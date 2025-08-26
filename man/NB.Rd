@@ -85,7 +85,6 @@ R6 abstract class for a generic sparse Normal Block model
 \item \href{#method-NB-plot_loglik}{\code{NB$plot_loglik()}}
 \item \href{#method-NB-plot_network}{\code{NB$plot_network()}}
 \item \href{#method-NB-plot}{\code{NB$plot()}}
-\item \href{#method-NB-coef}{\code{NB$coef()}}
 \item \href{#method-NB-print}{\code{NB$print()}}
 \item \href{#method-NB-clone}{\code{NB$clone()}}
 }
@@ -364,16 +363,6 @@ plot the latent network.
 plot together latent network and log-likelihood values during model optimization
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NB$plot()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NB-coef"></a>}}
-\if{latex}{\out{\hypertarget{method-NB-coef}{}}}
-\subsection{Method \code{coef()}}{
-coef returns regression coefficients for the covariates
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$coef()}\if{html}{\out{</div>}}
 }
 
 }

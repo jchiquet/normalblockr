@@ -47,7 +47,6 @@ R6 class for zero-inflated normal-block model with a fixed number of clusters (b
 <ul>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="candidates_merge"><a href='../../normalblockr/html/NB.html#method-NB-candidates_merge'><code>normalblockr::NB$candidates_merge()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="candidates_split"><a href='../../normalblockr/html/NB.html#method-NB-candidates_split'><code>normalblockr::NB$candidates_split()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="coef"><a href='../../normalblockr/html/NB.html#method-NB-coef'><code>normalblockr::NB$coef()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="latent_network"><a href='../../normalblockr/html/NB.html#method-NB-latent_network'><code>normalblockr::NB$latent_network()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="merge"><a href='../../normalblockr/html/NB.html#method-NB-merge'><code>normalblockr::NB$merge()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="optimize"><a href='../../normalblockr/html/NB.html#method-NB-optimize'><code>normalblockr::NB$optimize()</code></a></span></li>

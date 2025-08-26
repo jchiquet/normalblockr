@@ -382,9 +382,6 @@ NB <- R6::R6Class(
       self$plot_loglik(type = "b", log = "xy", neg = TRUE)
     },
 
-    #' @description coef returns regression coefficients for the covariates
-    coef = function() private$B,
-
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## S3 methods ----------------------------
@@ -639,3 +636,14 @@ NB <- R6::R6Class(
     }
   )
 )
+
+
+#' @title Extracts model coefficients from objects returned by [NB()] and its variants
+#' @description Extract coefficients from an NB object.
+#' @param object An object of class NB.
+#' @return A matrix of coefficients extracted from the NB model.
+#' @export
+coef.NB <- function(object){
+  object$model_par$B
+}
+
