@@ -396,7 +396,7 @@ NB <- R6::R6Class(
       cat("    $model_par, $posterior_par / $var_par, $clustering \n")
       cat("    $loglik, $BIC, $ICL, $objective, $nb_param, $criteria\n")
       cat("* Useful S3 methods\n")
-      cat("    print(), fitted() \n")
+      cat("    print(), coef(), sigma(), fitted(), predict() \n")
     }
   ),
 
@@ -636,14 +636,3 @@ NB <- R6::R6Class(
     }
   )
 )
-
-
-#' @title Extracts model coefficients from objects returned by [NB()] and its variants
-#' @description Extract coefficients from an NB object.
-#' @param object An object of class NB.
-#' @return A matrix of coefficients extracted from the NB model.
-#' @export
-coef.NB <- function(object){
-  object$model_par$B
-}
-
