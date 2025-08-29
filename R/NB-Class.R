@@ -424,6 +424,7 @@ NB <- R6::R6Class(
     approx            = NA, # use approximation/heuristic approach or not
     clustering_approx = NA, # clustering function in the heuristic approach
     ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed)
+    niter             = NA, # number of EM iterations required by the inference, if applicable
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated EM inference------------------
@@ -436,6 +437,7 @@ NB <- R6::R6Class(
         if (abs(ll_list[h + 1] - ll_list[h]) < control$threshold)
           break
       }
+      private$niter <- h
       c(parameters, list(ll_list = ll_list))
     },
     EM_step = function() {},
@@ -596,7 +598,8 @@ NB <- R6::R6Class(
     #' @field criteria a vector with loglik, BIC and number of parameters
     criteria   = function() {
       data.frame(nb_param = self$nb_param, Q = self$Q, n_edges = self$n_edges, sparsity = self$sparsity,
-                 loglik = self$loglik, deviance = self$deviance, BIC = self$BIC, ICL = self$ICL, EBIC = self$EBIC)
+                 loglik = self$loglik, deviance = self$deviance, BIC = self$BIC, ICL = self$ICL, EBIC = self$EBIC,
+                 niter = private$niter )
     },
     #' @field sparsity (overall sparsity parameter)
     sparsity = function(value) {
