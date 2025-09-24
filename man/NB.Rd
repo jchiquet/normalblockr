@@ -28,11 +28,11 @@ R6 abstract class for a generic sparse Normal Block model
 
 \item{\code{d0}}{number of zi variables (dimensions in X0)}
 
-\item{\code{Q}}{number of blocks}
+\item{\code{q}}{number of blocks}
 
-\item{\code{n_edges}}{number of edges of the network (non null coefficient of the sparse precision matrix OmegaQ)}
+\item{\code{n_edges}}{number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)}
 
-\item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), OmegaQ (groups precision matrix))}
+\item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix))}
 
 \item{\code{nb_param}}{number of parameters in the model}
 
@@ -95,7 +95,7 @@ R6 abstract class for a generic sparse Normal Block model
 \subsection{Method \code{new()}}{
 Create a new [`NB`] object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$new(data, Q, sparsity = 0, control = NB_control())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NB$new(data, q, sparsity = 0, control = NB_control())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -103,7 +103,7 @@ Create a new [`NB`] object.
 \describe{
 \item{\code{data}}{object of NB_data class, with responses and design matrix}
 
-\item{\code{Q}}{number of block/cluster}
+\item{\code{q}}{number of block/cluster}
 
 \item{\code{sparsity}}{sparsity penalty on the network density}
 
@@ -127,7 +127,7 @@ All possible parameters of the child classes
   B = NA,
   dm1 = NA,
   C = NA,
-  OmegaQ = NA,
+  Omegaq = NA,
   gamma = NA,
   mu = NA,
   kappa = NA,
@@ -147,7 +147,7 @@ All possible parameters of the child classes
 
 \item{\code{C}}{the matrix of groups memberships (posterior probabilities)}
 
-\item{\code{OmegaQ}}{groups inverse variance matrix}
+\item{\code{Omegaq}}{groups inverse variance matrix}
 
 \item{\code{gamma}}{variance of posterior distribution of W}
 
@@ -295,7 +295,7 @@ Extract interaction network in the latent space
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a square matrix of size `NB_fixed_blocks_class$Q`
+a square matrix of size `NB_fixed_blocks_class$q`
 }
 }
 \if{html}{\out{<hr>}}

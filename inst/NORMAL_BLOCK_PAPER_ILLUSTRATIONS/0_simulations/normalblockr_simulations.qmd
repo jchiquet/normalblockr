@@ -32,7 +32,7 @@ source("measures.R")
 #' @param kappa zero-inflation probabilities for each variable
 #' @param omega_structure network structure
 one_simulation <- function(simu, n, p, Q, d, kappa,
-                           omega_structure = c("erdos_reyni",
+                           omega_structure = c("erdos_renyi",
                                                "preferential_attachment","community"),
                            verbose = FALSE){
   omega_structure <- match.arg(omega_structure)
@@ -136,7 +136,7 @@ one_simulation <- function(simu, n, p, Q, d, kappa,
 #' @param omega_structure network structure
 #' @param mc.cores number of cores to use for the execution
 multiple_simulations <- function(n_simu, n, p, Q, d, kappa,
-                                 omega_structure = c("erdos_reyni",
+                                 omega_structure = c("erdos_renyi",
                                                      "preferential_attachment","community"),
                                  mc.cores = max(1, detectCores() - 2)){
   
@@ -194,7 +194,7 @@ kappa_list <- list(unlist(lapply(rnorm(50, 0.2, 0.05), f <- function(x){min(x, 0
                    unlist(lapply(rnorm(50, 0.5, 0.05), f <- function(x){min(x, 0.9)})),
                    unlist(lapply(rnorm(50, 0.8, 0.05), f <- function(x){min(x, 0.9)})))
 
-omega_structure_list  <- c("erdos_reyni")
+omega_structure_list  <- c("erdos_renyi")
 
 res <- grid_simulations(n_simu, n_list, p_list, Q_list, d_list, kappa_list,
                         omega_structure_list, saving_folder = NULL,

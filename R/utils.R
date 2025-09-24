@@ -1,12 +1,12 @@
-# turns a list clustering of Q cluster labels for N elements into a matrix of
-# dimensions (N, Q) with a one-hot encoding of the clustering
+# turns a list clustering of q cluster labels for N elements into a matrix of
+# dimensions (p, q) with a one-hot encoding of the clustering
 #
 # @param clustering a list of labels
 as_indicator <- function(clustering) {
-  Q <- max(clustering)
-  N <- length(clustering)
-  Z <- matrix(0, N, Q)
-  Z[cbind(seq.int(N), clustering)] <- 1
+  q <- max(clustering)
+  p <- length(clustering)
+  Z <- matrix(0, p, q)
+  Z[cbind(seq.int(p), clustering)] <- 1
   Z
 }
 

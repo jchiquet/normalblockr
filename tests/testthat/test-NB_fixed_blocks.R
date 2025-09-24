@@ -24,7 +24,7 @@ test_that("normal block with diagonal residual covariance and known clusters", {
   model$sparsity <- 0.05
   model$optimize()
   expect_equal(model_sparse$loglik, model$loglik, tolerance = 1e-2)
-  expect_equal(model_sparse$model_par$OmegaQ, model$model_par$OmegaQ, tolerance = 1e-2)
+  expect_equal(model_sparse$model_par$Omegaq, model$model_par$Omegaq, tolerance = 1e-2)
 
 })
 

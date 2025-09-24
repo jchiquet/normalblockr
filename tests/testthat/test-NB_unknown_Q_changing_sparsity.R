@@ -4,7 +4,7 @@
 testdata <- readRDS("testdata/testdata_normal.RDS")
 Y <- testdata$Y
 X <- testdata$X
-C <- testdata$parameters$C ; Q <- ncol(C)
+C <- testdata$parameters$C ; q <- ncol(C)
 
 
 ###############################################################################
@@ -13,7 +13,7 @@ C <- testdata$parameters$C ; Q <- ncol(C)
 data  <- normalblockr:::NB_data$new(Y, X)
 
 test_that("normal block with spherical residual covariance and unknown clusters", {
-  model <- normalblockr:::NB_unknown_Q_changing_sparsity$new(data, c(2,3,4))
+  model <- normalblockr:::NB_unknown_q_changing_sparsity$new(data, c(2,3,4))
   model$optimize()
   model_BIC <- model$get_best_model("BIC")
   expect_lt(model_BIC$BIC, 5509)
@@ -22,7 +22,7 @@ test_that("normal block with spherical residual covariance and unknown clusters"
 
 test_that("normal block with spherical residual covariance and unknown clusters heuristic", {
   data <- NB_data$new(Y, X)
-  model <- normalblockr:::NB_unknown_Q_changing_sparsity$new(data, c(2,3,4),
+  model <- normalblockr:::NB_unknown_q_changing_sparsity$new(data, c(2,3,4),
                                               control = NB_control(heuristic = TRUE))
   model$optimize()
   model_1 <- model$get_model(3, 0.1)

@@ -3,7 +3,7 @@ library(igraph)
 #' Function to generate an erdos-reyni graph
 #' @param Q number of clusters
 #' @param p probability to have an edge between two clusters
-erdos_reyni_graph <- function(Q, p = 0.5){
+erdos_renyi_graph <- function(Q, p = 0.5){
   as_adjacency_matrix(sample_gnp(Q, p))
 }
 
@@ -27,12 +27,12 @@ community_graph <- function(Q, prob = c(1/2,1/4,1/4), p_in = 0.5, p_out = 0.1) {
   graph_mat
 }
 
-#' Function to generate a possible value for Omega from a graph structure 
+#' Function to generate a possible value for Omega from a graph structure
 #' @param p_in probability to have an edge between nodes from different communities
 generate_omega <- function(Q, omega_structure, v = 0.3, u = 0.1){
   cond <- FALSE
   while(!cond){
-    if(omega_structure == "erdos_reyni") G <- erdos_reyni_graph(Q)
+    if(omega_structure == "erdos_renyi") G <- erdos_renyi_graph(Q)
     if(omega_structure == "preferential_attachment") G <- preferential_attachment_graph(Q)
     if(omega_structure == "community") G <- community_graph(Q)
 

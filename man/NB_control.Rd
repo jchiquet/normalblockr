@@ -36,10 +36,10 @@ are only used if penalties is not specified}
 \item{min_ratio}{ratio for sparsity between max penalty (0 edge penalty) and min penalty to test}
 
 \item{fixed_tau}{whether tau should be fixed at clustering_init during optimization
-useful for calls to fixed_Q models in stability_selection}
+useful for calls to fixed_q models in stability_selection}
 
-\item{clustering_init}{proposal of initial value for clustering, when Q is
-unknown, can be a list with one clustering for each Q value}
+\item{clustering_init}{proposal of initial value for clustering, when q is
+unknown, can be a list with one clustering for each q value}
 
 \item{verbose}{telling if information should be printed during optimization}
 

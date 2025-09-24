@@ -63,7 +63,7 @@ Create a new [`NB_fixed_blocks`] object.
 \describe{
 \item{\code{data}}{object of NB_data class, with responses and design matrix}
 
-\item{\code{C}}{clustering matrix C_jq = 1 if species j belongs to cluster q}
+\item{\code{C}}{clustering matrix C_jk = 1 if species j belongs to cluster k}
 
 \item{\code{sparsity}}{to apply on variance matrix when calling GLASSO}
 

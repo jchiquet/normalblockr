@@ -4,12 +4,12 @@ testdata <- readRDS("testdata/testdata_normal_covardep_zi.RDS")
 Y  <- testdata$Y
 X  <- testdata$X
 X0 <- testdata$X0
-C  <- testdata$parameters$C ; Q <- ncol(C)
+C  <- testdata$parameters$C ; q <- ncol(C)
 data  <- NB_data$new(Y, X, X0 = X0)
 
 test_that("zero inflated normal block with diagonal residual covariance and known clusters", {
   ## Diagonal model
-  model <- ZINB_fixed_Q$new(data, Q)
+  model <- ZINB_fixed_q$new(data, q)
   model$optimize()
   expect_lt(model$BIC, 4300)
   expect_gt(model$loglik, -2000)

@@ -3,7 +3,7 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#' R6 class for normal-block model with unknown Q (number of groups)
+#' R6 class for normal-block model with unknown q (number of groups)
 #' @param data contains the matrix of responses (Y) and the design matrix (X).
 #' @param zero_inflation whether the models should be zero-inflated or not
 #' @param blocks group matrix or number of blocks.
@@ -14,7 +14,7 @@ NB_changing_sparsity <- R6::R6Class(
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @field models list of NB_fixed_Q models corresponding to each nb_block value
+    #' @field models list of NB_fixed_q models corresponding to each nb_block value
     models = NA,
     #' @field control store the list of user-defined model settings and optimization parameters
     control = NA,
@@ -47,10 +47,10 @@ NB_changing_sparsity <- R6::R6Class(
       } else {
         init_model <- get_model(mydata, blocks, 0, zero_inflation, control)
         init_model$optimize(control = list(niter=5, threshold=1e-4, verbose=FALSE))
-        SigmaQ   <- solve(init_model$model_par$OmegaQ)
+        Sigmaq   <- solve(init_model$model_par$Omegaq)
         diag_pen <- max(diag(init_model$sparsity_weights)) > 0
         weights  <- init_model$sparsity_weights
-        weights  <- abs((SigmaQ / weights)[upper.tri(SigmaQ, diag = diag_pen)])
+        weights  <- abs((Sigmaq / weights)[upper.tri(Sigmaq, diag = diag_pen)])
         if (length(weights) > 0) {
           max_pen  <- max(weights)
           sparsity <- 10^seq(log10(max_pen), log10(max_pen * control$min_ratio), len = control$n_sparsity_penalties)
@@ -93,7 +93,7 @@ NB_changing_sparsity <- R6::R6Class(
     #' @param crit a character for the criterion used to performed the selection.
     #' @param stability if criterion = "StARS" gives level of stability required.
     #' Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC
-    #' @return a [`NB_fixed_Q`] object
+    #' @return a [`NB_fixed_q`] object
     get_best_model = function(crit = c("BIC", "EBIC", "ICL", "StARS"),
                               stability = 0.9) {
       stopifnot("Log-likelihood based criteria do not apply to the heuristic method" = (self$models[[1]]$inference_method == "integrated" | crit == "StARS" ))
@@ -178,7 +178,7 @@ NB_changing_sparsity <- R6::R6Class(
           mydata, blocks, self$control$zero_inflation, control_stabs)
         myNB$optimize(control_stabs)
 
-        upper_tri <- upper.tri(diag(self$Q))
+        upper_tri <- upper.tri(diag(self$q))
         nets <- do.call(cbind, lapply(myNB$models, function(model) {
           model$latent_network("support")[upper_tri]
         }))
@@ -187,7 +187,7 @@ NB_changing_sparsity <- R6::R6Class(
 
       prob <- Reduce("+", stabs_out, accumulate = FALSE) / length(subsamples)
       ## formatting/tyding
-      node_set <- lapply(1:self$Q, f <- function(g){paste0("group_", g)})
+      node_set <- lapply(1:self$q, f <- function(g){paste0("group_", g)})
       colnames(prob) <- private$sparsity_
       private$stab_path <- prob %>%
         as.data.frame() %>%
@@ -212,8 +212,8 @@ NB_changing_sparsity <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field Q number of blocks
-    Q = function(value) ifelse(is.matrix(private$blocks_), ncol(private$blocks_), private$blocks_),
+    #' @field q number of blocks
+    q = function(value) ifelse(is.matrix(private$blocks_), ncol(private$blocks_), private$blocks_),
     #' @field blocks group matrix or number of blocks.
     blocks = function(value) private$blocks_,
     #' @field sparsity list of sparsity penalties
@@ -245,7 +245,7 @@ NB_changing_sparsity <- R6::R6Class(
       paste0("Collection of ",
              ifelse(self$control$zero_inflation, " zero-inflated ", ""),
                     self$control$noise_covariance, " normal-block models with ",
-             ifelse(is.matrix(private$blocks_), "fixed blocks", "fixed Q"),
+             ifelse(is.matrix(private$blocks_), "fixed blocks", "fixed q"),
         ", with different sparsity penalties.")}
   )
 )

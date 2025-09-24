@@ -1,9 +1,9 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NB_unknown_Q #################################
+##  CLASS NB_unknown_q #################################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#' R6 class for normal-block model with unknown Q (number of groups)
+#' R6 class for normal-block model with unknown q (number of groups)
 #' @param data contains the matrix of responses (Y) and the design matrix (X).
 #' @param zero_inflation whether the models should be zero-inflated or not
 #' @param control structured list for specific parameters (including initial clustering proposal)
@@ -53,13 +53,13 @@ selection_n_clusters <- R6::R6Class(
       model0$optimize()
 
       self$best_models <- tibble(
-        n_clusters     = model0$Q,
+        n_clusters     = model0$q,
         split_explored = FALSE,
         merge_explored = TRUE ,
         ICL            = model0$ICL,
         model          = list(model0)
       )
-      self$ICL_explored <- data.frame(n_clusters = model0$Q, ICL = model0$ICL)
+      self$ICL_explored <- data.frame(n_clusters = model0$q, ICL = model0$ICL)
     },
 
     #' @description perform model selection with forward/backward exploration
@@ -101,20 +101,20 @@ selection_n_clusters <- R6::R6Class(
         ## Exit if maximum nb of clusters is reached
         current <- self$best_models$model[[icurrent[1]]]
         self$best_models$split_explored[icurrent[1]] <- TRUE
-        if (current$Q >= self$n_clusters_range[2]) break
+        if (current$q >= self$n_clusters_range[2]) break
 
         ## Exit if no candidate is found
         candidates <- self$train_best_candidates(current, "split")
         if (length(candidates) == 0) break
 
-        cat("Explore by spliting a model with", current$Q, "clusters \r")
+        cat("Explore by spliting a model with", current$q, "clusters \r")
         candidates_ICL <- map_dbl(candidates, "ICL")
         best_model <- candidates[[which.min(candidates_ICL)]]
 
-        icurrent_best <- with(self$best_models, which(n_clusters == best_model$Q))
+        icurrent_best <- with(self$best_models, which(n_clusters == best_model$q))
         if (length(icurrent_best) == 0) {
           self$best_models <- self$best_models %>% add_row(
-            n_clusters     = best_model$Q,
+            n_clusters     = best_model$q,
             split_explored = FALSE,
             merge_explored = FALSE,
             ICL            = best_model$ICL,
@@ -122,7 +122,7 @@ selection_n_clusters <- R6::R6Class(
           )
           self$ICL_explored <- rbind(
             self$ICL_explored,
-            data.frame(n_clusters = best_model$Q, ICL = candidates_ICL)
+            data.frame(n_clusters = best_model$q, ICL = candidates_ICL)
           )
         } else if (best_model$ICL < self$best_models[icurrent_best, "ICL"]) {
           self$best_models$ICL[icurrent_best] <- best_model$ICL
@@ -144,10 +144,10 @@ selection_n_clusters <- R6::R6Class(
         if (length(icurrent) == 0) break
         current <- self$best_models$model[[icurrent[1]]]
         self$best_models$merge_explored[icurrent[1]] <- TRUE
-        cat("Explore by merging a model with", current$Q, "clusters \r")
+        cat("Explore by merging a model with", current$q, "clusters \r")
 
         ## Exit if the minimum nb of clusters is reached
-        if (current$Q <= 2) break
+        if (current$q <= 2) break
 
         ## Exit if no candidate is found
         candidates <- self$train_best_candidates(current, "merge")
@@ -156,7 +156,7 @@ selection_n_clusters <- R6::R6Class(
 
         candidates_ICL <- map_dbl(candidates, "ICL")
         best_model <- candidates[[which.min(candidates_ICL)]]
-        icurrent_best <- with(self$best_models, which(n_clusters == best_model$Q))
+        icurrent_best <- with(self$best_models, which(n_clusters == best_model$q))
         if (best_model$ICL < self$best_models[icurrent_best, "ICL"]) {
           self$best_models$ICL[icurrent_best] <- best_model$ICL
           self$best_models$model[[icurrent_best]] <- best_model
@@ -164,7 +164,7 @@ selection_n_clusters <- R6::R6Class(
 
         self$ICL_explored <- rbind(
           self$ICL_explored,
-          data.frame(n_clusters = best_model$Q, ICL = candidates_ICL)
+          data.frame(n_clusters = best_model$q, ICL = candidates_ICL)
         )
       }
       invisible(self)

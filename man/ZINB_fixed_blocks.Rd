@@ -20,7 +20,7 @@ R6 class for a Zero-Inflated normal-block model with a known clustering.
 
 \item{\code{nb_param}}{number of parameters in the model}
 
-\item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), OmegaQ (groups precision matrix), kappa (zero-inflation probabilities)}
+\item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix), kappa (zero-inflation probabilities)}
 
 \item{\code{fitted}}{Y values predicted by the model}
 
@@ -67,7 +67,7 @@ Create a new [`ZINB_fixed_blocks_fixed_sparsity`] object.
 \describe{
 \item{\code{data}}{object of NB_data class, with responses and design matrix}
 
-\item{\code{C}}{clustering matrix C_jq = 1 if species j belongs to cluster q}
+\item{\code{C}}{clustering matrix C_jk = 1 if species j belongs to cluster k}
 
 \item{\code{sparsity}}{to apply on variance matrix when calling GLASSO}
 

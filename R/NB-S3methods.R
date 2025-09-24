@@ -28,7 +28,7 @@ coef.NB <- function(object){
 #' @export
 sigma.NB <- function(object){
   stopifnot(isNB(object))
-  solve(object$model_par$OmegaQ)
+  solve(object$model_par$Omegaq)
 }
 
 #' @title Extracts fitted values from objects returned by [NB()] and its variants

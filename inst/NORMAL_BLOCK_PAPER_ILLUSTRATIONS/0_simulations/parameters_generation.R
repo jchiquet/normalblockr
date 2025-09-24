@@ -54,7 +54,7 @@ generate_blocks <- function(p, Q, alpha = NULL){
 #' @param p number of variables
 #' @param Q number of clusters
 #' @param kappa list of zero-inflation probabilities for each variable
-#' @param omega_structure either erdos-reyni, preferential attachment, community (SBM)
+#' @param omega_structure either erdos-renyi, preferential attachment, community (SBM)
 generate_parameters <- function(X, p, Q, kappa, omega_structure) {
   Omega <- generate_omega(Q, omega_structure)
   Sigma <- chol2inv(chol(Omega))
