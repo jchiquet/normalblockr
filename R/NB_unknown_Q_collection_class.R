@@ -72,7 +72,7 @@ NB_unknown_q <- R6::R6Class(
     #' @param crit a character for the criterion used to performed the selection.
     #' Either "ICL" or "BIC". "ICL" is the default criterion
     #' @return a [`NB_fixed_q`] object
-    get_best_model = function(crit = c("ICL", "BIC")) {
+    get_best_model = function(crit = c("ICL", "BIC", "EBIC", "deviance")) {
       stopifnot("Log-likelihood based criteria do not apply to the heuristic method" = self$models[[1]]$inference_method == "integrated")
       crit <- match.arg(crit)
       stopifnot(!anyNA(self$criteria[[crit]]))
