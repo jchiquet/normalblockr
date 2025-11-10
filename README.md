@@ -29,10 +29,10 @@ an input to normal_block. normal_block parameters allow to choose between sparse
 The package comes with a small artificial data set simulated under the model.
 
 ```r
-testdata <- readRDS("testdata/testdata_normal.RDS")
+testdata <- readRDS("tests/testthat/testdata/testdata_normal.RDS")
 Y        <- testdata$Y ; X <- testdata$X
 C        <- testdata$parameters$C ; Q <- ncol(C)
-data     <- normal_data$new(Y, X)
+data     <- NB_data$new(Y, X) 
 model    <- normal_block(data, blocks = C)
 ```
 
@@ -49,5 +49,19 @@ model    <- normal_block(data, blocks = 2:5, sparsity = TRUE)
 model$plot_criteria()
 model_BIC <- model$get_best_model("BIC")
 ```
+
+### With zero-inflated data
+```r
+testdata_zi <- readRDS("tests/testthat/testdata/testdata_normal_zi.RDS")
+Y        <- testdata_zi$Y ; X <- testdata_zi$X
+C        <- testdata_zi$parameters$C ; Q <- ncol(C)
+data_zi  <- NB_data$new(Y, X) 
+model    <- normal_block(data_zi, blocks = C, zero_inflation = TRUE)
+```
+
+### References
+
+Please cite our work using the following reference:
+Tous, J., & Chiquet, J. (2025). An integrated method for clustering and association network inference. arXiv preprint arXiv:2503.22467.
 
 
