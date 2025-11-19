@@ -4,7 +4,7 @@
 \alias{sigma.NB}
 \title{Extracts model coefficients from objects returned by [NB()] and its variants}
 \usage{
-\method{sigma}{NB}(object)
+\method{sigma}{NB}(object, ...)
 }
 \arguments{
 \item{object}{An object of class NB.}

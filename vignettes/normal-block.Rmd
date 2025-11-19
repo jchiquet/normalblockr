@@ -32,8 +32,6 @@ Theoretical explanations for this model can be found in the pre-print "An integr
 ```{r, set-up}
 # library(normalblockr)
 devtools::load_all(".")
-library(pheatmap)
-library(paletteer)
 ```
 
 # Data simulation
@@ -75,10 +73,8 @@ my_nb_data <- generate_normal_block_data(n, p, d, Q, kappa, omega_structure, u_v
 ```
 
 ```{r, simulation1-visualization}
-pheatmap(my_nb_data$Y,
-         color = paletteer_c("ggthemes::Orange-Gold", n = 100),
-         cluster_rows = FALSE, cluster_cols = FALSE,
-         show_rownames = FALSE)
+pheatmap::pheatmap(my_nb_data$Y, 
+                   color =paletteer::paletteer_c("ggthemes::Orange-Gold", n = 100), cluster_rows = FALSE, cluster_cols = FALSE, show_rownames = FALSE)
 ```
 
 
@@ -95,14 +91,14 @@ For a better visualization of the zero-inflated data, we set-up the 0 to be show
 
 ```{r, simulation2-visualization}
 min_val <- min(my_nb_data_zi$Y) ; max_val <- max(my_nb_data_zi$Y)
-orange_gold_pal <- paletteer_c("ggthemes::Orange-Gold", n = 100)
+orange_gold_pal <- paletteer::paletteer_c("ggthemes::Orange-Gold", n = 100)
 n_breaks <- 100
 zero_pos <- round((0 - min_val) / (max_val - min_val) * n_breaks) + 1
 custom_pal <- c(orange_gold_pal[1:(zero_pos - 1)], "white", orange_gold_pal[zero_pos:n_breaks])
-pheatmap(my_nb_data_zi$Y,
-         color = custom_pal,
-         cluster_rows = FALSE, cluster_cols = FALSE,
-         show_rownames = FALSE)
+pheatmap::pheatmap(my_nb_data_zi$Y,
+                   color = custom_pal,
+                   cluster_rows = FALSE, cluster_cols = FALSE,
+                   show_rownames = FALSE)
 ```
 
 

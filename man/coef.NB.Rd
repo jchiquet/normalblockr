@@ -4,7 +4,7 @@
 \alias{coef.NB}
 \title{Extracts model coefficients from objects returned by [NB()] and its variants}
 \usage{
-\method{coef}{NB}(object)
+\method{coef}{NB}(object, ...)
 }
 \arguments{
 \item{object}{An object of class NB.}

@@ -37,7 +37,7 @@ Formatting data for Normal-Block.
 ```{r Normal-Block-formatting}
 Y            <- as.matrix(RPPA_expr) %>% scale()
 X_subtype    <- model.matrix(~ 0 + PAM50_SUBTYPE, data = RPPA_clin)
-data_subtype <- NBData$new(Y, X_subtype)
+data_subtype <- NB_data$new(Y, X_subtype)
 ```
 
 ## Applying Normal-Block to the data

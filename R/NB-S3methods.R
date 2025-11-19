@@ -16,7 +16,7 @@ isNB <- function(object) {inherits(object, "NB")}
 #' @param object An object of class NB.
 #' @return A matrix of coefficients extracted from the NB model.
 #' @export
-coef.NB <- function(object){
+coef.NB <- function(object, ...){
   stopifnot(isNB(object))
   object$model_par$B
 }
@@ -26,7 +26,7 @@ coef.NB <- function(object){
 #' @param object An object of class NB.
 #' @return A matrix of coefficients extracted from the NB model.
 #' @export
-sigma.NB <- function(object){
+sigma.NB <- function(object, ...){
   stopifnot(isNB(object))
   solve(object$model_par$Omegaq)
 }
@@ -36,7 +36,7 @@ sigma.NB <- function(object){
 #' @param object An object of class NB.
 #' @return A matrix of Fitted values extracted from the object object.
 #' @export
-fitted.NB <- function(object){
+fitted.NB <- function(object, ...){
   stopifnot(isNB(object))
   object$fitted
 }

@@ -118,7 +118,7 @@ A NB_fixed_q object with given value q
 \subsection{Method \code{get_best_model()}}{
 Extract best model in the collection
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB_unknown_q$get_best_model(crit = c("ICL", "BIC"))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NB_unknown_q$get_best_model(crit = c("ICL", "BIC", "EBIC", "deviance"))}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

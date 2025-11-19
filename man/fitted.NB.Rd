@@ -4,7 +4,7 @@
 \alias{fitted.NB}
 \title{Extracts fitted values from objects returned by [NB()] and its variants}
 \usage{
-\method{fitted}{NB}(object)
+\method{fitted}{NB}(object, ...)
 }
 \arguments{
 \item{object}{An object of class NB.}
