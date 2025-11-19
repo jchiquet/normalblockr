@@ -2,27 +2,27 @@
 % Please edit documentation in R/NB_changing_sparsity_collection_class.R
 \name{NB_changing_sparsity}
 \alias{NB_changing_sparsity}
-\title{R6 class for normal-block model with unknown Q (number of groups)}
+\title{R6 class for normal-block model with unknown q (number of groups)}
 \description{
-R6 class for normal-block model with unknown Q (number of groups)
+R6 class for normal-block model with unknown q (number of groups)
 
-R6 class for normal-block model with unknown Q (number of groups)
+R6 class for normal-block model with unknown q (number of groups)
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{models}}{list of NB_fixed_Q models corresponding to each nb_block value}
+\item{\code{models}}{list of NB_fixed_q models corresponding to each nb_block value}
 
 \item{\code{control}}{store the list of user-defined model settings and optimization parameters}
 
-\item{\code{data}}{object of NBData class, with responses and design matrix}
+\item{\code{data}}{object of NB_data class, with responses and design matrix}
 }
 \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{Q}}{number of blocks}
+\item{\code{q}}{number of blocks}
 
 \item{\code{blocks}}{group matrix or number of blocks.}
 
@@ -69,7 +69,7 @@ Create a new [`NB_changing_sparsity`] object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{mydata}}{object of NBData class, with responses and design matrix}
+\item{\code{mydata}}{object of NB_data class, with responses and design matrix}
 
 \item{\code{blocks}}{group matrix or number of blocks.}
 
@@ -145,7 +145,7 @@ Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a [`NB_fixed_Q`] object
+a [`NB_fixed_q`] object
 }
 }
 \if{html}{\out{<hr>}}

@@ -2,11 +2,11 @@
 % Please edit documentation in R/model_selection.R
 \name{selection_n_clusters}
 \alias{selection_n_clusters}
-\title{R6 class for normal-block model with unknown Q (number of groups)}
+\title{R6 class for normal-block model with unknown q (number of groups)}
 \description{
-R6 class for normal-block model with unknown Q (number of groups)
+R6 class for normal-block model with unknown q (number of groups)
 
-R6 class for normal-block model with unknown Q (number of groups)
+R6 class for normal-block model with unknown q (number of groups)
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -58,7 +58,7 @@ Explores and selects the optimal number of classes
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{mydata}}{object of NBData class, with responses and design matrix}
+\item{\code{mydata}}{object of NB_data class, with responses and design matrix}
 
 \item{\code{n_clusters_range}}{a size-2 vector with the range of cluster size to browse}
 

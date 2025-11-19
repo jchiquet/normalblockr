@@ -44,7 +44,7 @@ taxo_reference <- taxonomy[match(colnames(microcosm$Abundance),taxonomy$ASV), ]
 ```{r data-formatting}
 Y <- scale(log(1 + microcosm$Abundance), FALSE, TRUE) %>% as.matrix()
 X <- model.matrix(~ 0 + microcosm$site_time)
-data <- NBData$new(Y, X)
+data <- NB_data$new(Y, X)
 ```
 
 ## Running ZI-Normal-Block on the data with the selected clustering

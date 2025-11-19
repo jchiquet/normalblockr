@@ -11,7 +11,7 @@ R6 abstract class for a generic sparse Normal Block model
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{data}}{object of NBData class, with responses and design matrix}
+\item{\code{data}}{object of NB_data class, with responses and design matrix}
 }
 \if{html}{\out{</div>}}
 }
@@ -28,11 +28,11 @@ R6 abstract class for a generic sparse Normal Block model
 
 \item{\code{d0}}{number of zi variables (dimensions in X0)}
 
-\item{\code{Q}}{number of blocks}
+\item{\code{q}}{number of blocks}
 
-\item{\code{n_edges}}{number of edges of the network (non null coefficient of the sparse precision matrix OmegaQ)}
+\item{\code{n_edges}}{number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)}
 
-\item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), OmegaQ (groups precision matrix))}
+\item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix))}
 
 \item{\code{nb_param}}{number of parameters in the model}
 
@@ -80,9 +80,12 @@ R6 abstract class for a generic sparse Normal Block model
 \item \href{#method-NB-candidates_split}{\code{NB$candidates_split()}}
 \item \href{#method-NB-candidates_merge}{\code{NB$candidates_merge()}}
 \item \href{#method-NB-merge}{\code{NB$merge()}}
-\item \href{#method-NB-plot_loglik}{\code{NB$plot_loglik()}}
+\item \href{#method-NB-predict}{\code{NB$predict()}}
 \item \href{#method-NB-latent_network}{\code{NB$latent_network()}}
+\item \href{#method-NB-plot_loglik}{\code{NB$plot_loglik()}}
 \item \href{#method-NB-plot_network}{\code{NB$plot_network()}}
+\item \href{#method-NB-plot}{\code{NB$plot()}}
+\item \href{#method-NB-print}{\code{NB$print()}}
 \item \href{#method-NB-clone}{\code{NB$clone()}}
 }
 }
@@ -92,15 +95,15 @@ R6 abstract class for a generic sparse Normal Block model
 \subsection{Method \code{new()}}{
 Create a new [`NB`] object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$new(data, Q, sparsity = 0, control = NB_control())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NB$new(data, q, sparsity = 0, control = NB_control())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{data}}{object of NBData class, with responses and design matrix}
+\item{\code{data}}{object of NB_data class, with responses and design matrix}
 
-\item{\code{Q}}{number of block/cluster}
+\item{\code{q}}{number of block/cluster}
 
 \item{\code{sparsity}}{sparsity penalty on the network density}
 
@@ -124,7 +127,7 @@ All possible parameters of the child classes
   B = NA,
   dm1 = NA,
   C = NA,
-  OmegaQ = NA,
+  Omegaq = NA,
   gamma = NA,
   mu = NA,
   kappa = NA,
@@ -144,7 +147,7 @@ All possible parameters of the child classes
 
 \item{\code{C}}{the matrix of groups memberships (posterior probabilities)}
 
-\item{\code{OmegaQ}}{groups inverse variance matrix}
+\item{\code{Omegaq}}{groups inverse variance matrix}
 
 \item{\code{gamma}}{variance of posterior distribution of W}
 
@@ -256,24 +259,23 @@ A new [`NB`] object
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NB-plot_loglik"></a>}}
-\if{latex}{\out{\hypertarget{method-NB-plot_loglik}{}}}
-\subsection{Method \code{plot_loglik()}}{
-plots log-likelihood values during model optimization
+\if{html}{\out{<a id="method-NB-predict"></a>}}
+\if{latex}{\out{\hypertarget{method-NB-predict}{}}}
+\subsection{Method \code{predict()}}{
+Predicts observations Y for new covariates X.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$plot_loglik(type = "b", log = "xy", neg = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{NB$predict(new_X)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{type}}{char for line type (see plot.default)}
-
-\item{\code{log}}{char for logarithmic axes (see plot.default)}
-
-\item{\code{neg}}{boolean plot negative log-likelihood (useful when log="y")}
+\item{\code{new_X}}{new set of covariates.}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A n*p prediction matrix for new observations
 }
 }
 \if{html}{\out{<hr>}}
@@ -293,7 +295,28 @@ Extract interaction network in the latent space
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a square matrix of size `NB_fixed_blocks_class$Q`
+a square matrix of size `NB_fixed_blocks_class$q`
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NB-plot_loglik"></a>}}
+\if{latex}{\out{\hypertarget{method-NB-plot_loglik}{}}}
+\subsection{Method \code{plot_loglik()}}{
+plots log-likelihood values during model optimization
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{NB$plot_loglik(type = "b", log = "xy", neg = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{type}}{char for line type (see plot.default)}
+
+\item{\code{log}}{char for logarithmic axes (see plot.default)}
+
+\item{\code{neg}}{boolean plot negative log-likelihood (useful when log="y")}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
@@ -329,6 +352,33 @@ plot the latent network.
 \item{\code{layout}}{an optional igraph layout. Only relevant for igraph output.}
 
 \item{\code{plot}}{logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NB-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-NB-plot}{}}}
+\subsection{Method \code{plot()}}{
+plot together latent network and log-likelihood values during model optimization
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{NB$plot()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NB-print"></a>}}
+\if{latex}{\out{\hypertarget{method-NB-print}{}}}
+\subsection{Method \code{print()}}{
+User friendly print method
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{NB$print(model = paste("A", self$who_am_I, ".\\n"))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{model}}{First line of the print output}
 }
 \if{html}{\out{</div>}}
 }

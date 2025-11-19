@@ -16,7 +16,7 @@ get_model(
 \item{data}{contains the matrix of responses (Y) and the design matrix (X).}
 
 \item{blocks}{either an integer (number of blocks), a vector of integer (list of possible number of block)
-or a p * Q matrix (for indicating block membership when its known)}
+or a p * q matrix (for indicating block membership when its known)}
 
 \item{sparsity}{boolean to say whether the model should have a changing penalty
 OR float to run model with a single penalty value}

@@ -13,10 +13,10 @@ normal_block(
 )
 }
 \arguments{
-\item{data}{contains the matrix of responses (Y, n x p) and the design matrix (X, n x d)."}
+\item{data}{NB_data object, contains the matrix of responses (Y, n x p) and the design matrix (X, n x d), must be created with NB_data$new.}
 
 \item{blocks}{either a integer (number of blocks), a vector of integer (list of possible number of block)
-or a p * Q matrix (for indicating block membership when its known)}
+or a p * q matrix (for indicating block membership when its known)}
 
 \item{sparsity}{either TRUE to run the optimization for different sparsity penalty values
 OR float to run model with a single sparsity penalty value}
@@ -27,15 +27,15 @@ OR float to run model with a single sparsity penalty value}
 generated with NB_control().}
 }
 \value{
-an R6 object with one of the NB classes
+an R6 object with one of the NB classes (or a collection of NB objects).
 }
 \description{
 Fit a normal-block model with a variational or heuristic algorithm
 }
 \examples{
 ## Normal Data
-ex_data <- generate_normal_block_data(n=50, p=50, d=1, Q=3)
-data <- NBData$new(ex_data$Y, ex_data$X)
+ex_data <- generate_normal_block_data(n=50, p=50, d=1, q=3)
+data <- NB_data$new(ex_data$Y, ex_data$X)
 my_normal_block <- normal_block(data, blocks = 1:6)
 \dontrun{
 my_normal_block$plot(c("deviance", "BIC", "ICL"))
@@ -43,8 +43,8 @@ Y_hat <- my_normal_block$get_best_model()$fitted
 plot(data$Y, Y_hat, log = "xy"); abline(0,1)
 }
 ## Normal Data with Zero Inflation
-ex_data_zi <- generate_normal_block_data(n=50, p=50, d=1, Q=3, kappa = rep(0.5,50))
-zidata <- NBData$new(ex_data_zi$Y, ex_data_zi$X)
+ex_data_zi <- generate_normal_block_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
+zidata <- NB_data$new(ex_data_zi$Y, ex_data_zi$X)
 my_normal_block <- normal_block(zidata, blocks = 1:6, zero_inflation = TRUE)
 
 }

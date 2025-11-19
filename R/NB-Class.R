@@ -9,19 +9,19 @@ NB <- R6::R6Class(
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @field data object of NBData class, with responses and design matrix
+    #' @field data object of NB_data class, with responses and design matrix
     data  = NULL,
 
     #' @description Create a new [`NB`] object.
-    #' @param data object of NBData class, with responses and design matrix
-    #' @param Q number of block/cluster
+    #' @param data object of NB_data class, with responses and design matrix
+    #' @param q number of block/cluster
     #' @param sparsity sparsity penalty on the network density
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`NB`] object
-    initialize = function(data, Q, sparsity = 0, control = NB_control()) {
+    initialize = function(data, q, sparsity = 0, control = NB_control()) {
       self$data <- data
 
-      stopifnot("There cannot be more blocks than there are entities to cluster" = Q <= ncol(self$data$Y))
+      stopifnot("There cannot be more blocks than there are entities to cluster" = q <= ncol(self$data$Y))
 
       ## variant (either diagonal or spherical residuals covariance)
       private$res_covariance <- control$noise_covariance
@@ -41,7 +41,7 @@ NB <- R6::R6Class(
 
       ## penalty mask
       private$sparsity_ <- sparsity
-      weights <- matrix(1, Q, Q)
+      weights <- matrix(1, q, q)
       diag(weights) <- 0
       if (!is.null(control$sparsity_weights)) {
         weights <- control$sparsity_weights
@@ -52,24 +52,24 @@ NB <- R6::R6Class(
       if (!is.null(cl0)) {
         if (!is.vector(cl0) & !is.matrix(cl0)) stop("Labels must be encoded in vector of labels or indicator matrix")
         if (is.vector(cl0)) {
-          if (any(cl0 < 1 | cl0 > Q))
-            stop("Cluster labels must be between 1 and Q")
+          if (any(cl0 < 1 | cl0 > q))
+            stop("Cluster labels must be between 1 and q")
           if (length(cl0) != self$p)
             stop("Cluster labels must match the number of Y's columns")
-          if (length(unique(cl0)) != Q)
-            stop("The number of clusters in the initial clustering must be equal to Q.")
+          if (length(unique(cl0)) != q)
+            stop("The number of clusters in the initial clustering must be equal to q.")
           cl0 <- as_indicator(cl0)
         } else {
           if (nrow(cl0) != self$p)
             stop("Cluster-indicating matrix must have as many rows as Y has columns")
-          if (ncol(cl0) != Q)
-            stop("Cluster-indicating matrix must have Q columns")
-          if ((min(colSums(cl0)) < 1) & !Q)
-            stop("The number of clusters in the initial clustering must be equal to Q.")
+          if (ncol(cl0) != q)
+            stop("Cluster-indicating matrix must have q columns")
+          if ((min(colSums(cl0)) < 1) & !q)
+            stop("The number of clusters in the initial clustering must be equal to q.")
         }
         private$C <- cl0
       } else {
-        private$C <- matrix(NA, self$data$n, Q)
+        private$C <- matrix(NA, self$data$n, q)
       }
 
       if(self$data$npY < self$n * self$p){
@@ -99,7 +99,7 @@ NB <- R6::R6Class(
     #' @param B regression matrix
     #' @param dm1 diagonal vector of inverse variance matrix (variables level)
     #' @param C the matrix of groups memberships (posterior probabilities)
-    #' @param OmegaQ groups inverse variance matrix
+    #' @param Omegaq groups inverse variance matrix
     #' @param gamma  variance of posterior distribution of W
     #' @param mu mean for posterior distribution of W
     #' @param kappa vector of zero-inflation probabilities
@@ -111,7 +111,7 @@ NB <- R6::R6Class(
     update = function(B = NA,
                       dm1 = NA,
                       C = NA,
-                      OmegaQ = NA,
+                      Omegaq = NA,
                       gamma = NA,
                       mu = NA,
                       kappa = NA,
@@ -122,7 +122,7 @@ NB <- R6::R6Class(
       if (!anyNA(B))       private$B       <- B
       if (!anyNA(dm1))     private$dm1     <- dm1
       if (!anyNA(C))       private$C       <- C
-      if (!anyNA(OmegaQ))  private$OmegaQ  <- OmegaQ
+      if (!anyNA(Omegaq))  private$Omegaq  <- Omegaq
       if (!anyNA(gamma))   private$gamma   <- gamma
       if (!anyNA(kappa))   private$kappa   <- kappa
       if (!anyNA(mu))      private$mu      <- mu
@@ -148,7 +148,7 @@ NB <- R6::R6Class(
     #' @return A new [`NB`] object
     split = function(index, in_place = FALSE) {
       ## update private fields related to group parameters
-      ## C, OmegaQ, M, S, sparsity_weights
+      ## C, Omegaq, M, S, sparsity_weights
 
       ## indices of individuals split within the cluster
       cl  <- self$clustering == index
@@ -158,46 +158,46 @@ NB <- R6::R6Class(
       ## Cluster split
       new_C <- cbind(private$C, .Machine$double.eps)
       new_C[split1, index] <- new_C[split1, index] - .Machine$double.eps
-      new_C[split2, self$Q + 1] <- new_C[split2, index]
+      new_C[split2, self$q + 1] <- new_C[split2, index]
       new_C[split2, index] <- .Machine$double.eps
       new_C <- new_C / rowSums(new_C)
 
       ## Variational means
       new_M <- cbind(private$M, 0)
-      new_M[split2, self$Q + 1] <- new_M[split2, index]
+      new_M[split2, self$q + 1] <- new_M[split2, index]
       new_M[split2, index] <- 0
 
       ## Variational variances
       if (is.matrix(private$S)) {
         new_S <- cbind(private$S, 0.1)
-        new_S[split2, self$Q + 1] <- new_C[split2, index]
+        new_S[split2, self$q + 1] <- new_C[split2, index]
         new_S[split2, index] <- 0.1
       } else {
         new_S <- c(private$S, mean(private$S))
       }
 
       ## Precision matrix
-      new_OmegaQ <- cbind(rbind(private$OmegaQ,  0), 0)
-      new_OmegaQ[index, index] <- private$OmegaQ[index, index]/2
-      new_OmegaQ[self$Q + 1, self$Q + 1] <- private$OmegaQ[index, index]/2
+      new_Omegaq <- cbind(rbind(private$Omegaq,  0), 0)
+      new_Omegaq[index, index] <- private$Omegaq[index, index]/2
+      new_Omegaq[self$q + 1, self$q + 1] <- private$Omegaq[index, index]/2
 
       ## Sparsity weights
-      if (self$Q == 1) {
+      if (self$q == 1) {
         new_weights <- matrix(c(0,1,1,0), 2, 2)
       } else {
-        weights_cl <-  private$weights[index, setdiff(1:self$Q, index)]
+        weights_cl <-  private$weights[index, setdiff(1:self$q, index)]
         weights_cl <-  c(weights_cl, mean(weights_cl))
         new_weights <- cbind(rbind(private$weights, weights_cl, deparse.level = 0),
                              c(weights_cl, 0))
       }
 
       if (in_place) {
-        self$update(C = new_C, OmegaQ = new_OmegaQ, M = new_M, S = new_S)
+        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
         self$sparsity_weights <- new_weights
         return(invisible(self))
       } else {
         new_NB <- self$clone()
-        new_NB$update(C = new_C, OmegaQ = new_OmegaQ, M = new_M, S = new_S)
+        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
         new_NB$sparsity_weights <- new_weights
         return(invisible(new_NB))
       }
@@ -207,12 +207,12 @@ NB <- R6::R6Class(
     #' by splitting the clusters of the current model
     candidates_split = function() {
       # do not split groups with less than 2 guys
-      candidates <- map((1:self$Q)[self$cluster_sizes > 1], self$split)
+      candidates <- map((1:self$q)[self$cluster_sizes > 1], self$split)
       # keep candidates with at least 2 guys per cluster and non empty split
       clustering_sizes <- map(candidates, "clustering") %>% map(table)
       min_sizes  <- clustering_sizes %>% map_dbl(min)
       n_clusters <- clustering_sizes %>% map_dbl(length)
-      candidates <- candidates[min_sizes > 1 & n_clusters == self$Q + 1]
+      candidates <- candidates[min_sizes > 1 & n_clusters == self$q + 1]
 
       for (i in seq_along(candidates))
         candidates[[i]]$optimize(list(niter = 5, threshold = 1e-4))
@@ -222,8 +222,8 @@ NB <- R6::R6Class(
     #' @description generate and select a set of candidate models
     #' by merging the clusters of the current model
     candidates_merge = function() {
-      stopifnot("need at least two clusters to merge them" = self$Q > 1)
-      candidates <- map(combn(self$Q, 2, simplify = FALSE), self$merge)
+      stopifnot("need at least two clusters to merge them" = self$q > 1)
+      candidates <- map(combn(self$q, 2, simplify = FALSE), self$merge)
       for (i in seq_along(candidates))
         candidates[[i]]$optimize(list(niter = 5, threshold = 1e-4))
       candidates
@@ -257,23 +257,51 @@ NB <- R6::R6Class(
       }
 
       ## Precision matrix
-      new_OmegaQ <- private$OmegaQ[-indices[2], -indices[2]]
-      new_OmegaQ[indices[1], indices[1]] <-
-        .5 * (private$OmegaQ[indices[1], indices[1]] + private$OmegaQ[indices[2], indices[2]])
+      new_Omegaq <- private$Omegaq[-indices[2], -indices[2]]
+      new_Omegaq[indices[1], indices[1]] <-
+        .5 * (private$Omegaq[indices[1], indices[1]] + private$Omegaq[indices[2], indices[2]])
 
       ## Sparsity weights
       new_weights <-  private$weights[-indices[2], -indices[2]]
 
       if (in_place) {
-        self$update(C = new_C, OmegaQ = new_OmegaQ, M = new_M, S = new_S)
+        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
         self$sparsity_weights <- new_weights
         return(self)
       } else {
         new_NB <- self$clone()
-        new_NB$update(C = new_C, OmegaQ = new_OmegaQ, M = new_M, S = new_S)
+        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
         new_NB$sparsity_weights <- new_weights
         return(new_NB)
       }
+    },
+
+    #' @description Predicts observations Y for new covariates X.
+    #' @param new_X new set of covariates.
+    #' @return A n*p prediction matrix for new observations
+    predict = function(new_X){
+      return(new_X %*% private$B)
+    },
+
+    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ## Extractors ------------------------
+    #' @description Extract interaction network in the latent space
+    #' @param type edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)
+    #' @importFrom Matrix Matrix
+    #' @return a square matrix of size `NB_fixed_blocks_class$q`
+    latent_network = function(type = c("partial_cor", "support", "precision")) {
+      net <- switch(
+        match.arg(type),
+        "support"     = 1 * (private$Omegaq != 0 & !diag(TRUE, ncol(private$Omegaq))),
+        "precision"   = private$Omegaq,
+        "partial_cor" = {
+          tmp <- -private$Omegaq / tcrossprod(sqrt(diag(private$Omegaq))); diag(tmp) <- 1
+          tmp
+        }
+      )
+      ## Enforce sparse Matrix encoding to avoid downstream problems with igraph::graph_from_adjacency_matrix
+      ## as it fails when given dsyMatrix objects
+      Matrix(net, sparse = TRUE)
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -287,29 +315,6 @@ NB <- R6::R6Class(
       plot(seq_along(self$objective), neg * self$objective, type = type, log = log)
     },
 
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## Extractors ------------------------
-    #' @description Extract interaction network in the latent space
-    #' @param type edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)
-    #' @importFrom Matrix Matrix
-    #' @return a square matrix of size `NB_fixed_blocks_class$Q`
-    latent_network = function(type = c("partial_cor", "support", "precision")) {
-      net <- switch(
-        match.arg(type),
-        "support"     = 1 * (private$OmegaQ != 0 & !diag(TRUE, ncol(private$OmegaQ))),
-        "precision"   = private$OmegaQ,
-        "partial_cor" = {
-          tmp <- -private$OmegaQ / tcrossprod(sqrt(diag(private$OmegaQ))); diag(tmp) <- 1
-          tmp
-        }
-      )
-      ## Enforce sparse Matrix encoding to avoid downstream problems with igraph::graph_from_adjacency_matrix
-      ## as it fails when given dsyMatrix objects
-      Matrix(net, sparse = TRUE)
-    },
-
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## Graphical methods------------------
     #' @description plot the latent network.
     #' @param type edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).
     #' @param output Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)
@@ -325,7 +330,7 @@ NB <- R6::R6Class(
                             node.labels     = NULL,
                             layout          = igraph::layout_in_circle,
                             plot = TRUE) {
-      if(anyNA(private$OmegaQ)) stop("NA in the precision matrix")
+      if(anyNA(private$Omegaq)) stop("NA in the precision matrix")
 
       type   <- match.arg(type)
       output <- match.arg(output)
@@ -370,6 +375,28 @@ NB <- R6::R6Class(
         }
       }
       invisible(G)
+    },
+
+    #' @description plot together latent network and log-likelihood values during model optimization
+    plot = function(){
+      self$plot_loglik(type = "b", log = "xy", neg = TRUE)
+    },
+
+
+    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ## S3 methods ----------------------------
+    #' @description User friendly print method
+    #' @param model First line of the print output
+    print = function(model = paste("A", self$who_am_I, ".\n")) {
+      cat(model)
+      cat("===========================================================================\n")
+      print(as.data.frame(round(self$criteria, digits = 3), row.names = ""))
+      cat("===========================================================================\n")
+      cat("* Useful fields\n")
+      cat("    $model_par, $posterior_par / $var_par, $clustering \n")
+      cat("    $loglik, $BIC, $ICL, $objective, $nb_param, $criteria\n")
+      cat("* Useful S3 methods\n")
+      cat("    print(), coef(), sigma(), fitted(), predict() \n")
     }
   ),
 
@@ -381,7 +408,7 @@ NB <- R6::R6Class(
     B                 = NA, # regression matrix
     dm1               = NA, # diagonal vector of inverse variance matrix (variables level)
     C                 = NA, # the matrix of posterior probabilities (tau) or group affectation
-    OmegaQ            = NA, # precision matrix for clusters
+    Omegaq            = NA, # precision matrix for clusters
     kappa             = NA, # vector of zero-inflation probabilities
     B0                = NA, # vector of zero-inflation regression matrix
     alpha             = NA, # vector of groups probabilities
@@ -397,6 +424,7 @@ NB <- R6::R6Class(
     approx            = NA, # use approximation/heuristic approach or not
     clustering_approx = NA, # clustering function in the heuristic approach
     ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed)
+    niter             = NA, # number of EM iterations required by the inference, if applicable
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated EM inference------------------
@@ -409,13 +437,14 @@ NB <- R6::R6Class(
         if (abs(ll_list[h + 1] - ll_list[h]) < control$threshold)
           break
       }
+      private$niter <- h
       c(parameters, list(ll_list = ll_list))
     },
     EM_step = function() {},
     EM_initialize = function() {},
     compute_loglik  = function() {},
 
-    get_OmegaQ = function(Sigma) {
+    get_Omegaq = function(Sigma) {
       if (private$sparsity_ == 0) {
         Omega <- solve(Sigma)
       } else {
@@ -487,20 +516,20 @@ NB <- R6::R6Class(
       c(parameters, list(ll_list = NA))
     },
 
-    heuristic_SigmaQ_from_Sigma = function(Sigma){
-      Sigma_Q <- (t(private$C) %*% Sigma %*% private$C) / outer(colSums(private$C), colSums(private$C))
+    heuristic_Sigmaq_from_Sigma = function(Sigma){
+      Sigma_q <- (t(private$C) %*% Sigma %*% private$C) / outer(colSums(private$C), colSums(private$C))
       ### TODO: why is there any NA?
-      if (anyNA(Sigma_Q)) {
-        diag(Sigma_Q)[is.na(diag(Sigma_Q))] <- mean(diag(Sigma_Q)[!is.na(diag(Sigma_Q))])
-        Sigma_Q[is.na(Sigma_Q)] <- 0
+      if (anyNA(Sigma_q)) {
+        diag(Sigma_q)[is.na(diag(Sigma_q))] <- mean(diag(Sigma_q)[!is.na(diag(Sigma_q))])
+        Sigma_q[is.na(Sigma_q)] <- 0
       }
-      Sigma_Q
+      Sigma_q
     },
 
     heuristic_clustering = function(R) {
       clustering <- private$clustering_approx(R)
-      if (length(unique(clustering)) < self$Q) {
-        clustering <- cutree(ClustOfVar::hclustvar(R), self$Q)
+      if (length(unique(clustering)) < self$q) {
+        clustering <- cutree(ClustOfVar::hclustvar(R), self$q)
       }
       C <- as_indicator(clustering)
       if (min(colSums(C)) < 1) warning("Initialization failed to place elements in each cluster")
@@ -509,19 +538,20 @@ NB <- R6::R6Class(
 
     heuristic_cluster_sigma_ward2 = function(R){
       hc <- hclust(dist(1 - cor(R)), method = "ward.D2")
-      cutree(hc, self$Q)
+      cutree(hc, self$q)
     },
 
+    #' @importFrom sbm estimateSimpleSBM
     heuristic_cluster_sigma_sbm = function(R){
-      options <- list(verbosity=0, exploreMin=self$Q, exploreMax=self$Q,
+      options <- list(verbosity=0, exploreMin=self$q, exploreMax=self$q,
                       verbosity=0, plot=FALSE, nbCores=1)
       mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)
-      mySBM$setModel(self$Q)
+      mySBM$setModel(self$q)
       mySBM$memberships
     },
 
     heuristic_cluster_residuals_kmeans = function(R) {
-      kmeans(t(R), self$Q, nstart = 30, iter.max = 50)$cluster
+      kmeans(t(R), self$q, nstart = 30, iter.max = 50)$cluster
     }
 
   ),
@@ -540,17 +570,17 @@ NB <- R6::R6Class(
     d = function() self$data$d,
     #' @field d0 number of zi variables (dimensions in X0)
     d0 = function() self$data$d0,
-    #' @field Q number of blocks
-    Q = function(value) as.integer(ncol(private$C)),
-    #' @field n_edges number of edges of the network (non null coefficient of the sparse precision matrix OmegaQ)
-    n_edges  = function(value) sum(private$OmegaQ[upper.tri(private$OmegaQ, diag = FALSE)] != 0),
-    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), OmegaQ (groups precision matrix))
+    #' @field q number of blocks
+    q = function(value) as.integer(ncol(private$C)),
+    #' @field n_edges number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)
+    n_edges  = function(value) sum(private$Omegaq[upper.tri(private$Omegaq, diag = FALSE)] != 0),
+    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix))
     model_par = function(value) list(B = private$B, B0 = private$B0,
-                                     dm1 = private$dm1, OmegaQ = private$OmegaQ),
+                                     dm1 = private$dm1, Omegaq = private$Omegaq),
     #' @field nb_param number of parameters in the model
     nb_param = function(value) {
       nb_param_D <- ifelse(private$res_covariance == "diagonal", self$p, 1)
-      as.integer(self$p * self$d + self$Q + self$n_edges + nb_param_D)
+      as.integer(self$p * self$d + self$q + self$n_edges + nb_param_D)
     },
     #' @field objective evolution of the objective function during (V)EM algorithm
     objective = function() private$ll_list[-1],
@@ -565,11 +595,12 @@ NB <- R6::R6Class(
     #' @field ICL variational lower bound of the ICL
     ICL        = function() self$BIC + 2 * self$entropy,
     #' @field EBIC variational lower bound of the EBIC
-    EBIC   = function(value) self$BIC + 2 * ifelse(self$n_edges > 0, self$n_edges * log(self$Q), 0),
+    EBIC   = function(value) self$BIC + 2 * ifelse(self$n_edges > 0, self$n_edges * log(self$q), 0),
     #' @field criteria a vector with loglik, BIC and number of parameters
     criteria   = function() {
-      data.frame(nb_param = self$nb_param, Q = self$Q, n_edges = self$n_edges, sparsity = self$sparsity,
-                 loglik = self$loglik, deviance = self$deviance, BIC = self$BIC, ICL = self$ICL, EBIC = self$EBIC)
+      data.frame(nb_param = self$nb_param, q = self$q, n_edges = self$n_edges, sparsity = self$sparsity,
+                 loglik = self$loglik, deviance = self$deviance, BIC = self$BIC, ICL = self$ICL, EBIC = self$EBIC,
+                 niter = private$niter )
     },
     #' @field sparsity (overall sparsity parameter)
     sparsity = function(value) {
@@ -585,13 +616,13 @@ NB <- R6::R6Class(
       if (missing(value)) {
         private$weights
       } else {
-        stopifnot("must be a Q x Q matrix" =
-                    all(is.matrix(value), nrow(value) == ncol(value), ncol(value) == self$Q))
+        stopifnot("must be a q x q matrix" =
+                    all(is.matrix(value), nrow(value) == ncol(value), ncol(value) == self$q))
         private$weights <- value
       }
     },
     #' @field sparsity_term (sparsity_term term in log-likelihood due to sparsity)
-    sparsity_term = function(value) self$sparsity * sum(abs(self$sparsity_weights * private$OmegaQ)),
+    sparsity_term = function(value) self$sparsity * sum(abs(self$sparsity_weights * private$Omegaq)),
     #' @field get_res_covariance whether the residual covariance is diagonal or spherical
     get_res_covariance = function(value) private$res_covariance,
     #' @field memberships cluster memberships

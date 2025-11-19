@@ -1,53 +1,65 @@
 library(igraph)
 
-#' Function to generate an erdos-reyni graph
-#' @param Q number of clusters
-#' @param p probability to have an edge between two clusters
-erdos_reyni_graph <- function(Q, p = 0.5){
-  as_adjacency_matrix(sample_gnp(Q, p))
+#'@description generates an Erdos-Renyi structure
+#'@returns an igraph object Erdos-Renyi graph
+#'@param q number of nodes in the graph
+#'@param p probability of having an edge between two nodes
+erdos_renyi_graph <- function(q, p = 0.5){
+  as_adjacency_matrix(sample_gnp(q, p))
 }
 
-#' Function to generate a preferential attachment graph
-#' @param Q number of clusters
-preferential_attachment_graph <- function(Q){
-  as_adjacency_matrix(sample_pa(Q, directed = FALSE))
+#'@description generates a preferential attachment structure
+#'@returns an igraph object with a preferential attachment structure
+#'@param q number of nodes in the graph
+preferential_attachment_graph <- function(q){
+  as_adjacency_matrix(sample_pa(q, directed = FALSE))
 }
 
-#' Function to generate a community graph (SBM logic)
-#' @param Q number of clusters
-#' @param prob list of probabilities of intra-community edge
-#' @param p_in probability to have an edge between nodes from different communities
-#' @param p_in probability to have an edge between nodes from the same community
-community_graph <- function(Q, prob = c(1/2,1/4,1/4), p_in = 0.5, p_out = 0.1) {
+#'@description generates a community structure
+#'@returns an igraph object with a community structure
+#'@param q number of nodes in the graph
+#'@param prob vector of probabilities describing the probability of belonging to
+#'each community, the number of which is defined by the length of prob
+#'@param p_in probability of having an edge between 2 nodes of one community
+#'@param p_out probability of having an edge between 2 nodes of different communities
+community_graph <- function(q, prob = c(1/2,1/4,1/4), p_in = 0.5, p_out = 0.1) {
   pref_mat <- matrix(p_out, length(prob), length(prob))
   diag(pref_mat) <- p_in
-  graph_mat <- as_adjacency_matrix(sample_sbm(Q,
+  graph_mat <- as_adjacency_matrix(sample_sbm(q,
                                               pref.matrix = pref_mat,
-                                              block.sizes = c(rmultinom(1, Q, prob)) ))
+                                              block.sizes = c(rmultinom(1, q, prob)) ))
   graph_mat
 }
 
-#' Function to generate a possible value for Omega from a graph structure 
-#' @param p_in probability to have an edge between nodes from different communities
-generate_omega <- function(Q, omega_structure, v = 0.3, u = 0.1){
+#'@description generates a precision matrix
+#'@returns a precision matrix of dimensions (q, q)
+#'@param q dimension of the precision matrix
+#'@param omega_structure graph structure for the precision matrix
+#'@param v parameter used to compute omega from a graph
+#'@param u parameter used to compute omega from a graph
+generate_omega <- function(q, omega_structure = c("erdos_renyi",
+                                                  "preferential_attachment",
+                                                  "community"),
+                           v = 0.3, u = 0.1){
+  omega_structure <- match.arg(omega_structure)
   cond <- FALSE
   while(!cond){
-    if(omega_structure == "erdos_reyni") G <- erdos_reyni_graph(Q)
-    if(omega_structure == "preferential_attachment") G <- preferential_attachment_graph(Q)
-    if(omega_structure == "community") G <- community_graph(Q)
+    if(omega_structure == "erdos_renyi") G <- erdos_renyi_graph(q)
+    if(omega_structure == "preferential_attachment") G <- preferential_attachment_graph(q)
+    if(omega_structure == "community") G <- community_graph(q)
 
     # Ensuring that the network is not empty for AUC to make sense
     if(max(G) == 0){
-      off_diag_indices <- which(row(matrix(1:Q, Q, Q)) != col(matrix(1:Q, Q, Q)), arr.ind = TRUE)
+      off_diag_indices <- which(row(matrix(1:q, q, q)) != col(matrix(1:q, q, q)), arr.ind = TRUE)
       selected_index <- off_diag_indices[sample(nrow(off_diag_indices), 1), ]
       G[selected_index[["row"]], selected_index[["col"]]] <- 1
       G[selected_index[["col"]], selected_index[["row"]]] <- 1
     }
     omega_tilde <- G * v
-    omega <- omega_tilde + diag(abs(min(eigen(omega_tilde)$values)) + u, Q, Q)
+    omega <- omega_tilde + diag(abs(min(eigen(omega_tilde)$values)) + u, q, q)
     # Ensuring that the network is not full for AUC to make sense
     if(min(omega) > 0){ # Ensuring that the network has 0s for AUC to make sense
-      off_diag_indices <- which(row(matrix(1:Q, Q, Q)) != col(matrix(1:Q, Q, Q)), arr.ind = TRUE)
+      off_diag_indices <- which(row(matrix(1:q, q, q)) != col(matrix(1:q, q, q)), arr.ind = TRUE)
       selected_index <- off_diag_indices[sample(nrow(off_diag_indices), 1), ]
       omega[selected_index[["row"]], selected_index[["col"]]] <- 0
       omega[selected_index[["col"]], selected_index[["row"]]] <- 0

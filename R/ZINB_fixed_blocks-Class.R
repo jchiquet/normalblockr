@@ -2,7 +2,7 @@
 ##  CLASS ZINB_fixed_blocks_fixed_sparsity ############
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 class for a generic normal model
+#' R6 class for a Zero-Inflated normal-block model with a known clustering.
 #' @export
 ZINB_fixed_blocks <- R6::R6Class(
   classname = "ZINB_fixed_blocks",
@@ -12,8 +12,8 @@ ZINB_fixed_blocks <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
     #' @description Create a new [`ZINB_fixed_blocks_fixed_sparsity`] object.
-    #' @param data object of NBData class, with responses and design matrix
-    #' @param C clustering matrix C_jq = 1 if species j belongs to cluster q
+    #' @param data object of NB_data class, with responses and design matrix
+    #' @param C clustering matrix C_jk = 1 if species j belongs to cluster k
     #' @param sparsity to apply on variance matrix when calling GLASSO
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`ZINB_fixed_blocks_fixed_sparsity`] object
@@ -30,41 +30,41 @@ ZINB_fixed_blocks <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
 
-    compute_loglik  = function(B, OmegaQ, dm1 = NA, kappa = NA, gamma = NA, mu = NA) {
-      log_det_OmegaQ <- as.numeric(determinant(OmegaQ, logarithm = TRUE)$modulus)
+    compute_loglik  = function(B, Omegaq, dm1 = NA, kappa = NA, gamma = NA, mu = NA) {
+      log_det_Omegaq <- as.numeric(determinant(Omegaq, logarithm = TRUE)$modulus)
       log_det_Gamma  <- gamma %>%
         map(determinant, logarithm = TRUE) %>%
         map("modulus") %>% map(as.numeric) %>% unlist()
 
       J <- -.5 * self$data$npY * log(2 * pi * exp(1)) + .5 * sum(self$data$nY * log(dm1))
-      J <- J + .5 * self$n * log_det_OmegaQ + .5 * sum(log_det_Gamma)
+      J <- J + .5 * self$n * log_det_Omegaq + .5 * sum(log_det_Gamma)
       J <- J +  private$ZI_cond_mean
 
       if (private$sparsity_ > 0) {
         gamma_bar <- reduce(gamma, `+`)
-        ## when not sparse, this terms equal -n Q /2 by definition of OmegaQ_hat
-        J <- J + .5 * self$n * self$Q - .5 * sum(diag(OmegaQ %*% (gamma_bar + crossprod(mu))))
-        J <- J - private$sparsity_ * sum(abs(self$sparsity_weights * OmegaQ))
+        ## when not sparse, this terms equal -n q /2 by definition of Omegaq_hat
+        J <- J + .5 * self$n * self$q - .5 * sum(diag(Omegaq %*% (gamma_bar + crossprod(mu))))
+        J <- J - private$sparsity_ * sum(abs(self$sparsity_weights * Omegaq))
       }
       J
     },
 
     get_heuristic_parameters = function(){
       zi_diag <- private$zi_diag_normal_inference()
-      SigmaQ  <- private$heuristic_SigmaQ_from_Sigma(cov(zi_diag$R))
-      OmegaQ  <- private$get_OmegaQ(SigmaQ)
-      list(B = zi_diag$B, dm1 = zi_diag$dm1, OmegaQ = OmegaQ, kappa = zi_diag$kappa)
+      Sigmaq  <- private$heuristic_Sigmaq_from_Sigma(cov(zi_diag$R))
+      Omegaq  <- private$get_Omegaq(Sigmaq)
+      list(B = zi_diag$B, dm1 = zi_diag$dm1, Omegaq = Omegaq, kappa = zi_diag$kappa)
     },
 
     EM_initialize = function() {
       c(private$get_heuristic_parameters(),  list(
-        gamma = rep(list(diag(1, self$Q, self$Q)), self$n),
-        mu    = matrix(0, self$n, self$Q)
+        gamma = rep(list(diag(1, self$q, self$q)), self$n),
+        mu    = matrix(0, self$n, self$q)
         )
       )
     },
 
-    EM_step = function(B, dm1, OmegaQ, kappa, gamma, mu) {
+    EM_step = function(B, dm1, Omegaq, kappa, gamma, mu) {
 
       ## Auxiliary variables
       R <- self$data$Y - self$data$X %*% B
@@ -73,7 +73,7 @@ ZINB_fixed_blocks <- R6::R6Class(
 
       # E step
       gamma <- apply(dm1C, 1, function(dm1C_) {
-        solve(OmegaQ + diag(dm1C_, self$Q, self$Q))}, simplify = FALSE)
+        solve(Omegaq + diag(dm1C_, self$q, self$q))}, simplify = FALSE)
       Rdm1C <- (R * dm1_mat) %*% private$C
       mu    <- t(sapply(1:length(gamma), function(i) Rdm1C[i, ] %*% gamma[[i]]))
 
@@ -86,9 +86,9 @@ ZINB_fixed_blocks <- R6::R6Class(
       dm1  <- switch(private$res_covariance,
         "diagonal"  = self$data$nY / colSums(self$data$zeros_bar * A),
         "spherical" = rep(self$data$npY / sum(self$data$zeros_bar * A), self$p))
-      OmegaQ <- private$get_OmegaQ((crossprod(mu) + reduce(gamma, `+`))/self$n)
+      Omegaq <- private$get_Omegaq((crossprod(mu) + reduce(gamma, `+`))/self$n)
 
-      list(B = B, dm1 = dm1, OmegaQ = OmegaQ,  kappa = kappa, gamma = gamma, mu = mu)
+      list(B = B, dm1 = dm1, Omegaq = Omegaq,  kappa = kappa, gamma = gamma, mu = mu)
     },
 
     zi_NB_fixed_blocks_obj_grad_B = function(B_vec, dm1_mat, muC) {
@@ -128,13 +128,13 @@ ZINB_fixed_blocks <- R6::R6Class(
         log_det_Gamma <- private$gamma %>%
           map(determinant, logarithm = TRUE) %>%
           map("modulus") %>% map(as.numeric) %>% unlist()
-        res <- .5 * (self$n * self$Q * log(2*pi*exp(1)) + sum(log_det_Gamma))
+        res <- .5 * (self$n * self$q * log(2*pi*exp(1)) + sum(log_det_Gamma))
       } else {res <- NA}
       res
     },
     #' @field nb_param number of parameters in the model
     nb_param = function() super$nb_param + self$p * self$d0, # adding kappa
-    #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), OmegaQ (groups precision matrix), kappa (zero-inflation probabilities)
+    #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix), kappa (zero-inflation probabilities)
     model_par  = function() {
       par       <- super$model_par
       par$kappa <- private$kappa

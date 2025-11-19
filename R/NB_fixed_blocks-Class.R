@@ -1,8 +1,8 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NB_fixed_blocks                ###############
+##  CLASS NB_fixed_blocks ##############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 class for normal-block model with known block
+#' R6 class for a normal-block model with known clustering.
 #' @export
 NB_fixed_blocks <- R6::R6Class(
   classname = "NB_fixed_blocks",
@@ -12,8 +12,8 @@ NB_fixed_blocks <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
     #' @description Create a new [`NB_fixed_blocks`] object.
-    #' @param data object of NBData class, with responses and design matrix
-    #' @param C clustering matrix C_jq = 1 if species j belongs to cluster q
+    #' @param data object of NB_data class, with responses and design matrix
+    #' @param C clustering matrix C_jk = 1 if species j belongs to cluster k
     #' @param sparsity to apply on variance matrix when calling GLASSO
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`NB_fixed_blocks`] object
@@ -30,16 +30,16 @@ NB_fixed_blocks <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
 
-    compute_loglik  = function(B, OmegaQ, dm1 = NA, gamma = NA, mu = NA) {
-      log_det_OmegaQ <- as.numeric(determinant(OmegaQ, logarithm = TRUE)$modulus)
+    compute_loglik  = function(B, Omegaq, dm1 = NA, gamma = NA, mu = NA) {
+      log_det_Omegaq <- as.numeric(determinant(Omegaq, logarithm = TRUE)$modulus)
       log_det_Gamma  <- as.numeric(determinant(gamma , logarithm = TRUE)$modulus)
 
       J <- -.5 * (self$n * self$p * log(2 * pi * exp(1)) - self$n * sum(log(dm1)))
-      J <- J + .5 * self$n * (log_det_OmegaQ + log_det_Gamma)
+      J <- J + .5 * self$n * (log_det_Omegaq + log_det_Gamma)
       if (self$sparsity > 0) {
-        ## when not sparse, this terms equal -n Q /2 by definition of OmegaQ_hat
-        J <- J + self$n*self$Q / 2 - .5 * sum(diag(OmegaQ %*% (self$n * gamma + crossprod(mu))))
-        J <- J - self$sparsity * sum(abs(self$sparsity_weights * OmegaQ))
+        ## when not sparse, this terms equal -n q /2 by definition of Omegaq_hat
+        J <- J + self$n*self$q / 2 - .5 * sum(diag(Omegaq %*% (self$n * gamma + crossprod(mu))))
+        J <- J - self$sparsity * sum(abs(self$sparsity_weights * Omegaq))
       }
       J
     },
@@ -50,22 +50,22 @@ NB_fixed_blocks <- R6::R6Class(
       dm1   <- switch(private$res_covariance,
                       "diagonal"  = 1 / as.vector(ddiag),
                       "spherical" = rep(1/mean(ddiag), self$p))
-      SigmaQ    <- private$heuristic_SigmaQ_from_Sigma(reg_res$Sigma)
-      OmegaQ    <- private$get_OmegaQ(SigmaQ)
-      list(B = reg_res$B, dm1 = dm1, OmegaQ = OmegaQ)
+      Sigmaq    <- private$heuristic_Sigmaq_from_Sigma(reg_res$Sigma)
+      Omegaq    <- private$get_Omegaq(Sigmaq)
+      list(B = reg_res$B, dm1 = dm1, Omegaq = Omegaq)
     },
 
     EM_initialize = function() {
       c(private$get_heuristic_parameters(),  list(
-        gamma = diag(1, self$Q, self$Q),
-        mu    = matrix(0, self$n, self$Q)
+        gamma = diag(1, self$q, self$q),
+        mu    = matrix(0, self$n, self$q)
         )
       )
     },
 
-    EM_step = function(B, dm1, OmegaQ, gamma, mu) {
+    EM_step = function(B, dm1, Omegaq, gamma, mu) {
       ## E step
-      gamma <- solve(OmegaQ + diag(colSums(dm1 * private$C), self$Q, self$Q))
+      gamma <- solve(Omegaq + diag(colSums(dm1 * private$C), self$q, self$q))
       mu    <- (self$data$Y - self$data$X %*% B) %*% (dm1 * private$C) %*% gamma
 
       ## M step
@@ -75,8 +75,8 @@ NB_fixed_blocks <- R6::R6Class(
       dm1  <- switch(private$res_covariance,
         "diagonal"  = 1 / as.vector(ddiag),
         "spherical" = rep(1/mean(ddiag), self$p))
-      OmegaQ <- private$get_OmegaQ(crossprod(mu)/self$n + gamma)
-      list(B = B, OmegaQ = OmegaQ, dm1 = dm1, gamma = gamma, mu = mu)
+      Omegaq <- private$get_Omegaq(crossprod(mu)/self$n + gamma)
+      list(B = B, Omegaq = Omegaq, dm1 = dm1, gamma = gamma, mu = mu)
     }
 
   ),
@@ -90,7 +90,7 @@ NB_fixed_blocks <- R6::R6Class(
     #' @field entropy Entropy of the conditional distribution
     entropy    = function(value) {
       if (!private$approx){
-        res <- .5 * self$n * self$Q * log(2 * pi * exp(1)) +
+        res <- .5 * self$n * self$q * log(2 * pi * exp(1)) +
           .5 * self$n * as.numeric(determinant(private$gamma)$modulus)
       } else {res <- NA}
       res

@@ -2,11 +2,11 @@
 % Please edit documentation in R/ZINB_fixed_blocks-Class.R
 \name{ZINB_fixed_blocks}
 \alias{ZINB_fixed_blocks}
-\title{R6 class for a generic normal model}
+\title{R6 class for a Zero-Inflated normal-block model with a known clustering.}
 \description{
-R6 class for a generic normal model
+R6 class for a Zero-Inflated normal-block model with a known clustering.
 
-R6 class for a generic normal model
+R6 class for a Zero-Inflated normal-block model with a known clustering.
 }
 \section{Super class}{
 \code{\link[normalblockr:NB]{normalblockr::NB}} -> \code{ZINB_fixed_blocks}
@@ -20,7 +20,7 @@ R6 class for a generic normal model
 
 \item{\code{nb_param}}{number of parameters in the model}
 
-\item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), OmegaQ (groups precision matrix), kappa (zero-inflation probabilities)}
+\item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix), kappa (zero-inflation probabilities)}
 
 \item{\code{fitted}}{Y values predicted by the model}
 
@@ -43,8 +43,11 @@ R6 class for a generic normal model
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="latent_network"><a href='../../normalblockr/html/NB.html#method-NB-latent_network'><code>normalblockr::NB$latent_network()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="merge"><a href='../../normalblockr/html/NB.html#method-NB-merge'><code>normalblockr::NB$merge()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="optimize"><a href='../../normalblockr/html/NB.html#method-NB-optimize'><code>normalblockr::NB$optimize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="plot"><a href='../../normalblockr/html/NB.html#method-NB-plot'><code>normalblockr::NB$plot()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="plot_loglik"><a href='../../normalblockr/html/NB.html#method-NB-plot_loglik'><code>normalblockr::NB$plot_loglik()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="plot_network"><a href='../../normalblockr/html/NB.html#method-NB-plot_network'><code>normalblockr::NB$plot_network()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="predict"><a href='../../normalblockr/html/NB.html#method-NB-predict'><code>normalblockr::NB$predict()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="print"><a href='../../normalblockr/html/NB.html#method-NB-print'><code>normalblockr::NB$print()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="split"><a href='../../normalblockr/html/NB.html#method-NB-split'><code>normalblockr::NB$split()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NB" data-id="update"><a href='../../normalblockr/html/NB.html#method-NB-update'><code>normalblockr::NB$update()</code></a></span></li>
 </ul>
@@ -62,9 +65,9 @@ Create a new [`ZINB_fixed_blocks_fixed_sparsity`] object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{data}}{object of NBData class, with responses and design matrix}
+\item{\code{data}}{object of NB_data class, with responses and design matrix}
 
-\item{\code{C}}{clustering matrix C_jq = 1 if species j belongs to cluster q}
+\item{\code{C}}{clustering matrix C_jk = 1 if species j belongs to cluster k}
 
 \item{\code{sparsity}}{to apply on variance matrix when calling GLASSO}
 
