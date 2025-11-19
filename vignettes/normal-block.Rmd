@@ -30,8 +30,9 @@ Theoretical explanations for this model can be found in the pre-print "An integr
 ### Requirements
 
 ```{r, set-up}
-# library(normalblockr)
-devtools::load_all(".")
+library(normalblockr)
+library(pheatmap)
+library(paletteer)
 ```
 
 # Data simulation

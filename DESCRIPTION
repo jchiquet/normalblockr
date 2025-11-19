@@ -18,7 +18,7 @@ URL: http://github.com/jeannetous/normalblockr
 BugReports: https://github.com/jeannetous/normalblockr/issues
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1.0)
 Imports: 
     methods,
     glassoFast,
@@ -42,6 +42,10 @@ Suggests:
     knitr,
     rmarkdown,
     pheatmap,
-    paletteer
+    paletteer,
+    pheatmap,
+    matrixcalc,
+    ggthemes,
+    knitr
 Config/testthat/edition: 3
 VignetteBuilder: knitr

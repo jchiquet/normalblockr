@@ -7,6 +7,7 @@
 #' @param X design matrix.
 #' @param X0 zero-inflation design matrix, if applicable.
 #' @param formula describes the relationship between Y and X, and X0 if applicable, useful if not all of X's or X0's covariates should be used, should be formatted ~ X1 + X2... | Z1 + Z2... with the Normal formula before the | and the ZI formula after the |
+#' @export
 NB_data <- R6::R6Class(
   classname = "NB_data",
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

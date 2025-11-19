@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{An object of class NB.}
+
+\item{...}{not use, only here for S3 compatibility}
 }
 \value{
 A matrix of coefficients extracted from the NB model.

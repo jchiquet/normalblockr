@@ -541,6 +541,7 @@ NB <- R6::R6Class(
       cutree(hc, self$q)
     },
 
+    #' @importFrom sbm estimateSimpleSBM
     heuristic_cluster_sigma_sbm = function(R){
       options <- list(verbosity=0, exploreMin=self$q, exploreMax=self$q,
                       verbosity=0, plot=FALSE, nbCores=1)

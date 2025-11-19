@@ -4,12 +4,14 @@
 \alias{predict.NB}
 \title{Predicts observations Y for new covariates X.}
 \usage{
-\method{predict}{NB}(object, new_X)
+\method{predict}{NB}(object, new_X, ...)
 }
 \arguments{
 \item{object}{An object of class NB.}
 
 \item{new_X}{New set of covariates.}
+
+\item{...}{not use, only here for S3 compatibility}
 }
 \value{
 A n*p prediction matrix for new observations
