@@ -1,23 +1,30 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>/404.html</loc></url>
 <url><loc>/LICENSE.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/normal-block.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/NB.html</loc></url>
-<url><loc>/reference/NBData.html</loc></url>
 <url><loc>/reference/NB_changing_sparsity.html</loc></url>
 <url><loc>/reference/NB_control.html</loc></url>
-<url><loc>/reference/NB_fixed_Q.html</loc></url>
+<url><loc>/reference/NB_data.html</loc></url>
 <url><loc>/reference/NB_fixed_blocks.html</loc></url>
-<url><loc>/reference/NB_unknown_Q.html</loc></url>
-<url><loc>/reference/NB_unknown_Q_changing_sparsity.html</loc></url>
-<url><loc>/reference/ZINB_fixed_Q.html</loc></url>
+<url><loc>/reference/NB_fixed_q.html</loc></url>
+<url><loc>/reference/NB_unknown_q.html</loc></url>
+<url><loc>/reference/NB_unknown_q_changing_sparsity.html</loc></url>
 <url><loc>/reference/ZINB_fixed_blocks.html</loc></url>
+<url><loc>/reference/ZINB_fixed_q.html</loc></url>
+<url><loc>/reference/coef.NB.html</loc></url>
+<url><loc>/reference/fitted.NB.html</loc></url>
 <url><loc>/reference/generate_normal_block_data.html</loc></url>
 <url><loc>/reference/get_model.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/isNB.html</loc></url>
 <url><loc>/reference/normal_block.html</loc></url>
 <url><loc>/reference/normalblockr-package.html</loc></url>
+<url><loc>/reference/predict.NB.html</loc></url>
 <url><loc>/reference/selection_n_clusters.html</loc></url>
+<url><loc>/reference/sigma.NB.html</loc></url>
 </urlset>
 

@@ -16,6 +16,10 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+  </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/jeannetous/normalblockr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -35,8 +39,7 @@
 
 
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -47,84 +50,132 @@
 
         </dt>
         <dd>R6 abstract class for a generic sparse Normal Block model</dd>
-      </dl><dl><dt>
 
-          <code><a href="NBData.html">NBData</a></code>
-
-        </dt>
-        <dd>R6 class for a generic normal model</dd>
-      </dl><dl><dt>
+        <dt>
 
           <code><a href="NB_changing_sparsity.html">NB_changing_sparsity</a></code>
 
         </dt>
-        <dd>R6 class for normal-block model with unknown Q (number of groups)</dd>
-      </dl><dl><dt>
+        <dd>R6 class for normal-block model with unknown q (number of groups)</dd>
+
+        <dt>
 
           <code><a href="NB_control.html">NB_control()</a></code>
 
         </dt>
         <dd>NB_control</dd>
-      </dl><dl><dt>
 
-          <code><a href="NB_fixed_Q.html">NB_fixed_Q</a></code>
+        <dt>
+
+          <code><a href="NB_data.html">NB_data</a></code>
 
         </dt>
-        <dd>R6 class for normal-block model with fixed number of groups</dd>
-      </dl><dl><dt>
+        <dd>R6 class for a generic normal model</dd>
+
+        <dt>
 
           <code><a href="NB_fixed_blocks.html">NB_fixed_blocks</a></code>
 
         </dt>
-        <dd>R6 class for normal-block model with known block</dd>
-      </dl><dl><dt>
+        <dd>R6 class for a normal-block model with known clustering.</dd>
 
-          <code><a href="NB_unknown_Q.html">NB_unknown_Q</a></code>
+        <dt>
 
-        </dt>
-        <dd>R6 class for normal-block model with unknown Q (number of groups)</dd>
-      </dl><dl><dt>
-
-          <code><a href="NB_unknown_Q_changing_sparsity.html">NB_unknown_Q_changing_sparsity</a></code>
+          <code><a href="NB_fixed_q.html">NB_fixed_q</a></code>
 
         </dt>
-        <dd>R6 class for normal-block model with unknown Q (number of groups)</dd>
-      </dl><dl><dt>
+        <dd>R6 class for a normal-block model with fixed number of clusters (but unknown clustering).</dd>
 
-          <code><a href="ZINB_fixed_Q.html">ZINB_fixed_Q</a></code>
+        <dt>
+
+          <code><a href="NB_unknown_q.html">NB_unknown_q</a></code>
 
         </dt>
-        <dd>R6 class for zero-inflated normal-block model with fixed number of groups#'</dd>
-      </dl><dl><dt>
+        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.</dd>
+
+        <dt>
+
+          <code><a href="NB_unknown_q_changing_sparsity.html">NB_unknown_q_changing_sparsity</a></code>
+
+        </dt>
+        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.</dd>
+
+        <dt>
 
           <code><a href="ZINB_fixed_blocks.html">ZINB_fixed_blocks</a></code>
 
         </dt>
-        <dd>R6 class for a generic normal model</dd>
-      </dl><dl><dt>
+        <dd>R6 class for a Zero-Inflated normal-block model with a known clustering.</dd>
+
+        <dt>
+
+          <code><a href="ZINB_fixed_q.html">ZINB_fixed_q</a></code>
+
+        </dt>
+        <dd>R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).</dd>
+
+        <dt>
+
+          <code><a href="coef.NB.html">coef(<i>&lt;NB&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extracts model coefficients from objects returned by [NB()] and its variants</dd>
+
+        <dt>
+
+          <code><a href="fitted.NB.html">fitted(<i>&lt;NB&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extracts fitted values from objects returned by [NB()] and its variants</dd>
+
+        <dt>
 
           <code><a href="generate_normal_block_data.html">generate_normal_block_data()</a></code>
 
         </dt>
         <dd>Generate Normal Block Data</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="get_model.html">get_model()</a></code>
 
         </dt>
         <dd>Creates appropriate new normal block model depending on the parametrization</dd>
-      </dl><dl><dt>
+
+        <dt>
+
+          <code><a href="isNB.html">isNB()</a></code>
+
+        </dt>
+        <dd>Checks if a model is of class [NB()]</dd>
+
+        <dt>
 
           <code><a href="normal_block.html">normal_block()</a></code>
 
         </dt>
         <dd>Normal-block model</dd>
-      </dl><dl><dt>
+
+        <dt>
+
+          <code><a href="predict.NB.html">predict(<i>&lt;NB&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Predicts observations Y for new covariates X.</dd>
+
+        <dt>
 
           <code><a href="selection_n_clusters.html">selection_n_clusters</a></code>
 
         </dt>
-        <dd>R6 class for normal-block model with unknown Q (number of groups)</dd>
+        <dd>R6 class for normal-block model with unknown q (number of groups)</dd>
+
+        <dt>
+
+          <code><a href="sigma.NB.html">sigma(<i>&lt;NB&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extracts model coefficients from objects returned by [NB()] and its variants</dd>
       </dl></div>
   </main></div>
 
@@ -134,7 +185,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

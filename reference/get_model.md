@@ -1,0 +1,43 @@
+# Creates appropriate new normal block model depending on the parametrization
+
+Creates appropriate new normal block model depending on the
+parametrization
+
+## Usage
+
+``` r
+get_model(
+  data,
+  blocks,
+  sparsity = 0,
+  zero_inflation = FALSE,
+  control = NB_control()
+)
+```
+
+## Arguments
+
+- data:
+
+  contains the matrix of responses (Y) and the design matrix (X).
+
+- blocks:
+
+  either an integer (number of blocks), a vector of integer (list of
+  possible number of block) or a p \* q matrix (for indicating block
+  membership when its known)
+
+- sparsity:
+
+  boolean to say whether the model should have a changing penalty OR
+  float to run model with a single penalty value
+
+- zero_inflation:
+
+  boolean to indicate if Y is zero-inflated and adjust fitted model as a
+  consequence
+
+- control:
+
+  a list-like structure for detailed control on parameters should be
+  generated with normal_block_control() for collections of sparse models
