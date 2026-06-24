@@ -77,10 +77,10 @@ NB_unknown_q_changing_sparsity <- R6::R6Class(
       stopifnot(!anyNA(self$criteria[[crit]]))
       id <- 1
       if (length(self$criteria[[crit]]) > 1) {
-        id       <- which.min(self$criteria[[crit]])
-        best_pen <- self$criteria$sparsity[[id]]
-        best_q   <- self$criteria$q[[id]]
+        id <- which.min(self$criteria[[crit]])
       }
+      best_pen <- self$criteria$sparsity[[id]]
+      best_q   <- self$criteria$q[[id]]
       model <- self$get_model(best_q, best_pen)$clone()
       model
     },

@@ -64,8 +64,8 @@ NB <- R6::R6Class(
             stop("Cluster-indicating matrix must have as many rows as Y has columns")
           if (ncol(cl0) != q)
             stop("Cluster-indicating matrix must have q columns")
-          if ((min(colSums(cl0)) < 1) & !q)
-            stop("The number of clusters in the initial clustering must be equal to q.")
+          if (min(colSums(cl0)) < 1)
+            stop("There cannot be empty clusters in the initial clustering matrix.")
         }
         private$C <- cl0
       } else {

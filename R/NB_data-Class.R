@@ -49,8 +49,8 @@ NB_data <- R6::R6Class(
     #' @param X0 zero-inflation design matrix, if applicable.
     #' @param formula describes the relationship between Y and X, useful if not all of X's covariates should be used.
     initialize = function(Y, X, X0 = NULL, formula = NULL) {
-      stopifnot("Y and X must be matrices" = all(is.matrix(Y), is.matrix(X))) |> try()
-      stopifnot("Y and X must have the same number of rows" = (nrow(Y) == nrow(X))) |> try()
+      stopifnot("Y and X must be matrices" = all(is.matrix(Y), is.matrix(X)))
+      stopifnot("Y and X must have the same number of rows" = (nrow(Y) == nrow(X)))
       self$Y <- Y
       self$n <- nrow(Y)
       self$p <- ncol(Y)
@@ -58,13 +58,13 @@ NB_data <- R6::R6Class(
       fm_zi <- NULL
       if(is.null(formula)){self$X <- X
       }else{
-        stopifnot("The formula should start with ~" = (formula[[1]] == "~")) |> try()
+        stopifnot("The formula should start with ~" = (formula[[1]] == "~"))
         if(formula[[2]][[1]] == "|"){
           fm <- as.formula(paste0("~", formula[[2]][2]))
           fm_zi <- as.formula(paste0("~", formula[[2]][3]))
         }else{
           fm <- formula}
-        stopifnot("Covariates given in formula must be present in X" = (length(setdiff(all.vars(terms(fm)), colnames(X))) ==0))|> try()
+        stopifnot("Covariates given in formula must be present in X" = (length(setdiff(all.vars(terms(fm)), colnames(X))) ==0))
         self$X <- matrix(model.matrix(fm, as.data.frame(X)))
       }
       if(is.null(X0)){X0 <- matrix(rep(1, self$n))}
@@ -72,7 +72,7 @@ NB_data <- R6::R6Class(
         self$X0 <- X0
       }else{
         self$X0 <- matrix(model.matrix(fm_zi, as.data.frame(X0)))
-        stopifnot("Zero-inflation covariates given in the formula must be present in X0" = (length(setdiff(all.vars(terms(fm_zi)), colnames(X0))) ==0))|> try()
+        stopifnot("Zero-inflation covariates given in the formula must be present in X0" = (length(setdiff(all.vars(terms(fm_zi)), colnames(X0))) ==0))
       }
       self$d0 <- ncol(self$X0)
       self$d <- ncol(self$X)
