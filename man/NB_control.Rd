@@ -16,7 +16,7 @@ NB_control(
   verbose = TRUE,
   heuristic = FALSE,
   noise_covariance = c("diagonal", "spherical"),
-  clustering_approx = c("ward2", "kmeans", "sbm", "kmeansvar")
+  clustering_approx = c("kmeans", "ward2", "sbm", "kmeansvar", "spectral")
 )
 }
 \arguments{
@@ -51,11 +51,15 @@ are all `NA` on the resulting model.}
 \item{noise_covariance}{variance can be variable specific ("diagonal", the default) or common ("spherical")}
 
 \item{clustering_approx}{clustering heuristic used to initialize the unknown
-clustering, one of "ward2" (default), "kmeans", "sbm" or "kmeansvar" (the
-latter from the ClustOfVar package, like the internal "hclustvar" fallback
-used whenever the chosen method collapses to fewer than q clusters). No
-single method dominates on every dataset, so it is worth trying more than
-one (see inst/normal_block_models.qmd for a benchmark). When fitting a
+clustering, one of "kmeans" (default), "ward2", "sbm", "kmeansvar" (from the
+ClustOfVar package, like the internal "hclustvar" fallback used whenever the
+chosen method collapses to fewer than q clusters) or "spectral" (k-means on
+the row-normalized eigenvectors of cov(R), a cheap proxy for clustering the
+residuals' covariance structure rather than their values). No single method
+dominates on every dataset (see inst/normal_block_models.qmd for a
+benchmark); "kmeans" is the default because it was never the worst of the 5
+on either of the two benchmarked datasets, not because it ever won. When
+fitting a
 collection over several values of q (`normal_block(blocks = <vector>)`,
 [NormalBlockUnknownQ], [NormalBlockUnknownQChangingSparsity]) without an
 explicit `clustering_init`, "sbm" runs a single SBM exploration over the

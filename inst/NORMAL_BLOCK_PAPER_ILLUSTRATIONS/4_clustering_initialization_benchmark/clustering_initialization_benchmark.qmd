@@ -1,0 +1,246 @@
+---
+title: "Initializing the unknown clustering: which heuristic, and why"
+format: html
+editor: visual
+---
+
+## Motivation
+
+`NormalBlockUnknownClusters` (and the collections built on it) need a
+starting clustering of the `p` variables before the (V)EM recursion can run.
+This starting point comes from `private$clustering_methods` in
+`R/NormalBlockBase.R`, selectable via `NB_control(clustering_approx = ...)`.
+
+The question behind this whole notebook: **the normal-block model's
+clustering target is the *covariance* structure of the residuals, not their
+*values*** -- for two variables $j, j'$ in the same cluster $k$,
+$\mathrm{Cov}(Y_j, Y_{j'}) = \mathrm{Var}(W_k)$, a constant shared by every
+pair in the cluster, regardless of each variable's own idiosyncratic noise
+$D_j$. A heuristic that clusters on raw residual proximity (plain `kmeans`)
+is targeting something else entirely. So: does a heuristic that is more
+faithful to this covariance structure actually initialize better, and is
+there a single best choice?
+
+Short answer, confirmed below on two real datasets (breast cancer
+proteomics, university webpages text data): **no single heuristic dominates
+across datasets.** The package therefore keeps a menu of 5, rather than
+picking one "best" method.
+
+## Setup
+
+```{r useful-libraries, message=FALSE}
+library(normalblockr)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r data-breast-cancer}
+base_dir <- "../1_breast_cancer_proteomics"
+RPPA_expr <- readRDS(file.path(base_dir, "RPPA_expr.rds"))
+clinical  <- readRDS(file.path(base_dir, "brca_clinical.rds"))
+RPPA_clin <- clinical[match(rownames(RPPA_expr), clinical$sampleId), ]
+data_brca <- NormalBlockData$new(
+  scale(as.matrix(RPPA_expr)),
+  model.matrix(~ 0 + PAM50_SUBTYPE, data = RPPA_clin)
+)
+```
+
+```{r data-university-webpages, eval=FALSE}
+## see ../2_university_webpages/normal_block_analysis_university_webpages_data.qmd
+## for the full text-preprocessing pipeline (tm-based DTM construction,
+## entropy-based term selection, log(1+freq) + scale()); reproduced here only
+## as a pointer, not re-run, since it requires the `tm` package and the raw
+## corpus.
+data_web <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))
+```
+
+## The 5-method menu
+
+```{r show-registry, eval=FALSE}
+## R/NormalBlockBase.R, private$clustering_methods
+list(
+  kmeans    = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
+  ward2     = function(R, q) cutree(hclust(dist(1 - cor(R)), method = "ward.D2"), q),
+  sbm       = function(R, q) { # via sbm_clustering_path() for collections over several q
+    options <- list(verbosity = 0, exploreMin = q, exploreMax = q, plot = FALSE, nbCores = 1)
+    mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)
+    mySBM$setModel(q)
+    mySBM$memberships
+  },
+  kmeansvar = function(R, q) ClustOfVar::kmeansvar(X.quanti = R, init = q, nstart = 30)$cluster,
+  spectral  = function(R, q) {
+    U <- eigen(cov(R), symmetric = TRUE)$vectors[, seq_len(q), drop = FALSE]
+    U <- U / pmax(sqrt(rowSums(U^2)), 1e-10)
+    kmeans(U, q, nstart = 30, iter.max = 50)$cluster
+  }
+)
+```
+
+| method | targets | theoretical fit to the model | cost |
+|---|---|---|---|
+| `kmeans` | residual *values* (Euclidean) | weak -- not the model's actual clustering criterion | cheap |
+| `ward2` | pairwise *correlation* | partial -- confounded by heterogeneous $D_j$ (correlation divides by $\sqrt{\mathrm{Var}(W_k)+D_j}$) | cheap |
+| `sbm` | block-constant *covariance* (Gaussian SBM) | exact match -- a Gaussian SBM literally assumes constant within/between-block covariance | expensive (mitigated for collections by `sbm_clustering_path()`, see "Implementation notes" in `inst/normal_block_models.qmd`) |
+| `kmeansvar` | one dominant factor per cluster, *arbitrary* loadings | related but more permissive than the model (which assumes a *unit* loading) | expensive |
+| `spectral` | top-$q$ eigenvectors of $\mathrm{cov}(R)$, row-normalized | same target as `sbm`, via a cheap proxy (classical for SBM recovery) instead of a combinatorial search | cheap |
+
+## Benchmark protocol
+
+Both datasets, $q = 2$ to $25$. For each $(q, \text{method})$: get the
+heuristic clustering on the OLS residuals (`ols_residuals()`,
+`R/utils.R`), seed `NormalBlockUnknownClusters$new(data, q, control =
+NB_control(clustering_init = cl))`, run `$optimize()`, record the final
+ICL. **Strictly sequential** -- a single R process, no `parallel`/
+`mclapply`/`foreach` (the BLAS backend here is already multithreaded across
+all cores; comparisons must not also be parallelized on top of that, or
+timings become meaningless).
+
+```{r benchmark-loop, eval=FALSE}
+q_values <- 2:25
+methods  <- c("kmeans", "ward2", "kmeansvar", "sbm", "spectral")
+
+run_one <- function(data, q, method) {
+  R <- ols_residuals(data)
+  cl <- if (method == "sbm") {
+    sbm_clustering_path(R, q_values)[[as.character(q)]] # one shared exploration
+  } else {
+    dummy <- NormalBlockUnknownClusters$new(data, q, control = NB_control(verbose = FALSE))
+    dummy$.__enclos_env__$private$clustering_methods[[method]](R, q)
+  }
+  model <- NormalBlockUnknownClusters$new(data, q, control = NB_control(verbose = FALSE, clustering_init = cl))
+  model$optimize(control = NB_control(verbose = FALSE))
+  data.frame(q = q, method = method, niter = length(model$objective), ICL = model$ICL)
+}
+
+results <- do.call(rbind, lapply(methods, function(m) do.call(rbind, lapply(q_values, run_one, data = data_brca, method = m))))
+```
+
+## Results
+
+```{r load-results}
+menu <- readRDS("results/menu_benchmark.rds")
+```
+
+```{r icl-vs-q-plot, fig.width=9, fig.height=4}
+ggplot(menu, aes(q, ICL, color = method)) +
+  geom_line() + geom_point(size = 0.8) +
+  facet_wrap(~ dataset, scales = "free_y") +
+  theme_minimal() +
+  labs(title = "ICL vs number of clusters, by initialization method")
+```
+
+```{r rank-table}
+menu %>%
+  group_by(dataset, q) %>%
+  mutate(rank = rank(ICL, ties.method = "average")) %>%
+  ungroup() %>%
+  group_by(dataset, method) %>%
+  summarise(mean_rank = round(mean(rank), 2), wins = sum(rank == 1), .groups = "drop") %>%
+  arrange(dataset, mean_rank) %>%
+  knitr::kable()
+```
+
+**No method wins on both datasets.** `sbm` is best on breast cancer
+proteomics (9/24 wins) but worst on university webpages (0/24); `kmeansvar`
+is the mirror image (worst on breast cancer, co-best on webpages);
+`spectral` is mediocre on breast cancer but co-best on webpages, at a
+fraction of `kmeansvar`'s cost. `kmeans` is never the *worst* on either
+dataset, which is why it was chosen as the default in `NB_control()` -- it
+optimizes for "never embarrassing" rather than "sometimes best".
+
+## Side investigation 1: a hand-rolled Armadillo k-means
+
+Tested whether reimplementing k-means in RcppArmadillo (Lloyd's algorithm,
+multi-start) could beat `stats::kmeans()` (Hartigan-Wong) on speed and/or
+quality. Reference implementation kept at `results/kmeans_arma.cpp` (not
+compiled into the package -- exploratory only, via `Rcpp::sourceCpp()`).
+
+```{r kmeans-arma-results}
+ka <- readRDS("results/kmeans_arma_benchmark.rds")
+ka %>%
+  group_by(dataset, method) %>%
+  summarise(total_cluster_time = round(sum(cluster_time), 2), .groups = "drop") %>%
+  knitr::kable(caption = "Total clustering time (s), summed over q in {3,8,15,22} x nstart in {10,30,100,300}")
+```
+
+Findings:
+
+- **Speed**: no systematic win -- faster on one dataset, slower on the other.
+- **Quality (WCSS)**: plain Lloyd's is *consistently worse* than
+  Hartigan-Wong (28/32 configurations), by ~2.6% on average, and this gap
+  does **not** close with more restarts: `kmeans_arma` at `nstart=300` still
+  doesn't beat `stats::kmeans` at `nstart=10` in most cases. The gap is the
+  local-search algorithm itself, not an insufficient number of restarts.
+
+```{r kmeanspp-results}
+kapp <- readRDS("results/kmeans_arma_pp_benchmark.rds")
+kapp %>%
+  group_by(method, nstart) %>%
+  summarise(total_cluster_time = round(sum(cluster_time), 3), .groups = "drop") %>%
+  knitr::kable(caption = "Total clustering time (s), summed over q in {3,8,15,22}, both datasets")
+```
+
+Following up: does k-means++ seeding let `kmeans_arma` match `stats::kmeans`
+with far fewer restarts? Confirmed on the resource-efficiency axis -- WCSS
+plateaus by `nstart = 3-5` instead of needing hundreds -- but the plateau
+itself is still *worse* than Hartigan-Wong's. **Conclusion: not worth
+shipping.** No clear edge on either axis once Hartigan-Wong is the
+baseline; the existing 5-method menu already provides cheap diversity.
+
+## Side investigation 2: which spectral-clustering variant matters
+
+Classical spectral clustering has several normalization conventions
+(unnormalized adjacency, symmetric-normalized Laplacian, row-normalized
+embedding, ...). Tested 6 combinations: eigenvectors of $\mathrm{cov}(R)$ vs
+$\mathrm{cor}(R)$ (= the symmetric-Laplacian analogue, since $\mathrm{cor} =
+D^{-1/2} \Sigma D^{-1/2}$ with $D = \mathrm{diag}(\Sigma)$), each with/without
+row-normalizing the eigenvector embedding (Ng-Jordan-Weiss), plus a
+diagonal-deleted variant motivated by the same $D_j$-interference argument
+from the motivation section: $\mathrm{Cov}(Y_j, Y_{j'})$ for $j \ne j'$ never
+involves $D_j$, only the *diagonal* of $\mathrm{cov}(R)$ does, so a few
+high-noise variables can hijack top eigenvector slots if the diagonal is
+left in.
+
+```{r spectral-variants-synthetic, eval=FALSE}
+## synthetic stress test: heteroscedastic noise, not aligned with cluster
+## membership -- 30 replications, p=60, q=4, n=80
+## mean ARI with diagonal kept:   0.0025  (clustering destroyed)
+## mean ARI with diagonal zeroed: 0.342   (real signal recovered)
+## nodiag better in 30/30 replications
+```
+
+That diagonal-deletion fix is decisive in this adversarial synthetic
+setting. On the two **real** datasets, though, it is not what matters most:
+
+```{r spectral-variants-results}
+sv <- readRDS("results/spectral_variants_benchmark.rds")
+sv %>%
+  group_by(dataset, q) %>%
+  mutate(rank = rank(ICL, ties.method = "average")) %>%
+  ungroup() %>%
+  group_by(dataset, method) %>%
+  summarise(mean_rank = round(mean(rank), 2), wins = sum(rank == 1), .groups = "drop") %>%
+  arrange(dataset, mean_rank) %>%
+  knitr::kable()
+```
+
+Row-normalization (`*_rownorm`) dominates the other 4 variants on both
+datasets; diagonal-deletion does not show the same benefit here, probably
+because the real noise heterogeneity isn't as extreme as the synthetic
+stress test, and row-normalization already absorbs much of the same
+"a few extreme embedding rows distort kmeans" failure mode. **This is why
+`spectral` in the registry is specifically `cov(R)` eigenvectors with
+row-normalization** -- the other variants were measurably worse and didn't
+make the cut.
+
+## Open threads for later
+
+- The diagonal-deletion idea was validated synthetically but not on real
+  data here -- worth retesting on a dataset with more extreme,
+  cluster-misaligned noise heterogeneity than these two happen to have.
+- Only two datasets so far. A third (e.g. `3_MICROCOSM`) would help tell
+  whether `kmeans`'s "never worst" property generalizes or was a
+  two-dataset coincidence.
+- `kmeansvar` and `spectral` were close to tied on university webpages
+  (12/24 wins each) -- worth a paired significance check rather than raw
+  win-counting if this matters for a future default-choice decision.

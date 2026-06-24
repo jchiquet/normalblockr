@@ -525,13 +525,22 @@ NormalBlockBase <- R6::R6Class(
     ## (n x p) into an initial clustering of the p variables into self$q
     ## groups (a vector of length p with values in 1:q). One single table
     ## instead of one ad hoc private method per algorithm -- selectable via
-    ## NB_control(clustering_approx = ...) ("kmeans"/"ward2"/"sbm"/"kmeansvar";
-    ## "hclustvar" is reserved for the fallback below, not user-selectable).
+    ## NB_control(clustering_approx = ...) ("kmeans"/"ward2"/"sbm"/"kmeansvar"/
+    ## "spectral"; "hclustvar" is reserved for the fallback below, not
+    ## user-selectable).
     ## Benchmarked on two real datasets (inst/normal_block_models.qmd): no
     ## single method dominates everywhere -- e.g. kmeansvar is unremarkable on
     ## breast cancer proteomics data but wins decisively (20/24 q values) on
     ## university webpages text data, hence it being offered as a genuine
     ## alternative rather than dropping ClustOfVar from the dependencies.
+    ## spectral clusters the eigenvectors of cov(R) (top q, each row rescaled
+    ## to unit L2 norm -- the classic Ng-Jordan-Weiss normalization) instead
+    ## of the residuals themselves: the model's clustering target is the
+    ## *covariance* structure, not the residual values, so an eigen-embedding
+    ## of cov(R) is a closer match (and far cheaper than sbm). Without the
+    ## row normalization it is mediocre everywhere; with it, it ties
+    ## kmeansvar on university webpages at a fraction of the cost while
+    ## staying reasonable (never worst) on breast cancer.
     clustering_methods = list(
       kmeans    = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
       ward2     = function(R, q) cutree(hclust(dist(1 - cor(R)), method = "ward.D2"), q),
@@ -542,6 +551,11 @@ NormalBlockBase <- R6::R6Class(
         mySBM$memberships
       },
       kmeansvar = function(R, q) ClustOfVar::kmeansvar(X.quanti = R, init = q, nstart = 30)$cluster,
+      spectral  = function(R, q) {
+        U <- eigen(cov(R), symmetric = TRUE)$vectors[, seq_len(q), drop = FALSE]
+        U <- U / pmax(sqrt(rowSums(U^2)), 1e-10)
+        kmeans(U, q, nstart = 30, iter.max = 50)$cluster
+      },
       hclustvar = function(R, q) cutree(ClustOfVar::hclustvar(R), q)
     ),
 
