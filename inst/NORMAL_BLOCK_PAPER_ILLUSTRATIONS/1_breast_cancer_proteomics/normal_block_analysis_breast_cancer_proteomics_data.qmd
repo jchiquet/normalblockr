@@ -56,7 +56,7 @@ NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
 
 ```{r model-selection}
 selected_NB <- NB_prot_subtype$get_best_model("ICL")
-paste0("ICL selects ", selected_NB$Q, " clusters.")
+paste0("ICL selects ", selected_NB$q, " clusters.")
 ```
 
 ## Enrichment analysis
