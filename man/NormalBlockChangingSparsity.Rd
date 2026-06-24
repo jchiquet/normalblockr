@@ -41,6 +41,7 @@ R6 class for a collection of normal-block models with a fixed clustering (blocks
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockChangingSparsity-initialize}{\code{NormalBlockChangingSparsity$new()}}
+    \item \href{#method-NormalBlockChangingSparsity-optimize}{\code{NormalBlockChangingSparsity$optimize()}}
     \item \href{#method-NormalBlockChangingSparsity-get_model}{\code{NormalBlockChangingSparsity$get_model()}}
     \item \href{#method-NormalBlockChangingSparsity-get_best_model}{\code{NormalBlockChangingSparsity$get_best_model()}}
     \item \href{#method-NormalBlockChangingSparsity-plot}{\code{NormalBlockChangingSparsity$plot()}}
@@ -48,11 +49,6 @@ R6 class for a collection of normal-block models with a fixed clustering (blocks
     \item \href{#method-NormalBlockChangingSparsity-clone}{\code{NormalBlockChangingSparsity$clone()}}
   }
 }
-\if{html}{\out{<details open><summary>Inherited methods</summary>
-<ul>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-optimize'><code>NormalBlockCollection$optimize()</code></a></span></li>
-</ul>
-</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockChangingSparsity-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockChangingSparsity-initialize}{}}}
@@ -80,6 +76,33 @@ R6 class for a collection of normal-block models with a fixed clustering (blocks
   }
   \subsection{Returns}{
     A new [`NormalBlockChangingSparsity`] object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockChangingSparsity-optimize"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockChangingSparsity-optimize}{}}}
+\subsection{\code{NormalBlockChangingSparsity$optimize()}}{
+  optimizes every model in the sparsity path, warm-starting
+each one (after the first) from the previous, adjacent penalty's
+converged parameters (see [NormalBlockBase]'s `warm_start_from()`)
+instead of re-deriving everything from the heuristic clustering, the
+way the generic [NormalBlockCollection] `optimize()` would. `blocks`
+(hence q) is fixed across the whole path, only the sparsity penalty
+changes, so the warm start is always between models of matching shape.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockChangingSparsity$optimize(
+  control = list(niter = 100, threshold = 1e-04, verbose = TRUE)
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{control}}{optimization parameters (niter and threshold)}
+    }
+    \if{html}{\out{</div>}}
   }
 }
 

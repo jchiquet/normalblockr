@@ -42,7 +42,10 @@ NormalBlockKnownClusters <- R6::R6Class(
     },
 
     EM_initialize = function() {
-      c(private$get_heuristic_parameters(),  list(
+      if (private$warm_started) {
+        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq,
+             gamma = private$gamma, mu = private$mu)
+      } else c(private$get_heuristic_parameters(),  list(
         gamma = diag(1, self$q, self$q),
         mu    = matrix(0, self$n, self$q)
         )

@@ -38,7 +38,10 @@ ZINormalBlockKnownClusters <- R6::R6Class(
     },
 
     EM_initialize = function() {
-      c(private$get_heuristic_parameters(),  list(
+      if (private$warm_started) {
+        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq, kappa = private$kappa,
+             gamma = private$gamma, mu = private$mu)
+      } else c(private$get_heuristic_parameters(),  list(
         gamma = rep(list(diag(1, self$q, self$q)), self$n),
         mu    = matrix(0, self$n, self$q)
         )

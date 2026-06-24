@@ -62,6 +62,28 @@ NormalBlockChangingSparsity <- R6::R6Class(
       private$progress_label <- "penalty"
     },
 
+    #' @description optimizes every model in the sparsity path, warm-starting
+    #' each one (after the first) from the previous, adjacent penalty's
+    #' converged parameters (see [NormalBlockBase]'s `warm_start_from()`)
+    #' instead of re-deriving everything from the heuristic clustering, the
+    #' way the generic [NormalBlockCollection] `optimize()` would. `blocks`
+    #' (hence q) is fixed across the whole path, only the sparsity penalty
+    #' changes, so the warm start is always between models of matching shape.
+    #' @param control optimization parameters (niter and threshold)
+    optimize = function(control = list(niter = 100, threshold = 1e-4, verbose = TRUE)) {
+      previous <- NULL
+      self$models <- lapply(self$models, function(model) {
+        if (control$verbose)
+          cat("\t", private$progress_label, "=", model[[private$progress_field]], "          \r")
+        flush.console()
+        if (!is.null(previous)) model$warm_start_from(previous)
+        model$optimize(control)
+        previous <<- model
+        model
+      })
+      invisible(self)
+    },
+
     #' @description returns the NormalBlockKnownClusters model corresponding to given penalty
     #' @param sparsity sparsity penalty asked by user
     #' @return A NormalBlockKnownClusters (sparse) object with given value penalty

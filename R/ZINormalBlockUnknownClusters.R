@@ -50,7 +50,10 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
     ## Methods for integrated inference ------------------------
 
     EM_initialize = function() {
-      c(private$get_heuristic_parameters(),  list(
+      if (private$warm_started) {
+        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq, kappa = private$kappa,
+             alpha = private$alpha, C = private$C, M = private$M, S = private$S)
+      } else c(private$get_heuristic_parameters(),  list(
           M = matrix(rep(0, self$n * self$q), nrow = self$n),
           S = matrix(rep(0.1, self$n * self$q), nrow = self$n)
         )

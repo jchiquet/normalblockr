@@ -147,6 +147,37 @@ NormalBlockBase <- R6::R6Class(
       do.call(self$update, optim_out)
     },
 
+    #' @description Seed this model's starting parameters from another,
+    #' already-optimized model with the same q, instead of the heuristic
+    #' clustering-derived values set at construction time. Used by
+    #' [NormalBlockChangingSparsity] to warm-start each penalty in a sparsity
+    #' path from the previous (adjacent) one's converged solution -- adjacent
+    #' penalties along a sorted path usually have similar optima, so this
+    #' typically needs far fewer EM iterations than starting cold each time
+    #' (the same rationale as warm-starting in glmnet/glassoFast's own
+    #' regularization paths). `B0`/`kappa` (zero-inflation) are deliberately
+    #' left untouched: they depend only on the data, not on sparsity/blocks,
+    #' so they are already set correctly and independently on every model.
+    #' @param other a [NormalBlockBase] object, already optimized
+    #' @return Update the current object in place with `other`'s parameters
+    warm_start_from = function(other) {
+      stopifnot("warm_start_from() requires both models to have the same q" = self$q == other$q)
+      args <- other$model_par
+      args$B0 <- NULL
+      if (!is.null(other$var_par)) {
+        args$C     <- other$var_par$tau
+        args$M     <- other$var_par$M
+        args$S     <- other$var_par$S
+        args$alpha <- colMeans(other$var_par$tau)
+      } else if (!is.null(other$posterior_par)) {
+        args$gamma <- other$posterior_par$gamma
+        args$mu    <- other$posterior_par$mu
+      }
+      do.call(self$update, args)
+      private$warm_started <- TRUE
+      invisible(self)
+    },
+
     #' @description Create a clone of the current [`NormalBlockBase`] object after splitting cluster `cl`
     #' We split the cluster according to the species variances
     #' @param index index (integer) of the cluster to split
@@ -431,6 +462,12 @@ NormalBlockBase <- R6::R6Class(
     clustering_approx = NA, # name of the clustering heuristic, key into clustering_methods
     ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed)
     niter             = NA, # number of EM iterations required by the inference, if applicable
+    warm_started      = FALSE, # set by warm_start_from(): tells EM_initialize() to reuse
+                                # the current B/dm1/Omegaq (and C/M/S/alpha or gamma/mu)
+                                # instead of (re-)deriving them from the heuristic clustering.
+                                # Deliberately NOT inferred from "are these fields non-NA",
+                                # which would also be true for split()/merge() clones (those
+                                # keep their own, different, already-tested initialization path).
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated (V)EM inference --------------

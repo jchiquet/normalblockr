@@ -54,7 +54,10 @@ NormalBlockUnknownClusters <- R6::R6Class(
     ## Methods for integrated inference ------------------------
 
     EM_initialize = function() {
-      c(private$get_heuristic_parameters(),  list(
+      if (private$warm_started) {
+        list(B = private$B, Omegaq = private$Omegaq, dm1 = private$dm1,
+             C = private$C, alpha = private$alpha, M = private$M, S = private$S)
+      } else c(private$get_heuristic_parameters(),  list(
             M = matrix(rep(0, self$n * self$q), nrow = self$n),
             S = rep(0.1, self$q)
           )

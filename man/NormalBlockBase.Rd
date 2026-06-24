@@ -74,6 +74,7 @@ R6 abstract class for a generic sparse Normal Block model
     \item \href{#method-NormalBlockBase-initialize}{\code{NormalBlockBase$new()}}
     \item \href{#method-NormalBlockBase-update}{\code{NormalBlockBase$update()}}
     \item \href{#method-NormalBlockBase-optimize}{\code{NormalBlockBase$optimize()}}
+    \item \href{#method-NormalBlockBase-warm_start_from}{\code{NormalBlockBase$warm_start_from()}}
     \item \href{#method-NormalBlockBase-split}{\code{NormalBlockBase$split()}}
     \item \href{#method-NormalBlockBase-candidates_split}{\code{NormalBlockBase$candidates_split()}}
     \item \href{#method-NormalBlockBase-candidates_merge}{\code{NormalBlockBase$candidates_merge()}}
@@ -187,6 +188,38 @@ All possible parameters of the child classes
   }
   \subsection{Returns}{
     optimizes the model and updates its parameters
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockBase-warm_start_from"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockBase-warm_start_from}{}}}
+\subsection{\code{NormalBlockBase$warm_start_from()}}{
+  Seed this model's starting parameters from another,
+already-optimized model with the same q, instead of the heuristic
+clustering-derived values set at construction time. Used by
+[NormalBlockChangingSparsity] to warm-start each penalty in a sparsity
+path from the previous (adjacent) one's converged solution -- adjacent
+penalties along a sorted path usually have similar optima, so this
+typically needs far fewer EM iterations than starting cold each time
+(the same rationale as warm-starting in glmnet/glassoFast's own
+regularization paths). `B0`/`kappa` (zero-inflation) are deliberately
+left untouched: they depend only on the data, not on sparsity/blocks,
+so they are already set correctly and independently on every model.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockBase$warm_start_from(other)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{other}}{a [NormalBlockBase] object, already optimized}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Update the current object in place with `other`'s parameters
   }
 }
 
