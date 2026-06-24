@@ -19,7 +19,7 @@ BugReports: https://github.com/jeannetous/normalblockr/issues
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 4.1.0)
-Imports: 
+Imports:
     methods,
     glassoFast,
     Matrix,
@@ -34,8 +34,11 @@ Imports:
     igraph,
     sbm,
     MASS,
-    stats
-RoxygenNote: 7.3.3
+    stats,
+    Rcpp
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
 Suggests: 
     testthat (>= 3.0.0),
     Metrics,
@@ -49,3 +52,4 @@ Suggests:
     knitr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
