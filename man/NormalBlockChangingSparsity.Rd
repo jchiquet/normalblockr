@@ -2,9 +2,9 @@
 % Please edit documentation in R/NormalBlockChangingSparsity.R
 \name{NormalBlockChangingSparsity}
 \alias{NormalBlockChangingSparsity}
-\title{R6 class for normal-block model with unknown q (number of groups)}
+\title{R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.}
 \description{
-R6 class for normal-block model with unknown q (number of groups)
+R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.
 }
 \section{Super class}{
 \code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{NormalBlockChangingSparsity}

@@ -4,9 +4,9 @@
 \name{normalblockr-package}
 \alias{normalblockr}
 \alias{normalblockr-package}
-\title{normalblockr: implementation of the Normal-block model, Gaussian graphical model with latent clustering structure}
+\title{normalblockr: Implementation of the Normal-block model, Gaussian graphical model with latent clustering structure}
 \description{
-The Normal-Block model (Tous, J., & Chiquet, J. (2025). An integrated method for clustering and association network inference. arXiv preprint arXiv:2503.22467.) can be used to analyse multivariate Gaussian data with underlying latent structure. The model infers a structure of statistical dependencies between the clusters identified (or given) in the observations.
+The Normal-Block model (Tous, J., & Chiquet, J. (2026). An integrated method for clustering and association network inference. Computational Statistics & Data Analysis, 219, 108347. \doi{10.1016/j.csda.2026.108347}) can be used to analyse multivariate Gaussian data with underlying latent structure. The model infers a structure of statistical dependencies between the clusters identified (or given) in the observations.
 }
 \seealso{
 Useful links:

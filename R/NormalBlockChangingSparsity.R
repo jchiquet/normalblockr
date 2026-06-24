@@ -3,11 +3,8 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#' R6 class for normal-block model with unknown q (number of groups)
-#' @param data contains the matrix of responses (Y) and the design matrix (X).
-#' @param zero_inflation whether the models should be zero-inflated or not
-#' @param blocks group matrix or number of blocks.
-#' @param control structured list for specific parameters (including initial clustering proposal)
+#' R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.
+#' @export
 NormalBlockChangingSparsity <- R6::R6Class(
   classname = "NormalBlockChangingSparsity",
   inherit   = NormalBlockCollection,
