@@ -1,22 +1,22 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS ZINB_fixed_blocks_fixed_sparsity ############
+##  CLASS zi_known_clusters #############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #' R6 class for a Zero-Inflated normal-block model with a known clustering.
 #' @export
-ZINB_fixed_blocks <- R6::R6Class(
-  classname = "ZINB_fixed_blocks",
+zi_known_clusters <- R6::R6Class(
+  classname = "zi_known_clusters",
   inherit   = NB,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS --------------------------------------
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @description Create a new [`ZINB_fixed_blocks_fixed_sparsity`] object.
+    #' @description Create a new [`zi_known_clusters`] object.
     #' @param data object of NB_data class, with responses and design matrix
     #' @param C clustering matrix C_jk = 1 if species j belongs to cluster k
     #' @param sparsity to apply on variance matrix when calling GLASSO
     #' @param control structured list of more specific parameters, to generate with NB_control
-    #' @return A new [`ZINB_fixed_blocks_fixed_sparsity`] object
+    #' @return A new [`zi_known_clusters`] object
     initialize = function(data, C, sparsity = 0, control = NB_control()) {
       stopifnot("C must be a matrix" = is.matrix(C))
       stopifnot("There cannot be empty clusters" = min(colSums(C)) > 0)
@@ -29,25 +29,6 @@ ZINB_fixed_blocks <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-
-    compute_loglik  = function(B, Omegaq, dm1 = NA, kappa = NA, gamma = NA, mu = NA) {
-      log_det_Omegaq <- as.numeric(determinant(Omegaq, logarithm = TRUE)$modulus)
-      log_det_Gamma  <- gamma %>%
-        map(determinant, logarithm = TRUE) %>%
-        map("modulus") %>% map(as.numeric) %>% unlist()
-
-      J <- -.5 * self$data$npY * log(2 * pi * exp(1)) + .5 * sum(self$data$nY * log(dm1))
-      J <- J + .5 * self$n * log_det_Omegaq + .5 * sum(log_det_Gamma)
-      J <- J +  private$ZI_cond_mean
-
-      if (private$sparsity_ > 0) {
-        gamma_bar <- reduce(gamma, `+`)
-        ## when not sparse, this terms equal -n q /2 by definition of Omegaq_hat
-        J <- J + .5 * self$n * self$q - .5 * sum(diag(Omegaq %*% (gamma_bar + crossprod(mu))))
-        J <- J - private$sparsity_ * sum(abs(self$sparsity_weights * Omegaq))
-      }
-      J
-    },
 
     get_heuristic_parameters = function(){
       zi_diag <- private$zi_diag_normal_inference()
@@ -64,55 +45,21 @@ ZINB_fixed_blocks <- R6::R6Class(
       )
     },
 
-    EM_step = function(B, dm1, Omegaq, kappa, gamma, mu) {
-
-      ## Auxiliary variables
-      R <- self$data$Y - self$data$X %*% B
-      dm1_mat <- matrix(dm1, self$n, self$p, byrow = TRUE) * self$data$zeros_bar
-      dm1C    <- dm1_mat %*% private$C
-
-      # E step
-      gamma <- apply(dm1C, 1, function(dm1C_) {
-        solve(Omegaq + diag(dm1C_, self$q, self$q))}, simplify = FALSE)
-      Rdm1C <- (R * dm1_mat) %*% private$C
-      mu    <- t(sapply(1:length(gamma), function(i) Rdm1C[i, ] %*% gamma[[i]]))
-
-      # M step
-      B <- private$zi_NB_fixed_blocks_optim_B(B, dm1_mat, mu)
-      RmmuC <- R - mu %*% t(private$C)
-      CgC   <- t(sapply(gamma, function(gamma_) diag(gamma_)[self$clustering]))
-      A     <- RmmuC^2  + CgC
-
-      dm1  <- switch(private$res_covariance,
-        "diagonal"  = self$data$nY / colSums(self$data$zeros_bar * A),
-        "spherical" = rep(self$data$npY / sum(self$data$zeros_bar * A), self$p))
-      Omegaq <- private$get_Omegaq((crossprod(mu) + reduce(gamma, `+`))/self$n)
-
-      list(B = B, dm1 = dm1, Omegaq = Omegaq,  kappa = kappa, gamma = gamma, mu = mu)
-    },
-
-    zi_NB_fixed_blocks_obj_grad_B = function(B_vec, dm1_mat, muC) {
-      RmmuC <- self$data$Y - self$data$X %*% matrix(B_vec, nrow = self$d, ncol = self$p) - muC
-      grad <- crossprod(self$data$X, dm1_mat * RmmuC)
-      obj <- -.5 * sum(dm1_mat * RmmuC^2)
-      res <- list("objective" = -obj, "gradient"  = -grad)
-      res
-    },
-
-    zi_NB_fixed_blocks_optim_B = function(B0, dm1_mat, mu) {
-      muC <- mu %*% t(private$C)
-      res <- nloptr::nloptr(
-        x0 = as.vector(B0),
-        eval_f = private$zi_NB_fixed_blocks_obj_grad_B,
-        opts = list(
-          algorithm = "NLOPT_LD_LBFGS",
-          maxeval = 100
-        ),
-        dm1_mat = dm1_mat,
-        muC = muC
+    ## Runs the EM recursion via the Rcpp/Armadillo core (src/exports.cpp,
+    ## zi_known_clusters_fit); see inst/normal_block_models.qmd §6/§7.
+    EM_optimize = function(control) {
+      init <- private$EM_initialize()
+      res  <- zi_known_clusters_fit(
+        Y = self$data$Y, X = self$data$X,
+        zeros_bar = self$data$zeros_bar, zi_cond_mean = private$ZI_cond_mean, C = private$C,
+        B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+        sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
+        noise_covariance = private$res_covariance,
+        niter = control$niter, threshold = control$threshold
       )
-      newB <- matrix(res$solution, nrow = self$d, ncol = self$p)
-      newB
+      private$niter <- res$niter
+      list(B = res$B, dm1 = res$dm1, Omegaq = res$Omegaq,
+           gamma = purrr::array_branch(res$gamma, 3), mu = res$mu, ll_list = res$objective)
     }
   ),
 

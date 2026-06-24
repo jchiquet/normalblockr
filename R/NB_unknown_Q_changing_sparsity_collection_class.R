@@ -13,7 +13,7 @@ NB_unknown_q_changing_sparsity <- R6::R6Class(
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @field models list of NB_fixed_q models corresponding to each nb_block value
+    #' @field models list of nb_unknown_clusters models corresponding to each nb_block value
     models = NA,
     #' @field control store the list of user-defined model settings and optimization parameters
     control = NA,
@@ -53,7 +53,7 @@ NB_unknown_q_changing_sparsity <- R6::R6Class(
     #' or one single model if penalty is also given
     #' @param q number of blocks asked by user.
     #' @param sparsity sparsity penalty penalty asked by user
-    #' @return either a NB_changing_sparsity or a NB_fixed_q object
+    #' @return either a NB_changing_sparsity or a nb_unknown_clusters object
     get_model = function(q, sparsity = NA) {
       stopifnot("No such model in the collection. Acceptable values can be found via $q" = q %in% self$q_list)
       model <- self$models[[which(self$q_list == q)]]

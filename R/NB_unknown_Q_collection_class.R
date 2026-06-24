@@ -14,7 +14,7 @@ NB_unknown_q <- R6::R6Class(
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @field models list of NB_fixed_q models corresponding to each nb_block value
+    #' @field models list of nb_unknown_clusters models corresponding to each nb_block value
     models = NULL,
     #' @field control store the list of user-defined model settings and optimization parameters
     control = NA,
@@ -36,7 +36,7 @@ NB_unknown_q <- R6::R6Class(
       self$control <- control
       self$control$zero_inflation <- zero_inflation
 
-      # instantiates an NB_fixed_q model for each q in nb_blocks
+      # instantiates an nb_unknown_clusters model for each q in nb_blocks
       this_control <- control
       self$models <- map(rank(q_list),
           function(r) {
@@ -49,7 +49,7 @@ NB_unknown_q <- R6::R6Class(
         })
     },
 
-    #' @description optimizes an NB_fixed_q object for each value of q
+    #' @description optimizes an nb_unknown_clusters object for each value of q
     #' @param control optimization parameters (niter and threshold)
     optimize = function(control = list(niter = 100, threshold = 1e-4, verbose=TRUE)) {
       self$models <- map(self$models, function(model) {
@@ -60,9 +60,9 @@ NB_unknown_q <- R6::R6Class(
       })
     },
 
-    #' @description returns the NB_fixed_q model corresponding to given q
+    #' @description returns the nb_unknown_clusters model corresponding to given q
     #' @param q number of blocks asked by user
-    #' @return A NB_fixed_q object with given value q
+    #' @return A nb_unknown_clusters object with given value q
     get_model = function(q) {
       stopifnot("No such model in the collection. Acceptable values can be found via $q" = q %in% self$q_list)
       self$models[[which(self$q_list == q)]]
@@ -71,7 +71,7 @@ NB_unknown_q <- R6::R6Class(
     #' @description Extract best model in the collection
     #' @param crit a character for the criterion used to performed the selection.
     #' Either "ICL" or "BIC". "ICL" is the default criterion
-    #' @return a [`NB_fixed_q`] object
+    #' @return a [`nb_unknown_clusters`] object
     get_best_model = function(crit = c("ICL", "BIC", "EBIC", "deviance")) {
       stopifnot("Log-likelihood based criteria do not apply to the heuristic method" = self$models[[1]]$inference_method == "integrated")
       crit <- match.arg(crit)

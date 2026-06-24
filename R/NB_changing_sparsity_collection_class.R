@@ -14,7 +14,7 @@ NB_changing_sparsity <- R6::R6Class(
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @field models list of NB_fixed_q models corresponding to each nb_block value
+    #' @field models list of nb_unknown_clusters models corresponding to each nb_block value
     models = NA,
     #' @field control store the list of user-defined model settings and optimization parameters
     control = NA,
@@ -77,9 +77,9 @@ NB_changing_sparsity <- R6::R6Class(
       })
     },
 
-    #' @description returns the NB_fixed_block model corresponding to given penalty
+    #' @description returns the nb_known_clusters model corresponding to given penalty
     #' @param sparsity sparsity penalty asked by user
-    #' @return A NB_fixed_blocks_sparse object with given value penalty
+    #' @return A nb_known_clusters (sparse) object with given value penalty
     get_model = function(sparsity) {
       if (!(sparsity %in% private$sparsity_)) {
         sparsity <-  private$sparsity_[[which.min(abs(private$sparsity_ - sparsity))]]
@@ -93,7 +93,7 @@ NB_changing_sparsity <- R6::R6Class(
     #' @param crit a character for the criterion used to performed the selection.
     #' @param stability if criterion = "StARS" gives level of stability required.
     #' Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC
-    #' @return a [`NB_fixed_q`] object
+    #' @return a [`nb_unknown_clusters`] object
     get_best_model = function(crit = c("BIC", "EBIC", "ICL", "StARS"),
                               stability = 0.9) {
       stopifnot("Log-likelihood based criteria do not apply to the heuristic method" = (self$models[[1]]$inference_method == "integrated" | crit == "StARS" ))
@@ -169,7 +169,7 @@ NB_changing_sparsity <- R6::R6Class(
 
       ## got for stability selection
       if(self$control$verbose)
-        cat("\nStability Selection for NB_fixed_blocks_sparse: \nsubsampling: ")
+        cat("\nStability Selection for nb_known_clusters (sparse): \nsubsampling: ")
 
       stabs_out <- lapply(subsamples, function(subsample) {
         mydata <- NB_data$new(Y = self$data$Y[subsample, , drop = FALSE],

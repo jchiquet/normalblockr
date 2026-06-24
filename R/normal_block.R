@@ -140,8 +140,15 @@ get_model <- function(data,
 
   is_collection <- ifelse(sparse_class == "_changing_sparsity" | block_class == "_unknown_q", TRUE, FALSE)
 
-  class_name <- paste0("NB", block_class, sparse_class)
-  if (!is_collection & zero_inflation) class_name <- paste0("ZI", class_name)
+  if (is_collection) {
+    class_name <- paste0("NB", block_class, sparse_class)
+  } else {
+    class_name <- switch(block_class,
+      "_fixed_blocks" = "nb_known_clusters",
+      "_fixed_q"      = "nb_unknown_clusters"
+    )
+    if (zero_inflation) class_name <- sub("^nb_", "zi_", class_name)
+  }
 
   myClass <- eval(str2lang(class_name))
   if (is_collection) {

@@ -288,7 +288,7 @@ NB <- R6::R6Class(
     #' @description Extract interaction network in the latent space
     #' @param type edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)
     #' @importFrom Matrix Matrix
-    #' @return a square matrix of size `NB_fixed_blocks_class$q`
+    #' @return a square matrix of size `self$q`
     latent_network = function(type = c("partial_cor", "support", "precision")) {
       net <- switch(
         match.arg(type),
@@ -427,22 +427,12 @@ NB <- R6::R6Class(
     niter             = NA, # number of EM iterations required by the inference, if applicable
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## Methods for integrated EM inference------------------
-    EM_optimize = function(control) {
-      parameters <- private$EM_initialize()
-      ll_list    <- do.call(private$compute_loglik, parameters)
-      for (h in 1:control$niter) {
-        parameters <- do.call(private$EM_step, parameters)
-        ll_list    <- c(ll_list, do.call(private$compute_loglik, parameters))
-        if (abs(ll_list[h + 1] - ll_list[h]) < control$threshold)
-          break
-      }
-      private$niter <- h
-      c(parameters, list(ll_list = ll_list))
-    },
-    EM_step = function() {},
+    ## Methods for integrated (V)EM inference --------------
+    ## Each concrete subclass overrides EM_optimize() to call its
+    ## Rcpp/Armadillo core (see src/exports.cpp and
+    ## inst/normal_block_models.qmd); EM_initialize() (heuristic
+    ## initialization) stays in R and supplies the starting values.
     EM_initialize = function() {},
-    compute_loglik  = function() {},
 
     get_Omegaq = function(Sigma) {
       if (private$sparsity_ == 0) {

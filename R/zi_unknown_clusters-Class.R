@@ -1,11 +1,11 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS ZINB_fixed_q ###############
+##  CLASS zi_unknown_clusters ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #' R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).
 #' @export
-ZINB_fixed_q <- R6::R6Class(
-  classname = "ZINB_fixed_q",
+zi_unknown_clusters <- R6::R6Class(
+  classname = "zi_unknown_clusters",
   inherit   = NB,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS --------------------------------------
@@ -14,12 +14,12 @@ ZINB_fixed_q <- R6::R6Class(
     #' @field fixed_tau whether tau should be fixed at clustering_init during optimization, useful for stability selection
     fixed_tau = NULL,
 
-    #' @description Create a new [`ZINB_fixed_q`] object.
+    #' @description Create a new [`zi_unknown_clusters`] object.
     #' @param data object of NB_data class, with responses and design matrix
     #' @param sparsity to apply on variance matrix when calling GLASSO
     #' @param q required number of groups
     #' @param control structured list of more specific parameters
-    #' @return A new [`ZINB_fixed_q`] object
+    #' @return A new [`zi_unknown_clusters`] object
     initialize = function(data, q, sparsity = 0, control = NB_control()) {
       super$initialize(data, q, sparsity, control)
       self$fixed_tau  <- control$fixed_tau
@@ -30,22 +30,6 @@ ZINB_fixed_q <- R6::R6Class(
   ## PRIVATE MEMBERS -------------------------------------
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-
-    compute_loglik  = function(B, dm1, Omegaq, alpha, kappa, M, S, C) {
-      log_det_Omegaq <- as.numeric(determinant(Omegaq, logarithm = TRUE)$modulus)
-
-      J <- -.5 * self$data$npY * log(2 * pi * exp(1)) + .5 * sum(self$data$nY * log(dm1))
-      J <- J + .5 * self$n * log_det_Omegaq + .5 * sum(log(S))
-      J <- J +  sum(C %*% log(alpha)) - sum(xlogx(C))
-      J <- J + private$ZI_cond_mean
-
-      if (private$sparsity_ > 0) {
-        ## when not sparse, this terms equal -n q /2 by definition of Omegaq_hat
-        J <- J + .5 * self$n * self$q - .5 * sum(diag(Omegaq %*% (crossprod(M) + diag(colSums(S), nrow = self$q, ncol = self$q))))
-        J <- J - private$sparsity_ * sum(abs(self$sparsity_weights * Omegaq))
-      }
-      J
-    },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for heuristic inference -----------------------
@@ -73,83 +57,22 @@ ZINB_fixed_q <- R6::R6Class(
       )
     },
 
-    EM_step = function(B, dm1, Omegaq, alpha, kappa, C, M, S) {
-
-      R <- self$data$Y - self$data$X %*% B
-      DM1 <- matrix(dm1, self$n, self$p, byrow = TRUE) * self$data$zeros_bar
-
-      # E step
-      M <- private$zi_NB_fixed_q_nlopt_optim_M(M, DM1, R, Omegaq, C)
-      S <-  1 / sweep(DM1 %*% C, 2, diag(Omegaq), "+")
-      if (self$q > 1 & !self$fixed_tau) {
-        eta <- -.5 * crossprod(DM1, (M^2 + S)) + crossprod(DM1 * R, M)
-        eta <- sweep(eta, 2, log(alpha) - 1, "+")
-        C <- t(check_zero_boundary(check_one_boundary(apply(eta, 1, softmax))))
-      }
-      A <- R^2 - 2 * R * tcrossprod(M,C) + tcrossprod(M^2 + S, C)
-
-      # M step
-      B   <- private$zi_NB_fixed_q_nlopt_optim_B(B, DM1, M, C)
-      dm1  <- switch(private$res_covariance,
-                     "diagonal"  = self$data$nY / colSums(self$data$zeros_bar * A),
-                     "spherical" = rep(self$data$npY / sum(self$data$zeros_bar * A), self$p))
-      alpha <- colMeans(C)
-      Omegaq <- private$get_Omegaq(crossprod(M)/self$n + diag(colMeans(S), self$q, self$q))
-
-      list(B = B, dm1 = dm1, Omegaq = Omegaq, alpha = alpha, kappa = kappa,
-           C = C, M = M, S = S)
-    },
-
-    zi_NB_fixed_q_obj_grad_M = function(M_vec, DM1, DM1RC, DM1C, R, CT, Omegaq) {
-      M    <- matrix(M_vec, nrow = self$n, ncol = self$q)
-      MO   <- M %*% Omegaq
-      grad <- DM1RC - DM1C * M - MO
-      obj <- -.5 * ( sum(DM1 * ((M^2) %*% CT - 2*R * (M %*% CT))) + sum(MO * M) )
-      res  <- list("objective" = -obj, "gradient"  = -grad)
-      res
-    },
-
-    zi_NB_fixed_q_nlopt_optim_M = function(M0, DM1, R, Omegaq, C) {
-      M0_vec <- as.vector(M0)
-      res <- nloptr::nloptr(
-        x0 = M0_vec,
-        eval_f = private$zi_NB_fixed_q_obj_grad_M,
-        opts = list(
-          algorithm = "NLOPT_LD_LBFGS",
-          maxeval = 100
-        ),
-        DM1    = DM1,
-        DM1RC  = (DM1 * R) %*% C,
-        DM1C   = DM1 %*% C,
-        R      = R,
-        CT     = t(C),
-        Omegaq = Omegaq
+    ## Runs the VEM recursion via the Rcpp/Armadillo core (src/exports.cpp,
+    ## zi_unknown_clusters_fit); see inst/normal_block_models.qmd §8/§9.
+    EM_optimize = function(control) {
+      init <- private$EM_initialize()
+      res  <- zi_unknown_clusters_fit(
+        Y = self$data$Y, X = self$data$X,
+        zeros_bar = self$data$zeros_bar, zi_cond_mean = private$ZI_cond_mean,
+        B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+        C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,
+        sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
+        noise_covariance = private$res_covariance, fixed_tau = self$fixed_tau,
+        niter = control$niter, threshold = control$threshold
       )
-      newM <- matrix(res$solution, nrow = self$n, ncol = self$q)
-      newM
-    },
-
-    zi_NB_fixed_q_obj_grad_B = function(B_vec, DM1, MC) {
-      R    <- self$data$Y - self$data$X %*% matrix(B_vec, nrow = self$d, ncol = self$p)
-      grad <- crossprod(self$data$X, DM1 * (R - MC))
-      obj  <- -.5 * sum(DM1 * (R^2 - 2 * R * MC))
-      res  <- list("objective" = -obj, "gradient"  = -grad)
-      res
-    },
-
-    zi_NB_fixed_q_nlopt_optim_B = function(B0, DM1, M, C) {
-      res <- nloptr::nloptr(
-        x0 = as.vector(B0),
-        eval_f = private$zi_NB_fixed_q_obj_grad_B,
-        opts = list(
-          algorithm = "NLOPT_LD_LBFGS",
-          maxeval = 100
-        ),
-        DM1 = DM1,
-        MC = tcrossprod(M, C)
-      )
-      newB <- matrix(res$solution, nrow = self$d, ncol = self$p)
-      newB
+      private$niter <- res$niter
+      list(B = res$B, dm1 = res$dm1, Omegaq = res$Omegaq, alpha = res$alpha,
+           C = res$C, M = res$M, S = res$S, ll_list = res$objective)
     }
 
   ),

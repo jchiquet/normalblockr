@@ -1,22 +1,22 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NB_fixed_blocks ##############################
+##  CLASS nb_known_clusters #############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #' R6 class for a normal-block model with known clustering.
 #' @export
-NB_fixed_blocks <- R6::R6Class(
-  classname = "NB_fixed_blocks",
+nb_known_clusters <- R6::R6Class(
+  classname = "nb_known_clusters",
   inherit   = NB,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @description Create a new [`NB_fixed_blocks`] object.
+    #' @description Create a new [`nb_known_clusters`] object.
     #' @param data object of NB_data class, with responses and design matrix
     #' @param C clustering matrix C_jk = 1 if species j belongs to cluster k
     #' @param sparsity to apply on variance matrix when calling GLASSO
     #' @param control structured list of more specific parameters, to generate with NB_control
-    #' @return A new [`NB_fixed_blocks`] object
+    #' @return A new [`nb_known_clusters`] object
     initialize = function(data, C, sparsity = 0, control = NB_control()) {
       stopifnot("C must be a matrix" = is.matrix(C))
       stopifnot("There cannot be empty clusters" = min(colSums(C)) > 0)
@@ -29,20 +29,6 @@ NB_fixed_blocks <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-
-    compute_loglik  = function(B, Omegaq, dm1 = NA, gamma = NA, mu = NA) {
-      log_det_Omegaq <- as.numeric(determinant(Omegaq, logarithm = TRUE)$modulus)
-      log_det_Gamma  <- as.numeric(determinant(gamma , logarithm = TRUE)$modulus)
-
-      J <- -.5 * (self$n * self$p * log(2 * pi * exp(1)) - self$n * sum(log(dm1)))
-      J <- J + .5 * self$n * (log_det_Omegaq + log_det_Gamma)
-      if (self$sparsity > 0) {
-        ## when not sparse, this terms equal -n q /2 by definition of Omegaq_hat
-        J <- J + self$n*self$q / 2 - .5 * sum(diag(Omegaq %*% (self$n * gamma + crossprod(mu))))
-        J <- J - self$sparsity * sum(abs(self$sparsity_weights * Omegaq))
-      }
-      J
-    },
 
     get_heuristic_parameters = function(){
       reg_res   <- private$multivariate_normal_inference()
@@ -63,20 +49,20 @@ NB_fixed_blocks <- R6::R6Class(
       )
     },
 
-    EM_step = function(B, dm1, Omegaq, gamma, mu) {
-      ## E step
-      gamma <- solve(Omegaq + diag(colSums(dm1 * private$C), self$q, self$q))
-      mu    <- (self$data$Y - self$data$X %*% B) %*% (dm1 * private$C) %*% gamma
-
-      ## M step
-      YmmuCT <- self$data$Y - mu %*% t(private$C)
-      B      <- self$data$XtXm1 %*% crossprod(self$data$X, YmmuCT)
-      ddiag  <- colMeans((YmmuCT - self$data$X %*% B)^2) + private$C %*% diag(gamma)
-      dm1  <- switch(private$res_covariance,
-        "diagonal"  = 1 / as.vector(ddiag),
-        "spherical" = rep(1/mean(ddiag), self$p))
-      Omegaq <- private$get_Omegaq(crossprod(mu)/self$n + gamma)
-      list(B = B, Omegaq = Omegaq, dm1 = dm1, gamma = gamma, mu = mu)
+    ## Runs the EM recursion via the Rcpp/Armadillo core (src/exports.cpp,
+    ## nb_known_clusters_fit); see inst/normal_block_models.qmd §1/§2.
+    EM_optimize = function(control) {
+      init <- private$EM_initialize()
+      res  <- nb_known_clusters_fit(
+        Y = self$data$Y, X = self$data$X, C = private$C,
+        B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+        sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
+        noise_covariance = private$res_covariance,
+        niter = control$niter, threshold = control$threshold
+      )
+      private$niter <- res$niter
+      list(B = res$B, dm1 = res$dm1, Omegaq = res$Omegaq,
+           gamma = res$gamma, mu = res$mu, ll_list = res$objective)
     }
 
   ),

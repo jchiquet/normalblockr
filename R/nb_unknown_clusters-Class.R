@@ -1,11 +1,11 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NB_fixed_q ###################################
+##  CLASS nb_unknown_clusters ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #' R6 class for a normal-block model with fixed number of clusters (but unknown clustering).
 #' @export
-NB_fixed_q <- R6::R6Class(
-  classname = "NB_fixed_q",
+nb_unknown_clusters <- R6::R6Class(
+  classname = "nb_unknown_clusters",
   inherit = NB,
 
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -15,12 +15,12 @@ NB_fixed_q <- R6::R6Class(
     #' @field fixed_tau whether tau should be fixed at clustering_init during optimization, useful for stability selection
     fixed_tau = NULL,
 
-    #' @description Create a new [`NB_fixed_q`] object.
+    #' @description Create a new [`nb_unknown_clusters`] object.
     #' @param data contains the matrix of responses (Y) and the design matrix (X).
     #' @param q required number of groups
     #' @param sparsity sparsity penalty to add on blocks precision matrix for sparsity
     #' @param control structured list for specific parameters
-    #' @return A new [`NB_fixed_q`] object
+    #' @return A new [`nb_unknown_clusters`] object
     initialize = function(data, q, sparsity = 0, control = NB_control()) {
       super$initialize(data, q, sparsity, control)
       self$fixed_tau <- control$fixed_tau
@@ -31,21 +31,6 @@ NB_fixed_q <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-
-    compute_loglik  = function(B, dm1, Omegaq, alpha, C, M, S) {
-      log_det_Omegaq <- as.numeric(determinant(Omegaq, logarithm = TRUE)$modulus)
-
-      J <- -.5 * self$n * self$p * log(2 * pi * exp(1)) + .5 * self$n * sum(log(dm1))
-      J <- J + .5 * self$n * log_det_Omegaq + .5 * self$n * sum(log(S))
-      J <- J + sum(C %*% log(alpha)) - sum(xlogx(C))
-
-      if (private$sparsity_ > 0) {
-        ## when not sparse, this terms equal -n q /2 by definition of Omegaq_hat and simplifies
-        J <- J + self$n*self$q / 2 - .5 * sum(diag(Omegaq %*% (crossprod(M) + self$n * diag(S, self$q, self$q))))
-        J <- J - private$sparsity_ * sum(abs(private$sparsity__weights * Omegaq))
-      }
-      J
-    },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for heuristic inference -----------------------
@@ -76,33 +61,21 @@ NB_fixed_q <- R6::R6Class(
       )
     },
 
-    EM_step = function(B, Omegaq, dm1, alpha, C, M, S) {
-
-      ## Auxiliary variables
-      R     <- self$data$Y - self$data$X %*% B
-      Gamma <- solve(Omegaq + diag(colSums(dm1 * C), self$q, self$q))
-
-      # E step
-      M <- R %*% (dm1 * C) %*% Gamma
-      S <- diag(Gamma)
-
-      if (self$q > 1 & !self$fixed_tau) {
-        eta <- dm1 * crossprod(R, M) - .5 * outer(dm1,  colSums(M^2) + self$n * S)
-        eta <- eta + outer(rep(1, self$p), log(alpha)) - 1
-        C   <- t(check_zero_boundary(check_one_boundary(apply(eta, 1, softmax))))
-      }
-
-      # M step
-      MCT   <- tcrossprod(M, C)
-      B     <- self$data$XtXm1 %*% crossprod(self$data$X, self$data$Y - MCT)
-      ddiag <- colMeans(R^2 - 2 * R * MCT + tcrossprod(M^2 + outer(rep(1, self$n), S), C))
-      dm1   <- switch(private$res_covariance,
-                     "diagonal"  = 1 / as.vector(ddiag),
-                     "spherical" = rep(1/mean(ddiag), self$p))
-      alpha  <- colMeans(C)
-      Omegaq <- private$get_Omegaq(crossprod(M)/self$n +  diag(S, self$q, self$q))
-
-      list(B = B, Omegaq = Omegaq, dm1 = dm1, alpha = alpha, C = C, M = M, S = S)
+    ## Runs the VEM recursion via the Rcpp/Armadillo core (src/exports.cpp,
+    ## nb_unknown_clusters_fit); see inst/normal_block_models.qmd §3/§4.
+    EM_optimize = function(control) {
+      init <- private$EM_initialize()
+      res  <- nb_unknown_clusters_fit(
+        Y = self$data$Y, X = self$data$X,
+        B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+        C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,
+        sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
+        noise_covariance = private$res_covariance, fixed_tau = self$fixed_tau,
+        niter = control$niter, threshold = control$threshold
+      )
+      private$niter <- res$niter
+      list(B = res$B, Omegaq = res$Omegaq, dm1 = res$dm1, alpha = res$alpha,
+           C = res$C, M = res$M, S = res$S, ll_list = res$objective)
     }
   ),
 
