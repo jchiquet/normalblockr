@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Analyzing multivariate Gaussian data with the Normal-Block model - First steps • normalblockr</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Analyzing multivariate Gaussian data with the Normal-Block model - First steps">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@
                         <h4 data-toc-skip class="author">Jeanne Tous,
 Julien Chiquet</h4>
             
-            <h4 data-toc-skip class="date">2025-11-19</h4>
+            <h4 data-toc-skip class="date">2026-06-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jeannetous/normalblockr/blob/master/vignettes/normal-block.Rmd" class="external-link"><code>vignettes/normal-block.Rmd</code></a></small>
       <div class="d-none name"><code>normal-block.Rmd</code></div>
@@ -90,7 +90,7 @@ approach.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://github.com/jeannetous/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/EmilHvitfeldt/paletteer" class="external-link">paletteer</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emilhvitfeldt.github.io/paletteer/" class="external-link">paletteer</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -134,8 +134,8 @@ the simulation parameters (including the clustering
 <span>                                        <span class="va">SNR</span>, <span class="va">alpha</span>, <span class="va">range_X</span>, <span class="va">range_D</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">pheatmap</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html" class="external-link">pheatmap</a></span><span class="op">(</span><span class="va">my_nb_data</span><span class="op">$</span><span class="va">Y</span>, </span>
-<span>                   color <span class="op">=</span><span class="fu">paletteer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/paletteer/man/paletteer_c.html" class="external-link">paletteer_c</a></span><span class="op">(</span><span class="st">"ggthemes::Orange-Gold"</span>, n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>, cluster_rows <span class="op">=</span> <span class="cn">FALSE</span>, cluster_cols <span class="op">=</span> <span class="cn">FALSE</span>, show_rownames <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation1-visualization-1.png" class="r-plt" width="700"></p>
+<span>                   color <span class="op">=</span><span class="fu">paletteer</span><span class="fu">::</span><span class="fu"><a href="https://emilhvitfeldt.github.io/paletteer/reference/paletteer_c.html" class="external-link">paletteer_c</a></span><span class="op">(</span><span class="st">"ggthemes::Orange-Gold"</span>, n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>, cluster_rows <span class="op">=</span> <span class="cn">FALSE</span>, cluster_cols <span class="op">=</span> <span class="cn">FALSE</span>, show_rownames <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="normal-block_files/figure-html/simulation1-visualization-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="simulation-2-with-zero-inflation">Simulation 2 (with zero-inflation)<a class="anchor" aria-label="anchor" href="#simulation-2-with-zero-inflation"></a>
@@ -152,7 +152,7 @@ between 0 and 1.</p>
 to be shown in white.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">min_val</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">my_nb_data_zi</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span> ; <span class="va">max_val</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">my_nb_data_zi</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span>
-<span><span class="va">orange_gold_pal</span> <span class="op">&lt;-</span> <span class="fu">paletteer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/paletteer/man/paletteer_c.html" class="external-link">paletteer_c</a></span><span class="op">(</span><span class="st">"ggthemes::Orange-Gold"</span>, n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">orange_gold_pal</span> <span class="op">&lt;-</span> <span class="fu">paletteer</span><span class="fu">::</span><span class="fu"><a href="https://emilhvitfeldt.github.io/paletteer/reference/paletteer_c.html" class="external-link">paletteer_c</a></span><span class="op">(</span><span class="st">"ggthemes::Orange-Gold"</span>, n <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">n_breaks</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">zero_pos</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="op">(</span><span class="fl">0</span> <span class="op">-</span> <span class="va">min_val</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">max_val</span> <span class="op">-</span> <span class="va">min_val</span><span class="op">)</span> <span class="op">*</span> <span class="va">n_breaks</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span></span>
 <span><span class="va">custom_pal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">orange_gold_pal</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="va">zero_pos</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">]</span>, <span class="st">"white"</span>, <span class="va">orange_gold_pal</span><span class="op">[</span><span class="va">zero_pos</span><span class="op">:</span><span class="va">n_breaks</span><span class="op">]</span><span class="op">)</span></span>
@@ -160,24 +160,24 @@ to be shown in white.</p>
 <span>                   color <span class="op">=</span> <span class="va">custom_pal</span>,</span>
 <span>                   cluster_rows <span class="op">=</span> <span class="cn">FALSE</span>, cluster_cols <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                   show_rownames <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation2-visualization-1.png" class="r-plt" width="700"></p>
+<p><img src="normal-block_files/figure-html/simulation2-visualization-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="prepare-the-data-for-a-normal-block-analysis">Prepare the data for a normal-block analysis<a class="anchor" aria-label="anchor" href="#prepare-the-data-for-a-normal-block-analysis"></a>
 </h2>
-<p>A specific data object of class <strong>NB_data</strong> needs to be
-created to analyse the data with normalblockr.</p>
+<p>A specific data object of class <strong>NormalBlockData</strong>
+needs to be created to analyse the data with normalblockr.</p>
 <p>One can either use Y and X only to generate the
-<strong>NB_data</strong> object.</p>
+<strong>NormalBlockData</strong> object.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">my_data</span>    <span class="op">&lt;-</span> <span class="va"><a href="../reference/NB_data.html">NB_data</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">my_nb_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">my_nb_data</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span>
-<span><span class="va">my_data_zi</span> <span class="op">&lt;-</span> <span class="va"><a href="../reference/NB_data.html">NB_data</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">my_nb_data_zi</span><span class="op">$</span><span class="va">Y</span>, <span class="va">my_nb_data_zi</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">my_data</span>    <span class="op">&lt;-</span> <span class="va"><a href="../reference/NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">my_nb_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">my_nb_data</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span>
+<span><span class="va">my_data_zi</span> <span class="op">&lt;-</span> <span class="va"><a href="../reference/NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">my_nb_data_zi</span><span class="op">$</span><span class="va">Y</span>, <span class="va">my_nb_data_zi</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></code></pre></div>
 <p>Alternatively, if one only wants to include some of the covariates
 contained in X, a formula can be used to specify which one:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">my_data</span><span class="op">$</span><span class="va">X</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"X1"</span>, <span class="st">"X2"</span><span class="op">)</span></span>
-<span><span class="va">my_data_alt</span>    <span class="op">&lt;-</span> <span class="va"><a href="../reference/NB_data.html">NB_data</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">my_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">my_data</span><span class="op">$</span><span class="va">X</span>, formula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">X1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">my_data_alt</span>    <span class="op">&lt;-</span> <span class="va"><a href="../reference/NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">my_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">my_data</span><span class="op">$</span><span class="va">X</span>, formula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">X1</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="run-a-normal-block-analysis">Run a normal-block analysis<a class="anchor" aria-label="anchor" href="#run-a-normal-block-analysis"></a>
@@ -210,17 +210,15 @@ as an input to the <strong>normal_block</strong> function.</p>
 <p>The model convergence can be checked with <strong>plot</strong>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">my_NB</span><span class="op">)</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation1-NB1-plot-1.png" class="r-plt" width="700"></p>
+<p><img src="normal-block_files/figure-html/simulation1-NB1-plot-1.png" class="r-plt" alt="" width="700"></p>
 <p>A summary of the results is accessible via
 <strong>print</strong>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">my_NB</span><span class="op">)</span></span>
 <span><span class="co">#&gt; A diagonal normal-block model with fixed blocks .</span></span>
 <span><span class="co">#&gt; ===========================================================================</span></span>
-<span><span class="co">#&gt;  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC</span></span>
-<span><span class="co">#&gt;       126 3       3        0 -6052.493 12104.99 12685.24 12709.46 12691.83</span></span>
-<span><span class="co">#&gt;  niter</span></span>
-<span><span class="co">#&gt;      7</span></span>
+<span><span class="co">#&gt;  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter</span></span>
+<span><span class="co">#&gt;       126 3       3        0 -5225.34 10450.68 11030.93 11055.14 11037.52    12</span></span>
 <span><span class="co">#&gt; ===========================================================================</span></span>
 <span><span class="co">#&gt; * Useful fields</span></span>
 <span><span class="co">#&gt;     $model_par, $posterior_par / $var_par, $clustering </span></span>
@@ -233,7 +231,7 @@ as an input to the <strong>normal_block</strong> function.</p>
 <code class="sourceCode R"><span> <span class="va">my_NB</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: vertex attribute frame.color contains NAs. Replacing with</span></span>
 <span><span class="co">#&gt; default value black</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation1-NB1-plot_network-1.png" class="r-plt" width="700"></p>
+<p><img src="normal-block_files/figure-html/simulation1-NB1-plot_network-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level4">
 <h4 id="fixed-number-of-clusters">Fixed number of clusters<a class="anchor" aria-label="anchor" href="#fixed-number-of-clusters"></a>
@@ -260,7 +258,7 @@ number of clusters in the <strong>blocks</strong> parameter.</p>
 <span><span class="co">#&gt; * Useful S3 methods</span></span>
 <span><span class="co">#&gt;     print(), coef(), sigma(), fitted(), predict()</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">my_NB</span><span class="op">)</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation1-NB2-1.png" class="r-plt" width="700">
+<p><img src="normal-block_files/figure-html/simulation1-NB2-1.png" class="r-plt" alt="" width="700">
 The clustering inferred by the <strong>normal_block</strong> function
 can be compared with the real clustering if it is known.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -277,7 +275,7 @@ get a collection of Normal-Block models, one per number of clusters.</p>
 <code class="sourceCode R"><span><span class="va">my_NB_unknown</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">my_data</span>,</span>
 <span>                      blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a diagonal normal-block model with unknown q </span></span>
-<span><span class="co">#&gt;  number of blocks = 2            number of blocks = 3            number of blocks = 4            number of blocks = 5           </span></span>
+<span><span class="co">#&gt;   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
 <p><strong>my_NB_unknown</strong> is a collection of Normal-Block
 models. It is possible to select a specific one either by picking a
@@ -286,7 +284,7 @@ number of clusters or by selecting the best model for a given criterion
 can be seen with the <strong>plot</strong> function.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">my_NB_unknown</span><span class="op">)</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation1-NB3-plot-1.png" class="r-plt" width="700"></p>
+<p><img src="normal-block_files/figure-html/simulation1-NB3-plot-1.png" class="r-plt" alt="" width="700"></p>
 <p>The model selection is done with <strong>get_model</strong> when a
 specific number of clusters is required and with
 <strong>get_best_model</strong> to select the best model for a given
@@ -326,14 +324,14 @@ be given in the sparsity parameter.</p>
 <code class="sourceCode R"><span><span class="va">my_NB_sparse_low</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: vertex attribute frame.color contains NAs. Replacing with</span></span>
 <span><span class="co">#&gt; default value black</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation1-NB-low-sparsity-plot-1.png" class="r-plt" width="700"></p>
+<p><img src="normal-block_files/figure-html/simulation1-NB-low-sparsity-plot-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_NB_sparse_high</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: vertex attribute label.cex contains NAs. Replacing with default</span></span>
 <span><span class="co">#&gt; value 1</span></span>
 <span><span class="co">#&gt; Warning: vertex attribute frame.color contains NAs. Replacing with</span></span>
 <span><span class="co">#&gt; default value black</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation1-NB-high-sparsity-plot-1.png" class="r-plt" width="700">
+<p><img src="normal-block_files/figure-html/simulation1-NB-high-sparsity-plot-1.png" class="r-plt" alt="" width="700">
 It is usually hard to know a priori what would be the best sparsity
 penalty. One can allow the <strong>normal_block</strong> function to
 explore different sparsity levels by simply setting <strong>sparsity =
@@ -350,7 +348,7 @@ collection of Normal-Block models, one per sparsity penalty.</p>
 penalty, using <strong>plot</strong>.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">my_NB_sparse</span><span class="op">)</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation1-NB-changing-sparsity-plot-1.png" class="r-plt" width="700">
+<p><img src="normal-block_files/figure-html/simulation1-NB-changing-sparsity-plot-1.png" class="r-plt" alt="" width="700">
 Penalty selection can be done similarly to the selection of the number
 of clusters.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
@@ -364,7 +362,7 @@ clusters vary.</p>
 <span>                                      blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">6</span>,</span>
 <span>                                      sparsity <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a Collection of   diagonal normal-block models with different values of q and different penalties. </span></span>
-<span><span class="co">#&gt;  number of blocks = 2             penalty = 3.364992              penalty = 2.870903              penalty = 2.449362              penalty = 2.089717              penalty = 1.782879              penalty = 1.521095              penalty = 1.29775               penalty = 1.107198              penalty = 0.944626              penalty = 0.8059245             penalty = 0.6875889             penalty = 0.5866287             penalty = 0.5004928             penalty = 0.4270043             penalty = 0.3643064             penalty = 0.3108145             penalty = 0.2651769             penalty = 0.2262404             penalty = 0.1930211             penalty = 0.1646794             penalty = 0.1404991             penalty = 0.1198694             penalty = 0.1022687             penalty = 0.08725235                penalty = 0.0744409             penalty = 0.06351058                penalty = 0.05418519                penalty = 0.04622906                penalty = 0.03944115                penalty = 0.03364992               number of blocks = 3             penalty = 3.452901              penalty = 2.945904              penalty = 2.513351              penalty = 2.14431               penalty = 1.829456              penalty = 1.560833              penalty = 1.331653              penalty = 1.136123              penalty = 0.9693039             penalty = 0.8269789             penalty = 0.7055518             penalty = 0.6019542             penalty = 0.5135679             penalty = 0.4381597             penalty = 0.3738237             penalty = 0.3189344             penalty = 0.2721046             penalty = 0.2321509             penalty = 0.1980637             penalty = 0.1689815             penalty = 0.1441696             penalty = 0.1230009             penalty = 0.1049404             penalty = 0.08953178                penalty = 0.07638563                penalty = 0.06516977                penalty = 0.05560075                penalty = 0.04743677                penalty = 0.04047153                penalty = 0.03452901               number of blocks = 4             penalty = 3.48963               penalty = 2.97724               penalty = 2.540086              penalty = 2.167119              penalty = 1.848917              penalty = 1.577436              penalty = 1.345818              penalty = 1.148209              penalty = 0.9796146             penalty = 0.8357757             penalty = 0.7130569             penalty = 0.6083573             penalty = 0.5190309             penalty = 0.4428204             penalty = 0.3778002             penalty = 0.322327              penalty = 0.274999              penalty = 0.2346203             penalty = 0.2001705             penalty = 0.170779              penalty = 0.1457032             penalty = 0.1243093             penalty = 0.1060567             penalty = 0.09048415                penalty = 0.07719816                penalty = 0.06586299                penalty = 0.05619219                penalty = 0.04794137                penalty = 0.04090203                penalty = 0.0348963            number of blocks = 5             penalty = 5.733478              penalty = 4.891619              penalty = 4.173372              penalty = 3.560587              penalty = 3.037779              penalty = 2.591735              penalty = 2.211185              penalty = 1.886512              penalty = 1.609511              penalty = 1.373183              penalty = 1.171556              penalty = 0.9995338             penalty = 0.8527701             penalty = 0.727556              penalty = 0.6207274             penalty = 0.5295847             penalty = 0.4518246             penalty = 0.3854823             penalty = 0.3288811             penalty = 0.2805908             penalty = 0.239391              penalty = 0.2042407             penalty = 0.1742516             penalty = 0.1486659             penalty = 0.1268369             penalty = 0.1082132             penalty = 0.09232403                penalty = 0.07876789                penalty = 0.06720223                penalty = 0.05733478               number of blocks = 6             penalty = 5.734837              penalty = 4.892779              penalty = 4.174362              penalty = 3.561431              penalty = 3.038499              penalty = 2.592349              penalty = 2.211709              penalty = 1.886959              penalty = 1.609893              penalty = 1.373509              penalty = 1.171834              penalty = 0.9997707             penalty = 0.8529722             penalty = 0.7277285             penalty = 0.6208746             penalty = 0.5297102             penalty = 0.4519317             penalty = 0.3855736             penalty = 0.328959              penalty = 0.2806573             penalty = 0.2394478             penalty = 0.2042891             penalty = 0.1742929             penalty = 0.1487011             penalty = 0.126867              penalty = 0.1082389             penalty = 0.09234591                penalty = 0.07878656                penalty = 0.06721816                penalty = 0.05734837           </span></span>
+<span><span class="co">#&gt;   number of blocks = 2                penalty = 3.364992              penalty = 2.870903              penalty = 2.449362              penalty = 2.089717              penalty = 1.782879              penalty = 1.521095              penalty = 1.29775               penalty = 1.107198              penalty = 0.944626              penalty = 0.8059245             penalty = 0.6875889             penalty = 0.5866287             penalty = 0.5004928             penalty = 0.4270043             penalty = 0.3643064             penalty = 0.3108145             penalty = 0.2651769             penalty = 0.2262404             penalty = 0.1930211             penalty = 0.1646794             penalty = 0.1404991             penalty = 0.1198694             penalty = 0.1022687             penalty = 0.08725235                penalty = 0.0744409             penalty = 0.06351058                penalty = 0.05418519                penalty = 0.04622906                penalty = 0.03944115                penalty = 0.03364992                number of blocks = 3                penalty = 3.452901              penalty = 2.945904              penalty = 2.513351              penalty = 2.14431               penalty = 1.829456              penalty = 1.560833              penalty = 1.331653              penalty = 1.136123              penalty = 0.9693039             penalty = 0.8269789             penalty = 0.7055518             penalty = 0.6019542             penalty = 0.5135679             penalty = 0.4381597             penalty = 0.3738237             penalty = 0.3189344             penalty = 0.2721046             penalty = 0.2321509             penalty = 0.1980637             penalty = 0.1689815             penalty = 0.1441696             penalty = 0.1230009             penalty = 0.1049404             penalty = 0.08953178                penalty = 0.07638563                penalty = 0.06516977                penalty = 0.05560075                penalty = 0.04743677                penalty = 0.04047153                penalty = 0.03452901                number of blocks = 4                penalty = 3.48963               penalty = 2.97724               penalty = 2.540086              penalty = 2.167119              penalty = 1.848917              penalty = 1.577436              penalty = 1.345818              penalty = 1.148209              penalty = 0.9796146             penalty = 0.8357757             penalty = 0.7130569             penalty = 0.6083573             penalty = 0.5190309             penalty = 0.4428204             penalty = 0.3778002             penalty = 0.322327              penalty = 0.274999              penalty = 0.2346203             penalty = 0.2001705             penalty = 0.170779              penalty = 0.1457032             penalty = 0.1243093             penalty = 0.1060567             penalty = 0.09048415                penalty = 0.07719816                penalty = 0.06586299                penalty = 0.05619219                penalty = 0.04794137                penalty = 0.04090203                penalty = 0.0348963             number of blocks = 5                penalty = 5.733478              penalty = 4.891619              penalty = 4.173372              penalty = 3.560587              penalty = 3.037779              penalty = 2.591735              penalty = 2.211185              penalty = 1.886512              penalty = 1.609511              penalty = 1.373183              penalty = 1.171556              penalty = 0.9995338             penalty = 0.8527701             penalty = 0.727556              penalty = 0.6207274             penalty = 0.5295847             penalty = 0.4518246             penalty = 0.3854823             penalty = 0.3288811             penalty = 0.2805908             penalty = 0.239391              penalty = 0.2042407             penalty = 0.1742516             penalty = 0.1486659             penalty = 0.1268369             penalty = 0.1082132             penalty = 0.09232403                penalty = 0.07876789                penalty = 0.06720223                penalty = 0.05733478                number of blocks = 6                penalty = 5.734837              penalty = 4.892779              penalty = 4.174362              penalty = 3.561431              penalty = 3.038499              penalty = 2.592349              penalty = 2.211709              penalty = 1.886959              penalty = 1.609893              penalty = 1.373509              penalty = 1.171834              penalty = 0.9997707             penalty = 0.8529722             penalty = 0.7277285             penalty = 0.6208746             penalty = 0.5297102             penalty = 0.4519317             penalty = 0.3855736             penalty = 0.328959              penalty = 0.2806573             penalty = 0.2394478             penalty = 0.2042891             penalty = 0.1742929             penalty = 0.1487011             penalty = 0.126867              penalty = 0.1082389             penalty = 0.09234591                penalty = 0.07878656                penalty = 0.06721816                penalty = 0.05734837           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
 <p>The result is a collection of normal-block models with different
 numbers of clusters and ifferent penalties.</p>
@@ -378,7 +376,7 @@ function for each number of clusters and they can be different from one
 number to another, this explains the blanks in the plot.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">my_NB_sparse_unknown</span>, <span class="st">"BIC"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation1-NB-sparse_unknown-plot-1.png" class="r-plt" width="700"></p>
+<p><img src="normal-block_files/figure-html/simulation1-NB-sparse_unknown-plot-1.png" class="r-plt" alt="" width="700"></p>
 <p>Model selection is also done using the <strong>get_model</strong> and
 <strong>get_best_model</strong> functions. Using
 <strong>get_model</strong>, one can either fix the n umber of clusters
@@ -408,7 +406,7 @@ number of blocks and no penalty on the network.</p>
 longer.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">my_NB_zi</span><span class="op">)</span></span></code></pre></div>
-<p><img src="normal-block_files/figure-html/simulation2-NB-plot-1.png" class="r-plt" width="700"></p>
+<p><img src="normal-block_files/figure-html/simulation2-NB-plot-1.png" class="r-plt" alt="" width="700"></p>
 <p>The clustering inference may also be harder.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">aricode</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/aricode/man/ARI.html" class="external-link">ARI</a></span><span class="op">(</span><span class="va">my_NB_zi</span><span class="op">$</span><span class="va">clustering</span>,</span>

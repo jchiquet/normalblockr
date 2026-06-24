@@ -1,0 +1,114 @@
+# R6 class for a normal-block model with fixed number of clusters (but unknown clustering).
+
+R6 class for a normal-block model with fixed number of clusters (but
+unknown clustering).
+
+## Super class
+
+[`NormalBlockBase`](NormalBlockBase.md) -\> `NormalBlockUnknownClusters`
+
+## Public fields
+
+- `fixed_tau`:
+
+  whether tau should be fixed at clustering_init during optimization,
+  useful for stability selection
+
+## Active bindings
+
+- `model_par`:
+
+  a list with the matrices of the model parameters: B (covariates), dm1
+  (species variance), Omegaq (groups precision matrix))
+
+- `nb_param`:
+
+  number of parameters in the model
+
+- `var_par`:
+
+  a list with the matrices of the variational parameters: M (means), S
+  (variances), tau (posterior group probabilities)
+
+- `entropy`:
+
+  Entropy of the conditional distribution
+
+- `fitted`:
+
+  Y values predicted by the model
+
+- `who_am_I`:
+
+  a method to print what model is being fitted
+
+## Methods
+
+### Public methods
+
+- [`NormalBlockUnknownClusters$new()`](#method-NormalBlockUnknownClusters-initialize)
+
+- [`NormalBlockUnknownClusters$clone()`](#method-NormalBlockUnknownClusters-clone)
+
+Inherited methods
+
+- [`NormalBlockBase$candidates_merge()`](NormalBlockBase.html#method-candidates_merge)
+- [`NormalBlockBase$candidates_split()`](NormalBlockBase.html#method-candidates_split)
+- [`NormalBlockBase$latent_network()`](NormalBlockBase.html#method-latent_network)
+- [`NormalBlockBase$merge()`](NormalBlockBase.html#method-merge)
+- [`NormalBlockBase$optimize()`](NormalBlockBase.html#method-optimize)
+- [`NormalBlockBase$plot()`](NormalBlockBase.html#method-plot)
+- [`NormalBlockBase$plot_loglik()`](NormalBlockBase.html#method-plot_loglik)
+- [`NormalBlockBase$plot_network()`](NormalBlockBase.html#method-plot_network)
+- [`NormalBlockBase$predict()`](NormalBlockBase.html#method-predict)
+- [`NormalBlockBase$print()`](NormalBlockBase.html#method-print)
+- [`NormalBlockBase$split()`](NormalBlockBase.html#method-split)
+- [`NormalBlockBase$update()`](NormalBlockBase.html#method-update)
+
+------------------------------------------------------------------------
+
+### `NormalBlockUnknownClusters$new()`
+
+Create a new \[\`NormalBlockUnknownClusters\`\] object.
+
+#### Usage
+
+    NormalBlockUnknownClusters$new(data, q, sparsity = 0, control = NB_control())
+
+#### Arguments
+
+- `data`:
+
+  contains the matrix of responses (Y) and the design matrix (X).
+
+- `q`:
+
+  required number of groups
+
+- `sparsity`:
+
+  sparsity penalty to add on blocks precision matrix for sparsity
+
+- `control`:
+
+  structured list for specific parameters
+
+#### Returns
+
+A new \[\`NormalBlockUnknownClusters\`\] object
+
+------------------------------------------------------------------------
+
+### `NormalBlockUnknownClusters$clone()`
+
+The objects of this class are cloneable with this method.
+
+#### Usage
+
+    NormalBlockUnknownClusters$clone(deep = FALSE)
+
+#### Arguments
+
+- `deep`:
+
+  Whether to make a deep clone.
