@@ -11,12 +11,12 @@ C <- testdata$parameters$C
 test_that("normal block with diagonal residual covariance and known clusters", {
   data <- NB_data$new(Y, X)
 
-  model <- normalblockr:::NB_fixed_blocks$new(data, C)
+  model <- normalblockr:::nb_known_clusters$new(data, C)
   model$optimize()
   expect_gt(model$loglik, -2600)
   expect_lt(Metrics::rmse(model$fitted, Y), 1)
 
-  model_sparse <- normalblockr:::NB_fixed_blocks$new(data, C, sparsity = 0.05)
+  model_sparse <- normalblockr:::nb_known_clusters$new(data, C, sparsity = 0.05)
   model_sparse$optimize()
   expect_gt(model_sparse$loglik, -2600)
   expect_lt(Metrics::rmse(model_sparse$fitted, Y), 1)
@@ -33,12 +33,12 @@ test_that("normal block with spherical residual covariance and known clusters", 
 
   ## Spherical model
   ctrl <- NB_control(noise_covariance = "spherical")
-  model <- NB_fixed_blocks$new(data, C, control = ctrl)
+  model <- nb_known_clusters$new(data, C, control = ctrl)
   model$optimize()
   expect_gt(model$loglik, -2630)
   expect_lt(Metrics::rmse(model$fitted, Y), 1)
 
-  model <- NB_fixed_blocks$new(data, C, sparsity = 0.01, control = ctrl)
+  model <- nb_known_clusters$new(data, C, sparsity = 0.01, control = ctrl)
   model$optimize()
   expect_gt(model$loglik, -2630)
   expect_lt(Metrics::rmse(model$fitted, Y), 1)
@@ -46,7 +46,7 @@ test_that("normal block with spherical residual covariance and known clusters", 
 
 test_that("normal block with known clusters, heuristic", {
   data <- NB_data$new(Y, X)
-  model <- NB_fixed_blocks$new(data, C, sparsity = 0.05,
+  model <- nb_known_clusters$new(data, C, sparsity = 0.05,
                                               control = NB_control(heuristic = TRUE))
   model$optimize()
   expect_lt(Metrics::rmse(model$fitted, Y), 2.4)

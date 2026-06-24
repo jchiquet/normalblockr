@@ -9,13 +9,13 @@ data <- NB_data$new(Y, X)
 
 test_that("Robustness of starting clustering with NB", {
   ## Diagonal model
-  model_kmeans <- NB_fixed_q$new(data, q, control = NB_control(clustering_approx = "kmeans"))
+  model_kmeans <- nb_unknown_clusters$new(data, q, control = NB_control(clustering_approx = "kmeans"))
   model_kmeans$optimize()
 
-  model_ward2 <- NB_fixed_q$new(data, q, control = NB_control(clustering_approx = "ward2"))
+  model_ward2 <- nb_unknown_clusters$new(data, q, control = NB_control(clustering_approx = "ward2"))
   model_ward2$optimize()
 
-  model_sbm <- NB_fixed_q$new(data, q, control = NB_control(clustering_approx = "sbm"))
+  model_sbm <- nb_unknown_clusters$new(data, q, control = NB_control(clustering_approx = "sbm"))
   model_sbm$optimize()
 
   expect_gt(model_kmeans$loglik, -2650)
@@ -38,13 +38,13 @@ data <- NB_data$new(Y, X)
 
 test_that("Robustness of starting clustering with ZINB", {
   ## Diagonal model
-  model_ward2 <- ZINB_fixed_q$new(data, q, control = NB_control(clustering_approx = "ward2"))
+  model_ward2 <- zi_unknown_clusters$new(data, q, control = NB_control(clustering_approx = "ward2"))
   model_ward2$optimize()
 
-  model_kmeans <- ZINB_fixed_q$new(data, q, control = NB_control(clustering_approx = "kmeans"))
+  model_kmeans <- zi_unknown_clusters$new(data, q, control = NB_control(clustering_approx = "kmeans"))
   model_kmeans$optimize()
 
-  model_sbm <- ZINB_fixed_q$new(data, q, control = NB_control(clustering_approx = "sbm"))
+  model_sbm <- zi_unknown_clusters$new(data, q, control = NB_control(clustering_approx = "sbm"))
   model_sbm$optimize()
 
   expect_gt(model_kmeans$loglik, -2750)
