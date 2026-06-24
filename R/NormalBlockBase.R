@@ -17,8 +17,12 @@ NormalBlockBase <- R6::R6Class(
     #' @param q number of block/cluster
     #' @param sparsity sparsity penalty on the network density
     #' @param control structured list of more specific parameters, to generate with NB_control
+    #' @param zero_inflation whether the concrete subclass models zero-inflation;
+    #' set by the ZI subclasses themselves, not meant to be set by the end user.
+    #' When `FALSE`, the (costly) zero-inflation probability fit (`kappa`/`B0`)
+    #' is skipped entirely, since it would otherwise never be used downstream.
     #' @return A new [`NormalBlockBase`] object
-    initialize = function(data, q, sparsity = 0, control = NB_control()) {
+    initialize = function(data, q, sparsity = 0, control = NB_control(), zero_inflation = FALSE) {
       self$data <- data
 
       stopifnot("There cannot be more blocks than there are entities to cluster" = q <= ncol(self$data$Y))
@@ -30,14 +34,10 @@ NormalBlockBase <- R6::R6Class(
       private$optimizer <- ifelse(control$heuristic,
                                   private$heuristic_optimize,
                                   private$EM_optimize)
-      ## pointer to the chosen clustering function for heuristic approach
+      ## name of the chosen clustering heuristic, looked up in
+      ## private$clustering_methods by heuristic_clustering()
       private$approx <- control$heuristic
-      private$clustering_approx <-
-        switch(control$clustering_approx,
-               "kmeans"    = private$heuristic_cluster_residuals_kmeans,
-               "ward2"     = private$heuristic_cluster_sigma_ward2,
-               "sbm"       = private$heuristic_cluster_sigma_sbm
-        )
+      private$clustering_approx <- control$clustering_approx
 
       ## penalty mask
       private$sparsity_ <- sparsity
@@ -72,22 +72,29 @@ NormalBlockBase <- R6::R6Class(
         private$C <- matrix(NA, self$data$n, q)
       }
 
-      if(self$data$npY < self$n * self$p){
-        B0_list <- lapply(1:self$data$p,
-                          f <- function(j){
-                            df <- data.frame("zeros" = data$zeros[,j], self$data$X0)
-                            model <- glm(zeros ~ 0 + ., family=binomial(link = "logit"), data=df)
-                            return(model$coefficients)})
-        private$B0 <- t(sapply(B0_list, unlist))
-      }else{
-        private$B0 <- matrix(rep(-Inf, self$data$p * self$data$d0), nrow = self$data$d0)
+      ## Zero-inflation probabilities (kappa/B0) and the resulting fixed
+      ## log-likelihood contribution (ZI_cond_mean) are only ever read by the
+      ## ZI subclasses (see zi_diag_normal_inference(), and the ZI EM_optimize()/
+      ## fitted/model_par methods) -- skip the p logistic regressions entirely
+      ## for plain (non zero-inflated) models, where they would just be wasted
+      ## work (private$kappa/B0/ZI_cond_mean stay at their NA default).
+      if (zero_inflation) {
+        if(self$data$npY < self$n * self$p){
+          B0_list <- lapply(1:self$data$p,
+                            f <- function(j){
+                              df <- data.frame("zeros" = data$zeros[,j], self$data$X0)
+                              model <- glm(zeros ~ 0 + ., family=binomial(link = "logit"), data=df)
+                              return(model$coefficients)})
+          private$B0 <- t(sapply(B0_list, unlist))
+        }else{
+          private$B0 <- matrix(rep(-Inf, self$data$p * self$data$d0), nrow = self$data$d0)
+        }
+
+        private$kappa <- apply(self$data$X0 %*% private$B0, MARGIN = c(1,2), FUN = sigmoid)
+        private$ZI_cond_mean <-
+          sum(xlogy(data$zeros, private$kappa)) +
+          sum(xlogy(data$zeros_bar, 1 - private$kappa))
       }
-
-      private$kappa <- apply(self$data$X0 %*% private$B0, MARGIN = c(1,2), FUN = sigmoid)
-      private$ZI_cond_mean <-
-        sum(xlogy(data$zeros, private$kappa)) +
-        sum(xlogy(data$zeros_bar, 1 - private$kappa))
-
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -421,7 +428,7 @@ NormalBlockBase <- R6::R6Class(
     weights           = NA, # sparsity weights specific to each pairs of group
     res_covariance    = NA, # shape of the residuals covariance (diagonal or spherical)
     approx            = NA, # use approximation/heuristic approach or not
-    clustering_approx = NA, # clustering function in the heuristic approach
+    clustering_approx = NA, # name of the clustering heuristic, key into clustering_methods
     ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed)
     niter             = NA, # number of EM iterations required by the inference, if applicable
 
@@ -514,31 +521,32 @@ NormalBlockBase <- R6::R6Class(
       Sigma_q
     },
 
+    ## Registry of clustering heuristics used to turn the OLS/ZI residuals R
+    ## (n x p) into an initial clustering of the p variables into self$q
+    ## groups (a vector of length p with values in 1:q). One single table
+    ## instead of one ad hoc private method per algorithm -- selectable via
+    ## NB_control(clustering_approx = ...) ("kmeans"/"ward2"/"sbm"; "hclustvar"
+    ## is reserved for the fallback below, not user-selectable).
+    clustering_methods = list(
+      kmeans = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
+      ward2  = function(R, q) cutree(hclust(dist(1 - cor(R)), method = "ward.D2"), q),
+      sbm    = function(R, q) {
+        options <- list(verbosity = 0, exploreMin = q, exploreMax = q, plot = FALSE, nbCores = 1)
+        mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)
+        mySBM$setModel(q)
+        mySBM$memberships
+      },
+      hclustvar = function(R, q) cutree(ClustOfVar::hclustvar(R), q)
+    ),
+
     heuristic_clustering = function(R) {
-      clustering <- private$clustering_approx(R)
+      clustering <- private$clustering_methods[[private$clustering_approx]](R, self$q)
       if (length(unique(clustering)) < self$q) {
-        clustering <- cutree(ClustOfVar::hclustvar(R), self$q)
+        clustering <- private$clustering_methods$hclustvar(R, self$q)
       }
       C <- as_indicator(clustering)
       if (min(colSums(C)) < 1) warning("Initialization failed to place elements in each cluster")
       C
-    },
-
-    heuristic_cluster_sigma_ward2 = function(R){
-      hc <- hclust(dist(1 - cor(R)), method = "ward.D2")
-      cutree(hc, self$q)
-    },
-
-    heuristic_cluster_sigma_sbm = function(R){
-      options <- list(verbosity=0, exploreMin=self$q, exploreMax=self$q,
-                      verbosity=0, plot=FALSE, nbCores=1)
-      mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)
-      mySBM$setModel(self$q)
-      mySBM$memberships
-    },
-
-    heuristic_cluster_residuals_kmeans = function(R) {
-      kmeans(t(R), self$q, nstart = 30, iter.max = 50)$cluster
     }
 
   ),

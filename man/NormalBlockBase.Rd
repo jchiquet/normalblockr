@@ -94,7 +94,13 @@ R6 abstract class for a generic sparse Normal Block model
   Create a new [`NormalBlockBase`] object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$new(data, q, sparsity = 0, control = NB_control())}
+    \preformatted{NormalBlockBase$new(
+  data,
+  q,
+  sparsity = 0,
+  control = NB_control(),
+  zero_inflation = FALSE
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -104,6 +110,10 @@ R6 abstract class for a generic sparse Normal Block model
       \item{\code{q}}{number of block/cluster}
       \item{\code{sparsity}}{sparsity penalty on the network density}
       \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
+      \item{\code{zero_inflation}}{whether the concrete subclass models zero-inflation;
+set by the ZI subclasses themselves, not meant to be set by the end user.
+When `FALSE`, the (costly) zero-inflation probability fit (`kappa`/`B0`)
+is skipped entirely, since it would otherwise never be used downstream.}
     }
     \if{html}{\out{</div>}}
   }

@@ -21,7 +21,7 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
     #' @param control structured list of more specific parameters
     #' @return A new [`ZINormalBlockUnknownClusters`] object
     initialize = function(data, q, sparsity = 0, control = NB_control()) {
-      super$initialize(data, q, sparsity, control)
+      super$initialize(data, q, sparsity, control, zero_inflation = TRUE)
       self$fixed_tau  <- control$fixed_tau
     }
   ),

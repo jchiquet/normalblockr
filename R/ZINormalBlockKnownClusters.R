@@ -20,7 +20,7 @@ ZINormalBlockKnownClusters <- R6::R6Class(
     initialize = function(data, C, sparsity = 0, control = NB_control()) {
       stopifnot("C must be a matrix" = is.matrix(C))
       stopifnot("There cannot be empty clusters" = min(colSums(C)) > 0)
-      super$initialize(data, ncol(C), sparsity, control = control)
+      super$initialize(data, ncol(C), sparsity, control = control, zero_inflation = TRUE)
       private$C  <- C
     }
   ),

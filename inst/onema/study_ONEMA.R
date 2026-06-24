@@ -21,20 +21,20 @@ stations_env    <- env[idx, ,drop = FALSE] # does not contain NA
 
 # select and format data to run normalblockr on it
 X    <- stations_env[ , 2:ncol(stations_env)]
-Y    <- apply(as.matrix(dcast(onema_community, species ~ opcod, value.var = "biomass", fill = 0))[,-1], 1, as.numeric)
+Y    <- setNames(apply(as.matrix(dcast(onema_community, species ~ opcod, value.var = "biomass", fill = 0))[,-1], 1, as.numeric), species_order)
 Y    <- log(1 + Y)
-# Y500 <- Y[order(rowSums(Y == 0))[1:500],]
-# X500 <- as.matrix(X[order(rowSums(Y == 0))[1:500],])
-# rownames(X500) <- NULL
-# colnames(X500) <- NULL
-# Y500 <- Y500[, - which(colSums(Y500 == 0) >= 400)]
-# n = nrow(Y500)
 n <- nrow(Y)
 Xones <- matrix(rep(1, n), nrow = n)
 
 ## ZI inflated normal with diagonal covariance
-zi_normal <- normalblockr::normal_zi$new(Y, Xones)
-zi_normal$optimize()
+data <- normalblockr::NormalBlockData$new(Y, Xones)
+out <- normal_block(data, blocks = 2:10, zero_inflation = TRUE)
 
-myModel <- normalblockr::NB_unknown_zi$new(Y, Xones, c(2, 5, 10, 20))
-myModel$optimize()
+out$plot(criteria = c("BIC", "EBIC"))
+myModel <- out$get_best_model("BIC")
+
+mySparseModel <- normal_block(data, blocks = myModel$q, sparsity = TRUE, zero_inflation = TRUE)
+
+mySparseModel$plot(c("EBIC", "BIC"))
+mySparseModel$get_best_model("EBIC")$plot_network()
+mySparseModel$get_best_model("EBIC")$clustering
