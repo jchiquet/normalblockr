@@ -36,11 +36,6 @@ softmax <- function(x) {
   exp(x - b) / sum(exp(x - b))
 }
 
-# computes ARI between two clusterings
-matching_group_scores <- function(groups1, groups2) {
-  aricode::ARI(groups1, groups2)
-}
-
 # gets cluster labels from probability matrix
 get_clusters <- function(tau) {
   apply(tau, 1, which.max)

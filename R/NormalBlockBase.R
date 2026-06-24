@@ -287,7 +287,6 @@ NormalBlockBase <- R6::R6Class(
     ## Extractors ------------------------
     #' @description Extract interaction network in the latent space
     #' @param type edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)
-    #' @importFrom Matrix Matrix
     #' @return a square matrix of size `self$q`
     latent_network = function(type = c("partial_cor", "support", "precision")) {
       net <- switch(
@@ -301,7 +300,7 @@ NormalBlockBase <- R6::R6Class(
       )
       ## Enforce sparse Matrix encoding to avoid downstream problems with igraph::graph_from_adjacency_matrix
       ## as it fails when given dsyMatrix objects
-      Matrix(net, sparse = TRUE)
+      Matrix::Matrix(net, sparse = TRUE)
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -359,7 +358,7 @@ NormalBlockBase <- R6::R6Class(
           igraph::E(G)$width <- 15*abs(igraph::E(G)$weight)
 
         if (remove.isolated) {
-          G <- delete.vertices(G, which(degree(G) == 0))
+          G <- igraph::delete.vertices(G, which(igraph::degree(G) == 0))
         }
         if (plot) plot(G, layout = layout)
       }
@@ -369,7 +368,7 @@ NormalBlockBase <- R6::R6Class(
             colnames(net) <- rownames(net) <- rep(" ", ncol(net))
           G <- net
           diag(net) <- 0
-          corrplot(as.matrix(net), method = "color", is.corr = FALSE, tl.pos = "td", cl.pos = "n", tl.cex = 0.5, type = "upper")
+          corrplot::corrplot(as.matrix(net), method = "color", is.corr = FALSE, tl.pos = "td", cl.pos = "n", tl.cex = 0.5, type = "upper")
         } else  {
           G <- net
         }
@@ -471,34 +470,28 @@ NormalBlockBase <- R6::R6Class(
       B     <- self$data$XtXm1 %*% self$data$XtY
       dm1   <- self$data$nY / colSums(self$data$zeros_bar * (self$data$Y - self$data$X %*% B)^2)
       for (i in 1:3) { # a couple of iterates is enough
-        B     <- private$zi_diag_normal_optim_B(B, dm1)
+        B     <- private$zi_diag_normal_optim_B(dm1)
         dm1   <- self$data$nY / colSums(self$data$zeros_bar * (self$data$Y - self$data$X %*% B)^2)
       }
       R <- self$data$zeros_bar * (self$data$Y - self$data$X %*% B)
       list(B = B, dm1 = dm1, kappa = private$kappa, R = R)
     },
 
-    zi_diag_normal_obj_grad_B = function(B_vec, DM1) {
-      R <- self$data$Y - self$data$X %*% matrix(B_vec, nrow = self$d, ncol = self$p)
-      grad <- crossprod(self$data$X, DM1 * R)
-      obj <- -.5 * sum(DM1 * R^2)
-      res <- list("objective" = -obj, "gradient"  = -grad)
-      res
-    },
-
-    zi_diag_normal_optim_B = function(B0, dm1) {
+    ## Closed-form weighted least squares solve for B: the zero-inflation
+    ## mask makes the weight matrix vary by both row and column, so each
+    ## column of B is solved independently (mirrors nb_optim::solve_wls in
+    ## src/zi_closed_form_solvers.h -- no iterative optimizer is needed since
+    ## the objective is exactly quadratic in B).
+    zi_diag_normal_optim_B = function(dm1) {
       DM1 <- matrix(dm1, self$data$n, self$data$p, byrow = TRUE) * self$data$zeros_bar
-      res <- nloptr::nloptr(
-        x0 = as.vector(B0),
-        eval_f = private$zi_diag_normal_obj_grad_B,
-        opts = list(
-          algorithm = "NLOPT_LD_LBFGS",
-          maxeval = 100
-        ),
-        DM1 = DM1
-      )
-      newB <- matrix(res$solution, nrow = self$d, ncol = self$p)
-      newB
+      B <- matrix(0, self$d, self$p)
+      for (j in seq_len(self$data$p)) {
+        w <- DM1[, j]
+        XtWX <- crossprod(self$data$X, self$data$X * w)
+        XtWy <- crossprod(self$data$X, self$data$Y[, j] * w)
+        B[, j] <- solve(XtWX, XtWy)
+      }
+      B
     },
 
     heuristic_optimize = function(control){
@@ -531,7 +524,6 @@ NormalBlockBase <- R6::R6Class(
       cutree(hc, self$q)
     },
 
-    #' @importFrom sbm estimateSimpleSBM
     heuristic_cluster_sigma_sbm = function(R){
       options <- list(verbosity=0, exploreMin=self$q, exploreMax=self$q,
                       verbosity=0, plot=FALSE, nbCores=1)

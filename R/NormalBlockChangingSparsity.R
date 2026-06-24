@@ -107,7 +107,6 @@ NormalBlockChangingSparsity <- R6::R6Class(
     #' @description Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
     #' @param criteria vector of characters. The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults to all of them.
     #' @param log.x logical: should the x-axis be represented in log-scale? Default is `TRUE`.
-    #' @importFrom tidyr gather
     #' @return a [`ggplot`] graph
     plot = function(criteria = c("deviance", "BIC", "EBIC", "ICL"), log.x = TRUE) {
       vlines <- sapply(intersect(criteria, c("BIC")) , function(crit) self$get_best_model(crit)$sparsity)
@@ -206,7 +205,7 @@ NormalBlockChangingSparsity <- R6::R6Class(
       list("n_penalties" = length(self$sparsity), "min_ratio" = min(self$sparsity)/max(self$sparsity),
            "min_sparsity" = min(self$sparsity), "max_sparsity" = max(self$sparsity)),
     #' @field criteria a data frame with the values of some criteria ((approximated) log-likelihood, BIC) for the collection of models
-    criteria = function() super$criteria %>% mutate(stability = self$stability),
+    criteria = function() super$criteria %>% dplyr::mutate(stability = self$stability),
     #' @field stability_path measure of edges stability based on StARS method
     stability_path = function() private$stab_path,
     #' @field stability mean edge stability along the sparsity penalties path

@@ -2,9 +2,11 @@
 % Please edit documentation in R/SelectionNClusters.R
 \name{SelectionNClusters}
 \alias{SelectionNClusters}
-\title{R6 class for normal-block model with unknown q (number of groups)}
+\title{R6 class for selecting the number of clusters (q) by forward/backward
+split-and-merge exploration, comparing models with the ICL}
 \description{
-R6 class for normal-block model with unknown q (number of groups)
+R6 class for selecting the number of clusters (q) by forward/backward
+split-and-merge exploration, comparing models with the ICL
 }
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}

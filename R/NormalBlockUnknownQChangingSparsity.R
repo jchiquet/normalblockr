@@ -70,15 +70,14 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
     #' @description Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
     #' @param criterion The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults deviance.
     #' @param n_intervals number of intervals into which the penalties range should be splitted
-    #' @importFrom tidyr gather
     #' @return a [`ggplot`] heatmap
     plot = function(criterion = c("deviance", "ICL", "BIC", "EBIC"),
                     n_intervals = NULL) {
       criterion   <- match.arg(criterion)
       if(is.null(n_intervals)) n_intervals <- round(0.1 * length(unique(self$criteria$sparsity )))
-      df <- self$criteria %>% mutate(pen_binned = cut(sparsity, breaks = n_intervals)) %>%
-        group_by(pen_binned, q) %>% summarize(avg_crit = mean(.data[[criterion]]), .groups = "drop")
-      p  <- ggplot2::ggplot(df, aes(x = pen_binned, y = q, fill = avg_crit)) +
+      df <- self$criteria %>% dplyr::mutate(pen_binned = cut(sparsity, breaks = n_intervals)) %>%
+        dplyr::group_by(pen_binned, q) %>% dplyr::summarize(avg_crit = mean(.data[[criterion]]), .groups = "drop")
+      p  <- ggplot2::ggplot(df, ggplot2::aes(x = pen_binned, y = q, fill = avg_crit)) +
         ggplot2::geom_tile() +
         ggplot2::scale_fill_viridis_c() +
         ggplot2::theme_minimal() +
@@ -86,7 +85,7 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
                          subtitle = "Lower is better" ) +
         ggplot2::labs(x = "Penalties (Binned)", y = "q", fill = paste0("Average ", criterion),
                       title = criterion) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
       p
     }
 

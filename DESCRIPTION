@@ -20,11 +20,9 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 4.1.0)
 Imports:
-    methods,
     glassoFast,
     Matrix,
     nloptr (>= 2.0.3),
-    aricode,
     dplyr,
     tidyr,
     tibble,
@@ -33,6 +31,8 @@ Imports:
     ggplot2,
     igraph,
     sbm,
+    corrplot,
+    scales,
     MASS,
     stats,
     Rcpp
@@ -41,12 +41,11 @@ LinkingTo:
     RcppArmadillo
 Suggests:
     testthat (>= 3.0.0),
+    aricode,
     Metrics,
     rmarkdown,
     pheatmap,
     paletteer,
-    pheatmap,
-    matrixcalc,
     ggthemes,
     knitr
 Config/testthat/edition: 3

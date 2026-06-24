@@ -131,7 +131,6 @@ generate_normal_block_param <- function(X = matrix(rnorm(100*p), 100, p),
 #'    - kappa: vector of ZI inflation proabilities (one per variable)
 #'
 #' @importFrom igraph sample_pa sample_sbm sample_gnp as_adjacency_matrix
-#' @importFrom MASS mvrnorm
 #' @importFrom stats rbinom rmultinom rnorm runif var
 #' @export
 generate_normal_block_data <-

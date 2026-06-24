@@ -1,12 +1,9 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NormalBlockUnknownQ #################################
+##  CLASS SelectionNClusters ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-#' R6 class for normal-block model with unknown q (number of groups)
-#' @param data contains the matrix of responses (Y) and the design matrix (X).
-#' @param zero_inflation whether the models should be zero-inflated or not
-#' @param control structured list for specific parameters (including initial clustering proposal)
+#' R6 class for selecting the number of clusters (q) by forward/backward
+#' split-and-merge exploration, comparing models with the ICL
 #' @import tibble
 #' @export
 SelectionNClusters <- R6::R6Class(
@@ -174,13 +171,13 @@ SelectionNClusters <- R6::R6Class(
     #' @description Display the ICL for all the best models explored per number of cluster, and the winner
     #' @return a [`ggplot2::ggplot`] graph
     plot = function() {
-      data_min <- self$ICL_explored %>% group_by(n_clusters) %>% summarise(min_ICL = min(ICL))
+      data_min <- self$ICL_explored %>% dplyr::group_by(n_clusters) %>% dplyr::summarise(min_ICL = min(ICL))
       vlines <- data_min$n_clusters[which.min(data_min$min_ICL)]
       p <- ggplot2::ggplot(self$ICL_explored) +
         ggplot2::geom_point(ggplot2::aes(x = n_clusters, y = ICL), alpha = .75) +
         ggplot2::geom_line(data = data_min, ggplot2::aes(x = n_clusters, y = min_ICL), color = "red") +
         ggplot2::ggtitle(label    = "Model selection criteria",
-                         subtitle = "Lower is better" ) + xlab("number of clusters") +
+                         subtitle = "Lower is better" ) + ggplot2::xlab("number of clusters") +
         ggplot2::scale_x_continuous(breaks = scales::pretty_breaks()) +
         ggplot2::theme_bw() + ggplot2::geom_vline(xintercept = vlines, linetype = "dashed", alpha = 0.25)
       p
