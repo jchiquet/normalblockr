@@ -347,7 +347,7 @@ NormalBlockBase <- R6::R6Class(
         ## Nice nodes
         V.deg <- igraph::degree(G)/sum(igraph::degree(G))
         igraph::V(G)$label.cex <- V.deg / max(V.deg) + .5
-        igraph::V(G)$size <- table(self$clustering) * 100 / self$p
+        igraph::V(G)$size <- tabulate(self$clustering, nbins = self$q) * 100 / self$p
         igraph::V(G)$label.color <- rgb(0, 0, .2, .8)
         igraph::V(G)$frame.color <- NA
         ## Nice edges
@@ -615,7 +615,11 @@ NormalBlockBase <- R6::R6Class(
     #' @field memberships cluster memberships
     memberships = function(value) private$C,
     #' @field clustering given as the list of elements contained in each cluster
-    clustering = function(value) get_clusters(private$C),
+    clustering = function(value) {
+      cl <- get_clusters(private$C)
+      names(cl) <- colnames(self$data$Y)
+      cl
+    },
     #' @field cluster_sizes given as a vector of cluster sizes
     cluster_sizes = function(value) table(self$clustering),
     #' @field elements_per_cluster given as the list of elements contained in each cluster
