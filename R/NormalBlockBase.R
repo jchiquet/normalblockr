@@ -481,7 +481,12 @@ NormalBlockBase <- R6::R6Class(
     ## mask makes the weight matrix vary by both row and column, so each
     ## column of B is solved independently (mirrors nb_optim::solve_wls in
     ## src/zi_closed_form_solvers.h -- no iterative optimizer is needed since
-    ## the objective is exactly quadratic in B).
+    ## the objective is exactly quadratic in B). Uses a pseudo-inverse rather
+    ## than solve() because, e.g. with a one-hot design and enough zero
+    ## inflation, a whole design level can be all-zero for some variable,
+    ## making XtWX exactly singular; ginv() falls back to the minimum-norm
+    ## solution instead of erroring (mirroring arma::solve()'s automatic
+    ## pinv fallback on the C++ side).
     zi_diag_normal_optim_B = function(dm1) {
       DM1 <- matrix(dm1, self$data$n, self$data$p, byrow = TRUE) * self$data$zeros_bar
       B <- matrix(0, self$d, self$p)
@@ -489,7 +494,7 @@ NormalBlockBase <- R6::R6Class(
         w <- DM1[, j]
         XtWX <- crossprod(self$data$X, self$data$X * w)
         XtWy <- crossprod(self$data$X, self$data$Y[, j] * w)
-        B[, j] <- solve(XtWX, XtWy)
+        B[, j] <- MASS::ginv(XtWX) %*% XtWy
       }
       B
     },
