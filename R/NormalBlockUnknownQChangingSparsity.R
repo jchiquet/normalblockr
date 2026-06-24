@@ -25,8 +25,23 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
       self$control <- control
       self$control$zero_inflation <- zero_inflation
       control_ <- control
+
+      ## See NormalBlockUnknownQ$initialize() for the rationale: one wide SBM
+      ## exploration over the whole q_list range replaces one independent
+      ## exploration per q. control_$clustering_init is then read by every
+      ## get_model() call inside NormalBlockChangingSparsity$initialize()
+      ## (including across its own sparsity sweep), so setting it once here
+      ## per q is enough.
+      sbm_path <- NULL
+      if (identical(control$clustering_approx, "sbm") &&
+          is.null(control$clustering_init) && !zero_inflation) {
+        sbm_path <- sbm_clustering_path(ols_residuals(mydata), q_list)
+      }
+
       self$models <- purrr::map(seq_along(q_list), function(rank) {
-        if (!is.null(control$clustering_init))
+        if (!is.null(sbm_path))
+          control_$clustering_init <- sbm_path[[as.character(q_list[rank])]]
+        else if (!is.null(control$clustering_init))
           control_$clustering_init <- control$clustering_init[[rank]]
         model <- NormalBlockChangingSparsity$new(mydata, q_list[rank], zero_inflation, control_)
       })

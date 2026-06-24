@@ -30,11 +30,28 @@ NormalBlockUnknownQ <- R6::R6Class(
       self$control <- control
       self$control$zero_inflation <- zero_inflation
 
+      ## A single wide SBM exploration over the whole q_list range visits
+      ## every intermediate block count on its way there, so it gives a
+      ## clustering for every q in q_list at a fraction of the cost of letting
+      ## each model run its own independent exploration (clustering_approx =
+      ## "sbm" otherwise repeats the explore step once per q -- see
+      ## sbm_clustering_path() in R/utils.R). Only applies when nothing more
+      ## specific was already requested (no explicit clustering_init, and the
+      ## clustering itself only depends on the OLS residuals, not on the
+      ## zero-inflation mask, so it is skipped for ZI collections).
+      sbm_path <- NULL
+      if (identical(control$clustering_approx, "sbm") &&
+          is.null(control$clustering_init) && !zero_inflation) {
+        sbm_path <- sbm_clustering_path(ols_residuals(mydata), q_list)
+      }
+
       # instantiates an NormalBlockUnknownClusters model for each q in nb_blocks
       this_control <- control
       self$models <- map(rank(q_list),
           function(r) {
-            this_control$clustering_init <- control$clustering_init[[r]]
+            this_control$clustering_init <-
+              if (!is.null(sbm_path)) sbm_path[[as.character(q_list[r])]]
+              else control$clustering_init[[r]]
             model <- get_model(mydata,
                                q_list[r],
                                sparsity = sparsity,

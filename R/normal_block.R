@@ -75,7 +75,19 @@ normal_block <- function(data,
 #' recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no
 #' likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
 #' are all `NA` on the resulting model.
-#' @param clustering_approx to use for clustering with heuristic inference method
+#' @param clustering_approx clustering heuristic used to initialize the unknown
+#' clustering, one of "ward2" (default), "kmeans", "sbm" or "kmeansvar" (the
+#' latter from the ClustOfVar package, like the internal "hclustvar" fallback
+#' used whenever the chosen method collapses to fewer than q clusters). No
+#' single method dominates on every dataset, so it is worth trying more than
+#' one (see inst/normal_block_models.qmd for a benchmark). When fitting a
+#' collection over several values of q (`normal_block(blocks = <vector>)`,
+#' [NormalBlockUnknownQ], [NormalBlockUnknownQChangingSparsity]) without an
+#' explicit `clustering_init`, "sbm" runs a single SBM exploration over the
+#' whole range of q and reuses it for every model in the collection instead of
+#' repeating an independent (and increasingly costly) exploration for each q;
+#' any q its own model-selection does not reach falls back to a cheap "ward2"
+#' clustering rather than a dedicated (and potentially expensive) SBM call.
 #' @export
 NB_control <- function(
     niter                = 100,
@@ -89,7 +101,7 @@ NB_control <- function(
     verbose              = TRUE,
     heuristic            = FALSE,
     noise_covariance     = c("diagonal", "spherical"),
-    clustering_approx    = c("ward2", "kmeans", "sbm")) {
+    clustering_approx    = c("ward2", "kmeans", "sbm", "kmeansvar")) {
 
   if (!is.null(sparsity_weights))
     stopifnot(all(is.matrix(sparsity_weights), isSymmetric(sparsity_weights)))

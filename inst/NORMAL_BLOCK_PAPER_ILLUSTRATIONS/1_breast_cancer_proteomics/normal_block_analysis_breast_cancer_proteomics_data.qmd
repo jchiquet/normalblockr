@@ -48,6 +48,15 @@ data_subtype <- NormalBlockData$new(Y, X_subtype)
 NB_prot_subtype <- normal_block(data_subtype, blocks = 1:40)
 ```
 
+```{r running-normal-block}
+select_q_prot_subtype <- SelectionNClusters$new(
+  data_subtype, c(1,30),
+  zero_inflation = FALSE,
+  sparsity = 0,
+  control = NB_control()
+)
+```
+
 ### Model selection: criteria to fix the number of clusters
 
 ```{r plotting criteria}

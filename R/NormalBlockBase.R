@@ -466,7 +466,7 @@ NormalBlockBase <- R6::R6Class(
     ## MLE of MV Normal distribution
     multivariate_normal_inference = function(){
       B     <- self$data$XtXm1 %*% self$data$XtY
-      R     <- self$data$Y - self$data$X %*% B
+      R     <- ols_residuals(self$data)
       Sigma <- cov(R)
       list(B = B, R = R, Sigma = Sigma)
     },
@@ -525,17 +525,23 @@ NormalBlockBase <- R6::R6Class(
     ## (n x p) into an initial clustering of the p variables into self$q
     ## groups (a vector of length p with values in 1:q). One single table
     ## instead of one ad hoc private method per algorithm -- selectable via
-    ## NB_control(clustering_approx = ...) ("kmeans"/"ward2"/"sbm"; "hclustvar"
-    ## is reserved for the fallback below, not user-selectable).
+    ## NB_control(clustering_approx = ...) ("kmeans"/"ward2"/"sbm"/"kmeansvar";
+    ## "hclustvar" is reserved for the fallback below, not user-selectable).
+    ## Benchmarked on two real datasets (inst/normal_block_models.qmd): no
+    ## single method dominates everywhere -- e.g. kmeansvar is unremarkable on
+    ## breast cancer proteomics data but wins decisively (20/24 q values) on
+    ## university webpages text data, hence it being offered as a genuine
+    ## alternative rather than dropping ClustOfVar from the dependencies.
     clustering_methods = list(
-      kmeans = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
-      ward2  = function(R, q) cutree(hclust(dist(1 - cor(R)), method = "ward.D2"), q),
-      sbm    = function(R, q) {
+      kmeans    = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
+      ward2     = function(R, q) cutree(hclust(dist(1 - cor(R)), method = "ward.D2"), q),
+      sbm       = function(R, q) {
         options <- list(verbosity = 0, exploreMin = q, exploreMax = q, plot = FALSE, nbCores = 1)
         mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)
         mySBM$setModel(q)
         mySBM$memberships
       },
+      kmeansvar = function(R, q) ClustOfVar::kmeansvar(X.quanti = R, init = q, nstart = 30)$cluster,
       hclustvar = function(R, q) cutree(ClustOfVar::hclustvar(R), q)
     ),
 

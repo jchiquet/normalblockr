@@ -56,3 +56,54 @@ sigmoid <- function(x){
   return(1 / (1 + exp(-x)))
 }
 
+# OLS residuals of Y on X (used to seed the clustering heuristics). Factored
+# out of NormalBlockBase$multivariate_normal_inference() so that collections
+# fitting several q values (NormalBlockUnknownQ, NormalBlockUnknownQChangingSparsity)
+# can get the same residual once, instead of recomputing it once per model
+# (see sbm_clustering_path()).
+ols_residuals <- function(data) {
+  B <- data$XtXm1 %*% data$XtY
+  data$Y - data$X %*% B
+}
+
+# Clusters the (n x p) residual matrix R into every q in q_list using a
+# SINGLE sbm::estimateSimpleSBM exploration over [min(q_list), max(q_list)],
+# instead of one independent exploration per q. A wide SBM exploration
+# already visits every intermediate block count on its way to fitting any
+# single one (its cost grows steeply with the explored range, but the whole
+# path comes "for free" with the most expensive single point) -- one
+# exploration plus near-instant setModel() calls reproduces the same
+# clusterings as calling estimateSimpleSBM separately for each q, at a
+# fraction of the cost (see inst/normal_block_models.qmd, "Implementation
+# notes": benchmarked ~15-90x cheaper depending on the q range, same or
+# statistically equivalent ICL after the (V)EM polish).
+# estimateSimpleSBM's own model selection is adaptive and can stop exploring
+# before exploreMax if its ICL stops improving, so not every q in q_list is
+# necessarily covered by a single exploration; and even a stored model for q
+# blocks can have an empty block, just like the VEM's own argmax clustering
+# (see plot_network()/cluster_sizes' tabulate() fix). Re-running a dedicated,
+# increasingly expensive SBM exploration for just those q's would silently
+# reintroduce the very cost (and, empirically, no quality benefit -- see
+# inst/normal_block_models.qmd) this function exists to avoid, so those
+# entries fall back to a single shared, cheap ward2 clustering instead.
+# Returns a list of membership vectors (one per q, never NULL), named by q.
+sbm_clustering_path <- function(R, q_list) {
+  options <- list(verbosity = 0, exploreMin = min(q_list), exploreMax = max(q_list),
+                  plot = FALSE, nbCores = 1)
+  mySBM <- sbm::estimateSimpleSBM(stats::cov(R), "gaussian", estimOptions = options)
+  explored <- mySBM$storedModels$nbBlocks
+  fallback_tree <- stats::hclust(stats::dist(1 - stats::cor(R)), method = "ward.D2")
+
+  stats::setNames(
+    lapply(q_list, function(q) {
+      if (q %in% explored) {
+        mySBM$setModel(q)
+        memberships <- mySBM$memberships
+        if (length(unique(memberships)) == q) return(memberships)
+      }
+      stats::cutree(fallback_tree, q)
+    }),
+    q_list
+  )
+}
+
