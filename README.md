@@ -32,7 +32,7 @@ The package comes with a small artificial data set simulated under the model.
 testdata <- readRDS("tests/testthat/testdata/testdata_normal.RDS")
 Y        <- testdata$Y ; X <- testdata$X
 C        <- testdata$parameters$C ; Q <- ncol(C)
-data     <- NB_data$new(Y, X) 
+data     <- NormalBlockData$new(Y, X) 
 model    <- normal_block(data, blocks = C)
 ```
 
@@ -46,7 +46,7 @@ model    <- normal_block(data, blocks = C, sparsity = TRUE)
 
 ```r
 model    <- normal_block(data, blocks = 2:5, sparsity = TRUE)
-model$plot_criteria()
+model$plot()
 model_BIC <- model$get_best_model("BIC")
 ```
 
@@ -55,7 +55,7 @@ model_BIC <- model$get_best_model("BIC")
 testdata_zi <- readRDS("tests/testthat/testdata/testdata_normal_zi.RDS")
 Y        <- testdata_zi$Y ; X <- testdata_zi$X
 C        <- testdata_zi$parameters$C ; Q <- ncol(C)
-data_zi  <- NB_data$new(Y, X) 
+data_zi  <- NormalBlockData$new(Y, X) 
 model    <- normal_block(data_zi, blocks = C, zero_inflation = TRUE)
 ```
 

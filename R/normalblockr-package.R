@@ -2,6 +2,8 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @import methods R6 glassoFast nloptr purrr Matrix ggplot2 dplyr
+#' @import purrr
+#' @importFrom Rcpp sourceCpp
+#' @useDynLib normalblockr, .registration = TRUE
 ## usethis namespace: end
 NULL

@@ -37,7 +37,7 @@ Formatting data for Normal-Block.
 ```{r Normal-Block-formatting}
 Y            <- as.matrix(RPPA_expr) %>% scale()
 X_subtype    <- model.matrix(~ 0 + PAM50_SUBTYPE, data = RPPA_clin)
-data_subtype <- NB_data$new(Y, X_subtype)
+data_subtype <- NormalBlockData$new(Y, X_subtype)
 ```
 
 ## Applying Normal-Block to the data
@@ -56,7 +56,7 @@ NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
 
 ```{r model-selection}
 selected_NB <- NB_prot_subtype$get_best_model("ICL")
-paste0("ICL selects ", selected_NB$Q, " clusters.")
+paste0("ICL selects ", selected_NB$q, " clusters.")
 ```
 
 ## Enrichment analysis

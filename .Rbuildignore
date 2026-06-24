@@ -5,7 +5,11 @@
 ^inst/onema
 ^inst/itraq
 ^inst/NORMAL_BLOCK_PAPER_ILLUSTRATIONS
+^inst/normal_block_models.*
 
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+
+snowflake.log
+Rplots.pdf

@@ -1,7 +1,7 @@
 #' Normal-block model
 #'
 #' Fit a normal-block model with a variational or heuristic algorithm
-#' @param data NB_data object, contains the matrix of responses (Y, n x p) and the design matrix (X, n x d), must be created with NB_data$new.
+#' @param data NormalBlockData object, contains the matrix of responses (Y, n x p) and the design matrix (X, n x d), must be created with NormalBlockData$new.
 #' @param blocks either a integer (number of blocks), a vector of integer (list of possible number of block)
 #'  or a p * q matrix (for indicating block membership when its known)
 #' @param sparsity either TRUE to run the optimization for different sparsity penalty values
@@ -9,11 +9,11 @@
 #' @param zero_inflation boolean to indicate if Y is zero-inflated and adjust fitted model as a consequence
 #' @param control a list-like structure for detailed control on parameters should be
 #' generated with NB_control().
-#' @return an R6 object with one of the NB classes (or a collection of NB objects).
+#' @return an R6 object with one of the model classes (or a collection of model objects).
 #' @examples
 #' ## Normal Data
 #' ex_data <- generate_normal_block_data(n=50, p=50, d=1, q=3)
-#' data <- NB_data$new(ex_data$Y, ex_data$X)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' my_normal_block <- normal_block(data, blocks = 1:6)
 #' \dontrun{
 #' my_normal_block$plot(c("deviance", "BIC", "ICL"))
@@ -22,7 +22,7 @@
 #' }
 #' ## Normal Data with Zero Inflation
 #' ex_data_zi <- generate_normal_block_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
-#' zidata <- NB_data$new(ex_data_zi$Y, ex_data_zi$X)
+#' zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)
 #' my_normal_block <- normal_block(zidata, blocks = 1:6, zero_inflation = TRUE)
 #'
 #' @export
@@ -122,36 +122,32 @@ get_model <- function(data,
                       zero_inflation = FALSE,
                       control = NB_control()) {
 
-  sparse_class  <- ifelse(typeof(sparsity) == "logical" &
-                            sparsity,
-                          "_changing_sparsity",
-                          "")
+  changing_sparsity <- isTRUE(sparsity)
+  unknown_q_list    <- !is.matrix(blocks) && length(blocks) > 1
+  is_collection     <- changing_sparsity || unknown_q_list
 
-  block_class   <- ifelse(
-    sparse_class == "_changing_sparsity" &
-      (is.matrix(blocks) | length(blocks) == 1),
-    "",
-    ifelse(
-      is.matrix(blocks),
-      "_fixed_blocks",
-      ifelse(length(blocks) > 1, "_unknown_q", "_fixed_q")
-    )
-  )
-
-  is_collection <- ifelse(sparse_class == "_changing_sparsity" | block_class == "_unknown_q", TRUE, FALSE)
-
-  class_name <- paste0("NB", block_class, sparse_class)
-  if (!is_collection & zero_inflation) class_name <- paste0("ZI", class_name)
+  if (is_collection) {
+    class_name <- if (changing_sparsity && unknown_q_list) {
+      "NormalBlockUnknownQChangingSparsity"
+    } else if (changing_sparsity) {
+      "NormalBlockChangingSparsity"
+    } else {
+      "NormalBlockUnknownQ"
+    }
+  } else {
+    class_name <- if (is.matrix(blocks)) "NormalBlockKnownClusters" else "NormalBlockUnknownClusters"
+    if (zero_inflation) class_name <- paste0("ZI", class_name)
+  }
 
   myClass <- eval(str2lang(class_name))
   if (is_collection) {
-    if (sparse_class == "_changing_sparsity") {
-      model   <- myClass$new(data, blocks, zero_inflation, control = control)
-    } else{
-      model   <- myClass$new(data, blocks, zero_inflation, sparsity, control = control)
+    if (changing_sparsity) {
+      model <- myClass$new(data, blocks, zero_inflation, control = control)
+    } else {
+      model <- myClass$new(data, blocks, zero_inflation, sparsity, control = control)
     }
-  } else{
-    model   <- myClass$new(data, blocks, sparsity, control = control)
+  } else {
+    model <- myClass$new(data, blocks, sparsity, control = control)
   }
   model
 }

@@ -1,0 +1,272 @@
+---
+title: "Normal-Block models: distributions, criteria and explicit V(E)M solutions"
+format: pdf
+editor: visual
+header-includes:
+  - \usepackage{pdflscape}
+---
+
+::: hidden
+\newcommand{\rs}{\mathrm{row\text{-}sum}}
+\newcommand{\cs}{\mathrm{col\text{-}sum}}
+\newcommand{\ts}{\mathrm{total\text{-}sum}}
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\bO}{\Omega}
+:::
+
+This document is a reference card for every Normal-Block variant implemented in `src/` (C++/RcppArmadillo core) and validated against the R6 reference implementation. It follows the notation of the *normal_block_calculations* manuscript and chapter 3 of the thesis : $\odot$ Hadamard product, $\oslash$ term-to-term inverse, $A_i$ the (column) transpose of the $i$-th row of $A$, and
+
+$$A_{\mathrm{row\text{-}sum}} = \Big(\sum_i A_{i\cdot}\Big)^\top, \qquad
+A_{\mathrm{col\text{-}sum}} = \sum_j A_{\cdot j}, \qquad
+A_{\mathrm{total\text{-}sum}} = \sum_{ij} A_{ij}.$$
+
+For each variant we give: the generative model, the optimized criterion (log-likelihood or ELBO), and the explicit E/M (or VE/M) updates exactly as implemented in `src/`. All formulas below have been checked against `nb_block.pdf` (chapter 3) and validated numerically against the R6 classes (`NormalBlockKnownClusters`, `NormalBlockUnknownClusters`, `ZINormalBlockKnownClusters`, `ZINormalBlockUnknownClusters`) in `tests/testthat/test-cpp-normal-block.R` and `test-cpp-zi-normal-block.R`.
+
+> **Note on two known documentation typos in `nb_block.pdf`**, corrected here: the $\alpha$ estimator for the zero-inflated unknown-clusters model (§3.C.2) normalizes by $p$ (number of variables), not $n$; and the leading constant of the unknown-clusters ELBO (p.60) is $-\tfrac{np}{2}\log(2\pi)$, not $-\tfrac{n}{2}\log(2\pi)$ (consistent with the known-clusters criterion on p.58). See the PR/commit discussion for the full derivation.
+
+## 0. The Normal-Block model
+
+$$\begin{aligned}
+\text{Latent space:} \quad & W_i \sim \mathcal N(0, \Omega^{-1}), \quad W_i \in \mathbb R^q \\
+\text{Observation space:} \quad & Y_i \mid W_i \sim \mathcal N(C W_i + B^\top X_i,\, D), \quad Y_i \in \mathbb R^p
+\end{aligned}$$
+
+$Y$ ($n\times p$), $X$ ($n\times d$), $W$ ($n\times q$, stacked row-wise). $C$ ($p\times q$) is either a fixed 0/1 clustering matrix (**known clusters**), or a matrix of $\mathrm{Mult}(1,\alpha)$ membership probabilities $\tau$ (**unknown clusters**, inferred jointly with everything else). $D$ is the residual covariance: $D = \mathrm{diag}(d^{-1})$ (**diagonal** noise) or $D = \xi^{-1} I_p$ (**spherical** noise, i.e. $d$ constant across variables).
+
+Throughout, `dm1` denotes $d$ (the precision vector $1/\mathrm{diag}(D)$, of length $p$, constant across entries in the spherical case) -- this is the field named `dm1_` in every C++ class (`src/noise_models.h`, `src/zi_noise_models.h`).
+
+## 1. Known clusters, diagonal noise (EM)
+
+R6: `NormalBlockKnownClusters` (`noise_covariance = "diagonal"`).
+
+C++: `norm_block_cov_diag_noise_known_clusters` (`src/normal_block_known_clusters.h`).
+
+**E-step.** Posterior $W_i \mid Y_i \sim \mathcal N(\mu_i, \Gamma)$, shared $\Gamma$ ($C$ is fixed, so $\Gamma$ does not depend on $i$):
+
+$$\Gamma = (\Omega+ C^\top D^{-1} C)^{-1} \qquad [q \times q]$$
+
+$$\mu = (Y - XB)\, D^{-1} C \Gamma \qquad [n \times q]$$
+
+**M-step.** With $R_\mu = Y - XB - \mu C^\top$:
+
+$$\hat B = (X^\top X)^{-1} X^\top (Y - \mu C^\top)$$
+
+$$\hat\Sigma = \frac{1}{n}\mu^\top\mu + \Gamma$$
+
+$$\hat\Omega= \hat\Sigma^{-1} \qquad \text{(or graphical lasso, §10)}$$
+
+$$\hat d = \frac{(R_\mu^2)_{\mathrm{col\text{-}sum}}}{n} + C\,\mathrm{diag}(\Gamma)$$
+
+**Criterion** (full log-likelihood, including the $W\mid Y$ entropy):
+
+$$J = -\frac{np}{2}\log(2\pi e) + \frac{n}{2}\sum_j \log(d_j) + \frac{n}{2}\log|\Omega| + \frac{n}{2}\log|\Gamma|$$
+
+## 2. Known clusters, spherical noise (EM)
+
+R6: `NormalBlockKnownClusters` (`noise_covariance = "spherical"`).
+
+C++: `norm_block_cov_spherical_noise_known_clusters`.
+
+Identical to §1 except $d$ is replaced by a single scalar $\xi$, shared across all $p$ variables:
+
+$$\xi^{-1} = \frac{1}{p}\sum_j \hat d_j = \frac{(R_\mu^2)_{\mathrm{total\text{-}sum}}}{np} + \frac{C_{\mathrm{col\text{-}sum}}^\top \mathrm{diag}(\Gamma)}{p}$$
+
+($\hat d$ as in §1, before collapsing to a scalar.) The criterion is the same formula as §1 with $d_j = \xi$ for all $j$ (so $\sum_j\log(d_j) = p\log(\xi)$).
+
+## 3. Unknown clusters, diagonal noise (VEM)
+
+R6: `NormalBlockUnknownClusters` (`noise_covariance = "diagonal"`).
+
+C++: `norm_block_cov_diag_noise_unknown_clusters` (`src/normal_block_unknown_clusters.h`).
+
+Mean-field approximation $\mathbb P(W, C \mid Y) \approx \prod_i \pi_1(W_i) \prod_j \pi_2(C_j)$, with $W_i \sim \mathcal N(M_i, \mathrm{diag}(S))$ ($S$ shared across rows -- no zero-inflation mask to break that symmetry) and $C_j \sim \mathrm{Mult}(1, \tau_{j\cdot})$.
+
+**VE-step.**
+
+$$\tilde\Gamma = (\Omega+ \mathrm{diag}(\tau^\top d))^{-1} \qquad [q\times q,\ \text{shared}]$$
+
+$$M = (Y - XB)\, D^{-1}\tau\tilde\Gamma \qquad [n\times q]$$
+
+$$S = \mathrm{diag}(\tilde\Gamma) \qquad [q]$$
+
+$$\eta = d \otimes_{\text{rows}} \big((Y-XB)^\top M\big) - \frac12\, d\, \big(M^2_{\mathrm{col\text{-}sum}} + nS\big)^\top
+       + \mathbf 1_p \log(\alpha)^\top - 1$$
+
+$$\tau_{j\cdot} = \mathrm{softmax}(\eta_{j\cdot}) \qquad \text{(skipped if } q=1 \text{ or fixed\_tau)}$$
+
+**M-step.** With $R = Y - XB$ (computed at the *start* of the VEM iteration, refreshed once $B$ is updated below -- see implementation note in §11) and $A = R^2 - 2R\odot(M\tau^\top) + (M^2+S)\tau^\top$:
+
+$$\hat B = (X^\top X)^{-1}X^\top(Y - M\tau^\top)$$
+
+$$\hat d = \mathrm{mean}_{\text{rows}}(A)$$
+
+$$\hat\Sigma_q = \frac{1}{n}M^\top M + \mathrm{diag}(S)$$
+
+$$\hat\Omega= \hat\Sigma_q^{-1} \qquad \text{(or graphical lasso, §10)}$$
+
+$$\hat\alpha = \mathrm{mean}_{\text{cols}}(\tau)$$
+
+**Criterion** (ELBO):
+
+$$J = -\frac{np}{2}\log(2\pi e) + \frac{n}{2}\sum_j\log(d_j) + \frac{n}{2}\log|\Omega| + \frac{n}{2}\sum_k\log(S_k)
+    + \sum_j \tau_{j\cdot}\log(\alpha) - \sum_{jk}\tau_{jk}\log(\tau_{jk})$$
+
+## 4. Unknown clusters, spherical noise (VEM)
+
+R6: `NormalBlockUnknownClusters` (`noise_covariance = "spherical"`).
+
+C++: `norm_block_cov_spherical_noise_unknown_clusters`.
+
+Identical to §3 with $d_j = \xi$ for all $j$:
+
+$$\xi^{-1} = \frac{1}{p}\sum_j \hat d_j = \frac{A_{\mathrm{total\text{-}sum}}}{np}$$
+
+## 5. Zero-inflation extension
+
+R6: `ZINormalBlockKnownClusters`, `ZINormalBlockUnknownClusters`. C++: `ZINormalBlockData` (`src/zi_normal_block_data.h`), `ZINormalBlockKnownClusters` / `ZINormalBlockUnknownClusters`.
+
+$$\begin{aligned}
+\text{Excess-of-zero layer:} \quad & Z_i \sim \bigotimes_j \mathrm{Bernoulli}(\kappa_j) \\
+\text{Observation space:} \quad & Y_i \mid Z_i, W_i = Z_i \odot \delta_0 + (1-Z_i)\odot\big(CW_i + \mathcal N(B^\top X_i, D)\big)
+\end{aligned}$$
+
+We write $\mathbf 1_Y = \texttt{zeros\_bar}$ ($n\times p$, $1$ where $Y_{ij}\neq 0$), $\mathbf 0_Y = 1 - \mathbf 1_Y$, $nY = (\mathbf 1_Y)_{\mathrm{col\text{-}sum}}$ (per-variable count of non-zero observations), $npY = (\mathbf 1_Y)_{\mathrm{total\text{-}sum}}$.
+
+$\kappa$ is estimated **once, upfront, outside the (V)EM loop**: a per-variable logistic regression of $\mathbf 0_Y[\cdot, j]$ on the zero-inflation design matrix $X_0$ (defaulting to an intercept-only column when $X_0$ is not supplied, in which case $\kappa_j$ reduces exactly to the empirical zero-proportion of variable $j$, as in `nb_block.pdf` §3.C). $\kappa$ is **never updated** during the (V)EM recursion; only its fixed contribution to the log-likelihood,
+
+$$\texttt{zi\_cond\_mean} = \sum\big(\mathbf 0_Y \odot \log(\kappa)\big) + \sum\big(\mathbf 1_Y \odot \log(1-\kappa)\big),$$
+
+is carried through the C++ core (`ZINormalBlockData::zi_cond_mean`).
+
+Throughout, $W = \mathbf 1_Y \odot D^{-1}$ (broadcast $d$ over rows, masked by $\mathbf 1_Y$) is the "masked weight" matrix used in every closed-form solve below (`dm1_mat` / `DM1` in the code).
+
+## 6. ZI, known clusters, diagonal noise (EM)
+
+C++: `zi_norm_block_cov_diag_noise_known_clusters` (`src/zi_normal_block_known_clusters.h`).
+
+Because the zero-inflation mask varies row by row, the posterior covariance of $W_i \mid Y_i$ is **row-dependent**: $\Gamma$ is a family of $n$ distinct $q\times q$ matrices (`arma::cube`), not a single shared matrix as in §1.
+
+**E-step.** With $R = Y - XB$ (current $B$):
+
+$$\forall i: \quad \Gamma^{(i)} = \big(\Omega+ \mathrm{diag}((WC)_{i\cdot})\big)^{-1} \qquad [q\times q]$$
+
+$$\forall i: \quad \mu_i = \big((R\odot W)C\big)_{i\cdot}\, \Gamma^{(i)} \qquad [q]$$
+
+**M-step.** $B$ has no closed form *as a single linear system* (the mask makes each column's weights different), but the per-column subproblem stays exactly quadratic, hence solvable column-by-column (`nb_optim::solve_wls`, §11):
+
+$$\hat B = \arg\min_B \; \sum\Big( W \odot (Y - XB - \mu C^\top)^2 \Big) \qquad \text{[solved one column at a time]}$$
+
+With $R_\mu = R - \mu C^\top$ ($R$ refreshed with the new $\hat B$ first, see §11) and $\big(C\mathrm{diag}(\Gamma)\big)_i := C\,\mathrm{diag}(\Gamma^{(i)})$ (expansion of each row's posterior variance to the variable level via the cluster structure):
+
+$$A = R_\mu^2 + \big(C\mathrm{diag}(\Gamma)\big)_{i\cdot} \qquad [n\times p]$$
+
+$$\hat d = nY \oslash (\mathbf 1_Y \odot A)_{\mathrm{col\text{-}sum}}$$
+
+$$\hat\Sigma = \frac{1}{n}\Big(\mu^\top\mu + \sum_i \Gamma^{(i)}\Big)$$
+
+$$\hat\Omega= \hat\Sigma^{-1} \qquad \text{(or graphical lasso, §10)}$$
+
+**Criterion:**
+
+$$J = -\frac{npY}{2}\log(2\pi e) + \frac12 \sum_j nY_j \log(d_j) + \frac{n}{2}\log|\Omega|
+    + \frac12 \sum_i \log|\Gamma^{(i)}| + \texttt{zi\_cond\_mean}$$
+
+## 7. ZI, known clusters, spherical noise (EM)
+
+C++: `zi_norm_block_cov_spherical_noise_known_clusters`. Identical to §6 with:
+
+$$\xi^{-1} = \frac{npY}{(\mathbf 1_Y \odot A)_{\mathrm{total\text{-}sum}}}$$
+
+## 8. ZI, unknown clusters, diagonal noise (VEM)
+
+C++: `zi_norm_block_cov_diag_noise_unknown_clusters` (`src/zi_normal_block_unknown_clusters.h`).
+
+Same mean-field approximation as §3, but the zero-inflation mask makes the variational variance **row-dependent**: $S$ is now an $n\times q$ matrix, not a length-$q$ vector.
+
+**VE-step.** With $R = Y - XB$:
+
+$$M = \arg\max_M \; -\frac12 \Big( \sum\big(W\odot(M^2\tau^\top - 2R\odot(M\tau^\top))\big) + \sum\big((M\Omega)\odot M\big) \Big)$$
+
+$$S = \big(W\tau + \mathbf 1_n \mathrm{diag}(\Omega)^\top\big)^{\oslash} \qquad [n\times q]$$
+
+$$\eta = -\frac12\Big(W^\top(M^2+S) - 2(W\odot R)^\top M\Big) + \mathbf 1_p \log(\alpha)^\top - 1$$
+
+$$\tau_{j\cdot} = \mathrm{softmax}(\eta_{j\cdot}) \qquad \text{(skipped if } q=1 \text{ or fixed\_tau)}$$
+
+$M$'s objective is exactly quadratic and **row-separable** (mirrors $\Gamma^{(i)}/\mu_i$ in §6): each row solves an independent $q\times q$ ridge system (`nb_optim::solve_tau_ridge`, §11):
+
+$$\forall i: \quad M_i = \big(\Omega+ \mathrm{diag}((WC)_{i\cdot})\big)^{-1} \big((W\odot R)C\big)_{i\cdot}$$
+
+**M-step.** With $A = R^2 - 2R\odot(M\tau^\top) + (M^2+S)\tau^\top$ and $R$ refreshed with the new $\hat B$ before estimating $d$ (§11):
+
+$$\hat B = \arg\min_B \; \sum\Big( W \odot (Y - XB - M\tau^\top)^2 \Big) \qquad \text{[solved one column at a time]}$$
+
+$$\hat d = nY \oslash (\mathbf 1_Y \odot A)_{\mathrm{col\text{-}sum}}$$
+
+$$\hat\alpha = \mathrm{mean}_{\text{cols}}(\tau)$$
+
+$$\hat\Sigma_q = \frac{1}{n}M^\top M + \mathrm{diag}\big(\mathrm{mean}_{\text{cols}}(S)\big)$$
+
+$$\hat\Omega= \hat\Sigma_q^{-1} \qquad \text{(or graphical lasso, §10)}$$
+
+**Criterion:**
+
+$$\begin{aligned}
+J &= -\frac{npY}{2}\log(2\pi e) + \frac12\sum_j nY_j\log(d_j) + \frac{n}{2}\log|\Omega| + \frac12\sum_{ik}\log(S_{ik}) \\
+  &\quad + \sum_j\tau_{j\cdot}\log(\alpha) - \sum_{jk}\tau_{jk}\log(\tau_{jk}) + \texttt{zi\_cond\_mean}
+\end{aligned}$$
+
+($\sum_{ik}\log(S_{ik})$ now ranges over all $n\times q$ entries, since $S$ is row-dependent.)
+
+## 9. ZI, unknown clusters, spherical noise (VEM)
+
+C++: `zi_norm_block_cov_spherical_noise_unknown_clusters`. Identical to §8 with:
+
+$$\xi^{-1} = \frac{npY}{(\mathbf 1_Y\odot A)_{\mathrm{total\text{-}sum}}}$$
+
+## 10. Sparse precision matrix (graphical lasso)
+
+In every variant above, whenever `sparsity` $>0$, $\hat\Omega$ is no longer the exact inverse of $\hat\Sigma$ (or $\hat\Sigma_q$): it is estimated by the graphical lasso (`glassoFast::glassoFast`, called back from C++, see `src/omega_estimation.h`) applied to $\hat\Sigma$ with penalty $\lambda \odot W_\lambda$ ($W_\lambda$ a $q\times q$ matrix of per-pair weights, `sparsity_weights`, diagonal excluded from the penalty, and $\lambda$ the scalar `sparsity`).
+
+Because $\hat\Omega$ then no longer satisfies $\mathrm{tr}(\hat\Omega\hat\Sigma) = q$ (the identity that makes the corresponding term in $J$ collapse to a constant when the inversion is exact), every criterion above gains an explicit correction term when $\lambda > 0$:
+
+$$J_{\text{struct}} = J + \frac{nq}{2} - \frac{n}{2}\,\mathrm{tr}(\hat\Omega\hat\Sigma) - \lambda \sum\big|W_\lambda \odot \hat\Omega\big|$$
+
+where $\hat\Sigma$ is the corresponding M-step covariance estimate of each variant (§§1-9). This is implemented identically (modulo the variant-specific $\hat\Sigma$) in every `objective()` method.
+
+## 11. Implementation notes
+
+- **The residual** $R = Y - XB$ is always refreshed after $B$ is updated. Every $d$/`dm1` update above (§§1-4, 6-9) uses the residual computed with the *current* $B$ (i.e. $B$ is updated first within the M-step, then $R$ is recomputed before estimating $d$). Earlier revisions of the R6 reference implementation (`NormalBlockUnknownClusters`, `ZINormalBlockKnownClusters`, `ZINormalBlockUnknownClusters`) recomputed $R$ only in the known-clusters non-ZI model (§§1, 2) and reused a one-iteration-stale $R$ in the other three; this has been fixed on both the R and C++ sides for consistency (validated to machine/optimizer precision against R6 in `tests/testthat/`).
+
+- **No iterative optimizer is used anywhere.** `nb_block.pdf` (§§3.C.1, 3.C.2) presents the ZI $B$- and $M$-updates as requiring gradient ascent (the R6 reference used to call `nloptr`'s L-BFGS for both, within the (V)EM recursion). In fact, the zero-inflation mask only reweights residuals -- it introduces no nonlinearity -- so both subproblems stay exactly quadratic: $B$'s normal equations decouple into one weighted least-squares solve per column (`nb_optim::solve_wls`), and $M$'s decouple into one $q\times q$ ridge solve per row (`nb_optim::solve_tau_ridge`, identical in structure to $\Gamma^{(i)}/\mu_i$ in the ZI known-clusters E-step). Both are implemented in `src/zi_closed_form_solvers.h`. The same observation applies to the R-side heuristic initialization of $B$ (`zi_diag_normal_optim_B` in `R/NormalBlockBase.R`), which now also solves a per-column weighted least squares problem directly instead of calling `nloptr`. This removes any dependency on `nloptr`/NLopt entirely, and is substantially faster (see benchmark below).
+
+- **The per-column weighted normal equations can be exactly singular, and this is expected, not a bug.** With a one-hot design (e.g. a categorical covariate with no intercept) and real zero-inflated data, it is common for some design level to have *zero* non-zero-inflated observations for a given variable: both $X^\top W X$ and $X^\top W y$ are then exactly zero on that coordinate (no information to estimate that regression coefficient at all). `solve()` in base R errors on this (`Lapack routine dgesv: system is exactly singular`), whereas `arma::solve()` on the C++ side automatically falls back to a pseudo-inverse and only emits a (non-fatal) runtime warning -- silenced via `PKG_CPPFLAGS = -DARMA_WARN_LEVEL=1` in `src/Makevars`/`Makevars.win`, since it would otherwise print once per singular column, per EM iteration, per model in a collection (hundreds of thousands of lines on real microbiome-scale data). `zi_diag_normal_optim_B` on the R side mirrors this by using `MASS::ginv()` instead of `solve()`, which returns the same minimum-norm solution (effectively a 0 coefficient for the indeterminate design level) instead of erroring.
+
+- **Quantities shared by `E_step()`/`M_step()`/`objective()` within one (V)EM iteration are computed once, not re-derived.** Three instances, all in `src/`: (i) $\hat\Sigma$ (the M-step covariance estimate) is computed in `M_step()` to update $\hat\Omega$ and was, until recently, recomputed identically inside `objective()` when `sparsity_ > 0` -- it is now cached in a `Sigma_hat_` member, set once per iteration. (ii) In the two zero-inflated variants, the masked weight matrix (`dm1_mat_`/`DM1_`, equal to `repmat(dm1, n) % zeros_bar`) was computed once in `E_step()` and again, identically, in `M_step()` (`dm1_` only changes at the very end of `M_step()`); it is now a member set once in `E_step()` and reused. (iii) $\Gamma$'s log-determinant, needed in `objective()`, is a free byproduct of the Cholesky factorization already performed to invert $\Gamma$ in `E_step()` (`\log\det A = 2\sum\log\diag(\mathrm{chol}(A))`); calling `arma::inv_sympd()` then separately `arma::log_det_sympd()` repeats that factorization for nothing. `nb_utils::inv_and_log_det_sympd()` (`src/utils_arma.h`) returns both from a single `arma::chol()` call; `log_det_Gamma_` is cached from it in `E_step()` and read back in `objective()`. This matters most in `ZINormalBlockKnownClusters`, where $\Gamma$ is a cube of $n$ row-specific matrices: without the fix, $n$ redundant factorizations were performed per iteration instead of $0$. All three caches are initialized at construction time (matching the initial state of `Mu_`/`Gamma_`/`M_`/`S_`) so that the very first call to `objective()` in `run_em()` -- which happens before any `E_step()`/`M_step()` -- reads a value consistent with the model's initial parameters rather than an empty member. None of this changes any computed value (validated to the same `tolerance = 1e-8` against the R6 reference as before); it only removes redundant work.
+
+- **Code map.** (table on the next page, in landscape orientation -- the full C++ template aliases are too long to fit a portrait page legibly; the table below omits their common prefix, `norm_block_cov_` for the non-ZI variants and `zi_norm_block_cov_` for the ZI ones)
+
+```{=latex}
+\begin{landscape}
+\small
+```
+
+| Variant | C++ class (suffix, after the common prefix) | Rcpp export |
+|---|---|---|
+| §1 known, diagonal | `diag_noise_known_clusters` | `NormalBlockKnownClusters_fit` |
+| §2 known, spherical | `spherical_noise_known_clusters` | `NormalBlockKnownClusters_fit` |
+| §3 unknown, diagonal | `diag_noise_unknown_clusters` | `NormalBlockUnknownClusters_fit` |
+| §4 unknown, spherical | `spherical_noise_unknown_clusters` | `NormalBlockUnknownClusters_fit` |
+| §6 ZI known, diagonal | `diag_noise_known_clusters` | `ZINormalBlockKnownClusters_fit` |
+| §7 ZI known, spherical | `spherical_noise_known_clusters` | `ZINormalBlockKnownClusters_fit` |
+| §8 ZI unknown, diagonal | `diag_noise_unknown_clusters` | `ZINormalBlockUnknownClusters_fit` |
+| §9 ZI unknown, spherical | `spherical_noise_unknown_clusters` | `ZINormalBlockUnknownClusters_fit` |
+
+```{=latex}
+\end{landscape}
+```
+
+Both noise variants of a given clustering mode share one C++ template, parameterized by `NoisePolicy` (`NormalBlockKnownClusters`, `NormalBlockUnknownClusters`, `ZINormalBlockKnownClusters`, `ZINormalBlockUnknownClusters`), instantiated with `DiagonalNoise`/`SphericalNoise` (`src/noise_models.h`) or `ZIDiagonalNoise`/`ZISphericalNoise` (`src/zi_noise_models.h`); only the $d$/$\xi$ update differs between the two.
+
+  All initialization (heuristic parameters, clustering, the upfront zero-inflation logistic regression) is done in R; the C++ classes only run the (V)EM recursion from parameters passed in -- see the R6 classes (`NormalBlockKnownClusters`, `NormalBlockUnknownClusters`, `ZINormalBlockKnownClusters`, `ZINormalBlockUnknownClusters`) for the R-side heuristic initialization that supplies the starting values.

@@ -73,7 +73,7 @@ Y <- log(1 + freq_mat[, terms]) %>% scale() %>% as.matrix()
 ```
 
 ```{r formatting-the-data-for-Normal-Block}
-data <- NB_data$new(Y,  X = matrix(1, nrow(Y), 1))
+data <- NormalBlockData$new(Y,  X = matrix(1, nrow(Y), 1))
 ```
 
 ## Running Normal-Block on the dataset
@@ -83,7 +83,7 @@ nb_web_sparse <- normal_block(data = data, blocks = 15, sparsity = 0.005)
 ```
 
 ```{r clustering-results}
-elements_per_cluster <- split(names(nb_web_sparse$clustering), nb_web_sparse$clustering)
+elements_per_cluster <- split(colnames(data$Y), nb_web_sparse$clustering)
 
 df <- tibble(
     cluster = names(elements_per_cluster),

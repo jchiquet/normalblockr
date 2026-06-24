@@ -44,17 +44,16 @@ taxo_reference <- taxonomy[match(colnames(microcosm$Abundance),taxonomy$ASV), ]
 ```{r data-formatting}
 Y <- scale(log(1 + microcosm$Abundance), FALSE, TRUE) %>% as.matrix()
 X <- model.matrix(~ 0 + microcosm$site_time)
-data <- NB_data$new(Y, X)
+data <- NormalBlockData$new(Y, X)
 ```
 
 ## Running ZI-Normal-Block on the data with the selected clustering
 
 ```{r running-zimvnb}
-zimvnb_all <- normal_block(data, blocks = 2:15, zero_inflation = TRUE,
-                       sparsity = 0.001,
-                       control = NB_control(threshold = 1e-6, niter = 300,
-                                            verbose = TRUE))
-zimvnb <- zimvnb_all$get_model(15)
+zimvnb_all <- normal_block(data, blocks = 2:8, zero_inflation = TRUE,
+                       sparsity = 0.005,
+                       control = NB_control(verbose = TRUE))
+zimvnb <- zimvnb_all$get_best_model("BIC")
 ```
 
 ### Fitting quality
@@ -74,6 +73,12 @@ data.frame(
 #### ZI-MVNB clustering
 
 ```{r, mvnb-clustering-phylogeny}
+taxo_reference$Phylum  <- as.integer(as.factor(taxo_reference$Phylum))
+taxo_reference$Class   <- as.integer(as.factor(taxo_reference$Class))
+taxo_reference$Order   <- as.integer(as.factor(taxo_reference$Order))
+taxo_reference$Family  <- as.integer(as.factor(taxo_reference$Family))
+taxo_reference$Genus   <- as.integer(as.factor(taxo_reference$Genus))
+taxo_reference$Species <- as.integer(as.factor(taxo_reference$Species))
 ARI_zimvnb <- data.frame(
     Phylum  = ARI(zimvnb$clustering, taxo_reference$Phylum),
     Class   = ARI(zimvnb$clustering, taxo_reference$Class),

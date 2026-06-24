@@ -48,8 +48,15 @@ src/*.o
 src/*.so
 src/*.dll
 
+# coverage instrumentation artifacts (covr)
+src/*.gcno
+src/*.gcda
+/covr/
+cobertura.xml
+
 # Plot in testthat
 tests/testthat/Rplots.pdf
+Rplots.pdf
 
 # Raw data files
 data-raw/*.RData
@@ -62,3 +69,5 @@ README.html
 pkgdown
 docs
 inst/doc
+snowflake.log
+inst/normal_block_models.pdf
