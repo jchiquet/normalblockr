@@ -5,6 +5,7 @@
 #include "normal_block_base.h"
 #include "zi_normal_block_data.h"
 #include "zi_closed_form_solvers.h"
+#include "utils_arma.h"
 
 // Zero-inflated normal-block model with known clusters (fixed indicator
 // matrix C), templated on the residual-noise policy (ZIDiagonalNoise /
@@ -32,6 +33,11 @@ class ZINormalBlockKnownClusters : public NormalBlockBase {
   arma::mat Sigma_hat_; // q x q, M-step covariance estimate, cached for objective()
                         // (recomputing it there would be identical: nothing
                         // changes Mu_/Gamma_ between M_step() and objective())
+  arma::vec log_det_Gamma_; // n, log-determinant of each Gamma_ slice, a free
+                            // byproduct of the per-row Cholesky factorization
+                            // already needed to invert it in E_step() --
+                            // cached for objective() instead of running n
+                            // more factorizations via log_det_sympd()
 
   arma::mat sum_slices() const {
     arma::mat out(q_, q_, arma::fill::zeros);
@@ -46,7 +52,9 @@ class ZINormalBlockKnownClusters : public NormalBlockBase {
     arma::mat Rdm1C = (R_ % dm1_mat_) * C_;     // n x q
 
     for (arma::uword i = 0; i < zi_data_.n; ++i) {
-      Gamma_.slice(i) = arma::inv_sympd(Omegaq_ + arma::diagmat(dm1C.row(i).t()));
+      auto Gamma_inv = nb_utils::inv_and_log_det_sympd(Omegaq_ + arma::diagmat(dm1C.row(i).t()));
+      Gamma_.slice(i) = Gamma_inv.inv;
+      log_det_Gamma_(i) = Gamma_inv.log_det;
       Mu_.row(i) = Rdm1C.row(i) * Gamma_.slice(i);
     }
   }
@@ -76,6 +84,7 @@ public:
     zi_data_(data), C_(C), Gamma_(C.n_cols, C.n_cols, data.n), Mu_(arma::zeros(data.n, C.n_cols)) {
     for (arma::uword i = 0; i < data.n; ++i) Gamma_.slice(i) = arma::eye(C.n_cols, C.n_cols);
     Sigma_hat_ = (Mu_.t() * Mu_ + sum_slices()) / data.n; // matches the very first objective() call in run_em()
+    log_det_Gamma_ = arma::zeros(data.n); // log_det(I) = 0 for every row
   }
 
   // Log-likelihood criterion, mirrors compute_loglik in
@@ -85,15 +94,12 @@ public:
   // to the Gaussian part), plus the fixed zero-inflation contribution
   // (zi_cond_mean), and one log-determinant per row (Gamma_ is per-row).
   double objective() const override {
-    double sum_log_det_Gamma = 0.0;
-    for (arma::uword i = 0; i < Gamma_.n_slices; ++i) sum_log_det_Gamma += arma::log_det_sympd(Gamma_.slice(i));
-
     double log_det_Omegaq = arma::log_det_sympd(Omegaq_);
     double weighted_sum_log_dm1 = arma::accu(zi_data_.nY % arma::log(dm1_));
     double log2pie = 1.0 + std::log(2.0 * arma::datum::pi);
 
     double J = -0.5 * zi_data_.npY * log2pie + 0.5 * weighted_sum_log_dm1;
-    J += 0.5 * zi_data_.n * log_det_Omegaq + 0.5 * sum_log_det_Gamma;
+    J += 0.5 * zi_data_.n * log_det_Omegaq + 0.5 * arma::accu(log_det_Gamma_);
     J += zi_data_.zi_cond_mean;
 
     if (sparsity_ > 0.0) {

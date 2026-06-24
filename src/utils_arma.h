@@ -52,6 +52,22 @@ inline arma::mat clip_probabilities(const arma::mat& x, double zero = kEps) {
   return check_zero_boundary(check_one_boundary(x, zero), zero);
 }
 
+// Inverse and log-determinant of a symmetric positive-definite matrix,
+// computed from a single Cholesky factorization (A = R^T R) instead of two
+// separate ones (as arma::inv_sympd(A) followed by arma::log_det_sympd(A)
+// would do): log_det(A) = 2 * sum(log(diag(R))) is a free byproduct of the
+// factorization already needed for the inverse.
+struct SympdInverse {
+  arma::mat inv;
+  double log_det;
+};
+
+inline SympdInverse inv_and_log_det_sympd(const arma::mat& A) {
+  arma::mat R = arma::chol(A);
+  arma::mat Rinv = arma::inv(arma::trimatu(R));
+  return SympdInverse{Rinv * Rinv.t(), 2.0 * arma::accu(arma::log(R.diag()))};
+}
+
 } // namespace nb_utils
 
 #endif // NORMALBLOCKR_UTILS_ARMA_H
