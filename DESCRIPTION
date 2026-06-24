@@ -1,15 +1,16 @@
 Package: normalblockr
 Type: Package
-Title: implementation of the Normal-block model, Gaussian graphical model with latent clustering structure
-Version: 0.1.0
+Title: Implementation of the Normal-block model, Gaussian graphical model with latent clustering structure
+Version: 0.2.0
 Authors@R: c(
   person("Jeanne", "Tous", role = c("aut", "cre"), email = "jeanne.tous@inrae.fr"),
   person("Julien", "Chiquet", role = c("aut"), email = "julien.chiquet@inrae.fr",
       comment = c(ORCID = "0000-0002-3629-3429"))
       )
-Description: The Normal-Block model (Tous, J., & Chiquet, J. (2025). An
+Description: The Normal-Block model (Tous, J., & Chiquet, J. (2026). An
              integrated method for clustering and association network inference.
-             arXiv preprint arXiv:2503.22467.) can be used to analyse
+             Computational Statistics & Data Analysis, 219, 108347.
+             <doi:10.1016/j.csda.2026.108347>) can be used to analyse
              multivariate Gaussian data with underlying latent structure.
              The model infers a structure of statistical dependencies between
              the clusters identified (or given) in the observations.
