@@ -100,7 +100,7 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
       } else {res <- NA}
       res
     },
-    #' @field fitted Y values predicted by the model Y values predicted by the model
+    #' @field fitted Y values predicted by the model
     fitted = function(){
       if (private$approx) {
         res <- self$data$X %*% private$B
@@ -111,7 +111,7 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
       res
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function(value)
+    who_am_I = function()
     {paste("zero-inflated", private$res_covariance, "normal-block model with", self$q, "unknown blocks")}
   )
 )

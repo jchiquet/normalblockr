@@ -548,7 +548,7 @@ NormalBlockBase <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field inference_method inference procedure used (heuristic or integrated with EM)
-    inference_method = function(value) ifelse(private$approx, "heuristic", "integrated"),
+    inference_method = function() ifelse(private$approx, "heuristic", "integrated"),
     #' @field n number of samples
     n = function() self$data$n,
     #' @field p number of responses per sample
@@ -558,21 +558,21 @@ NormalBlockBase <- R6::R6Class(
     #' @field d0 number of zi variables (dimensions in X0)
     d0 = function() self$data$d0,
     #' @field q number of blocks
-    q = function(value) as.integer(ncol(private$C)),
+    q = function() as.integer(ncol(private$C)),
     #' @field n_edges number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)
-    n_edges  = function(value) sum(private$Omegaq[upper.tri(private$Omegaq, diag = FALSE)] != 0),
+    n_edges  = function() sum(private$Omegaq[upper.tri(private$Omegaq, diag = FALSE)] != 0),
     #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix))
-    model_par = function(value) list(B = private$B, B0 = private$B0,
+    model_par = function() list(B = private$B, B0 = private$B0,
                                      dm1 = private$dm1, Omegaq = private$Omegaq),
     #' @field nb_param number of parameters in the model
-    nb_param = function(value) {
+    nb_param = function() {
       nb_param_D <- ifelse(private$res_covariance == "diagonal", self$p, 1)
       as.integer(self$p * self$d + self$q + self$n_edges + nb_param_D)
     },
     #' @field objective evolution of the objective function during (V)EM algorithm
     objective = function() private$ll_list[-1],
     #' @field loglik (or its variational lower bound)
-    loglik = function(value) if (private$approx) NA else private$ll_list[[length(private$ll_list)]] + self$sparsity_term,
+    loglik = function() if (private$approx) NA else private$ll_list[[length(private$ll_list)]] + self$sparsity_term,
     #' @field deviance (or its variational lower bound)
     deviance = function() -2 * self$loglik,
     #' @field BIC (or its variational lower bound)
@@ -582,7 +582,7 @@ NormalBlockBase <- R6::R6Class(
     #' @field ICL variational lower bound of the ICL
     ICL        = function() self$BIC + 2 * self$entropy,
     #' @field EBIC variational lower bound of the EBIC
-    EBIC   = function(value) self$BIC + 2 * ifelse(self$n_edges > 0, self$n_edges * log(self$q), 0),
+    EBIC   = function() self$BIC + 2 * ifelse(self$n_edges > 0, self$n_edges * log(self$q), 0),
     #' @field criteria a vector with loglik, BIC and number of parameters
     criteria   = function() {
       data.frame(nb_param = self$nb_param, q = self$q, n_edges = self$n_edges, sparsity = self$sparsity,
@@ -609,21 +609,21 @@ NormalBlockBase <- R6::R6Class(
       }
     },
     #' @field sparsity_term (sparsity_term term in log-likelihood due to sparsity)
-    sparsity_term = function(value) self$sparsity * sum(abs(self$sparsity_weights * private$Omegaq)),
+    sparsity_term = function() self$sparsity * sum(abs(self$sparsity_weights * private$Omegaq)),
     #' @field get_res_covariance whether the residual covariance is diagonal or spherical
-    get_res_covariance = function(value) private$res_covariance,
+    get_res_covariance = function() private$res_covariance,
     #' @field memberships cluster memberships
-    memberships = function(value) private$C,
+    memberships = function() private$C,
     #' @field clustering given as the list of elements contained in each cluster
-    clustering = function(value) {
+    clustering = function() {
       cl <- get_clusters(private$C)
       names(cl) <- colnames(self$data$Y)
       cl
     },
     #' @field cluster_sizes given as a vector of cluster sizes
-    cluster_sizes = function(value) table(self$clustering),
+    cluster_sizes = function() tabulate(self$clustering, nbins = self$q),
     #' @field elements_per_cluster given as the list of elements contained in each cluster
-    elements_per_cluster = function(value) {
+    elements_per_cluster = function() {
       if (is.null(names(self$clustering)))
         base::split(1:self$p, self$clustering)
       else

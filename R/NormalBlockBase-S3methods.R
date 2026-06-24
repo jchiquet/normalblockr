@@ -55,5 +55,5 @@ fitted.NormalBlockBase <- function(object, ...){
 #' @export
 predict.NormalBlockBase <- function(object, new_X, ...){
   stopifnot(isNB(object))
-  object$fitted
+  object$predict(new_X)
 }

@@ -72,9 +72,9 @@ NormalBlockKnownClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field posterior_par a list with the parameters of posterior distribution W | Y
-    posterior_par = function(value) list(gamma = private$gamma, mu = private$mu),
+    posterior_par = function() list(gamma = private$gamma, mu = private$mu),
     #' @field entropy Entropy of the conditional distribution
-    entropy    = function(value) {
+    entropy    = function() {
       if (!private$approx){
         res <- .5 * self$n * self$q * log(2 * pi * exp(1)) +
           .5 * self$n * as.numeric(determinant(private$gamma)$modulus)
@@ -82,15 +82,15 @@ NormalBlockKnownClusters <- R6::R6Class(
       res
     },
     #' @field fitted Y values predicted by the model
-    fitted = function(value){
+    fitted = function(){
       if (private$approx) {
-        res <- self$data$X %*% private$B
+        self$data$X %*% private$B
       } else {
-        res <- self$data$X %*% private$B + private$mu %*% t(private$C)
+        self$data$X %*% private$B + private$mu %*% t(private$C)
       }
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function(value)
+    who_am_I = function()
       {paste(private$res_covariance, "normal-block model with fixed blocks")}
   )
 )

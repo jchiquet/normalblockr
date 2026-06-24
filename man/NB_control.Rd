@@ -43,7 +43,10 @@ unknown, can be a list with one clustering for each q value}
 
 \item{verbose}{telling if information should be printed during optimization}
 
-\item{heuristic}{weather to use heuristic approach or not. Default is FALSE}
+\item{heuristic}{whether to use the heuristic approach (moment-based, no (V)EM
+recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no
+likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
+are all `NA` on the resulting model.}
 
 \item{noise_covariance}{variance can be variable specific ("diagonal", the default) or common ("spherical")}
 

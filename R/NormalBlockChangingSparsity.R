@@ -192,9 +192,9 @@ NormalBlockChangingSparsity <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field q number of blocks
-    q = function(value) ifelse(is.matrix(private$blocks_), ncol(private$blocks_), private$blocks_),
+    q = function() ifelse(is.matrix(private$blocks_), ncol(private$blocks_), private$blocks_),
     #' @field blocks group matrix or number of blocks.
-    blocks = function(value) private$blocks_,
+    blocks = function() private$blocks_,
     #' @field sparsity list of sparsity penalties
     sparsity = function() private$sparsity_,
     #' @field sparsity_details list of information about model's penalties
@@ -220,7 +220,7 @@ NormalBlockChangingSparsity <- R6::R6Class(
       stability
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(value){
+    who_am_I  = function(){
       paste0("Collection of ",
              ifelse(self$control$zero_inflation, " zero-inflated ", ""),
                     self$control$noise_covariance, " normal-block models with ",

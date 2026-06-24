@@ -103,13 +103,13 @@ NormalBlockUnknownClusters <- R6::R6Class(
     #' @field fitted Y values predicted by the model
     fitted = function(){
       if (private$approx) {
-        res <- self$data$X %*% private$B
+        self$data$X %*% private$B
       } else {
-        res <- self$data$X %*% private$B + tcrossprod(private$M, private$C)
+        self$data$X %*% private$B + tcrossprod(private$M, private$C)
       }
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(value) {
+    who_am_I  = function() {
       paste(private$res_covariance, "normal-block model with", self$q, "unknown blocks")
     }
   )

@@ -94,7 +94,7 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field q_list  number of blocks
-    q_list = function(value) map_dbl(self$models, "q"),
+    q_list = function() map_dbl(self$models, "q"),
     #' @field sparsity list of penalties used for each q
     sparsity = function(){
       self$criteria %>%
@@ -102,7 +102,7 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
         dplyr::summarize(sparsity = paste(round(sparsity, 2), collapse = ", "))
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(value){
+    who_am_I  = function(){
       paste("Collection of ",
             ifelse(self$control$zero_inflation, " zero-inflated", ""),
             self$control$noise_covariance,

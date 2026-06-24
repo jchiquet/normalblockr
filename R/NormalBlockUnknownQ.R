@@ -88,8 +88,8 @@ NormalBlockUnknownQ <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field q_list number of blocks
-    q_list = function(value) map_dbl(self$models, "q"),
+    q_list = function() map_dbl(self$models, "q"),
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(value){paste0(self$control$noise_covariance, " normal-block model with unknown q")}
+    who_am_I  = function(){paste0(self$control$noise_covariance, " normal-block model with unknown q")}
   )
 )

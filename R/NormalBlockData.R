@@ -65,13 +65,13 @@ NormalBlockData <- R6::R6Class(
         }else{
           fm <- formula}
         stopifnot("Covariates given in formula must be present in X" = (length(setdiff(all.vars(terms(fm)), colnames(X))) ==0))
-        self$X <- matrix(model.matrix(fm, as.data.frame(X)))
+        self$X <- model.matrix(fm, as.data.frame(X))
       }
       if(is.null(X0)){X0 <- matrix(rep(1, self$n))}
       if(is.null(fm_zi)){
         self$X0 <- X0
       }else{
-        self$X0 <- matrix(model.matrix(fm_zi, as.data.frame(X0)))
+        self$X0 <- model.matrix(fm_zi, as.data.frame(X0))
         stopifnot("Zero-inflation covariates given in the formula must be present in X0" = (length(setdiff(all.vars(terms(fm_zi)), colnames(X0))) ==0))
       }
       self$d0 <- ncol(self$X0)
