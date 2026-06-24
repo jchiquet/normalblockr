@@ -29,20 +29,26 @@ class ZINormalBlockUnknownClusters : public NormalBlockBase {
   bool fixed_tau_;    // if true, C/alpha are not re-estimated (stability selection)
   arma::mat R_;       // n x p, Y - X*B computed at the start of the (V)EM step,
                        // reused unchanged by both E_step() and M_step()
+  arma::mat DM1_;     // n x p, repmat(dm1_, n) % zeros_bar, computed once in
+                      // E_step() and reused in M_step() (dm1_ does not change
+                      // in between -- it is only updated at the end of M_step())
+  arma::mat Sigma_hat_; // q x q, M-step covariance estimate, cached for objective()
+                        // (recomputing it there would be identical: nothing
+                        // changes M_/S_ between M_step() and objective())
 
   void E_step() override {
     R_ = zi_data_.Y - zi_data_.X * B_;
-    arma::mat DM1 = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
+    DM1_ = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
 
-    M_ = nb_optim::solve_tau_ridge(DM1, R_, C_, Omegaq_);
+    M_ = nb_optim::solve_tau_ridge(DM1_, R_, C_, Omegaq_);
 
-    arma::mat DM1C = DM1 * C_;                 // n x q
+    arma::mat DM1C = DM1_ * C_;                // n x q
     DM1C.each_row() += Omegaq_.diag().t();
     S_ = 1.0 / DM1C;
 
     if (q_ > 1 && !fixed_tau_) {
-      arma::mat term1 = -0.5 * (DM1.t() * (arma::square(M_) + S_));  // p x q
-      arma::mat term2 = (DM1 % R_).t() * M_;                          // p x q
+      arma::mat term1 = -0.5 * (DM1_.t() * (arma::square(M_) + S_));  // p x q
+      arma::mat term2 = (DM1_ % R_).t() * M_;                          // p x q
       arma::mat eta = term1 + term2;
       eta.each_row() += (arma::log(alpha_) - 1.0).t();
       C_ = nb_utils::clip_probabilities(nb_utils::softmax_rows(eta));
@@ -50,9 +56,8 @@ class ZINormalBlockUnknownClusters : public NormalBlockBase {
   }
 
   void M_step() override {
-    arma::mat DM1 = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
     arma::mat MCT = M_ * C_.t();
-    B_ = nb_optim::solve_wls(DM1, zi_data_.Y, zi_data_.X, MCT);
+    B_ = nb_optim::solve_wls(DM1_, zi_data_.Y, zi_data_.X, MCT);
     R_ = zi_data_.Y - zi_data_.X * B_;
 
     arma::mat A = arma::square(R_) - 2.0 * (R_ % MCT) + (arma::square(M_) + S_) * C_.t();
@@ -60,8 +65,8 @@ class ZINormalBlockUnknownClusters : public NormalBlockBase {
     dm1_ = NoisePolicy::update_dm1(weighted_ssq, zi_data_.nY, zi_data_.npY);
 
     alpha_ = arma::vectorise(arma::mean(C_, 0));
-    arma::mat Sigma_hat = M_.t() * M_ / zi_data_.n + arma::diagmat(arma::vectorise(arma::mean(S_, 0)));
-    Omegaq_ = estimate_omega(Sigma_hat);
+    Sigma_hat_ = M_.t() * M_ / zi_data_.n + arma::diagmat(arma::vectorise(arma::mean(S_, 0)));
+    Omegaq_ = estimate_omega(Sigma_hat_);
   }
 
 public:
@@ -72,7 +77,9 @@ public:
                                 double sparsity, const arma::mat& sparsity_weights,
                                 bool fixed_tau = false) :
     NormalBlockBase(data, C0.n_cols, B0, dm1_0, Omegaq0, sparsity, sparsity_weights),
-    zi_data_(data), C_(C0), alpha_(alpha0), M_(M0), S_(S0), fixed_tau_(fixed_tau) {}
+    zi_data_(data), C_(C0), alpha_(alpha0), M_(M0), S_(S0), fixed_tau_(fixed_tau) {
+    Sigma_hat_ = M_.t() * M_ / data.n + arma::diagmat(arma::vectorise(arma::mean(S_, 0))); // matches the very first objective() call in run_em()
+  }
 
   // ELBO at the current parameter values, mirrors compute_loglik in
   // R/ZINormalBlockUnknownClusters.R: same shape as the non zero-inflated criterion
@@ -92,8 +99,7 @@ public:
     J += zi_data_.zi_cond_mean;
 
     if (sparsity_ > 0.0) {
-      arma::mat Sigma_hat = M_.t() * M_ / zi_data_.n + arma::diagmat(arma::vectorise(arma::mean(S_, 0)));
-      J += 0.5 * zi_data_.n * q_ - 0.5 * zi_data_.n * arma::trace(Omegaq_ * Sigma_hat);
+      J += 0.5 * zi_data_.n * q_ - 0.5 * zi_data_.n * arma::trace(Omegaq_ * Sigma_hat_);
       J -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omegaq_));
     }
     return J;

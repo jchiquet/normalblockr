@@ -22,6 +22,9 @@ class NormalBlockUnknownClusters : public NormalBlockBase {
   bool fixed_tau_;    // if true, C/alpha are not re-estimated (stability selection)
   arma::mat R_;       // n x p, Y - X*B computed at the start of the (V)EM step,
                       // reused unchanged by both E_step() and M_step()
+  arma::mat Sigma_hat_; // q x q, M-step covariance estimate, cached for objective()
+                        // (recomputing it there would be identical: nothing
+                        // changes M_/S_ between M_step() and objective())
 
   void E_step() override {
     R_ = data_.Y - data_.X * B_;
@@ -56,8 +59,8 @@ class NormalBlockUnknownClusters : public NormalBlockBase {
     dm1_ = NoisePolicy::update_dm1(ddiag);
 
     alpha_ = arma::vectorise(arma::mean(C_, 0));
-    arma::mat Sigma_hat = M_.t() * M_ / data_.n + arma::diagmat(S_);
-    Omegaq_ = estimate_omega(Sigma_hat);
+    Sigma_hat_ = M_.t() * M_ / data_.n + arma::diagmat(S_);
+    Omegaq_ = estimate_omega(Sigma_hat_);
   }
 
 public:
@@ -68,7 +71,9 @@ public:
                               double sparsity, const arma::mat& sparsity_weights,
                               bool fixed_tau = false) :
     NormalBlockBase(data, C0.n_cols, B0, dm1_0, Omegaq0, sparsity, sparsity_weights),
-    C_(C0), alpha_(alpha0), M_(M0), S_(S0), fixed_tau_(fixed_tau) {}
+    C_(C0), alpha_(alpha0), M_(M0), S_(S0), fixed_tau_(fixed_tau) {
+    Sigma_hat_ = M_.t() * M_ / data.n + arma::diagmat(S_); // matches the very first objective() call in run_em()
+  }
 
   // ELBO at the current parameter values, see "Criterion" in section 6.3 of
   // normal_block_calculations_v2.pdf. When sparsity_ > 0, Omegaq_ is no
@@ -86,8 +91,7 @@ public:
     J += arma::accu(C_ * arma::log(alpha_)) - nb_utils::sum_xlogx(C_);
 
     if (sparsity_ > 0.0) {
-      arma::mat Sigma_hat = M_.t() * M_ / data_.n + arma::diagmat(S_);
-      J += 0.5 * data_.n * q_ - 0.5 * data_.n * arma::trace(Omegaq_ * Sigma_hat);
+      J += 0.5 * data_.n * q_ - 0.5 * data_.n * arma::trace(Omegaq_ * Sigma_hat_);
       J -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omegaq_));
     }
     return J;

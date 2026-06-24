@@ -26,6 +26,12 @@ class ZINormalBlockKnownClusters : public NormalBlockBase {
   arma::mat Mu_;      // n x q, posterior mean of W | Y
   arma::mat R_;       // n x p, Y - X*B computed at the start of the (V)EM step,
                        // reused unchanged by both E_step() and M_step()
+  arma::mat dm1_mat_; // n x p, repmat(dm1_, n) % zeros_bar, computed once in
+                      // E_step() and reused in M_step() (dm1_ does not change
+                      // in between -- it is only updated at the end of M_step())
+  arma::mat Sigma_hat_; // q x q, M-step covariance estimate, cached for objective()
+                        // (recomputing it there would be identical: nothing
+                        // changes Mu_/Gamma_ between M_step() and objective())
 
   arma::mat sum_slices() const {
     arma::mat out(q_, q_, arma::fill::zeros);
@@ -35,9 +41,9 @@ class ZINormalBlockKnownClusters : public NormalBlockBase {
 
   void E_step() override {
     R_ = zi_data_.Y - zi_data_.X * B_;
-    arma::mat dm1_mat = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
-    arma::mat dm1C = dm1_mat * C_;             // n x q
-    arma::mat Rdm1C = (R_ % dm1_mat) * C_;     // n x q
+    dm1_mat_ = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
+    arma::mat dm1C = dm1_mat_ * C_;             // n x q
+    arma::mat Rdm1C = (R_ % dm1_mat_) * C_;     // n x q
 
     for (arma::uword i = 0; i < zi_data_.n; ++i) {
       Gamma_.slice(i) = arma::inv_sympd(Omegaq_ + arma::diagmat(dm1C.row(i).t()));
@@ -46,9 +52,8 @@ class ZINormalBlockKnownClusters : public NormalBlockBase {
   }
 
   void M_step() override {
-    arma::mat dm1_mat = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
     arma::mat MuCT = Mu_ * C_.t();
-    B_ = nb_optim::solve_wls(dm1_mat, zi_data_.Y, zi_data_.X, MuCT);
+    B_ = nb_optim::solve_wls(dm1_mat_, zi_data_.Y, zi_data_.X, MuCT);
     R_ = zi_data_.Y - zi_data_.X * B_;
 
     arma::mat RmMuCT = R_ - MuCT;
@@ -59,8 +64,8 @@ class ZINormalBlockKnownClusters : public NormalBlockBase {
     arma::vec weighted_ssq = arma::vectorise(arma::sum(zi_data_.zeros_bar % A, 0));
     dm1_ = NoisePolicy::update_dm1(weighted_ssq, zi_data_.nY, zi_data_.npY);
 
-    arma::mat Sigma_hat = (Mu_.t() * Mu_ + sum_slices()) / zi_data_.n;
-    Omegaq_ = estimate_omega(Sigma_hat);
+    Sigma_hat_ = (Mu_.t() * Mu_ + sum_slices()) / zi_data_.n;
+    Omegaq_ = estimate_omega(Sigma_hat_);
   }
 
 public:
@@ -70,6 +75,7 @@ public:
     NormalBlockBase(data, C.n_cols, B0, dm1_0, Omegaq0, sparsity, sparsity_weights),
     zi_data_(data), C_(C), Gamma_(C.n_cols, C.n_cols, data.n), Mu_(arma::zeros(data.n, C.n_cols)) {
     for (arma::uword i = 0; i < data.n; ++i) Gamma_.slice(i) = arma::eye(C.n_cols, C.n_cols);
+    Sigma_hat_ = (Mu_.t() * Mu_ + sum_slices()) / data.n; // matches the very first objective() call in run_em()
   }
 
   // Log-likelihood criterion, mirrors compute_loglik in
@@ -91,8 +97,7 @@ public:
     J += zi_data_.zi_cond_mean;
 
     if (sparsity_ > 0.0) {
-      arma::mat Sigma_hat = (Mu_.t() * Mu_ + sum_slices()) / zi_data_.n;
-      J += 0.5 * zi_data_.n * q_ - 0.5 * zi_data_.n * arma::trace(Omegaq_ * Sigma_hat);
+      J += 0.5 * zi_data_.n * q_ - 0.5 * zi_data_.n * arma::trace(Omegaq_ * Sigma_hat_);
       J -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omegaq_));
     }
     return J;

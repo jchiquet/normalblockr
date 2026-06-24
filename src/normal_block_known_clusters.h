@@ -16,6 +16,9 @@ class NormalBlockKnownClusters : public NormalBlockBase {
   arma::mat C_;      // p x q, fixed cluster-indicator matrix
   arma::mat Gamma_;  // q x q, posterior covariance of W | Y
   arma::mat Mu_;     // n x q, posterior mean of W | Y
+  arma::mat Sigma_hat_; // q x q, M-step covariance estimate, cached for objective()
+                        // (recomputing it there would be identical: nothing
+                        // changes Mu_/Gamma_ between M_step() and objective())
 
   void E_step() override {
     // Gamma = (Omegaq + C^T diag(dm1) C)^{-1}, Mu = R diag(dm1) C Gamma
@@ -33,8 +36,8 @@ class NormalBlockKnownClusters : public NormalBlockBase {
     arma::vec ddiag = arma::vectorise(arma::mean(arma::square(resid), 0));
     ddiag += C_ * Gamma_.diag();
     dm1_ = NoisePolicy::update_dm1(ddiag);
-    arma::mat Sigma_hat = Mu_.t() * Mu_ / data_.n + Gamma_;
-    Omegaq_ = estimate_omega(Sigma_hat);
+    Sigma_hat_ = Mu_.t() * Mu_ / data_.n + Gamma_;
+    Omegaq_ = estimate_omega(Sigma_hat_);
   }
 
 public:
@@ -42,7 +45,9 @@ public:
                             const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omegaq0,
                             double sparsity, const arma::mat& sparsity_weights) :
     NormalBlockBase(data, C.n_cols, B0, dm1_0, Omegaq0, sparsity, sparsity_weights),
-    C_(C), Gamma_(arma::eye(C.n_cols, C.n_cols)), Mu_(arma::zeros(data.n, C.n_cols)) {}
+    C_(C), Gamma_(arma::eye(C.n_cols, C.n_cols)), Mu_(arma::zeros(data.n, C.n_cols)) {
+    Sigma_hat_ = Mu_.t() * Mu_ / data.n + Gamma_; // matches the very first objective() call in run_em()
+  }
 
   // Log-likelihood criterion, see "Criterion" in section 6.1/6.2 of
   // normal_block_calculations_v2.pdf. When sparsity_ > 0, Omegaq_ is no
@@ -59,8 +64,7 @@ public:
     J += 0.5 * data_.n * (log_det_Omegaq + log_det_Gamma);
 
     if (sparsity_ > 0.0) {
-      arma::mat Sigma_hat = Gamma_ + Mu_.t() * Mu_ / data_.n;
-      J += 0.5 * data_.n * q_ - 0.5 * data_.n * arma::trace(Omegaq_ * Sigma_hat);
+      J += 0.5 * data_.n * q_ - 0.5 * data_.n * arma::trace(Omegaq_ * Sigma_hat_);
       J -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omegaq_));
     }
     return J;
