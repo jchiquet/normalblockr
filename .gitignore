@@ -50,6 +50,7 @@ src/*.dll
 
 # Plot in testthat
 tests/testthat/Rplots.pdf
+Rplots.pdf
 
 # Raw data files
 data-raw/*.RData

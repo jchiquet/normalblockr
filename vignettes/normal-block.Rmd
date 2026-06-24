@@ -104,20 +104,20 @@ pheatmap::pheatmap(my_nb_data_zi$Y,
 
 
 # Prepare the data for a normal-block analysis
-A specific data object of class **NB_data** needs to be created to analyse the data with normalblockr.
+A specific data object of class **NormalBlockData** needs to be created to analyse the data with normalblockr.
 
-One can either use Y and X only to generate the **NB_data** object.
+One can either use Y and X only to generate the **NormalBlockData** object.
 
-```{r, NB_data}
-my_data    <- NB_data$new(my_nb_data$Y, my_nb_data$X)
-my_data_zi <- NB_data$new(my_nb_data_zi$Y, my_nb_data_zi$X)
+```{r, NormalBlockData}
+my_data    <- NormalBlockData$new(my_nb_data$Y, my_nb_data$X)
+my_data_zi <- NormalBlockData$new(my_nb_data_zi$Y, my_nb_data_zi$X)
 ```
 
 Alternatively, if one only wants to include some of the covariates contained in X, a formula can be used to specify which one:
 
-```{r, NB_data-alt}
+```{r, NormalBlockData-alt}
 colnames(my_data$X) <- c("X1", "X2")
-my_data_alt    <- NB_data$new(my_data$Y, my_data$X, formula = ~ 0 + X1)
+my_data_alt    <- NormalBlockData$new(my_data$Y, my_data$X, formula = ~ 0 + X1)
 ```
 
 
