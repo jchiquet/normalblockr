@@ -42,6 +42,7 @@ LinkingTo:
 Suggests:
     testthat (>= 3.0.0),
     aricode,
+    covr,
     Metrics,
     rmarkdown,
     pheatmap,
