@@ -62,3 +62,5 @@ README.html
 pkgdown
 docs
 inst/doc
+snowflake.log
+inst/normal_block_models.pdf
