@@ -22,7 +22,6 @@ Depends: R (>= 4.1.0)
 Imports:
     glassoFast,
     Matrix,
-    nloptr (>= 2.0.3),
     dplyr,
     tidyr,
     tibble,
