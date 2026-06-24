@@ -5,125 +5,123 @@
 \title{R6 abstract class for a generic sparse Normal Block model}
 \description{
 R6 abstract class for a generic sparse Normal Block model
-
-R6 abstract class for a generic sparse Normal Block model
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{data}}{object of NB_data class, with responses and design matrix}
-}
-\if{html}{\out{</div>}}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{data}}{object of NB_data class, with responses and design matrix}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{inference_method}}{inference procedure used (heuristic or integrated with EM)}
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{inference_method}}{inference procedure used (heuristic or integrated with EM)}
 
-\item{\code{n}}{number of samples}
+    \item{\code{n}}{number of samples}
 
-\item{\code{p}}{number of responses per sample}
+    \item{\code{p}}{number of responses per sample}
 
-\item{\code{d}}{number of variables (dimensions in X)}
+    \item{\code{d}}{number of variables (dimensions in X)}
 
-\item{\code{d0}}{number of zi variables (dimensions in X0)}
+    \item{\code{d0}}{number of zi variables (dimensions in X0)}
 
-\item{\code{q}}{number of blocks}
+    \item{\code{q}}{number of blocks}
 
-\item{\code{n_edges}}{number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)}
+    \item{\code{n_edges}}{number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)}
 
-\item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix))}
+    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix))}
 
-\item{\code{nb_param}}{number of parameters in the model}
+    \item{\code{nb_param}}{number of parameters in the model}
 
-\item{\code{objective}}{evolution of the objective function during (V)EM algorithm}
+    \item{\code{objective}}{evolution of the objective function during (V)EM algorithm}
 
-\item{\code{loglik}}{(or its variational lower bound)}
+    \item{\code{loglik}}{(or its variational lower bound)}
 
-\item{\code{deviance}}{(or its variational lower bound)}
+    \item{\code{deviance}}{(or its variational lower bound)}
 
-\item{\code{BIC}}{(or its variational lower bound)}
+    \item{\code{BIC}}{(or its variational lower bound)}
 
-\item{\code{entropy}}{Entropy of the conditional distribution when applicable}
+    \item{\code{entropy}}{Entropy of the conditional distribution when applicable}
 
-\item{\code{ICL}}{variational lower bound of the ICL}
+    \item{\code{ICL}}{variational lower bound of the ICL}
 
-\item{\code{EBIC}}{variational lower bound of the EBIC}
+    \item{\code{EBIC}}{variational lower bound of the EBIC}
 
-\item{\code{criteria}}{a vector with loglik, BIC and number of parameters}
+    \item{\code{criteria}}{a vector with loglik, BIC and number of parameters}
 
-\item{\code{sparsity}}{(overall sparsity parameter)}
+    \item{\code{sparsity}}{(overall sparsity parameter)}
 
-\item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
+    \item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
 
-\item{\code{sparsity_term}}{(sparsity_term term in log-likelihood due to sparsity)}
+    \item{\code{sparsity_term}}{(sparsity_term term in log-likelihood due to sparsity)}
 
-\item{\code{get_res_covariance}}{whether the residual covariance is diagonal or spherical}
+    \item{\code{get_res_covariance}}{whether the residual covariance is diagonal or spherical}
 
-\item{\code{memberships}}{cluster memberships}
+    \item{\code{memberships}}{cluster memberships}
 
-\item{\code{clustering}}{given as the list of elements contained in each cluster}
+    \item{\code{clustering}}{given as the list of elements contained in each cluster}
 
-\item{\code{cluster_sizes}}{given as a vector of cluster sizes}
+    \item{\code{cluster_sizes}}{given as a vector of cluster sizes}
 
-\item{\code{elements_per_cluster}}{given as the list of elements contained in each cluster}
-}
-\if{html}{\out{</div>}}
+    \item{\code{elements_per_cluster}}{given as the list of elements contained in each cluster}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-NB-new}{\code{NB$new()}}
-\item \href{#method-NB-update}{\code{NB$update()}}
-\item \href{#method-NB-optimize}{\code{NB$optimize()}}
-\item \href{#method-NB-split}{\code{NB$split()}}
-\item \href{#method-NB-candidates_split}{\code{NB$candidates_split()}}
-\item \href{#method-NB-candidates_merge}{\code{NB$candidates_merge()}}
-\item \href{#method-NB-merge}{\code{NB$merge()}}
-\item \href{#method-NB-predict}{\code{NB$predict()}}
-\item \href{#method-NB-latent_network}{\code{NB$latent_network()}}
-\item \href{#method-NB-plot_loglik}{\code{NB$plot_loglik()}}
-\item \href{#method-NB-plot_network}{\code{NB$plot_network()}}
-\item \href{#method-NB-plot}{\code{NB$plot()}}
-\item \href{#method-NB-print}{\code{NB$print()}}
-\item \href{#method-NB-clone}{\code{NB$clone()}}
-}
+  \itemize{
+    \item \href{#method-NB-initialize}{\code{NB$new()}}
+    \item \href{#method-NB-update}{\code{NB$update()}}
+    \item \href{#method-NB-optimize}{\code{NB$optimize()}}
+    \item \href{#method-NB-split}{\code{NB$split()}}
+    \item \href{#method-NB-candidates_split}{\code{NB$candidates_split()}}
+    \item \href{#method-NB-candidates_merge}{\code{NB$candidates_merge()}}
+    \item \href{#method-NB-merge}{\code{NB$merge()}}
+    \item \href{#method-NB-predict}{\code{NB$predict()}}
+    \item \href{#method-NB-latent_network}{\code{NB$latent_network()}}
+    \item \href{#method-NB-plot_loglik}{\code{NB$plot_loglik()}}
+    \item \href{#method-NB-plot_network}{\code{NB$plot_network()}}
+    \item \href{#method-NB-plot}{\code{NB$plot()}}
+    \item \href{#method-NB-print}{\code{NB$print()}}
+    \item \href{#method-NB-clone}{\code{NB$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NB-new"></a>}}
-\if{latex}{\out{\hypertarget{method-NB-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new [`NB`] object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$new(data, q, sparsity = 0, control = NB_control())}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-NB-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-NB-initialize}{}}}
+\subsection{\code{NB$new()}}{
+  Create a new [`NB`] object.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$new(data, q, sparsity = 0, control = NB_control())}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{object of NB_data class, with responses and design matrix}
+      \item{\code{q}}{number of block/cluster}
+      \item{\code{sparsity}}{sparsity penalty on the network density}
+      \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NB`] object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{object of NB_data class, with responses and design matrix}
-
-\item{\code{q}}{number of block/cluster}
-
-\item{\code{sparsity}}{sparsity penalty on the network density}
-
-\item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NB`] object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-update"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-update}{}}}
-\subsection{Method \code{update()}}{
-Update a [`NB`] object
+\subsection{\code{NB$update()}}{
+  Update a [`NB`] object
 
 All possible parameters of the child classes
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$update(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$update(
   B = NA,
   dm1 = NA,
   C = NA,
@@ -135,197 +133,201 @@ All possible parameters of the child classes
   M = NA,
   S = NA,
   ll_list = NA
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{B}}{regression matrix}
+      \item{\code{dm1}}{diagonal vector of inverse variance matrix (variables level)}
+      \item{\code{C}}{the matrix of groups memberships (posterior probabilities)}
+      \item{\code{Omegaq}}{groups inverse variance matrix}
+      \item{\code{gamma}}{variance of posterior distribution of W}
+      \item{\code{mu}}{mean for posterior distribution of W}
+      \item{\code{kappa}}{vector of zero-inflation probabilities}
+      \item{\code{alpha}}{vector of groups probabilities}
+      \item{\code{M}}{variational mean for posterior distribution of W}
+      \item{\code{S}}{variational diagonal of variances for posterior distribution of W}
+      \item{\code{ll_list}}{list of log-lik (elbo) values}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Update the current [`normal`] object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{B}}{regression matrix}
-
-\item{\code{dm1}}{diagonal vector of inverse variance matrix (variables level)}
-
-\item{\code{C}}{the matrix of groups memberships (posterior probabilities)}
-
-\item{\code{Omegaq}}{groups inverse variance matrix}
-
-\item{\code{gamma}}{variance of posterior distribution of W}
-
-\item{\code{mu}}{mean for posterior distribution of W}
-
-\item{\code{kappa}}{vector of zero-inflation probabilities}
-
-\item{\code{alpha}}{vector of groups probabilities}
-
-\item{\code{M}}{variational mean for posterior distribution of W}
-
-\item{\code{S}}{variational diagonal of variances for posterior distribution of W}
-
-\item{\code{ll_list}}{list of log-lik (elbo) values}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Update the current [`normal`] object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-optimize"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-optimize}{}}}
-\subsection{Method \code{optimize()}}{
-calls optimization (EM or heuristic) and updates relevant fields
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$optimize(control = list(niter = 100, threshold = 1e-04))}\if{html}{\out{</div>}}
+\subsection{\code{NB$optimize()}}{
+  calls optimization (EM or heuristic) and updates relevant fields
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$optimize(control = list(niter = 100, threshold = 1e-04))}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{control}}{a list for controlling the optimization proces}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    optimizes the model and updates its parameters
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{control}}{a list for controlling the optimization proces}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-optimizes the model and updates its parameters
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-split"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-split}{}}}
-\subsection{Method \code{split()}}{
-Create a clone of the current [`NB`] object after splitting cluster `cl`
+\subsection{\code{NB$split()}}{
+  Create a clone of the current [`NB`] object after splitting cluster `cl`
 We split the cluster according to the species variances
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$split(index, in_place = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{index}}{index (integer) of the cluster to split}
-
-\item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$split(index, in_place = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{index}}{index (integer) of the cluster to split}
+      \item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
 default FALSE (send a copy)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NB`] object
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NB`] object
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-candidates_split"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-candidates_split}{}}}
-\subsection{Method \code{candidates_split()}}{
-generate and select a set of candidate models
+\subsection{\code{NB$candidates_split()}}{
+  generate and select a set of candidate models
 by splitting the clusters of the current model
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$candidates_split()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$candidates_split()}
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-candidates_merge"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-candidates_merge}{}}}
-\subsection{Method \code{candidates_merge()}}{
-generate and select a set of candidate models
+\subsection{\code{NB$candidates_merge()}}{
+  generate and select a set of candidate models
 by merging the clusters of the current model
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$candidates_merge()}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$candidates_merge()}
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-merge"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-merge}{}}}
-\subsection{Method \code{merge()}}{
-Create a clone of the current [`NB`] object after merging clusters `cl1` and `cl2`
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$merge(indices, in_place = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{indices}}{indices (couple of integer) of the clusters to merge}
-
-\item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
+\subsection{\code{NB$merge()}}{
+  Create a clone of the current [`NB`] object after merging clusters `cl1` and `cl2`
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$merge(indices, in_place = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{indices}}{indices (couple of integer) of the clusters to merge}
+      \item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
 default FALSE (send a copy)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NB`] object
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NB`] object
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-predict}{}}}
-\subsection{Method \code{predict()}}{
-Predicts observations Y for new covariates X.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$predict(new_X)}\if{html}{\out{</div>}}
+\subsection{\code{NB$predict()}}{
+  Predicts observations Y for new covariates X.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$predict(new_X)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{new_X}}{new set of covariates.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A n*p prediction matrix for new observations
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{new_X}}{new set of covariates.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A n*p prediction matrix for new observations
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-latent_network"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-latent_network}{}}}
-\subsection{Method \code{latent_network()}}{
-Extract interaction network in the latent space
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$latent_network(type = c("partial_cor", "support", "precision"))}\if{html}{\out{</div>}}
+\subsection{\code{NB$latent_network()}}{
+  Extract interaction network in the latent space
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$latent_network(type = c("partial_cor", "support", "precision"))}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{type}}{edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a square matrix of size `self$q`
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{type}}{edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-a square matrix of size `NB_fixed_blocks_class$q`
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-plot_loglik"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-plot_loglik}{}}}
-\subsection{Method \code{plot_loglik()}}{
-plots log-likelihood values during model optimization
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$plot_loglik(type = "b", log = "xy", neg = TRUE)}\if{html}{\out{</div>}}
+\subsection{\code{NB$plot_loglik()}}{
+  plots log-likelihood values during model optimization
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$plot_loglik(type = "b", log = "xy", neg = TRUE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{type}}{char for line type (see plot.default)}
+      \item{\code{log}}{char for logarithmic axes (see plot.default)}
+      \item{\code{neg}}{boolean plot negative log-likelihood (useful when log="y")}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{type}}{char for line type (see plot.default)}
-
-\item{\code{log}}{char for logarithmic axes (see plot.default)}
-
-\item{\code{neg}}{boolean plot negative log-likelihood (useful when log="y")}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-plot_network"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-plot_network}{}}}
-\subsection{Method \code{plot_network()}}{
-plot the latent network.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$plot_network(
+\subsection{\code{NB$plot_network()}}{
+  plot the latent network.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$plot_network(
   type = c("partial_cor", "support"),
   output = c("igraph", "corrplot"),
   edge.color = c("#F8766D", "#00BFC4"),
@@ -333,71 +335,72 @@ plot the latent network.
   node.labels = NULL,
   layout = igraph::layout_in_circle,
   plot = TRUE
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{type}}{edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).}
+      \item{\code{output}}{Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)}
+      \item{\code{edge.color}}{Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.}
+      \item{\code{remove.isolated}}{if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.}
+      \item{\code{node.labels}}{vector of character. The labels of the nodes. The default will use the column names ot the response matrix.}
+      \item{\code{layout}}{an optional igraph layout. Only relevant for igraph output.}
+      \item{\code{plot}}{logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{type}}{edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).}
-
-\item{\code{output}}{Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)}
-
-\item{\code{edge.color}}{Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.}
-
-\item{\code{remove.isolated}}{if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.}
-
-\item{\code{node.labels}}{vector of character. The labels of the nodes. The default will use the column names ot the response matrix.}
-
-\item{\code{layout}}{an optional igraph layout. Only relevant for igraph output.}
-
-\item{\code{plot}}{logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-plot}{}}}
-\subsection{Method \code{plot()}}{
-plot together latent network and log-likelihood values during model optimization
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$plot()}\if{html}{\out{</div>}}
+\subsection{\code{NB$plot()}}{
+  plot together latent network and log-likelihood values during model optimization
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$plot()}
+    \if{html}{\out{</div>}}
+  }
 }
 
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-print"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-print}{}}}
-\subsection{Method \code{print()}}{
-User friendly print method
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$print(model = paste("A", self$who_am_I, ".\\n"))}\if{html}{\out{</div>}}
+\subsection{\code{NB$print()}}{
+  User friendly print method
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$print(model = paste("A", self$who_am_I, ".\\n"))}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{model}}{First line of the print output}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{model}}{First line of the print output}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NB-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NB-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NB$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{NB$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NB$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }
