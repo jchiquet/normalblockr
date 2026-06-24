@@ -2,6 +2,8 @@
 title: "Normal-Block models: distributions, criteria and explicit V(E)M solutions"
 format: pdf
 editor: visual
+header-includes:
+  - \usepackage{pdflscape}
 ---
 
 ::: hidden
@@ -210,8 +212,10 @@ $$\hat\Omega= \hat\Sigma_q^{-1} \qquad \text{(or graphical lasso, §10)}$$
 
 **Criterion:**
 
-$$J = -\frac{npY}{2}\log(2\pi e) + \frac12\sum_j nY_j\log(d_j) + \frac{n}{2}\log|\Omega| + \frac12\sum_{ik}\log(S_{ik})
-    + \sum_j\tau_{j\cdot}\log(\alpha) - \sum_{jk}\tau_{jk}\log(\tau_{jk}) + \texttt{zi\_cond\_mean}$$
+$$\begin{aligned}
+J &= -\frac{npY}{2}\log(2\pi e) + \frac12\sum_j nY_j\log(d_j) + \frac{n}{2}\log|\Omega| + \frac12\sum_{ik}\log(S_{ik}) \\
+  &\quad + \sum_j\tau_{j\cdot}\log(\alpha) - \sum_{jk}\tau_{jk}\log(\tau_{jk}) + \texttt{zi\_cond\_mean}
+\end{aligned}$$
 
 ($\sum_{ik}\log(S_{ik})$ now ranges over all $n\times q$ entries, since $S$ is row-dependent.)
 
@@ -239,19 +243,30 @@ where $\hat\Sigma$ is the corresponding M-step covariance estimate of each varia
 
 - **The per-column weighted normal equations can be exactly singular, and this is expected, not a bug.** With a one-hot design (e.g. a categorical covariate with no intercept) and real zero-inflated data, it is common for some design level to have *zero* non-zero-inflated observations for a given variable: both $X^\top W X$ and $X^\top W y$ are then exactly zero on that coordinate (no information to estimate that regression coefficient at all). `solve()` in base R errors on this (`Lapack routine dgesv: system is exactly singular`), whereas `arma::solve()` on the C++ side automatically falls back to a pseudo-inverse and only emits a (non-fatal) runtime warning -- silenced via `PKG_CPPFLAGS = -DARMA_WARN_LEVEL=1` in `src/Makevars`/`Makevars.win`, since it would otherwise print once per singular column, per EM iteration, per model in a collection (hundreds of thousands of lines on real microbiome-scale data). `zi_diag_normal_optim_B` on the R side mirrors this by using `MASS::ginv()` instead of `solve()`, which returns the same minimum-norm solution (effectively a 0 coefficient for the indeterminate design level) instead of erroring.
 
-- **Code map.**
+- **Quantities shared by `E_step()`/`M_step()`/`objective()` within one (V)EM iteration are computed once, not re-derived.** Three instances, all in `src/`: (i) $\hat\Sigma$ (the M-step covariance estimate) is computed in `M_step()` to update $\hat\Omega$ and was, until recently, recomputed identically inside `objective()` when `sparsity_ > 0` -- it is now cached in a `Sigma_hat_` member, set once per iteration. (ii) In the two zero-inflated variants, the masked weight matrix (`dm1_mat_`/`DM1_`, equal to `repmat(dm1, n) % zeros_bar`) was computed once in `E_step()` and again, identically, in `M_step()` (`dm1_` only changes at the very end of `M_step()`); it is now a member set once in `E_step()` and reused. (iii) $\Gamma$'s log-determinant, needed in `objective()`, is a free byproduct of the Cholesky factorization already performed to invert $\Gamma$ in `E_step()` (`\log\det A = 2\sum\log\diag(\mathrm{chol}(A))`); calling `arma::inv_sympd()` then separately `arma::log_det_sympd()` repeats that factorization for nothing. `nb_utils::inv_and_log_det_sympd()` (`src/utils_arma.h`) returns both from a single `arma::chol()` call; `log_det_Gamma_` is cached from it in `E_step()` and read back in `objective()`. This matters most in `ZINormalBlockKnownClusters`, where $\Gamma$ is a cube of $n$ row-specific matrices: without the fix, $n$ redundant factorizations were performed per iteration instead of $0$. All three caches are initialized at construction time (matching the initial state of `Mu_`/`Gamma_`/`M_`/`S_`) so that the very first call to `objective()` in `run_em()` -- which happens before any `E_step()`/`M_step()` -- reads a value consistent with the model's initial parameters rather than an empty member. None of this changes any computed value (validated to the same `tolerance = 1e-8` against the R6 reference as before); it only removes redundant work.
 
-  | Variant | C++ class | Rcpp export |
-  |-------------------|----------------------------------|-------------------|
-  | §1 known, diagonal | `norm_block_cov_diag_noise_known_clusters` | `NormalBlockKnownClusters_fit` |
-  | §2 known, spherical | `norm_block_cov_spherical_noise_known_clusters` | `NormalBlockKnownClusters_fit` |
-  | §3 unknown, diagonal | `norm_block_cov_diag_noise_unknown_clusters` | `NormalBlockUnknownClusters_fit` |
-  | §4 unknown, spherical | `norm_block_cov_spherical_noise_unknown_clusters` | `NormalBlockUnknownClusters_fit` |
-  | §6 ZI known, diagonal | `zi_norm_block_cov_diag_noise_known_clusters` | `ZINormalBlockKnownClusters_fit` |
-  | §7 ZI known, spherical | `zi_norm_block_cov_spherical_noise_known_clusters` | `ZINormalBlockKnownClusters_fit` |
-  | §8 ZI unknown, diagonal | `zi_norm_block_cov_diag_noise_unknown_clusters` | `ZINormalBlockUnknownClusters_fit` |
-  | §9 ZI unknown, spherical | `zi_norm_block_cov_spherical_noise_unknown_clusters` | `ZINormalBlockUnknownClusters_fit` |
+- **Code map.** (table on the next page, in landscape orientation -- the full C++ template aliases are too long to fit a portrait page legibly; the table below omits their common prefix, `norm_block_cov_` for the non-ZI variants and `zi_norm_block_cov_` for the ZI ones)
 
-  Both noise variants of a given clustering mode share one C++ template (`NormalBlockKnownClusters<NoisePolicy>`, `NormalBlockUnknownClusters<NoisePolicy>`, `ZINormalBlockKnownClusters<NoisePolicy>`, `ZINormalBlockUnknownClusters<NoisePolicy>`), instantiated with `DiagonalNoise`/`SphericalNoise` (`src/noise_models.h`) or `ZIDiagonalNoise`/`ZISphericalNoise` (`src/zi_noise_models.h`); only the $d$/$\xi$ update differs between the two.
+```{=latex}
+\begin{landscape}
+\small
+```
+
+| Variant | C++ class (suffix, after the common prefix) | Rcpp export |
+|---|---|---|
+| §1 known, diagonal | `diag_noise_known_clusters` | `NormalBlockKnownClusters_fit` |
+| §2 known, spherical | `spherical_noise_known_clusters` | `NormalBlockKnownClusters_fit` |
+| §3 unknown, diagonal | `diag_noise_unknown_clusters` | `NormalBlockUnknownClusters_fit` |
+| §4 unknown, spherical | `spherical_noise_unknown_clusters` | `NormalBlockUnknownClusters_fit` |
+| §6 ZI known, diagonal | `diag_noise_known_clusters` | `ZINormalBlockKnownClusters_fit` |
+| §7 ZI known, spherical | `spherical_noise_known_clusters` | `ZINormalBlockKnownClusters_fit` |
+| §8 ZI unknown, diagonal | `diag_noise_unknown_clusters` | `ZINormalBlockUnknownClusters_fit` |
+| §9 ZI unknown, spherical | `spherical_noise_unknown_clusters` | `ZINormalBlockUnknownClusters_fit` |
+
+```{=latex}
+\end{landscape}
+```
+
+Both noise variants of a given clustering mode share one C++ template, parameterized by `NoisePolicy` (`NormalBlockKnownClusters`, `NormalBlockUnknownClusters`, `ZINormalBlockKnownClusters`, `ZINormalBlockUnknownClusters`), instantiated with `DiagonalNoise`/`SphericalNoise` (`src/noise_models.h`) or `ZIDiagonalNoise`/`ZISphericalNoise` (`src/zi_noise_models.h`); only the $d$/$\xi$ update differs between the two.
 
   All initialization (heuristic parameters, clustering, the upfront zero-inflation logistic regression) is done in R; the C++ classes only run the (V)EM recursion from parameters passed in -- see the R6 classes (`NormalBlockKnownClusters`, `NormalBlockUnknownClusters`, `ZINormalBlockKnownClusters`, `ZINormalBlockUnknownClusters`) for the R-side heuristic initialization that supplies the starting values.
