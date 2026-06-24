@@ -44,7 +44,7 @@ Rcpp::List unknown_clusters_result(const Model& model) {
 }
 
 template <typename Model>
-Rcpp::List zi_known_clusters_result(const Model& model) {
+Rcpp::List ZINormalBlockKnownClusters_result(const Model& model) {
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),
     Rcpp::Named("dm1")       = to_rvector(model.dm1()),
@@ -57,7 +57,7 @@ Rcpp::List zi_known_clusters_result(const Model& model) {
 }
 
 template <typename Model>
-Rcpp::List zi_unknown_clusters_result(const Model& model) {
+Rcpp::List ZINormalBlockUnknownClusters_result(const Model& model) {
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),
     Rcpp::Named("dm1")       = to_rvector(model.dm1()),
@@ -75,7 +75,7 @@ Rcpp::List zi_unknown_clusters_result(const Model& model) {
 
 //' Fit a normal-block model with known clusters (Rcpp/Armadillo core)
 //'
-//' Equivalent of the R6 class nb_known_clusters (R/nb_known_clusters-Class.R),
+//' Equivalent of the R6 class NormalBlockKnownClusters (R/NormalBlockKnownClusters.R),
 //' implementing sections 2/3 (summarized in 6.1/6.2) of
 //' normal_block_calculations_v2.pdf. Initialization is entirely done on the R
 //' side: this function only runs the EM recursion from the parameters given.
@@ -89,7 +89,7 @@ Rcpp::List zi_unknown_clusters_result(const Model& model) {
 //' @param sparsity sparsity penalty applied to Omegaq through the graphical
 //' lasso (glassoFast); 0 means an unpenalized inversion
 //' @param sparsity_weights q x q matrix of per-pair penalty weights (see
-//' R/NB-Class.R, `sparsity_weights`); only used when sparsity > 0
+//' R/NormalBlockBase.R, `sparsity_weights`); only used when sparsity > 0
 //' @param noise_covariance either "diagonal" or "spherical"
 //' @param niter maximum number of EM iterations
 //' @param threshold convergence threshold on the objective increment
@@ -97,7 +97,7 @@ Rcpp::List zi_unknown_clusters_result(const Model& model) {
 //' objective (log-likelihood) trace and the number of iterations performed
 //' @noRd
 // [[Rcpp::export]]
-Rcpp::List nb_known_clusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& C,
+Rcpp::List NormalBlockKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& C,
                                   arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0,
                                   double sparsity, arma::mat sparsity_weights,
                                   std::string noise_covariance,
@@ -118,12 +118,12 @@ Rcpp::List nb_known_clusters_fit(const arma::mat& Y, const arma::mat& X, const a
 
 //' Fit a normal-block model with unknown clusters (Rcpp/Armadillo core, VEM)
 //'
-//' Equivalent of the R6 class nb_unknown_clusters (R/nb_unknown_clusters-Class.R), implementing
+//' Equivalent of the R6 class NormalBlockUnknownClusters (R/NormalBlockUnknownClusters.R), implementing
 //' sections 4/5 (summarized in 6.3) of normal_block_calculations_v2.pdf.
 //' Initialization is entirely done on the R side: this function only runs the
 //' VEM recursion from the parameters given.
 //'
-//' @inheritParams nb_known_clusters_fit
+//' @inheritParams NormalBlockKnownClusters_fit
 //' @param C0 initial variational membership probabilities (p x q)
 //' @param alpha0 initial cluster prior probabilities (length q)
 //' @param M0 initial variational mean of the cluster effects (n x q)
@@ -134,7 +134,7 @@ Rcpp::List nb_known_clusters_fit(const arma::mat& Y, const arma::mat& X, const a
 //' the ELBO trace and the number of iterations performed
 //' @noRd
 // [[Rcpp::export]]
-Rcpp::List nb_unknown_clusters_fit(const arma::mat& Y, const arma::mat& X,
+Rcpp::List NormalBlockUnknownClusters_fit(const arma::mat& Y, const arma::mat& X,
                                     arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0,
                                     arma::mat C0, arma::vec alpha0, arma::mat M0, arma::vec S0,
                                     double sparsity, arma::mat sparsity_weights,
@@ -158,7 +158,7 @@ Rcpp::List nb_unknown_clusters_fit(const arma::mat& Y, const arma::mat& X,
 
 //' Fit a zero-inflated normal-block model with known clusters (Rcpp/Armadillo core)
 //'
-//' Equivalent of the R6 class zi_known_clusters (R/zi_known_clusters-Class.R).
+//' Equivalent of the R6 class ZINormalBlockKnownClusters (R/ZINormalBlockKnownClusters.R).
 //' Initialization (including the fixed zero-inflation logistic regression)
 //' is entirely done on the R side: this function only runs the EM recursion
 //' from the parameters given. The zero-inflation mask makes the B-update's
@@ -169,7 +169,7 @@ Rcpp::List nb_unknown_clusters_fit(const arma::mat& Y, const arma::mat& X,
 //' @param X design matrix (n x d)
 //' @param zeros_bar zero-inflation mask (n x p), 1 where Y != 0, 0 where Y == 0
 //' @param zi_cond_mean fixed log-likelihood contribution of the (pre-estimated)
-//' zero-inflation component (private$ZI_cond_mean in R/NB-Class.R)
+//' zero-inflation component (private$ZI_cond_mean in R/NormalBlockBase.R)
 //' @param C fixed cluster-indicator matrix (p x q)
 //' @param B0 initial regression coefficients (d x p)
 //' @param dm1_0 initial inverse variance per variable (length p)
@@ -185,7 +185,7 @@ Rcpp::List nb_unknown_clusters_fit(const arma::mat& Y, const arma::mat& X,
 //' log-likelihood trace and the number of iterations performed
 //' @noRd
 // [[Rcpp::export]]
-Rcpp::List zi_known_clusters_fit(const arma::mat& Y, const arma::mat& X,
+Rcpp::List ZINormalBlockKnownClusters_fit(const arma::mat& Y, const arma::mat& X,
                                   const arma::mat& zeros_bar, double zi_cond_mean, const arma::mat& C,
                                   arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0,
                                   double sparsity, arma::mat sparsity_weights,
@@ -196,25 +196,25 @@ Rcpp::List zi_known_clusters_fit(const arma::mat& Y, const arma::mat& X,
   if (noise_covariance == "diagonal") {
     zi_norm_block_cov_diag_noise_known_clusters model(data, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights);
     model.run_em(niter, threshold);
-    return zi_known_clusters_result(model);
+    return ZINormalBlockKnownClusters_result(model);
   } else if (noise_covariance == "spherical") {
     zi_norm_block_cov_spherical_noise_known_clusters model(data, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights);
     model.run_em(niter, threshold);
-    return zi_known_clusters_result(model);
+    return ZINormalBlockKnownClusters_result(model);
   }
   Rcpp::stop("noise_covariance must be either \"diagonal\" or \"spherical\"");
 }
 
 //' Fit a zero-inflated normal-block model with unknown clusters (Rcpp/Armadillo core, VEM)
 //'
-//' Equivalent of the R6 class zi_unknown_clusters (R/zi_unknown_clusters-Class.R).
+//' Equivalent of the R6 class ZINormalBlockUnknownClusters (R/ZINormalBlockUnknownClusters.R).
 //' Initialization is entirely done on the R side: this function only runs
 //' the VEM recursion from the parameters given. The zero-inflation mask
 //' makes the B- and M-updates' normal equations column-/row-specific, so
 //' both are solved through direct linear systems rather than an iterative
 //' optimizer (see src/zi_closed_form_solvers.h).
 //'
-//' @inheritParams zi_known_clusters_fit
+//' @inheritParams ZINormalBlockKnownClusters_fit
 //' @param C0 initial variational membership probabilities (p x q)
 //' @param alpha0 initial cluster prior probabilities (length q)
 //' @param M0 initial variational mean of the cluster effects (n x q)
@@ -226,7 +226,7 @@ Rcpp::List zi_known_clusters_fit(const arma::mat& Y, const arma::mat& X,
 //' the ELBO trace and the number of iterations performed
 //' @noRd
 // [[Rcpp::export]]
-Rcpp::List zi_unknown_clusters_fit(const arma::mat& Y, const arma::mat& X,
+Rcpp::List ZINormalBlockUnknownClusters_fit(const arma::mat& Y, const arma::mat& X,
                                     const arma::mat& zeros_bar, double zi_cond_mean,
                                     arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0,
                                     arma::mat C0, arma::vec alpha0, arma::mat M0, arma::mat S0,
@@ -239,12 +239,12 @@ Rcpp::List zi_unknown_clusters_fit(const arma::mat& Y, const arma::mat& X,
     zi_norm_block_cov_diag_noise_unknown_clusters model(data, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0,
                                                          sparsity, sparsity_weights, fixed_tau);
     model.run_em(niter, threshold);
-    return zi_unknown_clusters_result(model);
+    return ZINormalBlockUnknownClusters_result(model);
   } else if (noise_covariance == "spherical") {
     zi_norm_block_cov_spherical_noise_unknown_clusters model(data, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0,
                                                               sparsity, sparsity_weights, fixed_tau);
     model.run_em(niter, threshold);
-    return zi_unknown_clusters_result(model);
+    return ZINormalBlockUnknownClusters_result(model);
   }
   Rcpp::stop("noise_covariance must be either \"diagonal\" or \"spherical\"");
 }

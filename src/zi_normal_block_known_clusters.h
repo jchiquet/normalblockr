@@ -9,7 +9,7 @@
 // Zero-inflated normal-block model with known clusters (fixed indicator
 // matrix C), templated on the residual-noise policy (ZIDiagonalNoise /
 // ZISphericalNoise, see zi_noise_models.h). Equivalent of the R6 class
-// zi_known_clusters (R/zi_known_clusters-Class.R).
+// ZINormalBlockKnownClusters (R/ZINormalBlockKnownClusters.R).
 //
 // Unlike the non zero-inflated counterpart (NormalBlockKnownClusters), the
 // posterior covariance of W | Y is *row-dependent* (the zero-inflation mask
@@ -73,7 +73,7 @@ public:
   }
 
   // Log-likelihood criterion, mirrors compute_loglik in
-  // R/zi_known_clusters-Class.R: same shape as the non zero-inflated
+  // R/ZINormalBlockKnownClusters.R: same shape as the non zero-inflated
   // criterion (NormalBlockKnownClusters::objective), but normalized by
   // nY/npY instead of n/p (only non-zero-inflated observations contribute
   // to the Gaussian part), plus the fixed zero-inflation contribution

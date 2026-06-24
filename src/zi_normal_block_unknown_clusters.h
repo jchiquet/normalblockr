@@ -9,8 +9,8 @@
 
 // Zero-inflated normal-block model with unknown clusters, templated on the
 // residual-noise policy (ZIDiagonalNoise / ZISphericalNoise, see
-// zi_noise_models.h). Equivalent of the R6 class zi_unknown_clusters
-// (R/zi_unknown_clusters-Class.R).
+// zi_noise_models.h). Equivalent of the R6 class ZINormalBlockUnknownClusters
+// (R/ZINormalBlockUnknownClusters.R).
 //
 // Unlike the non zero-inflated counterpart (NormalBlockUnknownClusters), the
 // variational variance of W | Y is *row-dependent* (the zero-inflation mask
@@ -75,7 +75,7 @@ public:
     zi_data_(data), C_(C0), alpha_(alpha0), M_(M0), S_(S0), fixed_tau_(fixed_tau) {}
 
   // ELBO at the current parameter values, mirrors compute_loglik in
-  // R/zi_unknown_clusters-Class.R: same shape as the non zero-inflated criterion
+  // R/ZINormalBlockUnknownClusters.R: same shape as the non zero-inflated criterion
   // (NormalBlockUnknownClusters::objective), but normalized by nY/npY
   // instead of n/p, plus the fixed zero-inflation contribution
   // (zi_cond_mean); sum(log(S)) ranges over all n*q entries since S is now

@@ -12,16 +12,16 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ###############################################################################
 ###############################################################################
 ## These tests check that the Rcpp/RcppArmadillo zero-inflated (V)EM core
-## (zi_known_clusters_fit / zi_unknown_clusters_fit, src/exports.cpp)
+## (ZINormalBlockKnownClusters_fit / ZINormalBlockUnknownClusters_fit, src/exports.cpp)
 ## reproduces *closely* (up to numerical precision) the EM/VEM recursion
-## already implemented in R (zi_known_clusters / zi_unknown_clusters), starting from
+## already implemented in R (ZINormalBlockKnownClusters / ZINormalBlockUnknownClusters), starting from
 ## the same initial parameters, both unpenalized (sparsity = 0) and penalized
 ## (sparsity > 0, graphical lasso via glassoFast). The B-update (and, for
 ## unknown clusters, the M-update) is exactly quadratic despite the
 ## zero-inflation mask, so the C++ side solves it directly (see
 ## src/zi_closed_form_solvers.h) instead of going through an iterative
 ## optimizer; the R reference still uses nloptr/L-BFGS for these subproblems
-## (R/zi_known_clusters-Class.R, R/ZINB_fixed_Q-Class.R), which only
+## (R/ZINormalBlockKnownClusters.R, R/ZINormalBlockUnknownClusters.R), which only
 ## converges to its own optimizer tolerance -- hence the looser tolerance
 ## here than in the non zero-inflated tests (test-cpp-normal-block.R), which
 ## only involve exact linear algebra on both sides. The R6 heuristic
@@ -29,19 +29,19 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ## `.__enclos_env__` so that both implementations start from the very same
 ## point.
 
-test_that("zi_known_clusters_fit matches zi_known_clusters (diagonal/spherical, unpenalized/sparse)", {
-  data <- NB_data$new(Y, X)
+test_that("ZINormalBlockKnownClusters_fit matches ZINormalBlockKnownClusters (diagonal/spherical, unpenalized/sparse)", {
+  data <- NormalBlockData$new(Y, X)
 
   for (nc in c("diagonal", "spherical")) {
     for (sparsity in c(0, 0.05)) {
-      model <- zi_known_clusters$new(data, C, sparsity = sparsity,
+      model <- ZINormalBlockKnownClusters$new(data, C, sparsity = sparsity,
                                       control = NB_control(noise_covariance = nc, verbose = FALSE))
       init <- model$.__enclos_env__$private$EM_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       zi_cond_mean <- model$.__enclos_env__$private$ZI_cond_mean
 
-      res <- zi_known_clusters_fit(Y = data$Y, X = data$X,
+      res <- ZINormalBlockKnownClusters_fit(Y = data$Y, X = data$X,
                                     zeros_bar = data$zeros_bar, zi_cond_mean = zi_cond_mean, C = C,
                                     B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
                                     sparsity = sparsity, sparsity_weights = model$sparsity_weights,
@@ -60,19 +60,19 @@ test_that("zi_known_clusters_fit matches zi_known_clusters (diagonal/spherical, 
   }
 })
 
-test_that("zi_unknown_clusters_fit matches zi_unknown_clusters (diagonal/spherical, unpenalized/sparse)", {
-  data <- NB_data$new(Y, X)
+test_that("ZINormalBlockUnknownClusters_fit matches ZINormalBlockUnknownClusters (diagonal/spherical, unpenalized/sparse)", {
+  data <- NormalBlockData$new(Y, X)
 
   for (nc in c("diagonal", "spherical")) {
     for (sparsity in c(0, 0.05)) {
-      model <- zi_unknown_clusters$new(data, q, sparsity = sparsity,
+      model <- ZINormalBlockUnknownClusters$new(data, q, sparsity = sparsity,
                                  control = NB_control(noise_covariance = nc, verbose = FALSE))
       init <- model$.__enclos_env__$private$EM_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       zi_cond_mean <- model$.__enclos_env__$private$ZI_cond_mean
 
-      res <- zi_unknown_clusters_fit(Y = data$Y, X = data$X,
+      res <- ZINormalBlockUnknownClusters_fit(Y = data$Y, X = data$X,
                                       zeros_bar = data$zeros_bar, zi_cond_mean = zi_cond_mean,
                                       B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
                                       C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,

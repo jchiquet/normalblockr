@@ -7,8 +7,8 @@
 
 // Normal-block model with known clusters (fixed indicator matrix C), templated
 // on the residual-noise policy (DiagonalNoise / SphericalNoise, see
-// noise_models.h). Equivalent of the R6 class nb_known_clusters
-// (R/nb_known_clusters-Class.R), implementing the EM recursion of section 2
+// noise_models.h). Equivalent of the R6 class NormalBlockKnownClusters
+// (R/NormalBlockKnownClusters.R), implementing the EM recursion of section 2
 // (diagonal D) / section 3 (spherical D) of normal_block_calculations_v2.pdf,
 // summarized in 6.1/6.2.
 template <typename NoisePolicy>
@@ -48,7 +48,7 @@ public:
   // normal_block_calculations_v2.pdf. When sparsity_ > 0, Omegaq_ is no
   // longer the exact inverse of Sigma_hat, so the trace/penalty correction
   // that otherwise cancels out must be added back (mirrors the `if
-  // (self$sparsity > 0)` branch of compute_loglik in R/nb_known_clusters-Class.R).
+  // (self$sparsity > 0)` branch of compute_loglik in R/NormalBlockKnownClusters.R).
   double objective() const override {
     double log_det_Omegaq = arma::log_det_sympd(Omegaq_);
     double log_det_Gamma  = arma::log_det_sympd(Gamma_);

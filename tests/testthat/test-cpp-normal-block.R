@@ -12,26 +12,26 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ###############################################################################
 ###############################################################################
 ## These tests check that the Rcpp/RcppArmadillo (V)EM core
-## (nb_known_clusters_fit / nb_unknown_clusters_fit, src/exports.cpp)
+## (NormalBlockKnownClusters_fit / NormalBlockUnknownClusters_fit, src/exports.cpp)
 ## reproduces *exactly* (up to numerical precision) the EM/VEM recursion
-## already implemented in R (nb_known_clusters / nb_unknown_clusters), starting from the
+## already implemented in R (NormalBlockKnownClusters / NormalBlockUnknownClusters), starting from the
 ## same initial parameters, both unpenalized (sparsity = 0, plain inversion)
 ## and penalized (sparsity > 0, graphical lasso via glassoFast, called back
 ## from C++, see src/omega_estimation.h). The R6 heuristic initialization
 ## (private method EM_initialize) is reached into via R6's `.__enclos_env__`
 ## so that both implementations start from the very same point.
 
-test_that("nb_known_clusters_fit matches nb_known_clusters (diagonal/spherical, unpenalized/sparse)", {
-  data <- NB_data$new(Y, X)
+test_that("NormalBlockKnownClusters_fit matches NormalBlockKnownClusters (diagonal/spherical, unpenalized/sparse)", {
+  data <- NormalBlockData$new(Y, X)
 
   for (nc in c("diagonal", "spherical")) {
     for (sparsity in c(0, 0.05)) {
-      model <- nb_known_clusters$new(data, C, sparsity = sparsity,
+      model <- NormalBlockKnownClusters$new(data, C, sparsity = sparsity,
                                     control = NB_control(noise_covariance = nc, verbose = FALSE))
       init <- model$.__enclos_env__$private$EM_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
-      res <- nb_known_clusters_fit(Y = data$Y, X = data$X, C = C,
+      res <- NormalBlockKnownClusters_fit(Y = data$Y, X = data$X, C = C,
                                     B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
                                     sparsity = sparsity, sparsity_weights = model$sparsity_weights,
                                     noise_covariance = nc, niter = niter, threshold = threshold)
@@ -46,17 +46,17 @@ test_that("nb_known_clusters_fit matches nb_known_clusters (diagonal/spherical, 
   }
 })
 
-test_that("nb_unknown_clusters_fit matches nb_unknown_clusters (diagonal/spherical, unpenalized/sparse)", {
-  data <- NB_data$new(Y, X)
+test_that("NormalBlockUnknownClusters_fit matches NormalBlockUnknownClusters (diagonal/spherical, unpenalized/sparse)", {
+  data <- NormalBlockData$new(Y, X)
 
   for (nc in c("diagonal", "spherical")) {
     for (sparsity in c(0, 0.05)) {
-      model <- nb_unknown_clusters$new(data, q, sparsity = sparsity,
+      model <- NormalBlockUnknownClusters$new(data, q, sparsity = sparsity,
                               control = NB_control(noise_covariance = nc, verbose = FALSE))
       init <- model$.__enclos_env__$private$EM_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
-      res <- nb_unknown_clusters_fit(Y = data$Y, X = data$X,
+      res <- NormalBlockUnknownClusters_fit(Y = data$Y, X = data$X,
                                       B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
                                       C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,
                                       sparsity = sparsity, sparsity_weights = model$sparsity_weights,

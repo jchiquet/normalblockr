@@ -38,7 +38,7 @@ one_simu_sparse_fixed_q <- function(simu, n, p, q, d, kappa,
   ## Draw parameters and data according to the Normal-Block model
   X <- generate_X(n, d)
   true_param <- generate_parameters(X, p, q, kappa, omega_structure)
-  data <- NB_data$new(Y = normal_block_data(true_param, X), X = X)
+  data <- NormalBlockData$new(Y = normal_block_data(true_param, X), X = X)
 
   ## Arguments common to all function call
   args_common <- list(data,

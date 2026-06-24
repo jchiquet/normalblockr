@@ -5,9 +5,9 @@
 #include "normal_block_data.h"
 
 // Zero-inflation bookkeeping added to NormalBlockData when Y has structural
-// zeros (R/NB_data-Class.R: zeros, zeros_bar, npY, nY), plus the fixed
+// zeros (R/NormalBlockData.R: zeros, zeros_bar, npY, nY), plus the fixed
 // log-likelihood contribution of the zero-inflation component, computed once
-// in NB$initialize (R/NB-Class.R: private$ZI_cond_mean). The zero-inflation
+// in NormalBlockBase$initialize (R/NormalBlockBase.R: private$ZI_cond_mean). The zero-inflation
 // probabilities themselves (kappa, estimated upfront by a fixed logistic
 // regression on X0) are never revisited by the (V)EM recursion, so only
 // their fixed log-likelihood contribution needs to be carried over here.

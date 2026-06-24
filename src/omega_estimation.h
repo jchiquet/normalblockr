@@ -3,8 +3,8 @@
 
 #include <RcppArmadillo.h>
 
-// Equivalent of the shared private method `NB$get_Omegaq` (R/NB-Class.R),
-// used identically by the M-step of both nb_known_clusters and nb_unknown_clusters:
+// Equivalent of the shared private method `NormalBlockBase$get_Omegaq` (R/NormalBlockBase.R),
+// used identically by the M-step of both NormalBlockKnownClusters and NormalBlockUnknownClusters:
 // estimate the precision matrix of the blocks from its covariance estimate
 // Sigma_hat (q x q). When `sparsity <= 0`, this is a plain matrix inversion;
 // otherwise it calls back into R's glassoFast::glassoFast() (graphical

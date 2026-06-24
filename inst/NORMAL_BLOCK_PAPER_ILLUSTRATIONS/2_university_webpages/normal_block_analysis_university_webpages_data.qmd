@@ -73,7 +73,7 @@ Y <- log(1 + freq_mat[, terms]) %>% scale() %>% as.matrix()
 ```
 
 ```{r formatting-the-data-for-Normal-Block}
-data <- NB_data$new(Y,  X = matrix(1, nrow(Y), 1))
+data <- NormalBlockData$new(Y,  X = matrix(1, nrow(Y), 1))
 ```
 
 ## Running Normal-Block on the dataset

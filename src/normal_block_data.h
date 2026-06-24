@@ -3,7 +3,7 @@
 
 #include <RcppArmadillo.h>
 
-// Equivalent of the R6 class NB_data (R/NB_data-Class.R), restricted to the
+// Equivalent of the R6 class NormalBlockData (R/NormalBlockData.R), restricted to the
 // fields required by the non zero-inflated models: the response matrix Y,
 // the design matrix X and the cross-products reused at every M-step.
 class NormalBlockData {

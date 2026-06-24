@@ -7,7 +7,7 @@
 #include "normal_block_data.h"
 #include "omega_estimation.h"
 
-// Abstract base class, equivalent of the R6 class NB (R/NB-Class.R) stripped
+// Abstract base class, equivalent of the R6 class NormalBlockBase (R/NormalBlockBase.R) stripped
 // of everything related to initialization, heuristics and clustering
 // approximation (all of that is done in R and the resulting parameters are
 // passed in at construction time): only the data reference, the
@@ -22,12 +22,12 @@ protected:
   arma::vec dm1_;     // p, inverse variance per variable (1 / diag(D))
   arma::mat Omegaq_;  // q x q, precision matrix of the blocks
   double sparsity_;          // sparsity penalty applied to Omegaq (0 = unpenalized)
-  arma::mat sparsity_weights_; // q x q, per-pair penalty weights (see R/NB-Class.R)
+  arma::mat sparsity_weights_; // q x q, per-pair penalty weights (see R/NormalBlockBase.R)
 
   virtual void E_step() = 0;
   virtual void M_step() = 0;
 
-  // Equivalent of the shared private method `NB$get_Omegaq` (R/NB-Class.R):
+  // Equivalent of the shared private method `NormalBlockBase$get_Omegaq` (R/NormalBlockBase.R):
   // plain inversion when sparsity_ <= 0, graphical lasso (callback to R's
   // glassoFast) otherwise. See omega_estimation.h.
   arma::mat estimate_omega(const arma::mat& Sigma_hat) const {
@@ -48,7 +48,7 @@ public:
 
   // Alternates E_step()/M_step(), recording objective() after each full
   // iteration, and stops once the increment falls below `tol` (or after
-  // `maxit` iterations). Equivalent of `private$EM_optimize` in R/NB-Class.R.
+  // `maxit` iterations). Equivalent of `private$EM_optimize` in R/NormalBlockBase.R.
   void run_em(int maxit, double tol) {
     objective_trace_.clear();
     objective_trace_.push_back(objective());
