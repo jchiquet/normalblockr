@@ -508,39 +508,25 @@ NormalBlockBase <- R6::R6Class(
       list(B = B, R = R, Sigma = Sigma)
     },
 
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## MLE of ZI Diagonal Normal distribution
-    zi_diag_normal_inference = function(){
-      B     <- self$data$XtXm1 %*% self$data$XtY
-      dm1   <- self$data$nY / colSums(self$data$zeros_bar * (self$data$Y - self$data$X %*% B)^2)
-      for (i in 1:3) { # a couple of iterates is enough
-        B     <- private$zi_diag_normal_optim_B(dm1)
-        dm1   <- self$data$nY / colSums(self$data$zeros_bar * (self$data$Y - self$data$X %*% B)^2)
-      }
-      R <- self$data$zeros_bar * (self$data$Y - self$data$X %*% B)
-      list(B = B, dm1 = dm1, kappa = private$kappa, R = R)
+    ## Per-variable inverse variance from a residual matrix, respecting
+    ## res_covariance ("diagonal": one dm1 per variable; "spherical": a
+    ## single shared value repeated p times). Shared by
+    ## NormalBlockKnownClusters/NormalBlockUnknownClusters's
+    ## get_heuristic_parameters() (previously duplicated verbatim in both).
+    dm1_from_residuals = function(R) {
+      ddiag <- colMeans(R^2)
+      switch(private$res_covariance,
+             "diagonal"  = 1 / as.vector(ddiag),
+             "spherical" = rep(1 / mean(ddiag), self$p))
     },
 
-    ## Closed-form weighted least squares solve for B: the zero-inflation
-    ## mask makes the weight matrix vary by both row and column, so each
-    ## column of B is solved independently (mirrors nb_optim::solve_wls in
-    ## src/zi_closed_form_solvers.h -- no iterative optimizer is needed since
-    ## the objective is exactly quadratic in B). Uses a pseudo-inverse rather
-    ## than solve() because, e.g. with a one-hot design and enough zero
-    ## inflation, a whole design level can be all-zero for some variable,
-    ## making XtWX exactly singular; ginv() falls back to the minimum-norm
-    ## solution instead of erroring (mirroring arma::solve()'s automatic
-    ## pinv fallback on the C++ side).
-    zi_diag_normal_optim_B = function(dm1) {
-      DM1 <- matrix(dm1, self$data$n, self$data$p, byrow = TRUE) * self$data$zeros_bar
-      B <- matrix(0, self$d, self$p)
-      for (j in seq_len(self$data$p)) {
-        w <- DM1[, j]
-        XtWX <- crossprod(self$data$X, self$data$X * w)
-        XtWy <- crossprod(self$data$X, self$data$Y[, j] * w)
-        B[, j] <- MASS::ginv(XtWX) %*% XtWy
-      }
-      B
+    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ## MLE of ZI Diagonal Normal distribution
+    ## (the weighted-least-squares fit itself lives in zi_weighted_fit(),
+    ## R/utils.R, shared with the collection-level zi_residuals())
+    zi_diag_normal_inference = function(){
+      fit <- zi_weighted_fit(self$data)
+      list(B = fit$B, dm1 = fit$dm1, kappa = private$kappa, R = fit$R)
     },
 
     heuristic_optimize = function(control){

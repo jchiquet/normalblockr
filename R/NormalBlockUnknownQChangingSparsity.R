@@ -32,11 +32,7 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
       ## get_model() call inside NormalBlockChangingSparsity$initialize()
       ## (including across its own sparsity sweep), so setting it once here
       ## per q is enough.
-      sbm_path <- NULL
-      if (identical(control$clustering_approx, "sbm") &&
-          is.null(control$clustering_init) && !zero_inflation) {
-        sbm_path <- sbm_clustering_path(ols_residuals(mydata), q_list)
-      }
+      sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
 
       self$models <- purrr::map(seq_along(q_list), function(rank) {
         if (!is.null(sbm_path))

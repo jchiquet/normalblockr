@@ -39,13 +39,10 @@ NormalBlockUnknownClusters <- R6::R6Class(
       reg_res   <- private$multivariate_normal_inference()
       if (anyNA(private$C)) # if no initial clustering provided
         private$C <- private$heuristic_clustering(reg_res$R)
-      private$C <- check_one_boundary(check_zero_boundary(private$C))
+      private$C <- clip_probabilities(private$C)
       Sigmaq    <- private$heuristic_Sigmaq_from_Sigma(reg_res$Sigma)
       Omegaq    <- private$get_Omegaq(Sigmaq)
-      ddiag <- colMeans(reg_res$R^2)
-      dm1   <- switch(private$res_covariance,
-                      "diagonal"  = 1 / as.vector(ddiag),
-                      "spherical" = rep(1/mean(ddiag), self$p))
+      dm1       <- private$dm1_from_residuals(reg_res$R)
       list(B = reg_res$B, Omegaq = Omegaq, dm1 = dm1,
            C = private$C, alpha = colMeans(private$C))
     },

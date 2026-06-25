@@ -32,10 +32,7 @@ NormalBlockKnownClusters <- R6::R6Class(
 
     get_heuristic_parameters = function(){
       reg_res   <- private$multivariate_normal_inference()
-      ddiag <- colMeans(reg_res$R^2)
-      dm1   <- switch(private$res_covariance,
-                      "diagonal"  = 1 / as.vector(ddiag),
-                      "spherical" = rep(1/mean(ddiag), self$p))
+      dm1       <- private$dm1_from_residuals(reg_res$R)
       Sigmaq    <- private$heuristic_Sigmaq_from_Sigma(reg_res$Sigma)
       Omegaq    <- private$get_Omegaq(Sigmaq)
       list(B = reg_res$B, dm1 = dm1, Omegaq = Omegaq)

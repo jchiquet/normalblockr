@@ -35,15 +35,8 @@ NormalBlockUnknownQ <- R6::R6Class(
       ## clustering for every q in q_list at a fraction of the cost of letting
       ## each model run its own independent exploration (clustering_approx =
       ## "sbm" otherwise repeats the explore step once per q -- see
-      ## sbm_clustering_path() in R/utils.R). Only applies when nothing more
-      ## specific was already requested (no explicit clustering_init, and the
-      ## clustering itself only depends on the OLS residuals, not on the
-      ## zero-inflation mask, so it is skipped for ZI collections).
-      sbm_path <- NULL
-      if (identical(control$clustering_approx, "sbm") &&
-          is.null(control$clustering_init) && !zero_inflation) {
-        sbm_path <- sbm_clustering_path(ols_residuals(mydata), q_list)
-      }
+      ## sbm_path_for_collection()/sbm_clustering_path() in R/utils.R).
+      sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
 
       # instantiates an NormalBlockUnknownClusters model for each q in nb_blocks
       this_control <- control
@@ -84,19 +77,8 @@ NormalBlockUnknownQ <- R6::R6Class(
     #' @param criteria vector of characters. The criteria to plot in `c("deviance", "BIC", "ICL")`. Defaults to all of them.
     #' @return a [`ggplot2::ggplot`] graph
     plot = function(criteria = c("deviance", "ICL", "BIC", "EBIC")) {
-      vlines <- sapply(intersect(criteria, c("ICL")) , function(crit) self$get_best_model(crit)$q)
       stopifnot(!anyNA(self$criteria[criteria]))
-
-      dplot <- self$criteria %>%
-        dplyr::select(dplyr::all_of(c("q", criteria))) %>%
-        tidyr::gather(key = "criterion", value = "value", -q) %>%
-        dplyr::group_by(criterion)
-      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = q, y = value, group = criterion, colour = criterion)) +
-        ggplot2::geom_line() + ggplot2::geom_point() +
-        ggplot2::ggtitle(label    = "Model selection criteria",
-                         subtitle = "Lower is better" ) +
-        ggplot2::theme_bw() + ggplot2::geom_vline(xintercept = vlines, linetype = "dashed", alpha = 0.25)
-      p
+      private$plot_criteria_path("q", criteria, "ICL")
     }
   ),
 

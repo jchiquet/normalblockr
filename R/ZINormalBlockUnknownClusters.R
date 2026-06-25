@@ -38,7 +38,7 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
       zi_diag <- private$zi_diag_normal_inference()
       if (anyNA(private$C))
         private$C <- private$heuristic_clustering(zi_diag$R)
-      private$C <- check_one_boundary(check_zero_boundary(private$C))
+      private$C <- clip_probabilities(private$C)
       Sigmaq <- private$heuristic_Sigmaq_from_Sigma(cov(zi_diag$R))
       Omegaq <- private$get_Omegaq(Sigmaq)
       list(B = zi_diag$B, dm1 = zi_diag$dm1, Omegaq = Omegaq,

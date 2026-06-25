@@ -128,18 +128,8 @@ NormalBlockChangingSparsity <- R6::R6Class(
     #' @param log.x logical: should the x-axis be represented in log-scale? Default is `TRUE`.
     #' @return a [`ggplot`] graph
     plot = function(criteria = c("deviance", "BIC", "EBIC", "ICL"), log.x = TRUE) {
-      vlines <- sapply(intersect(criteria, c("BIC")) , function(crit) self$get_best_model(crit)$sparsity)
       stopifnot(!is.null(self$criteria[criteria]))
-
-      dplot <- self$criteria %>%
-        dplyr::select(dplyr::all_of(c("sparsity", criteria))) %>%
-        tidyr::gather(key = "criterion", value = "value", -sparsity) %>%
-        dplyr::group_by(criterion)
-      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = sparsity, y = value, group = criterion, colour = criterion)) +
-        ggplot2::geom_line() + ggplot2::geom_point() +
-        ggplot2::ggtitle(label    = "Model selection criteria",
-                         subtitle = "Lower is better" ) +
-        ggplot2::theme_bw() + ggplot2::geom_vline(xintercept = vlines, linetype = "dashed", alpha = 0.25)
+      p <- private$plot_criteria_path("sparsity", criteria, "BIC")
       if (log.x) p <- p + ggplot2::coord_trans(x = "log10")
       p
     },

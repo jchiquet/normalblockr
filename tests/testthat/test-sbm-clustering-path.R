@@ -69,14 +69,19 @@ test_that("NormalBlockUnknownQChangingSparsity also uses the shared sbm path", {
   expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
 })
 
-test_that("zero-inflated collections are unaffected (no sbm path injected)", {
+test_that("zero-inflated collections also use the shared sbm path, clustering on zi_residuals() instead of ols_residuals()", {
   exzi   <- generate_normal_block_data(n = 60, p = 24, d = 1, q = 4, kappa = rep(0.3, 24))
-  datazi <- NormalBlockData$new(exzi$Y, exzi$X)
+  datazi <- NormalBlockData$new(exzi$Y, exzi$X, X0 = matrix(1, nrow(exzi$Y), 1))
 
   coll <- NormalBlockUnknownQ$new(datazi, 2:3, zero_inflation = TRUE,
                                   control = NB_control(verbose = FALSE, clustering_approx = "sbm"))
-  ## clustering_init was not eagerly injected -- private$C is still the
-  ## placeholder until optimize()/EM_initialize() actually runs
-  expect_true(anyNA(coll$models[[1]]$.__enclos_env__$private$C))
+  ## clustering_init is now eagerly injected from the shared path, just like
+  ## for non-ZI collections -- private$C is already a valid q-cluster
+  ## indicator matrix before optimize()/EM_initialize() ever runs
+  for (model in coll$models) {
+    C0 <- model$.__enclos_env__$private$C
+    expect_false(anyNA(C0))
+    expect_equal(length(unique(get_clusters(C0))), model$q)
+  }
   expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
 })
