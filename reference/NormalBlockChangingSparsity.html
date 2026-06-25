@@ -95,13 +95,13 @@
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockChangingSparsity-initialize"><code>NormalBlockChangingSparsity$new()</code></a></p></li>
+<li><p><a href="#method-NormalBlockChangingSparsity-optimize"><code>NormalBlockChangingSparsity$optimize()</code></a></p></li>
 <li><p><a href="#method-NormalBlockChangingSparsity-get_model"><code>NormalBlockChangingSparsity$get_model()</code></a></p></li>
 <li><p><a href="#method-NormalBlockChangingSparsity-get_best_model"><code>NormalBlockChangingSparsity$get_best_model()</code></a></p></li>
 <li><p><a href="#method-NormalBlockChangingSparsity-plot"><code>NormalBlockChangingSparsity$plot()</code></a></p></li>
 <li><p><a href="#method-NormalBlockChangingSparsity-stability_selection"><code>NormalBlockChangingSparsity$stability_selection()</code></a></p></li>
 <li><p><a href="#method-NormalBlockChangingSparsity-clone"><code>NormalBlockChangingSparsity$clone()</code></a></p></li>
-</ul></div><p><details open><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="optimize"><a href="NormalBlockCollection.html#method-optimize"><code>NormalBlockCollection$optimize()</code></a></span></li>
-</ul></details></p><hr><a id="method-NormalBlockChangingSparsity-initialize"></a><div class="section">
+</ul></div><p></p><hr><a id="method-NormalBlockChangingSparsity-initialize"></a><div class="section">
 <h3 id="normalblockchangingsparsity-new-"><code>NormalBlockChangingSparsity$new()</code><a class="anchor" aria-label="anchor" href="#normalblockchangingsparsity-new-"></a></h3>
 <p>Create a new [`NormalBlockChangingSparsity`] object.</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
@@ -134,13 +134,37 @@
 
 </div>
 
+<p></p><hr><a id="method-NormalBlockChangingSparsity-optimize"></a><div class="section">
+<h3 id="normalblockchangingsparsity-optimize-"><code>NormalBlockChangingSparsity$optimize()</code><a class="anchor" aria-label="anchor" href="#normalblockchangingsparsity-optimize-"></a></h3>
+<p>optimizes every model in the sparsity path, warm-starting
+each one (after the first) from the previous, adjacent penalty's
+converged parameters (see [NormalBlockBase]'s `warm_start_from()`)
+instead of re-deriving everything from the heuristic clustering, the
+way the generic [NormalBlockCollection] `optimize()` would. `blocks`
+(hence q) is fixed across the whole path, only the sparsity penalty
+changes, so the warm start is always between models of matching shape.</p><div class="section">
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockChangingSparsity</span><span class="op">$</span><span class="fu">optimize</span><span class="op">(</span></span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">100</span>, threshold <span class="op">=</span> <span class="fl">1e-04</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>control</code></dt>
+<dd><p>optimization parameters (niter and threshold)</p></dd>
+
+
+</dl><p></p></div>
+</div>
+
+</div>
+
 <p></p><hr><a id="method-NormalBlockChangingSparsity-get_model"></a><div class="section">
 <h3 id="normalblockchangingsparsity-get-model-"><code>NormalBlockChangingSparsity$get_model()</code><a class="anchor" aria-label="anchor" href="#normalblockchangingsparsity-get-model-"></a></h3>
 <p>returns the NormalBlockKnownClusters model corresponding to given penalty</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockChangingSparsity</span><span class="op">$</span><span class="fu">get_model</span><span class="op">(</span><span class="va">sparsity</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>sparsity</code></dt>
 <dd><p>sparsity penalty asked by user</p></dd>
 
@@ -156,13 +180,13 @@
 <p></p><hr><a id="method-NormalBlockChangingSparsity-get_best_model"></a><div class="section">
 <h3 id="normalblockchangingsparsity-get-best-model-"><code>NormalBlockChangingSparsity$get_best_model()</code><a class="anchor" aria-label="anchor" href="#normalblockchangingsparsity-get-best-model-"></a></h3>
 <p>Extract best model in the collection</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockChangingSparsity</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span></span>
 <span>  crit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"EBIC"</span>, <span class="st">"ICL"</span>, <span class="st">"StARS"</span><span class="op">)</span>,</span>
 <span>  stability <span class="op">=</span> <span class="fl">0.9</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>crit</code></dt>
 <dd><p>a character for the criterion used to performed the selection.</p></dd>
 
@@ -182,13 +206,13 @@ Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC</p></dd>
 <p></p><hr><a id="method-NormalBlockChangingSparsity-plot"></a><div class="section">
 <h3 id="normalblockchangingsparsity-plot-"><code>NormalBlockChangingSparsity$plot()</code><a class="anchor" aria-label="anchor" href="#normalblockchangingsparsity-plot-"></a></h3>
 <p>Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockChangingSparsity</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span></span>
 <span>  criteria <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"deviance"</span>, <span class="st">"BIC"</span>, <span class="st">"EBIC"</span>, <span class="st">"ICL"</span><span class="op">)</span>,</span>
 <span>  log.x <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>criteria</code></dt>
 <dd><p>vector of characters. The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults to all of them.</p></dd>
 
@@ -207,13 +231,13 @@ Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC</p></dd>
 <p></p><hr><a id="method-NormalBlockChangingSparsity-stability_selection"></a><div class="section">
 <h3 id="normalblockchangingsparsity-stability-selection-"><code>NormalBlockChangingSparsity$stability_selection()</code><a class="anchor" aria-label="anchor" href="#normalblockchangingsparsity-stability-selection-"></a></h3>
 <p>Compute the stability path by stability selection</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockChangingSparsity</span><span class="op">$</span><span class="fu">stability_selection</span><span class="op">(</span></span>
 <span>  subsamples <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_subsamples <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
+<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>subsamples</code></dt>
 <dd><p>a list of vectors describing the subsamples. The number of vectors (or list length) determines the number of subsamples used in the stability selection. Automatically set to 20 subsamples with size `10*sqrt(n)` if `n &gt;= 144` and `0.8*n` otherwise following Liu et al. (2010) recommendations.</p></dd>
 
@@ -229,10 +253,10 @@ Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC</p></dd>
 <p></p><hr><a id="method-NormalBlockChangingSparsity-clone"></a><div class="section">
 <h3 id="normalblockchangingsparsity-clone-"><code>NormalBlockChangingSparsity$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockchangingsparsity-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockChangingSparsity</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
+<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 

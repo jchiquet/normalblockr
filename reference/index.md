@@ -31,6 +31,8 @@
 - [`ZINormalBlockUnknownClusters`](ZINormalBlockUnknownClusters.md) : R6
   class for zero-inflated normal-block model with a fixed number of
   clusters (but unknown clustering).
+- [`brca_rppa`](brca_rppa.md) : Breast cancer proteomics data (TCGA,
+  RPPA)
 - [`coef(`*`<NormalBlockBase>`*`)`](coef.NormalBlockBase.md) : Extracts
   model coefficients from objects returned by \[NormalBlockBase()\] and
   its variants
@@ -44,8 +46,12 @@
 - [`isNB()`](isNB.md) : Checks if a model is of class
   \[NormalBlockBase()\]
 - [`normal_block()`](normal_block.md) : Normal-block model
+- [`onema`](onema.md) : French stream fish community data (ONEMA / OFB
+  electrofishing surveys)
 - [`predict(`*`<NormalBlockBase>`*`)`](predict.NormalBlockBase.md) :
   Predicts observations Y for new covariates X.
 - [`sigma(`*`<NormalBlockBase>`*`)`](sigma.NormalBlockBase.md) :
   Extracts model coefficients from objects returned by
   \[NormalBlockBase()\] and its variants
+- [`university`](university.md) : University webpages text data (CMU "4
+  Universities" / WebKB)

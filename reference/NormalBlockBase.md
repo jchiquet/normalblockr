@@ -42,7 +42,30 @@ R6 abstract class for a generic sparse Normal Block model
 - `model_par`:
 
   a list with the matrices of the model parameters: B (covariates), dm1
-  (species variance), Omegaq (groups precision matrix))
+  (species variance), Omegaq (groups precision matrix)). On the internal
+  fitting scale (\`self\$data\$Y\`, possibly column-rescaled by
+  \`NormalBlockData(scale = TRUE)\`) – use
+  \`\$B_original\`/\`\$dm1_original\` for the same quantities converted
+  back to Y's original units.
+
+- `B_original`:
+
+  regression coefficients (d x p), converted back to Y's original units
+  (undoing \`NormalBlockData(scale = TRUE)\`'s column-wise rescaling, if
+  any). Use \`model_par\$B\` instead for the coefficients on the
+  internal fitting scale.
+
+- `dm1_original`:
+
+  inverse residual variance per variable (1 / Var(Y_j)), converted back
+  to Y's original units. Use \`model_par\$dm1\` instead for the internal
+  fitting scale. With \`noise_covariance = "spherical"\`,
+  \`model_par\$dm1\` is a single value repeated p times (one shared
+  variance on the fitting scale); once converted back per-variable, the
+  p values returned here generally differ from one another whenever Y's
+  columns were rescaled by different factors – correctly so, since a
+  single shared \*scaled\* variance does not correspond to a single
+  shared variance in the original, heterogeneous-scale units.
 
 - `nb_param`:
 
@@ -122,6 +145,8 @@ R6 abstract class for a generic sparse Normal Block model
 
 - [`NormalBlockBase$optimize()`](#method-NormalBlockBase-optimize)
 
+- [`NormalBlockBase$warm_start_from()`](#method-NormalBlockBase-warm_start_from)
+
 - [`NormalBlockBase$split()`](#method-NormalBlockBase-split)
 
 - [`NormalBlockBase$candidates_split()`](#method-NormalBlockBase-candidates_split)
@@ -152,7 +177,13 @@ Create a new \[\`NormalBlockBase\`\] object.
 
 #### Usage
 
-    NormalBlockBase$new(data, q, sparsity = 0, control = NB_control())
+    NormalBlockBase$new(
+      data,
+      q,
+      sparsity = 0,
+      control = NB_control(),
+      zero_inflation = FALSE
+    )
 
 #### Arguments
 
@@ -172,6 +203,14 @@ Create a new \[\`NormalBlockBase\`\] object.
 
   structured list of more specific parameters, to generate with
   NB_control
+
+- `zero_inflation`:
+
+  whether the concrete subclass models zero-inflation; set by the ZI
+  subclasses themselves, not meant to be set by the end user. When
+  \`FALSE\`, the (costly) zero-inflation probability fit
+  (\`kappa\`/\`B0\`) is skipped entirely, since it would otherwise never
+  be used downstream.
 
 #### Returns
 
@@ -270,6 +309,36 @@ calls optimization (EM or heuristic) and updates relevant fields
 #### Returns
 
 optimizes the model and updates its parameters
+
+------------------------------------------------------------------------
+
+### `NormalBlockBase$warm_start_from()`
+
+Seed this model's starting parameters from another, already-optimized
+model with the same q, instead of the heuristic clustering-derived
+values set at construction time. Used by \[NormalBlockChangingSparsity\]
+to warm-start each penalty in a sparsity path from the previous
+(adjacent) one's converged solution – adjacent penalties along a sorted
+path usually have similar optima, so this typically needs far fewer EM
+iterations than starting cold each time (the same rationale as
+warm-starting in glmnet/glassoFast's own regularization paths).
+\`B0\`/\`kappa\` (zero-inflation) are deliberately left untouched: they
+depend only on the data, not on sparsity/blocks, so they are already set
+correctly and independently on every model.
+
+#### Usage
+
+    NormalBlockBase$warm_start_from(other)
+
+#### Arguments
+
+- `other`:
+
+  a \[NormalBlockBase\] object, already optimized
+
+#### Returns
+
+Update the current object in place with \`other\`'s parameters
 
 ------------------------------------------------------------------------
 

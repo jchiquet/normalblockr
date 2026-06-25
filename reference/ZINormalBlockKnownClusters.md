@@ -27,7 +27,7 @@ R6 class for a Zero-Inflated normal-block model with a known clustering.
 
 - `fitted`:
 
-  Y values predicted by the model
+  Y values predicted by the model, in Y's original units
 
 - `who_am_I`:
 
@@ -55,6 +55,7 @@ Inherited methods
 - [`NormalBlockBase$print()`](NormalBlockBase.html#method-print)
 - [`NormalBlockBase$split()`](NormalBlockBase.html#method-split)
 - [`NormalBlockBase$update()`](NormalBlockBase.html#method-update)
+- [`NormalBlockBase$warm_start_from()`](NormalBlockBase.html#method-warm_start_from)
 
 ------------------------------------------------------------------------
 

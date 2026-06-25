@@ -44,7 +44,12 @@
     <div class="section level2">
     <h2 id="public-fields">Public fields<a class="anchor" aria-label="anchor" href="#public-fields"></a></h2>
     <p></p><div class="r6-fields"><dl><dt><code>Y</code></dt>
-<dd><p>the matrix of responses</p></dd>
+<dd><p>the matrix of responses (rescaled column-wise if `scale = TRUE`)</p></dd>
+
+
+    <dt><code>Y_scale</code></dt>
+<dd><p>the per-column standard deviation Y was divided by (all
+1's if `scale = FALSE`)</p></dd>
 
 
     <dt><code>X</code></dt>
@@ -112,7 +117,7 @@
 <h3 id="normalblockdata-new-"><code>NormalBlockData$new()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-new-"></a></h3>
 <p>Create a new [`NormalBlockData`] object.</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">Y</span>, <span class="va">X</span>, X0 <span class="op">=</span> <span class="cn">NULL</span>, formula <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">Y</span>, <span class="va">X</span>, X0 <span class="op">=</span> <span class="cn">NULL</span>, formula <span class="op">=</span> <span class="cn">NULL</span>, scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>Y</code></dt>
@@ -126,6 +131,11 @@
 
       <dt><code>formula</code></dt>
 <dd><p>describes the relationship between Y and X, useful if not all of X's covariates should be used.</p></dd>
+
+      <dt><code>scale</code></dt>
+<dd><p>whether to rescale each column of Y by its own standard
+deviation (no centering). Default TRUE – see the class-level
+documentation for the rationale and its limits.</p></dd>
 
 
 </dl><p></p></div>

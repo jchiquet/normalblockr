@@ -55,6 +55,8 @@ R6 class for a collection of normal-block models with a fixed clustering
 
 - [`NormalBlockChangingSparsity$new()`](#method-NormalBlockChangingSparsity-initialize)
 
+- [`NormalBlockChangingSparsity$optimize()`](#method-NormalBlockChangingSparsity-optimize)
+
 - [`NormalBlockChangingSparsity$get_model()`](#method-NormalBlockChangingSparsity-get_model)
 
 - [`NormalBlockChangingSparsity$get_best_model()`](#method-NormalBlockChangingSparsity-get_best_model)
@@ -64,10 +66,6 @@ R6 class for a collection of normal-block models with a fixed clustering
 - [`NormalBlockChangingSparsity$stability_selection()`](#method-NormalBlockChangingSparsity-stability_selection)
 
 - [`NormalBlockChangingSparsity$clone()`](#method-NormalBlockChangingSparsity-clone)
-
-Inherited methods
-
-- [`NormalBlockCollection$optimize()`](NormalBlockCollection.html#method-optimize)
 
 ------------------------------------------------------------------------
 
@@ -105,6 +103,30 @@ Create a new \[\`NormalBlockChangingSparsity\`\] object.
 #### Returns
 
 A new \[\`NormalBlockChangingSparsity\`\] object
+
+------------------------------------------------------------------------
+
+### `NormalBlockChangingSparsity$optimize()`
+
+optimizes every model in the sparsity path, warm-starting each one
+(after the first) from the previous, adjacent penalty's converged
+parameters (see \[NormalBlockBase\]'s \`warm_start_from()\`) instead of
+re-deriving everything from the heuristic clustering, the way the
+generic \[NormalBlockCollection\] \`optimize()\` would. \`blocks\`
+(hence q) is fixed across the whole path, only the sparsity penalty
+changes, so the warm start is always between models of matching shape.
+
+#### Usage
+
+    NormalBlockChangingSparsity$optimize(
+      control = list(niter = 100, threshold = 1e-04, verbose = TRUE)
+    )
+
+#### Arguments
+
+- `control`:
+
+  optimization parameters (niter and threshold)
 
 ------------------------------------------------------------------------
 

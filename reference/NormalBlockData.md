@@ -6,7 +6,12 @@ R6 class for a generic normal model
 
 - `Y`:
 
-  the matrix of responses
+  the matrix of responses (rescaled column-wise if \`scale = TRUE\`)
+
+- `Y_scale`:
+
+  the per-column standard deviation Y was divided by (all 1's if \`scale
+  = FALSE\`)
 
 - `X`:
 
@@ -79,7 +84,7 @@ Create a new \[\`NormalBlockData\`\] object.
 
 #### Usage
 
-    NormalBlockData$new(Y, X, X0 = NULL, formula = NULL)
+    NormalBlockData$new(Y, X, X0 = NULL, formula = NULL, scale = TRUE)
 
 #### Arguments
 
@@ -99,6 +104,12 @@ Create a new \[\`NormalBlockData\`\] object.
 
   describes the relationship between Y and X, useful if not all of X's
   covariates should be used.
+
+- `scale`:
+
+  whether to rescale each column of Y by its own standard deviation (no
+  centering). Default TRUE – see the class-level documentation for the
+  rationale and its limits.
 
 ------------------------------------------------------------------------
 

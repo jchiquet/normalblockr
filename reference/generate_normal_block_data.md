@@ -55,11 +55,11 @@ generate_normal_block_data(
 
 - u_v:
 
-  two-size vector of positive numbers u and v controlling the generation
-  of the precision matrix Omega: u is the off-diagonal elements of the
-  precision matrix, controlling the magnitude of partial correlations
-  with v a positive number being added to the diagonal elements of the
-  precision matrix. The default value is c(0.3, 0.1).
+  two-size vector of positive numbers v and u controlling the generation
+  of the precision matrix Omega: v scales the off-diagonal elements of
+  the precision matrix (magnitude of partial correlations), and u is a
+  positive number added to the diagonal elements to ensure
+  positive-definiteness. The default value is c(0.3, 0.1).
 
 - SNR:
 
