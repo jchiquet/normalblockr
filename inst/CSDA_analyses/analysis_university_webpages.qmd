@@ -27,10 +27,16 @@ data_web <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))
 
 ```{r running-normal-block}
 nb_web_sparse <- normal_block(data = data_web, blocks = 15, sparsity = 0.005)
+
+nb_web_sparse <- normal_block(data = data_web, blocks = 15, sparsity = TRUE)
 ```
 
+```{r model-selection}
+nb_web_sparse$plot()
+nb_web <- nb_web_sparse$get_best_model("ICL")
+```
 ```{r clustering-results}
-elements_per_cluster <- split(colnames(data_web$Y), nb_web_sparse$clustering)
+elements_per_cluster <- nb_web$elements_per_cluster
 
 df <- tibble(
     cluster = names(elements_per_cluster),
@@ -41,5 +47,5 @@ df
 ```
 
 ```{r network-results}
-nb_web_sparse$plot_network()
+nb_web$plot_network()
 ```

@@ -52,6 +52,7 @@ NB_prot_subtype$refine()
 NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
 ```
 
+### Select the best model reached
 
 ```{r model-selection}
 selected_NB <- NB_prot_subtype$get_best_model("ICL")

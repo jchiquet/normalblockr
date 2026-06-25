@@ -210,18 +210,23 @@ NormalBlockBase <- R6::R6Class(
       new_C[split2, index] <- .Machine$double.eps
       new_C <- new_C / rowSums(new_C)
 
-      ## Variational means
-      new_M <- cbind(private$M, 0)
-      new_M[split2, self$q + 1] <- new_M[split2, index]
-      new_M[split2, index] <- 0
+      ## Variational means: the new block starts as a copy of its parent's
+      ## column. split1/split2 (above) are computed over *variables*
+      ## (length p, from self$clustering) and must not be reused to index
+      ## M/S, which are indexed by *individuals* (length n): doing so used
+      ## to silently scramble rows via recycling whenever p happened to
+      ## divide n evenly, and errors outright otherwise -- e.g. the
+      ## zero-inflated case, where S is also n x q rather than length q.
+      ## EM_initialize()'s first E-step differentiates the duplicated
+      ## columns immediately afterwards anyway, since it is driven by C/tau,
+      ## which already differs between the two new blocks.
+      new_M <- cbind(private$M, private$M[, index])
 
       ## Variational variances
       if (is.matrix(private$S)) {
-        new_S <- cbind(private$S, 0.1)
-        new_S[split2, self$q + 1] <- new_C[split2, index]
-        new_S[split2, index] <- 0.1
+        new_S <- cbind(private$S, private$S[, index])
       } else {
-        new_S <- c(private$S, mean(private$S))
+        new_S <- c(private$S, private$S[index])
       }
 
       ## Sparsity weights

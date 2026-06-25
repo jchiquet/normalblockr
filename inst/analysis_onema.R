@@ -8,9 +8,11 @@ Y <- log(1 + onema$biomass) |> as.matrix()
 data <- NormalBlockData$new(Y, X)
 
 ## ZI inflated normal with diagonal covariance
-out <- normal_block(data, blocks = 2:10, zero_inflation = TRUE)
+out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE)
 
 out$plot(criteria = c("BIC", "EBIC"))
+out$refine()
+out$plot(criteria = c("BIC", "EBIC", "deviance"))
 myModel <- out$get_best_model("EBIC")
 
 ## Groups of species
