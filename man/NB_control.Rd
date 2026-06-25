@@ -12,11 +12,10 @@ NB_control(
   n_sparsity_penalties = 30,
   min_ratio = 0.01,
   fixed_tau = FALSE,
-  clustering_init = NULL,
+  clustering_init = "kmeans",
   verbose = TRUE,
   heuristic = FALSE,
-  noise_covariance = c("diagonal", "spherical"),
-  clustering_approx = c("kmeans", "ward2", "sbm", "kmeansvar", "spectral")
+  noise_covariance = c("diagonal", "spherical")
 )
 }
 \arguments{
@@ -38,8 +37,27 @@ are only used if penalties is not specified}
 \item{fixed_tau}{whether tau should be fixed at clustering_init during optimization
 useful for calls to fixed_q models in stability_selection}
 
-\item{clustering_init}{proposal of initial value for clustering, when q is
-unknown, can be a list with one clustering for each q value}
+\item{clustering_init}{how to obtain the initial clustering of the q unknown
+blocks. Either the name of a clustering heuristic -- one of "kmeans"
+(default), "ward2", "sbm", "kmeansvar" (from the ClustOfVar package, like
+the internal "hclustvar" fallback used whenever the chosen method collapses
+to fewer than q clusters) or "spectral" (k-means on the row-normalized
+eigenvectors of cov(R), a cheap proxy for clustering the residuals'
+covariance structure rather than their values) -- or an actual clustering
+to use directly, as a vector of labels or a p x q indicator matrix. When q
+is unknown (a collection over several q values), can also be a list with
+one such heuristic name/clustering per q value. No single heuristic
+dominates on every dataset (see inst/normal_block_models.qmd for a
+benchmark); "kmeans" is the default because it was never the worst of the 5
+on either of the two benchmarked datasets, not because it ever won. When
+fitting a collection over several values of q
+(`normal_block(blocks = <vector>)`, [NormalBlockUnknownQ],
+[NormalBlockUnknownQChangingSparsity]) with the heuristic name "sbm" (and no
+per-q list of explicit clusterings), a single SBM exploration runs over the
+whole range of q and is reused for every model in the collection instead of
+repeating an independent (and increasingly costly) exploration for each q;
+any q its own model-selection does not reach falls back to a cheap "ward2"
+clustering rather than a dedicated (and potentially expensive) SBM call.}
 
 \item{verbose}{telling if information should be printed during optimization}
 
@@ -49,24 +67,6 @@ likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
 are all `NA` on the resulting model.}
 
 \item{noise_covariance}{variance can be variable specific ("diagonal", the default) or common ("spherical")}
-
-\item{clustering_approx}{clustering heuristic used to initialize the unknown
-clustering, one of "kmeans" (default), "ward2", "sbm", "kmeansvar" (from the
-ClustOfVar package, like the internal "hclustvar" fallback used whenever the
-chosen method collapses to fewer than q clusters) or "spectral" (k-means on
-the row-normalized eigenvectors of cov(R), a cheap proxy for clustering the
-residuals' covariance structure rather than their values). No single method
-dominates on every dataset (see inst/normal_block_models.qmd for a
-benchmark); "kmeans" is the default because it was never the worst of the 5
-on either of the two benchmarked datasets, not because it ever won. When
-fitting a
-collection over several values of q (`normal_block(blocks = <vector>)`,
-[NormalBlockUnknownQ], [NormalBlockUnknownQChangingSparsity]) without an
-explicit `clustering_init`, "sbm" runs a single SBM exploration over the
-whole range of q and reuses it for every model in the collection instead of
-repeating an independent (and increasingly costly) exploration for each q;
-any q its own model-selection does not reach falls back to a cheap "ward2"
-clustering rather than a dedicated (and potentially expensive) SBM call.}
 }
 \description{
 Control the model settings and various optimization parameters

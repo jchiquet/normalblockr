@@ -9,12 +9,12 @@ data  <- NormalBlockData$new(Y, X, X0 = X0)
 
 test_that("zero inflated normal block with diagonal residual covariance and known clusters", {
   ## Diagonal model
-  ## clustering_approx pinned to "ward2": the thresholds below were tuned for
+  ## clustering_init pinned to "ward2": the thresholds below were tuned for
   ## it specifically, and other heuristics (e.g. the "kmeans" default) land in
   ## a different, worse local optimum on this particular small dataset (see
   ## test-clustering-heuristics.R for the broader point that no heuristic
   ## dominates across datasets/models).
-  model <- ZINormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_approx = "ward2"))
+  model <- ZINormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_init = "ward2"))
   model$optimize()
   expect_lt(model$BIC, 4300)
   expect_gt(model$loglik, -2000)

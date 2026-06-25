@@ -9,13 +9,13 @@ data <- NormalBlockData$new(Y, X)
 
 test_that("Robustness of starting clustering with NormalBlockBase", {
   ## Diagonal model
-  model_kmeans <- NormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_approx = "kmeans"))
+  model_kmeans <- NormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_init = "kmeans"))
   model_kmeans$optimize()
 
-  model_ward2 <- NormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_approx = "ward2"))
+  model_ward2 <- NormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_init = "ward2"))
   model_ward2$optimize()
 
-  model_sbm <- NormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_approx = "sbm"))
+  model_sbm <- NormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_init = "sbm"))
   model_sbm$optimize()
 
   expect_gt(model_kmeans$loglik, -2650)
@@ -38,13 +38,13 @@ data <- NormalBlockData$new(Y, X)
 
 test_that("Robustness of starting clustering with ZINB", {
   ## Diagonal model
-  model_ward2 <- ZINormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_approx = "ward2"))
+  model_ward2 <- ZINormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_init = "ward2"))
   model_ward2$optimize()
 
-  model_kmeans <- ZINormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_approx = "kmeans"))
+  model_kmeans <- ZINormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_init = "kmeans"))
   model_kmeans$optimize()
 
-  model_sbm <- ZINormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_approx = "sbm"))
+  model_sbm <- ZINormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_init = "sbm"))
   model_sbm$optimize()
 
   expect_gt(model_kmeans$loglik, -2750)

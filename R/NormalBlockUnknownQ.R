@@ -33,7 +33,7 @@ NormalBlockUnknownQ <- R6::R6Class(
       ## A single wide SBM exploration over the whole q_list range visits
       ## every intermediate block count on its way there, so it gives a
       ## clustering for every q in q_list at a fraction of the cost of letting
-      ## each model run its own independent exploration (clustering_approx =
+      ## each model run its own independent exploration (clustering_init =
       ## "sbm" otherwise repeats the explore step once per q -- see
       ## sbm_path_for_collection()/sbm_clustering_path() in R/utils.R).
       sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
@@ -44,7 +44,10 @@ NormalBlockUnknownQ <- R6::R6Class(
           function(r) {
             this_control$clustering_init <-
               if (!is.null(sbm_path)) sbm_path[[as.character(q_list[r])]]
-              else control$clustering_init[[r]]
+              ## a list means one explicit clustering per q; anything else
+              ## (a heuristic name, or NULL) applies identically to every q
+              else if (is.list(control$clustering_init)) control$clustering_init[[r]]
+              else control$clustering_init
             model <- get_model(mydata,
                                q_list[r],
                                sparsity = sparsity,

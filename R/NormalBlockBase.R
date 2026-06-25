@@ -34,10 +34,7 @@ NormalBlockBase <- R6::R6Class(
       private$optimizer <- ifelse(control$heuristic,
                                   private$heuristic_optimize,
                                   private$EM_optimize)
-      ## name of the chosen clustering heuristic, looked up in
-      ## private$clustering_methods by heuristic_clustering()
       private$approx <- control$heuristic
-      private$clustering_approx <- control$clustering_approx
 
       ## penalty mask
       private$sparsity_ <- sparsity
@@ -48,8 +45,15 @@ NormalBlockBase <- R6::R6Class(
       }
       private$weights <- weights
 
+      ## control$clustering_init is either the name of a clustering heuristic
+      ## (a single string, deferred to heuristic_clustering(), looked up in
+      ## private$clustering_methods) or an actual clustering to use directly
+      ## (a vector of labels or a p x q indicator matrix).
       cl0 <- control$clustering_init
-      if (!is.null(cl0)) {
+      if (is.character(cl0) && length(cl0) == 1) {
+        private$clustering_approx <- cl0
+        private$C <- matrix(NA, self$data$n, q)
+      } else if (!is.null(cl0)) {
         if (!is.vector(cl0) & !is.matrix(cl0)) stop("Labels must be encoded in vector of labels or indicator matrix")
         if (is.vector(cl0)) {
           if (any(cl0 < 1 | cl0 > q))
@@ -513,8 +517,13 @@ NormalBlockBase <- R6::R6Class(
     ## single shared value repeated p times). Shared by
     ## NormalBlockKnownClusters/NormalBlockUnknownClusters's
     ## get_heuristic_parameters() (previously duplicated verbatim in both).
+    ## ddiag is floored away from exact zero: a variable with an
+    ## (near-)constant residual otherwise produces dm1 = Inf (e.g. a
+    ## variable observed at very few points relative to X's degrees of
+    ## freedom -- see zi_weighted_fit() in R/utils.R for the same guard on
+    ## the zero-inflation side).
     dm1_from_residuals = function(R) {
-      ddiag <- colMeans(R^2)
+      ddiag <- pmax(colMeans(R^2), .Machine$double.eps)
       switch(private$res_covariance,
              "diagonal"  = 1 / as.vector(ddiag),
              "spherical" = rep(1 / mean(ddiag), self$p))
@@ -548,7 +557,7 @@ NormalBlockBase <- R6::R6Class(
     ## (n x p) into an initial clustering of the p variables into self$q
     ## groups (a vector of length p with values in 1:q). One single table
     ## instead of one ad hoc private method per algorithm -- selectable via
-    ## NB_control(clustering_approx = ...) ("kmeans"/"ward2"/"sbm"/"kmeansvar"/
+    ## NB_control(clustering_init = ...) ("kmeans"/"ward2"/"sbm"/"kmeansvar"/
     ## "spectral"; "hclustvar" is reserved for the fallback below, not
     ## user-selectable).
     ## Benchmarked on two real datasets (inst/normal_block_models.qmd): no

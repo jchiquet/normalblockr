@@ -37,8 +37,10 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
       self$models <- purrr::map(seq_along(q_list), function(rank) {
         if (!is.null(sbm_path))
           control_$clustering_init <- sbm_path[[as.character(q_list[rank])]]
-        else if (!is.null(control$clustering_init))
+        else if (is.list(control$clustering_init)) # one explicit clustering per q
           control_$clustering_init <- control$clustering_init[[rank]]
+        ## else: a heuristic name (or NULL) applies identically to every q,
+        ## already carried over since control_ <- control above
         model <- NormalBlockChangingSparsity$new(mydata, q_list[rank], zero_inflation, control_)
       })
       private$progress_field <- "q"

@@ -9,7 +9,7 @@ editor: visual
 `NormalBlockUnknownClusters` (and the collections built on it) need a
 starting clustering of the `p` variables before the (V)EM recursion can run.
 This starting point comes from `private$clustering_methods` in
-`R/NormalBlockBase.R`, selectable via `NB_control(clustering_approx = ...)`.
+`R/NormalBlockBase.R`, selectable via `NB_control(clustering_init = ...)`.
 
 The question behind this whole notebook: **the normal-block model's
 clustering target is the *covariance* structure of the residuals, not their

@@ -89,9 +89,18 @@ ols_residuals <- function(data) {
 # variable, making XtWX exactly singular; ginv() falls back to the
 # minimum-norm solution instead of erroring (mirroring arma::solve()'s
 # automatic pinv fallback on the C++ side).
+# The weighted residual sum of squares (ssq) is floored away from exact zero:
+# a variable with very few non-zero observations relative to X's degrees of
+# freedom (e.g. a rare species seen at a single station) can be fit exactly
+# by B on one iterate, driving its residual -- and so dm1 = nY/ssq -- to
+# Inf; on the next iterate, that Inf weight propagates into XtWX, and
+# ginv()'s svd() errors on the non-finite input. Flooring ssq keeps dm1 large
+# but finite instead.
 zi_weighted_fit <- function(data) {
+  ssq <- function(B) pmax(colSums(data$zeros_bar * (data$Y - data$X %*% B)^2), .Machine$double.eps)
+
   B   <- data$XtXm1 %*% data$XtY
-  dm1 <- data$nY / colSums(data$zeros_bar * (data$Y - data$X %*% B)^2)
+  dm1 <- data$nY / ssq(B)
   for (i in 1:3) { # a couple of iterates is enough
     DM1 <- matrix(dm1, data$n, data$p, byrow = TRUE) * data$zeros_bar
     for (j in seq_len(data$p)) {
@@ -100,7 +109,7 @@ zi_weighted_fit <- function(data) {
       XtWy <- crossprod(data$X, data$Y[, j] * w)
       B[, j] <- MASS::ginv(XtWX) %*% XtWy
     }
-    dm1 <- data$nY / colSums(data$zeros_bar * (data$Y - data$X %*% B)^2)
+    dm1 <- data$nY / ssq(B)
   }
   list(B = B, dm1 = dm1, R = data$zeros_bar * (data$Y - data$X %*% B))
 }
@@ -158,16 +167,16 @@ sbm_clustering_path <- function(R, q_list) {
 
 # Builds the shared sbm_clustering_path() for a collection over q_list
 # (NormalBlockUnknownQ/NormalBlockUnknownQChangingSparsity), or returns NULL
-# when the optimization doesn't apply: the user picked a different
-# clustering_approx, or already supplied an explicit clustering_init (in
-# which case every model falls back to its own per-q heuristic_clustering()
-# call, as before). ZI collections cluster on zi_residuals() (the
-# zero-inflation-masked residual a ZI model would otherwise derive itself in
-# zi_diag_normal_inference()) instead of the plain ols_residuals().
-# Previously duplicated verbatim in both collection classes' initialize().
+# when the optimization doesn't apply: clustering_init isn't the heuristic
+# name "sbm" applied uniformly (it names a different heuristic, or is already
+# an explicit clustering/list of clusterings -- in which case every model
+# falls back to its own per-q heuristic_clustering() call, as before). ZI
+# collections cluster on zi_residuals() (the zero-inflation-masked residual a
+# ZI model would otherwise derive itself in zi_diag_normal_inference())
+# instead of the plain ols_residuals(). Previously duplicated verbatim in
+# both collection classes' initialize().
 sbm_path_for_collection <- function(mydata, q_list, zero_inflation, control) {
-  if (!identical(control$clustering_approx, "sbm") || !is.null(control$clustering_init))
-    return(NULL)
+  if (!identical(control$clustering_init, "sbm")) return(NULL)
   R <- if (zero_inflation) zi_residuals(mydata) else ols_residuals(mydata)
   sbm_clustering_path(R, q_list)
 }

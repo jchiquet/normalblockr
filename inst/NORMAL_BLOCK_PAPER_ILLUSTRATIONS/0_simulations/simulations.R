@@ -106,7 +106,7 @@ one_simu_sparse_fixed_q <- function(simu, n, p, q, d, kappa,
     args_baseline_sigma_clustering <- args_fixed_q
     args_baseline_sigma_clustering$control <- NB_control(verbose = FALSE,
                                                          heuristic = TRUE,
-                                                         clustering_approx = "sbm")
+                                                         clustering_init = "sbm")
     t0 <- Sys.time()
     baseline_sigma_clustering <- do.call(normal_block, args_baseline_sigma_clustering)
     t  <- Sys.time() - t0
@@ -124,7 +124,7 @@ one_simu_sparse_fixed_q <- function(simu, n, p, q, d, kappa,
   args_baseline_residuals_clustering         <- args_fixed_q
   args_baseline_residuals_clustering$control <- NB_control(verbose = FALSE,
                                                            heuristic = TRUE,
-                                                           clustering_approx = "kmeans")
+                                                           clustering_init = "kmeans")
 
   t0 <- Sys.time()
   baseline_residuals_clustering <- do.call(normal_block, args_baseline_residuals_clustering)

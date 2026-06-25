@@ -2,8 +2,8 @@
 ## Tests for sbm_clustering_path() (R/utils.R) and its use inside
 ## NormalBlockUnknownQ / NormalBlockUnknownQChangingSparsity: a single wide SBM
 ## exploration over the whole q_list range replaces one independent
-## exploration per q whenever clustering_approx = "sbm" and no explicit
-## clustering_init was supplied. See inst/normal_block_models.qmd for the
+## exploration per q whenever clustering_init = "sbm" is applied uniformly
+## (not as an explicit per-q clustering). See inst/normal_block_models.qmd for the
 ## benchmark motivating this change (the per-q sbm heuristic was ~15-90x more
 ## expensive than this shared-path version, for the same or statistically
 ## equivalent quality).
@@ -37,8 +37,8 @@ test_that("sbm_clustering_path() falls back to a cheap ward2 clustering for q's 
   for (q in q_list) expect_equal(length(unique(path[[as.character(q)]])), q)
 })
 
-test_that("NormalBlockUnknownQ with clustering_approx = 'sbm' eagerly sets clustering_init from the shared path", {
-  coll <- NormalBlockUnknownQ$new(data, 2:5, control = NB_control(verbose = FALSE, clustering_approx = "sbm"))
+test_that("NormalBlockUnknownQ with clustering_init = 'sbm' eagerly resolves it from the shared path", {
+  coll <- NormalBlockUnknownQ$new(data, 2:5, control = NB_control(verbose = FALSE, clustering_init = "sbm"))
 
   for (model in coll$models) {
     ## every model converges to a valid q-cluster initialization once
@@ -53,7 +53,7 @@ test_that("NormalBlockUnknownQ with clustering_approx = 'sbm' eagerly sets clust
 test_that("an explicit clustering_init is never overridden by the sbm path", {
   cl_init <- list(rep(1:2, length.out = data$p), rep(1:3, length.out = data$p))
   coll <- NormalBlockUnknownQ$new(data, c(2, 3), control = NB_control(
-    verbose = FALSE, clustering_approx = "sbm", clustering_init = cl_init
+    verbose = FALSE, clustering_init = cl_init
   ))
 
   for (i in seq_along(coll$models)) {
@@ -64,7 +64,7 @@ test_that("an explicit clustering_init is never overridden by the sbm path", {
 
 test_that("NormalBlockUnknownQChangingSparsity also uses the shared sbm path", {
   coll <- NormalBlockUnknownQChangingSparsity$new(data, c(2, 3), control = NB_control(
-    verbose = FALSE, clustering_approx = "sbm", n_sparsity_penalties = 3
+    verbose = FALSE, clustering_init = "sbm", n_sparsity_penalties = 3
   ))
   expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
 })
@@ -74,7 +74,7 @@ test_that("zero-inflated collections also use the shared sbm path, clustering on
   datazi <- NormalBlockData$new(exzi$Y, exzi$X, X0 = matrix(1, nrow(exzi$Y), 1))
 
   coll <- NormalBlockUnknownQ$new(datazi, 2:3, zero_inflation = TRUE,
-                                  control = NB_control(verbose = FALSE, clustering_approx = "sbm"))
+                                  control = NB_control(verbose = FALSE, clustering_init = "sbm"))
   ## clustering_init is now eagerly injected from the shared path, just like
   ## for non-ZI collections -- private$C is already a valid q-cluster
   ## indicator matrix before optimize()/EM_initialize() ever runs
