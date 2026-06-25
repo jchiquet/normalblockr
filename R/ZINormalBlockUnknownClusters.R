@@ -103,7 +103,7 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
       } else {res <- NA}
       res
     },
-    #' @field fitted Y values predicted by the model
+    #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
       if (private$approx) {
         res <- self$data$X %*% private$B
@@ -111,7 +111,7 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
         res <- self$data$X %*% private$B + private$M %*% t(private$C)
       }
       res <- res * self$data$zeros_bar
-      res
+      private$rescale_to_original(res)
     },
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()

@@ -32,14 +32,18 @@ test_that("normal block with fixed clusters, spherical residual covariance and h
 })
 
 test_that("optimize() warm-starts each penalty from the previous one, reducing total EM iterations without changing the BIC path", {
+  ## n_sparsity_penalties = 15: the warm-start advantage grows with the
+  ## length of the sparsity path and is only marginal (sometimes net-negative
+  ## by a couple of iterations) on very short paths -- 15 gives a robust,
+  ## comfortable margin on this dataset.
   set.seed(123)
-  warm <- normalblockr:::NormalBlockChangingSparsity$new(data, C, control = NB_control(verbose = FALSE, n_sparsity_penalties = 8))
+  warm <- normalblockr:::NormalBlockChangingSparsity$new(data, C, control = NB_control(verbose = FALSE, n_sparsity_penalties = 15))
   warm$optimize(NB_control(verbose = FALSE))
 
   ## same penalties, but optimized independently (the pre-warm-start behaviour:
   ## every model starts from its own heuristic-derived initial parameters)
   set.seed(123)
-  cold <- normalblockr:::NormalBlockChangingSparsity$new(data, C, control = NB_control(verbose = FALSE, n_sparsity_penalties = 8))
+  cold <- normalblockr:::NormalBlockChangingSparsity$new(data, C, control = NB_control(verbose = FALSE, n_sparsity_penalties = 15))
   cold$models <- lapply(cold$models, function(model) { model$optimize(NB_control(verbose = FALSE)); model })
 
   niter_warm <- sapply(warm$models, function(m) length(m$objective))

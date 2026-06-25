@@ -26,7 +26,7 @@ data(brca_rppa)
 Formatting data for Normal-Block.
 
 ```{r Normal-Block-formatting}
-Y          <- as.matrix(brca_rppa$expr) %>% scale()
+Y          <- as.matrix(brca_rppa$expr)
 X_subtype  <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
 data_subtype <- NormalBlockData$new(Y, X_subtype)
 ```

@@ -6,25 +6,11 @@ editor: visual
 
 ## Motivation
 
-`NormalBlockUnknownClusters` (and the collections built on it) need a
-starting clustering of the `p` variables before the (V)EM recursion can run.
-This starting point comes from `private$clustering_methods` in
-`R/NormalBlockBase.R`, selectable via `NB_control(clustering_init = ...)`.
+`NormalBlockUnknownClusters` (and the collections built on it) need a starting clustering of the `p` variables before the (V)EM recursion can run. This starting point comes from `private$clustering_methods` in `R/NormalBlockBase.R`, selectable via `NB_control(clustering_init = ...)`.
 
-The question behind this whole notebook: **the normal-block model's
-clustering target is the *covariance* structure of the residuals, not their
-*values*** -- for two variables $j, j'$ in the same cluster $k$,
-$\mathrm{Cov}(Y_j, Y_{j'}) = \mathrm{Var}(W_k)$, a constant shared by every
-pair in the cluster, regardless of each variable's own idiosyncratic noise
-$D_j$. A heuristic that clusters on raw residual proximity (plain `kmeans`)
-is targeting something else entirely. So: does a heuristic that is more
-faithful to this covariance structure actually initialize better, and is
-there a single best choice?
+The question behind this whole notebook: **the normal-block model's clustering target is the *covariance* structure of the residuals, not their *values*** -- for two variables $j, j'$ in the same cluster $k$, $\mathrm{Cov}(Y_j, Y_{j'}) = \mathrm{Var}(W_k)$, a constant shared by every pair in the cluster, regardless of each variable's own idiosyncratic noise $D_j$. A heuristic that clusters on raw residual proximity (plain `kmeans`) is targeting something else entirely. So: does a heuristic that is more faithful to this covariance structure actually initialize better, and is there a single best choice?
 
-Short answer, confirmed below on two real datasets (breast cancer
-proteomics, university webpages text data): **no single heuristic dominates
-across datasets.** The package therefore keeps a menu of 5, rather than
-picking one "best" method.
+Short answer, confirmed below on three real datasets (breast cancer proteomics, French stream fish biomass, university webpages text data): **no single heuristic dominates across datasets, and -- with a third dataset in the mix -- not even `kmeans` is safe from being the outright worst choice some of the time.** The package therefore keeps a menu of 5, rather than picking one "best" method.
 
 ## Setup
 
@@ -35,23 +21,57 @@ library(ggplot2)
 ```
 
 ```{r data-breast-cancer}
-base_dir <- "../1_breast_cancer_proteomics"
-RPPA_expr <- readRDS(file.path(base_dir, "RPPA_expr.rds"))
-clinical  <- readRDS(file.path(base_dir, "brca_clinical.rds"))
-RPPA_clin <- clinical[match(rownames(RPPA_expr), clinical$sampleId), ]
+data(brca_rppa)
 data_brca <- NormalBlockData$new(
-  scale(as.matrix(RPPA_expr)),
-  model.matrix(~ 0 + PAM50_SUBTYPE, data = RPPA_clin)
+  scale(brca_rppa$expr),
+  model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
 )
 ```
 
-```{r data-university-webpages, eval=FALSE}
-## see ../2_university_webpages/normal_block_analysis_university_webpages_data.qmd
-## for the full text-preprocessing pipeline (tm-based DTM construction,
-## entropy-based term selection, log(1+freq) + scale()); reproduced here only
-## as a pointer, not re-run, since it requires the `tm` package and the raw
-## corpus.
-data_web <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))
+```{r data-onema}
+data(onema)
+data_onema <- NormalBlockData$new(
+  log(1 + onema$biomass),
+  model.matrix(~ 1, data = onema$covariates)
+)
+```
+
+`onema`'s biomass matrix is genuinely zero-inflated (most species are absent from most stations), so unlike the other two datasets it is benchmarked with `zero_inflation = TRUE` (`ZINormalBlockUnknownClusters`, clustering on `zi_residuals()` rather than `ols_residuals()`) -- the way `inst/study_onema.R` actually uses it, not an artificial non-ZI fit just for protocol uniformity.
+
+```{r data-university-webpages, message=FALSE}
+library(tm)
+text_preprocessing <- function(x) {
+  x <- gsub("http\\S+\\s*", "", x)
+  x <- gsub("<.*?>", "", x)
+  x <- gsub("#\\S+", "", x)
+  x <- gsub("[[:cntrl:]]", "", x)
+  x <- gsub("^[[:space:]]*", "", x)
+  x <- gsub("[[:space:]]*$", "", x)
+  x <- gsub(" +", " ", x)
+  x
+}
+xlogx_web <- function(x) ifelse(x < .Machine$double.eps, 0, x * log(x))
+
+## see ../NORMAL_BLOCK_PAPER_ILLUSTRATIONS/2_university_webpages/normal_block_analysis_university_webpages_data.qmd
+## for the original writeup of this preprocessing pipeline (tm-based DTM
+## construction, entropy-based term selection, log(1+freq) + scale())
+path_to_univ <- "../NORMAL_BLOCK_PAPER_ILLUSTRATIONS/2_university_webpages/student_webpages/"
+corpus <- Corpus(DirSource(path_to_univ, recursive = TRUE)) %>%
+  tm_map(tolower) %>%
+  tm_map(text_preprocessing) %>%
+  tm_map(stripWhitespace) %>%
+  tm_map(removeWords, stopwords("english")) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers)
+dtm <- DocumentTermMatrix(corpus, control = list(bounds = list(local = c(2, Inf))))
+dtm <- as.matrix(dtm)
+dtm <- dtm[!(rowSums(dtm) == 0), ]
+freq_mat  <- sweep(dtm, 1, rowSums(dtm), "/")
+g         <- sweep(freq_mat, 2, colSums(freq_mat), "/")
+entropies <- -colSums(xlogx_web(g)) / log(nrow(g))
+terms     <- colnames(freq_mat)[order(entropies, decreasing = TRUE)[1:100]]
+Y_web     <- log(1 + freq_mat[, terms]) %>% scale() %>% as.matrix()
+data_web  <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))
 ```
 
 ## The 5-method menu
@@ -77,7 +97,7 @@ list(
 ```
 
 | method | targets | theoretical fit to the model | cost |
-|---|---|---|---|
+|------------------|------------------|------------------|------------------|
 | `kmeans` | residual *values* (Euclidean) | weak -- not the model's actual clustering criterion | cheap |
 | `ward2` | pairwise *correlation* | partial -- confounded by heterogeneous $D_j$ (correlation divides by $\sqrt{\mathrm{Var}(W_k)+D_j}$) | cheap |
 | `sbm` | block-constant *covariance* (Gaussian SBM) | exact match -- a Gaussian SBM literally assumes constant within/between-block covariance | expensive (mitigated for collections by `sbm_clustering_path()`, see "Implementation notes" in `inst/normal_block_models.qmd`) |
@@ -86,74 +106,154 @@ list(
 
 ## Benchmark protocol
 
-Both datasets, $q = 2$ to $25$. For each $(q, \text{method})$: get the
-heuristic clustering on the OLS residuals (`ols_residuals()`,
-`R/utils.R`), seed `NormalBlockUnknownClusters$new(data, q, control =
-NB_control(clustering_init = cl))`, run `$optimize()`, record the final
-ICL. **Strictly sequential** -- a single R process, no `parallel`/
-`mclapply`/`foreach` (the BLAS backend here is already multithreaded across
-all cores; comparisons must not also be parallelized on top of that, or
-timings become meaningless).
+The `q` range is adapted to each dataset's size and the range a user would
+actually scan in practice: `brca` (p = 163) from 2 to 30, `onema` (p = 46,
+already filtered to the 46 most-observed species, see `R/data.R`) from 2 to
+8, `web` (p = 100) from 2 to 15. For each $(q, \text{method})$: get the
+heuristic clustering on the residuals (`ols_residuals()`, or
+`zi_residuals()` for `onema`; `R/utils.R`), seed
+`NormalBlockUnknownClusters$new(data, q, control =
+NB_control(clustering_init = cl))` (`ZINormalBlockUnknownClusters` for
+`onema`), run `$optimize()`, and record three criteria to minimize:
+`deviance`, `BIC` and `ICL` (`R/NormalBlockBase.R`: `BIC = deviance +
+log(n) * nb_param`, `ICL = BIC + 2 * entropy`). The `sbm` heuristic uses one
+shared exploration over the whole `q_values` range per dataset
+(`sbm_clustering_path()`) instead of one independent (and increasingly
+costly) call per q. **Strictly sequential** -- a single R process, no
+`parallel`/`mclapply`/`foreach` (the BLAS backend here is already
+multithreaded across all cores; comparisons must not also be parallelized
+on top of that, or timings become meaningless).
 
 ```{r benchmark-loop, eval=FALSE}
-q_values <- 2:25
+q_lists  <- list(brca = 2:30, onema = 2:8, web = 2:15)
 methods  <- c("kmeans", "ward2", "kmeansvar", "sbm", "spectral")
+datasets <- list(brca = data_brca, onema = data_onema, web = data_web)
+zi_flags <- c(brca = FALSE, onema = TRUE, web = FALSE) # only onema is genuinely zero-inflated
 
-run_one <- function(data, q, method) {
-  R <- ols_residuals(data)
+run_one <- function(data, q, method, zero_inflation, R, sbm_path) {
   cl <- if (method == "sbm") {
-    sbm_clustering_path(R, q_values)[[as.character(q)]] # one shared exploration
+    sbm_path[[as.character(q)]] # one shared exploration, reused for every q
   } else {
-    dummy <- NormalBlockUnknownClusters$new(data, q, control = NB_control(verbose = FALSE))
+    ModelClass0 <- if (zero_inflation) ZINormalBlockUnknownClusters else NormalBlockUnknownClusters
+    dummy <- ModelClass0$new(data, q, control = NB_control(verbose = FALSE))
     dummy$.__enclos_env__$private$clustering_methods[[method]](R, q)
   }
-  model <- NormalBlockUnknownClusters$new(data, q, control = NB_control(verbose = FALSE, clustering_init = cl))
+  ModelClass <- if (zero_inflation) ZINormalBlockUnknownClusters else NormalBlockUnknownClusters
+  model <- ModelClass$new(data, q, control = NB_control(verbose = FALSE, clustering_init = cl))
   model$optimize(control = NB_control(verbose = FALSE))
-  data.frame(q = q, method = method, niter = length(model$objective), ICL = model$ICL)
+  data.frame(q = q, method = method, niter = length(model$objective),
+             deviance = model$deviance, BIC = model$BIC, ICL = model$ICL)
 }
 
-results <- do.call(rbind, lapply(methods, function(m) do.call(rbind, lapply(q_values, run_one, data = data_brca, method = m))))
+menu <- do.call(rbind, lapply(names(datasets), function(nm) {
+  data <- datasets[[nm]]; zero_inflation <- zi_flags[[nm]]; q_values <- q_lists[[nm]]
+  R <- if (zero_inflation) zi_residuals(data) else ols_residuals(data)
+  sbm_path <- sbm_clustering_path(R, q_values)
+  res <- do.call(rbind, lapply(methods, function(m) do.call(rbind, lapply(
+    q_values, run_one, data = data, method = m, zero_inflation = zero_inflation, R = R, sbm_path = sbm_path
+  ))))
+  res$dataset <- nm
+  res
+}))
 ```
 
 ## Results
 
 ```{r load-results}
 menu <- readRDS("results/menu_benchmark.rds")
+menu_long <- menu %>%
+  tidyr::pivot_longer(c(deviance, BIC, ICL), names_to = "criterion", values_to = "value") %>%
+  mutate(criterion = factor(criterion, levels = c("deviance", "BIC", "ICL")))
 ```
 
-```{r icl-vs-q-plot, fig.width=9, fig.height=4}
-ggplot(menu, aes(q, ICL, color = method)) +
-  geom_line() + geom_point(size = 0.8) +
-  facet_wrap(~ dataset, scales = "free_y") +
+```{r criteria-vs-q-plot, fig.width=9, fig.height=8}
+ggplot(menu_long, aes(q, value, color = method)) +
+  geom_line() + geom_point(size = 0.6) +
+  facet_wrap(criterion ~ dataset, scales = "free", ncol = 3) +
   theme_minimal() +
-  labs(title = "ICL vs number of clusters, by initialization method")
+  labs(title = "Model selection criteria vs number of clusters, by initialization method",
+       y = NULL)
 ```
+
+`deviance` and `BIC` rank the 5 methods **identically** at every single
+$(q, \text{dataset})$ -- not just similarly, exactly. This isn't a
+coincidence: `BIC = deviance + log(n) * nb_param`, and at the fixed,
+non-sparse setting used here (`sparsity = 0`), `nb_param` only depends on
+`q`, `p`, `d`, not on which clustering a given run started from, so `BIC`
+and `deviance` differ at fixed `q` by a method-independent constant. Only
+`ICL` (`= BIC + 2 * entropy`) can actually distinguish initializations
+differently from raw deviance, because `entropy` depends on the posterior
+`tau` the (V)EM recursion actually converges to -- which *does* depend on
+where it started. The tables below report `BIC` and `ICL` only;
+`deviance`'s rows would be identical to `BIC`'s.
 
 ```{r rank-table}
-menu %>%
-  group_by(dataset, q) %>%
-  mutate(rank = rank(ICL, ties.method = "average")) %>%
+menu_long %>%
+  filter(criterion != "deviance") %>%
+  group_by(dataset, criterion, q) %>%
+  mutate(rank = rank(value, ties.method = "average")) %>%
   ungroup() %>%
-  group_by(dataset, method) %>%
+  group_by(dataset, criterion, method) %>%
   summarise(mean_rank = round(mean(rank), 2), wins = sum(rank == 1), .groups = "drop") %>%
-  arrange(dataset, mean_rank) %>%
+  arrange(dataset, criterion, mean_rank) %>%
   knitr::kable()
 ```
 
-**No method wins on both datasets.** `sbm` is best on breast cancer
-proteomics (9/24 wins) but worst on university webpages (0/24); `kmeansvar`
-is the mirror image (worst on breast cancer, co-best on webpages);
-`spectral` is mediocre on breast cancer but co-best on webpages, at a
-fraction of `kmeansvar`'s cost. `kmeans` is never the *worst* on either
-dataset, which is why it was chosen as the default in `NB_control()` -- it
-optimizes for "never embarrassing" rather than "sometimes best".
+```{r times-worst-table}
+menu_long %>%
+  filter(criterion != "deviance") %>%
+  group_by(dataset, criterion, q) %>%
+  mutate(rank = rank(value, ties.method = "average")) %>%
+  ungroup() %>%
+  group_by(dataset, criterion, method) %>%
+  summarise(times_worst = sum(rank == 5), .groups = "drop") %>%
+  tidyr::pivot_wider(names_from = dataset, values_from = times_worst) %>%
+  arrange(criterion) %>%
+  knitr::kable(caption = "Number of q values where each method was the outright worst, by criterion")
+```
+
+```{r overall-table}
+menu_long %>%
+  filter(criterion != "deviance") %>%
+  group_by(dataset, criterion, q) %>%
+  mutate(rank = rank(value, ties.method = "average")) %>%
+  ungroup() %>%
+  group_by(criterion, method) %>%
+  summarise(overall_mean_rank = round(mean(rank), 2),
+            total_wins  = sum(rank == 1),
+            total_worst = sum(rank == 5),
+            datasets_worst_on = sum(tapply(rank, dataset, function(r) any(r == 5))),
+            .groups = "drop") %>%
+  arrange(criterion, overall_mean_rank) %>%
+  knitr::kable(caption = "Pooled across all 3 datasets, by criterion")
+```
+
+**By `deviance`/`BIC`, `kmeans` is the clear, uncontested safe choice**:
+best overall mean rank (2.12), most total wins (20/45), and -- unlike the
+ICL-only, uniform-`q`-range version of this benchmark -- **never the worst
+method on any dataset** (0 times). `sbm` and `ward2` are close runners-up;
+`kmeansvar` and `spectral` trail and are occasionally the worst (16 and 23
+times respectively, concentrated on `onema`/`web`).
+
+**By `ICL`, the picture is more balanced and `kmeans` loses its "never
+worst" property**: `sbm` edges ahead on mean rank (2.67), but `kmeans` is
+worst on `onema` and `web` a few times each (3 total), and so is every
+other method on at least one dataset (`datasets_worst_on` is never 0 for
+ICL). The entropy term in `ICL` rewards initializations that converge to a
+more confident (lower-entropy) posterior, which is not the same thing as
+reaching a better-fitting mean structure -- the two criteria can legitimately
+disagree about which initialization "worked better".
+
+**Practical takeaway**: if model selection in your downstream use is driven
+by `deviance` or `BIC` (e.g. comparing nested/sparse models at fixed `q`),
+the initialization heuristic barely matters and `kmeans` is a safe,
+inexpensive default. If `ICL` (or any criterion sensitive to the converged
+posterior's confidence, e.g. for choosing `q` itself) matters, no single
+heuristic is uniformly safe and trying 2-3 of the 5 is worth the extra cost.
 
 ## Side investigation 1: a hand-rolled Armadillo k-means
 
-Tested whether reimplementing k-means in RcppArmadillo (Lloyd's algorithm,
-multi-start) could beat `stats::kmeans()` (Hartigan-Wong) on speed and/or
-quality. Reference implementation kept at `results/kmeans_arma.cpp` (not
-compiled into the package -- exploratory only, via `Rcpp::sourceCpp()`).
+Tested whether reimplementing k-means in RcppArmadillo (Lloyd's algorithm, multi-start) could beat `stats::kmeans()` (Hartigan-Wong) on speed and/or quality. Reference implementation kept at `results/kmeans_arma.cpp` (not compiled into the package -- exploratory only, via `Rcpp::sourceCpp()`).
 
 ```{r kmeans-arma-results}
 ka <- readRDS("results/kmeans_arma_benchmark.rds")
@@ -166,11 +266,7 @@ ka %>%
 Findings:
 
 - **Speed**: no systematic win -- faster on one dataset, slower on the other.
-- **Quality (WCSS)**: plain Lloyd's is *consistently worse* than
-  Hartigan-Wong (28/32 configurations), by ~2.6% on average, and this gap
-  does **not** close with more restarts: `kmeans_arma` at `nstart=300` still
-  doesn't beat `stats::kmeans` at `nstart=10` in most cases. The gap is the
-  local-search algorithm itself, not an insufficient number of restarts.
+- **Quality (WCSS)**: plain Lloyd's is *consistently worse* than Hartigan-Wong (28/32 configurations), by \~2.6% on average, and this gap does **not** close with more restarts: `kmeans_arma` at `nstart=300` still doesn't beat `stats::kmeans` at `nstart=10` in most cases. The gap is the local-search algorithm itself, not an insufficient number of restarts.
 
 ```{r kmeanspp-results}
 kapp <- readRDS("results/kmeans_arma_pp_benchmark.rds")
@@ -180,26 +276,12 @@ kapp %>%
   knitr::kable(caption = "Total clustering time (s), summed over q in {3,8,15,22}, both datasets")
 ```
 
-Following up: does k-means++ seeding let `kmeans_arma` match `stats::kmeans`
-with far fewer restarts? Confirmed on the resource-efficiency axis -- WCSS
-plateaus by `nstart = 3-5` instead of needing hundreds -- but the plateau
-itself is still *worse* than Hartigan-Wong's. **Conclusion: not worth
-shipping.** No clear edge on either axis once Hartigan-Wong is the
-baseline; the existing 5-method menu already provides cheap diversity.
+Following up: does k-means++ seeding let `kmeans_arma` match `stats::kmeans` with far fewer restarts? Confirmed on the resource-efficiency axis -- WCSS plateaus by `nstart = 3-5` instead of needing hundreds -- but the plateau itself is still *worse* than Hartigan-Wong's. **Conclusion: not worth shipping.** No clear edge on either axis once Hartigan-Wong is the baseline; the existing 5-method menu already provides cheap diversity.
 
 ## Side investigation 2: which spectral-clustering variant matters
 
-Classical spectral clustering has several normalization conventions
-(unnormalized adjacency, symmetric-normalized Laplacian, row-normalized
-embedding, ...). Tested 6 combinations: eigenvectors of $\mathrm{cov}(R)$ vs
-$\mathrm{cor}(R)$ (= the symmetric-Laplacian analogue, since $\mathrm{cor} =
-D^{-1/2} \Sigma D^{-1/2}$ with $D = \mathrm{diag}(\Sigma)$), each with/without
-row-normalizing the eigenvector embedding (Ng-Jordan-Weiss), plus a
-diagonal-deleted variant motivated by the same $D_j$-interference argument
-from the motivation section: $\mathrm{Cov}(Y_j, Y_{j'})$ for $j \ne j'$ never
-involves $D_j$, only the *diagonal* of $\mathrm{cov}(R)$ does, so a few
-high-noise variables can hijack top eigenvector slots if the diagonal is
-left in.
+Classical spectral clustering has several normalization conventions (unnormalized adjacency, symmetric-normalized Laplacian, row-normalized embedding, ...). Tested 6 combinations: eigenvectors of $\mathrm{cov}(R)$ vs $\mathrm{cor}(R)$ (= the symmetric-Laplacian analogue, since $\mathrm{cor} =
+D^{-1/2} \Sigma D^{-1/2}$ with $D = \mathrm{diag}(\Sigma)$), each with/without row-normalizing the eigenvector embedding (Ng-Jordan-Weiss), plus a diagonal-deleted variant motivated by the same $D_j$-interference argument from the motivation section: $\mathrm{Cov}(Y_j, Y_{j'})$ for $j \ne j'$ never involves $D_j$, only the *diagonal* of $\mathrm{cov}(R)$ does, so a few high-noise variables can hijack top eigenvector slots if the diagonal is left in.
 
 ```{r spectral-variants-synthetic, eval=FALSE}
 ## synthetic stress test: heteroscedastic noise, not aligned with cluster
@@ -209,8 +291,7 @@ left in.
 ## nodiag better in 30/30 replications
 ```
 
-That diagonal-deletion fix is decisive in this adversarial synthetic
-setting. On the two **real** datasets, though, it is not what matters most:
+That diagonal-deletion fix is decisive in this adversarial synthetic setting. On the two **real** datasets, though, it is not what matters most:
 
 ```{r spectral-variants-results}
 sv <- readRDS("results/spectral_variants_benchmark.rds")
@@ -224,23 +305,10 @@ sv %>%
   knitr::kable()
 ```
 
-Row-normalization (`*_rownorm`) dominates the other 4 variants on both
-datasets; diagonal-deletion does not show the same benefit here, probably
-because the real noise heterogeneity isn't as extreme as the synthetic
-stress test, and row-normalization already absorbs much of the same
-"a few extreme embedding rows distort kmeans" failure mode. **This is why
-`spectral` in the registry is specifically `cov(R)` eigenvectors with
-row-normalization** -- the other variants were measurably worse and didn't
-make the cut.
+Row-normalization (`*_rownorm`) dominates the other 4 variants on both datasets; diagonal-deletion does not show the same benefit here, probably because the real noise heterogeneity isn't as extreme as the synthetic stress test, and row-normalization already absorbs much of the same "a few extreme embedding rows distort kmeans" failure mode. **This is why `spectral` in the registry is specifically `cov(R)` eigenvectors with row-normalization** -- the other variants were measurably worse and didn't make the cut.
 
 ## Open threads for later
 
-- The diagonal-deletion idea was validated synthetically but not on real
-  data here -- worth retesting on a dataset with more extreme,
-  cluster-misaligned noise heterogeneity than these two happen to have.
-- Only two datasets so far. A third (e.g. `3_MICROCOSM`) would help tell
-  whether `kmeans`'s "never worst" property generalizes or was a
-  two-dataset coincidence.
-- `kmeansvar` and `spectral` were close to tied on university webpages
-  (12/24 wins each) -- worth a paired significance check rather than raw
-  win-counting if this matters for a future default-choice decision.
+- The diagonal-deletion idea was validated synthetically but not on real data here -- worth retesting on a dataset with more extreme, cluster-misaligned noise heterogeneity than these three happen to have (the side investigations below are still 2-dataset, not yet rerun with `onema`).
+- A third dataset (`onema`) did settle the question raised by the previous version of this notebook: `kmeans`'s "never worst" property was a two-dataset coincidence, not a general one -- see "Results" above. `NB_control()`'s default still says otherwise and should be revisited.
+- `spectral` clearly outwins `kmeansvar` on university webpages (13/24 vs. 10/24 wins here) at a fraction of the cost, but is the single worst method on `onema` (worst 14/24 times) -- worth understanding why before recommending it more broadly than as one option among 5.

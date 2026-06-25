@@ -20,7 +20,7 @@ R6 class for a Zero-Inflated normal-block model with a known clustering.
 
     \item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix), kappa (zero-inflation probabilities)}
 
-    \item{\code{fitted}}{Y values predicted by the model}
+    \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }

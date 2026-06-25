@@ -81,13 +81,14 @@ NormalBlockKnownClusters <- R6::R6Class(
       } else {res <- NA}
       res
     },
-    #' @field fitted Y values predicted by the model
+    #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
-      if (private$approx) {
+      res <- if (private$approx) {
         self$data$X %*% private$B
       } else {
         self$data$X %*% private$B + private$mu %*% t(private$C)
       }
+      private$rescale_to_original(res)
     },
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()

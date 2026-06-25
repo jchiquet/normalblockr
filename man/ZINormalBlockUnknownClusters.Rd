@@ -27,7 +27,7 @@ R6 class for zero-inflated normal-block model with a fixed number of clusters (b
 
     \item{\code{entropy}}{Entropy of the conditional distribution}
 
-    \item{\code{fitted}}{Y values predicted by the model}
+    \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }

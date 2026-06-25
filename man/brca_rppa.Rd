@@ -39,12 +39,11 @@ brca_rppa
 Reverse-phase protein array (RPPA) measurements of 163 proteins across 346
 breast cancer tumor samples from The Cancer Genome Atlas (TCGA), along with
 the PAM50 molecular subtype of each sample. Used as the running example in
-Tous & Chiquet (2026) and in
-`inst/NORMAL_BLOCK_PAPER_ILLUSTRATIONS/1_breast_cancer_proteomics`.
+Tous & Chiquet (2026).
 }
 \examples{
 expr <- brca_rppa$expr
 X <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
-nb_data <- NormalBlockData$new(scale(expr), X)
+nb_data <- NormalBlockData$new(expr, X)
 }
 \keyword{datasets}

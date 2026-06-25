@@ -3,8 +3,7 @@
 #' Reverse-phase protein array (RPPA) measurements of 163 proteins across 346
 #' breast cancer tumor samples from The Cancer Genome Atlas (TCGA), along with
 #' the PAM50 molecular subtype of each sample. Used as the running example in
-#' Tous & Chiquet (2026) and in
-#' `inst/NORMAL_BLOCK_PAPER_ILLUSTRATIONS/1_breast_cancer_proteomics`.
+#' Tous & Chiquet (2026).
 #'
 #' @format A list with 3 elements:
 #' \describe{
@@ -33,7 +32,7 @@
 #' @examples
 #' expr <- brca_rppa$expr
 #' X <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
-#' nb_data <- NormalBlockData$new(scale(expr), X)
+#' nb_data <- NormalBlockData$new(expr, X)
 "brca_rppa"
 
 #' French stream fish community data (ONEMA / OFB electrofishing surveys)
@@ -79,4 +78,5 @@
 #' Y <- log(1 + onema$biomass)
 #' X <- model.matrix(~ 1, data = onema$covariates)
 #' nb_data <- NormalBlockData$new(Y, X)
+#' out <- normal_block(nb_data, 2:15, control = NB_control(clustering_init = "ward2"))
 "onema"

@@ -30,7 +30,23 @@ R6 abstract class for a generic sparse Normal Block model
 
     \item{\code{n_edges}}{number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)}
 
-    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix))}
+    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
+
+    \item{\code{B_original}}{regression coefficients (d x p), converted back to
+Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
+column-wise rescaling, if any). Use `model_par$B` instead for the
+coefficients on the internal fitting scale.}
+
+    \item{\code{dm1_original}}{inverse residual variance per variable
+(1 / Var(Y_j)), converted back to Y's original units. Use
+`model_par$dm1` instead for the internal fitting scale. With
+`noise_covariance = "spherical"`, `model_par$dm1` is a single value
+repeated p times (one shared variance on the fitting scale); once
+converted back per-variable, the p values returned here generally
+differ from one another whenever Y's columns were rescaled by
+different factors -- correctly so, since a single shared *scaled*
+variance does not correspond to a single shared variance in the
+original, heterogeneous-scale units.}
 
     \item{\code{nb_param}}{number of parameters in the model}
 

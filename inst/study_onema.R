@@ -8,7 +8,7 @@ Y <- log(1 + onema$biomass) |> as.matrix()
 data <- normalblockr::NormalBlockData$new(Y, X)
 
 ## ZI inflated normal with diagonal covariance
-out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE, control = NB_control(clustering_init = "ward2"))
+out <- normal_block(data, blocks = 2:10, zero_inflation = TRUE, control = NB_control(clustering_init = "ward2"))
 
 out$plot(criteria = c("BIC", "EBIC", "deviance"))
 myModel <- out$get_best_model("EBIC")

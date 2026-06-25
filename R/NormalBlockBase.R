@@ -503,6 +503,22 @@ NormalBlockBase <- R6::R6Class(
     ## Methods for heuristic inference----------------------
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    ## Converts a per-variable quantity from the internal fitting scale
+    ## (data$Y, rescaled column-wise by NormalBlockData(scale = TRUE)) back to
+    ## Y's original units. Y_scaled = Y_original / Y_scale, so an additive
+    ## quantity like B or a fitted value picks up one factor of Y_scale
+    ## (power = 1: X_original = Y_scale * X_scaled), while dm1 = 1/variance
+    ## picks up Y_scale^-2 (Var(Y_original) = Y_scale^2 * Var(Y_scaled), so
+    ## dm1_original = dm1_scaled / Y_scale^2, power = -2). Used by the public
+    ## B/dm1 bindings and by fitted() in the 4 leaf classes -- model_par$B/
+    ## model_par$dm1 stay on the internal scale unchanged, since
+    ## warm_start_from() copies them directly into another model's private
+    ## state and must not have them silently rescaled.
+    rescale_to_original = function(M, power = 1) {
+      factor <- self$data$Y_scale^power
+      if (is.matrix(M)) M * matrix(factor, nrow(M), ncol(M), byrow = TRUE) else M * factor
+    },
+
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## MLE of MV Normal distribution
     multivariate_normal_inference = function(){
@@ -621,9 +637,25 @@ NormalBlockBase <- R6::R6Class(
     q = function() as.integer(ncol(private$C)),
     #' @field n_edges number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)
     n_edges  = function() sum(private$Omegaq[upper.tri(private$Omegaq, diag = FALSE)] != 0),
-    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix))
+    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
     model_par = function() list(B = private$B, B0 = private$B0,
                                      dm1 = private$dm1, Omegaq = private$Omegaq),
+    #' @field B_original regression coefficients (d x p), converted back to
+    #' Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
+    #' column-wise rescaling, if any). Use `model_par$B` instead for the
+    #' coefficients on the internal fitting scale.
+    B_original = function() private$rescale_to_original(private$B, power = 1),
+    #' @field dm1_original inverse residual variance per variable
+    #' (1 / Var(Y_j)), converted back to Y's original units. Use
+    #' `model_par$dm1` instead for the internal fitting scale. With
+    #' `noise_covariance = "spherical"`, `model_par$dm1` is a single value
+    #' repeated p times (one shared variance on the fitting scale); once
+    #' converted back per-variable, the p values returned here generally
+    #' differ from one another whenever Y's columns were rescaled by
+    #' different factors -- correctly so, since a single shared *scaled*
+    #' variance does not correspond to a single shared variance in the
+    #' original, heterogeneous-scale units.
+    dm1_original = function() private$rescale_to_original(private$dm1, power = -2),
     #' @field nb_param number of parameters in the model
     nb_param = function() {
       nb_param_D <- ifelse(private$res_covariance == "diagonal", self$p, 1)

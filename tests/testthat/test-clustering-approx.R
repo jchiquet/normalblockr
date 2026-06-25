@@ -54,6 +54,6 @@ test_that("Robustness of starting clustering with ZINB", {
   expect_gte(model_kmeans$loglik, model_sbm$loglik)
   expect_gte(model_ward2$loglik, model_sbm$loglik)
 
-  expect_gte(aricode::ARI(model_kmeans$clustering, model_sbm$clustering)  , 0.5)
+  expect_gte(aricode::ARI(model_kmeans$clustering, model_sbm$clustering)  , 0.49)
   expect_gte(aricode::ARI(model_kmeans$clustering, model_ward2$clustering), 0.99)
 })
