@@ -39,18 +39,6 @@ data_subtype <- NormalBlockData$new(Y, X_subtype)
 NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30)
 ```
 
-Longer, but try to avoid local minima.
-
-```{r running-normal-block}
- <- SelectionNClusters$new(
-  data_subtype, c(1,30),
-  zero_inflation = FALSE,
-  sparsity = 0,
-  control = NB_control(clustering_init = "ward2")
-)
-select_q_prot_subtype$fit()
-```
-
 ### Model selection: criteria to fix the number of clusters
 
 ```{r plotting criteria}
@@ -65,8 +53,13 @@ paste0("ICL selects ", selected_NB$q, " clusters.")
 ## Enrichment analysis
 
 ```{r enrichment}
-EntrezGeneID <- str_remove_all(RPPA_meta["entrezGeneId", ], " ")
-df_inter <- data.frame(Entrez = EntrezGeneID, group  = selected_NB$clustering)
+EntrezGeneID <-
+  setNames(brca_rppa$gene_annotation$entrezGeneId,
+           brca_rppa$gene_annotation$protein)
+df_inter <- data.frame(
+    Entrez = brca_rppa$gene_annotation$entrezGeneId,
+    group  = selected_NB$clustering
+  )
 inter_kegg <- compareCluster(Entrez~group, data = df_inter, fun='enrichKEGG', pvalueCutoff = 0.001)
 inter_kegg <- setReadable(inter_kegg, OrgDb = "org.Hs.eg.db", keyType="ENTREZID")
 dotplot(inter_kegg, font.size = 8)
