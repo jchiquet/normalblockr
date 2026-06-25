@@ -40,53 +40,14 @@ data_onema <- NormalBlockData$new(
 
 `onema`'s biomass matrix is genuinely zero-inflated (most species are absent from most stations), so unlike the other two datasets it is benchmarked with `zero_inflation = TRUE` (`ZINormalBlockUnknownClusters`, clustering on `zi_residuals()` rather than `ols_residuals()`) -- the way `inst/study_onema.R` actually uses it, not an artificial non-ZI fit just for protocol uniformity.
 
-```{r data-university-webpages, message=FALSE}
-library(tm)
-text_preprocessing <- function(x) {
-  x <- gsub("http\\S+\\s*", "", x)
-  x <- gsub("<.*?>", "", x)
-  x <- gsub("#\\S+", "", x)
-  x <- gsub("[[:cntrl:]]", "", x)
-  x <- gsub("^[[:space:]]*", "", x)
-  x <- gsub("[[:space:]]*$", "", x)
-  x <- gsub(" +", " ", x)
-  x
-}
-xlogx_web <- function(x) ifelse(x < .Machine$double.eps, 0, x * log(x))
-
-## see ../NORMAL_BLOCK_PAPER_ILLUSTRATIONS/2_university_webpages/normal_block_analysis_university_webpages_data.qmd
-## for the original writeup of this preprocessing pipeline (tm-based DTM
-## construction, entropy-based term selection, log(1+freq) + scale())
-path_to_univ <- "../NORMAL_BLOCK_PAPER_ILLUSTRATIONS/2_university_webpages/student_webpages/"
-corpus <- Corpus(DirSource(path_to_univ, recursive = TRUE)) %>%
-  tm_map(tolower) %>%
-  tm_map(text_preprocessing) %>%
-  tm_map(stripWhitespace) %>%
-  tm_map(removeWords, stopwords("english")) %>%
-  tm_map(removePunctuation) %>%
-  tm_map(removeNumbers)
-dtm <- DocumentTermMatrix(corpus, control = list(bounds = list(local = c(2, Inf))))
-dtm <- as.matrix(dtm)
-dtm <- dtm[!(rowSums(dtm) == 0), ]
-freq_mat  <- sweep(dtm, 1, rowSums(dtm), "/")
-g         <- sweep(freq_mat, 2, colSums(freq_mat), "/")
-entropies <- -colSums(xlogx_web(g)) / log(nrow(g))
-terms     <- colnames(freq_mat)[order(entropies, decreasing = TRUE)[1:100]]
-Y_web     <- log(1 + freq_mat[, terms]) %>% as.matrix()
-data_web  <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))
+```{data(university)}
+Y_web    <- log(1 + university$frequencies[, university$terms])
+data_web <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))
 ```
 
 ## The menu tested here (5 methods; since reduced to 4)
 
-The benchmark below was run against this 5-method registry. As detailed in
-"Results", combining each method's BIC rank with how reliably its deviance
-path respects the model's theoretical monotonicity (see that section)
-showed `kmeansvar` to be both the worst-ranked and the least reliable
-method on every one of the 3 datasets -- it was dropped from
-`private$clustering_methods` as a consequence, which also removes the
-package's dependency on `ClustOfVar`. The registry shown here is therefore
-historical (what was actually run to reach that decision); the current
-registry in `R/NormalBlockBase.R` has 4 entries, not 5.
+The benchmark below was run against this 5-method registry. As detailed in "Results", combining each method's BIC rank with how reliably its deviance path respects the model's theoretical monotonicity (see that section) showed `kmeansvar` to be both the worst-ranked and the least reliable method on every one of the 3 datasets -- it was dropped from `private$clustering_methods` as a consequence, which also removes the package's dependency on `ClustOfVar`. The registry shown here is therefore historical (what was actually run to reach that decision); the current registry in `R/NormalBlockBase.R` has 4 entries, not 5.
 
 ```{r show-registry, eval=FALSE}
 ## R/NormalBlockBase.R, private$clustering_methods, AS BENCHMARKED (5
@@ -227,15 +188,7 @@ Standardizing `onema` (rather than leaving it on the raw `log(1 + biomass)` axis
 
 ## Decision: default and menu size
 
-Raw rank treats a method's value at each `q` in isolation, but the model
-gives a second, free diagnostic: with a fixed sparsity level, `deviance`
-(`-2 * loglik`) should be **non-increasing in `q`** -- a finer partition
-into blocks is always at least as expressive as a coarser one. A method
-whose deviance path *increases* somewhere is revealing that the (V)EM
-recursion converged to a worse local optimum at that `q` than it did at a
-smaller one, i.e. an initialization-quality failure, not just "a so-so
-fit". Counting these violations alongside the rank gives a reliability
-measure that pure ranking misses.
+Raw rank treats a method's value at each `q` in isolation, but the model gives a second, free diagnostic: with a fixed sparsity level, `deviance` (`-2 * loglik`) should be **non-increasing in `q`** -- a finer partition into blocks is always at least as expressive as a coarser one. A method whose deviance path *increases* somewhere is revealing that the (V)EM recursion converged to a worse local optimum at that `q` than it did at a smaller one, i.e. an initialization-quality failure, not just "a so-so fit". Counting these violations alongside the rank gives a reliability measure that pure ranking misses.
 
 ```{r monotonicity-table}
 menu %>%
@@ -248,34 +201,11 @@ menu %>%
   knitr::kable(caption = "Number of q-steps where deviance increases instead of (weakly) decreasing, and the size of the largest such jump")
 ```
 
-`kmeans` has the best raw `BIC` rank (2.36, see table above) but is also
-one of the least reliable methods by this measure -- 5 violations total,
-including a jump of 348 on `brca` alone, the second-largest of any method
-on that dataset. `ward2` has a less impressive raw rank (2.57) but by far
-the fewest and smallest violations (2 total, none larger than 20):
-its apparent rank disadvantage against `kmeans` is partly `kmeans` getting
-credit for runs that didn't reliably converge. `kmeansvar` is simultaneously
-the worst-ranked method *and* the least reliable one (17 violations, up to
-a jump of 997) on every single dataset -- there is no dataset where it is
-either competitive or trustworthy.
+`kmeans` has the best raw `BIC` rank (2.36, see table above) but is also one of the least reliable methods by this measure -- 5 violations total, including a jump of 348 on `brca` alone, the second-largest of any method on that dataset. `ward2` has a less impressive raw rank (2.57) but by far the fewest and smallest violations (2 total, none larger than 20): its apparent rank disadvantage against `kmeans` is partly `kmeans` getting credit for runs that didn't reliably converge. `kmeansvar` is simultaneously the worst-ranked method *and* the least reliable one (17 violations, up to a jump of 997) on every single dataset -- there is no dataset where it is either competitive or trustworthy.
 
-**Decision**: `ward2` is now `NB_control()`'s default `clustering_init`
-(`kmeans`, `sbm`, `spectral` remain available, in roughly that order of
-preference), and `kmeansvar` has been removed from the registry entirely
--- it was never the best choice and was also the least reliable, so there
-was no real benefit it brought to the menu that justified keeping the
-`ClustOfVar` dependency for it. The hidden fallback used whenever a chosen
-heuristic collapses to fewer than `q` clusters (previously `ClustOfVar::hclustvar`)
-is now `ward2` itself, which already gives the same "exactly q clusters,
-guaranteed" property via `cutree()`.
+**Decision**: `ward2` is now `NB_control()`'s default `clustering_init` (`kmeans`, `sbm`, `spectral` remain available, in roughly that order of preference), and `kmeansvar` has been removed from the registry entirely -- it was never the best choice and was also the least reliable, so there was no real benefit it brought to the menu that justified keeping the `ClustOfVar` dependency for it. The hidden fallback used whenever a chosen heuristic collapses to fewer than `q` clusters (previously `ClustOfVar::hclustvar`) is now `ward2` itself, which already gives the same "exactly q clusters, guaranteed" property via `cutree()`.
 
-**Practical takeaway**: `ward2` is the safest single choice balancing both
-raw fit quality and the reliability of the optimization that produced it,
-on either `deviance`/`BIC` or `ICL`. `kmeans`'s narrow raw-rank edge on
-`deviance`/`BIC` should not be read as it being the safer pick -- and on
-`ICL` it is outright the least safe of the 4 remaining methods. No single
-heuristic is uniformly best, so trying 2-3 of the 4 remains worth the extra
-cost whenever the stakes justify it.
+**Practical takeaway**: `ward2` is the safest single choice balancing both raw fit quality and the reliability of the optimization that produced it, on either `deviance`/`BIC` or `ICL`. `kmeans`'s narrow raw-rank edge on `deviance`/`BIC` should not be read as it being the safer pick -- and on `ICL` it is outright the least safe of the 4 remaining methods. No single heuristic is uniformly best, so trying 2-3 of the 4 remains worth the extra cost whenever the stakes justify it.
 
 ## Side investigation 1: a hand-rolled Armadillo k-means
 
