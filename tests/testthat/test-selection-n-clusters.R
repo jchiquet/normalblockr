@@ -43,6 +43,29 @@ test_that("split() then merge() round-trips back to the original q", {
   expect_equal(back$q, model$q)
 })
 
+test_that("split()/merge() mark the result as warm-started, so EM_initialize() reuses their Omegaq/M/S/alpha instead of a fresh heuristic estimate", {
+  model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model$optimize(control = list(niter = 5, threshold = -1))
+
+  split_model <- model$split(1)
+  priv <- split_model$.__enclos_env__$private
+  expect_true(priv$warm_started)
+  expect_equal(priv$alpha, colMeans(priv$C))
+  init <- priv$EM_initialize()
+  expect_identical(init$Omegaq, priv$Omegaq)
+  expect_identical(init$M, priv$M)
+  expect_identical(init$S, priv$S)
+
+  model3 <- NormalBlockUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
+  model3$optimize(control = list(niter = 5, threshold = -1))
+  merged_model <- model3$merge(c(1, 2))
+  priv2 <- merged_model$.__enclos_env__$private
+  expect_true(priv2$warm_started)
+  expect_equal(priv2$alpha, colMeans(priv2$C))
+  init2 <- priv2$EM_initialize()
+  expect_identical(init2$Omegaq, priv2$Omegaq)
+})
+
 test_that("split(in_place = TRUE) mutates self instead of returning a clone", {
   model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))

@@ -118,6 +118,10 @@ NormalBlockBase <- R6::R6Class(
     #' @param M variational mean for posterior distribution of W
     #' @param S variational diagonal of variances for posterior distribution of W
     #' @param ll_list  list of log-lik (elbo) values
+    #' @param warm_started whether `EM_initialize()` should treat the model as
+    #' already initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand)
+    #' rather than recomputing a fresh heuristic initialization -- set by
+    #' [warm_start_from()] and by [split()]/[merge()].
     #' @return Update the current [`normal`] object
     update = function(B = NA,
                       dm1 = NA,
@@ -129,7 +133,8 @@ NormalBlockBase <- R6::R6Class(
                       alpha = NA,
                       M = NA,
                       S = NA,
-                      ll_list = NA) {
+                      ll_list = NA,
+                      warm_started = NA) {
       if (!anyNA(B))       private$B       <- B
       if (!anyNA(dm1))     private$dm1     <- dm1
       if (!anyNA(C))       private$C       <- C
@@ -141,6 +146,7 @@ NormalBlockBase <- R6::R6Class(
       if (!anyNA(M))       private$M       <- M
       if (!anyNA(S))       private$S       <- S
       if (!anyNA(ll_list)) private$ll_list <- ll_list
+      if (!anyNA(warm_started)) private$warm_started <- warm_started
     },
 
     #' @description calls optimization (EM or heuristic) and updates relevant fields
@@ -218,11 +224,6 @@ NormalBlockBase <- R6::R6Class(
         new_S <- c(private$S, mean(private$S))
       }
 
-      ## Precision matrix
-      new_Omegaq <- cbind(rbind(private$Omegaq,  0), 0)
-      new_Omegaq[index, index] <- private$Omegaq[index, index]/2
-      new_Omegaq[self$q + 1, self$q + 1] <- private$Omegaq[index, index]/2
-
       ## Sparsity weights
       if (self$q == 1) {
         new_weights <- matrix(c(0,1,1,0), 2, 2)
@@ -233,13 +234,27 @@ NormalBlockBase <- R6::R6Class(
                              c(weights_cl, 0))
       }
 
+      ## Precision matrix: re-derived from new_M/new_S (already consistent
+      ## with the split), not hand-edited from the parent's Omegaq -- see
+      ## omega_from_M_S().
+      new_Omegaq <- private$omega_from_M_S(new_M, new_S, new_weights)
+
+      ## Mark the result as already initialized (C/Omegaq/M/S/alpha freshly
+      ## derived above, B/dm1 carried over unchanged from the parent -- valid
+      ## since their dimension doesn't depend on q) so that EM_initialize()
+      ## reuses this state instead of discarding it for a fresh heuristic
+      ## Sigmaq/Omegaq estimate, which is both wasted work and a numerical
+      ## stability risk (a candidate clustering from a split/merge is not
+      ## constrained to be "nice" the way a clustering heuristic's output is).
       if (in_place) {
-        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
+        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+                    alpha = colMeans(new_C), warm_started = TRUE)
         self$sparsity_weights <- new_weights
         return(invisible(self))
       } else {
         new_NB <- self$clone()
-        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
+        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+                      alpha = colMeans(new_C), warm_started = TRUE)
         new_NB$sparsity_weights <- new_weights
         return(invisible(new_NB))
       }
@@ -247,27 +262,48 @@ NormalBlockBase <- R6::R6Class(
 
     #' @description generate and select a set of candidate models
     #' by splitting the clusters of the current model
-    candidates_split = function() {
+    #' @param trial_niter number of EM iterations used to cheaply score each
+    #' candidate before [SelectionNClusters] fully re-optimizes the best few
+    #' (`train_best_candidates()`'s `max_training`) -- kept short on purpose.
+    candidates_split = function(trial_niter = 5) {
       # do not split groups with less than 2 guys
       candidates <- map((1:self$q)[self$cluster_sizes > 1], self$split)
-      # keep candidates with at least 2 guys per cluster and non empty split
+      # keep candidates with at least 2 guys per cluster and non empty split.
+      # Compared against the number of currently *live* (non-empty) clusters
+      # rather than self$q: the (V)EM can converge to an empty cluster (a
+      # known general failure mode, e.g. plot_network()'s cluster_sizes fix),
+      # in which case self$q overcounts and every split would otherwise look
+      # invalid, silently stalling explore_forward() before n_clusters_range[2].
       clustering_sizes <- map(candidates, "clustering") %>% map(table)
       min_sizes  <- clustering_sizes %>% map_dbl(min)
       n_clusters <- clustering_sizes %>% map_dbl(length)
-      candidates <- candidates[min_sizes > 1 & n_clusters == self$q + 1]
+      n_live <- length(unique(self$clustering))
+      candidates <- candidates[min_sizes > 1 & n_clusters == n_live + 1]
 
       for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = 5, threshold = 1e-4))
+        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4))
       candidates
     },
 
     #' @description generate and select a set of candidate models
     #' by merging the clusters of the current model
-    candidates_merge = function() {
+    #' @param max_candidates merge candidates are, unlike split's, quadratic
+    #' in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
+    #' the most promising ones (largest `|Omegaq[i, j]|`, i.e. the most
+    #' strongly related cluster pairs in the current fit) are actually built
+    #' and trial-optimized, since merging two nearly independent blocks is
+    #' rarely competitive anyway. Set to `Inf` to always try every pair.
+    #' @param trial_niter see [candidates_split()]
+    candidates_merge = function(max_candidates = 30, trial_niter = 2) {
       stopifnot("need at least two clusters to merge them" = self$q > 1)
-      candidates <- map(combn(self$q, 2, simplify = FALSE), self$merge)
+      pairs <- combn(self$q, 2, simplify = FALSE)
+      if (length(pairs) > max_candidates) {
+        score <- map_dbl(pairs, function(ij) abs(private$Omegaq[ij[1], ij[2]]))
+        pairs <- pairs[order(score, decreasing = TRUE)[1:max_candidates]]
+      }
+      candidates <- map(pairs, self$merge)
       for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = 5, threshold = 1e-4))
+        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4))
       candidates
     },
 
@@ -298,21 +334,25 @@ NormalBlockBase <- R6::R6Class(
         new_S[indices[1]] <- .5 * (private$S[indices[1]] + private$S[indices[2]])
       }
 
-      ## Precision matrix
-      new_Omegaq <- private$Omegaq[-indices[2], -indices[2]]
-      new_Omegaq[indices[1], indices[1]] <-
-        .5 * (private$Omegaq[indices[1], indices[1]] + private$Omegaq[indices[2], indices[2]])
-
       ## Sparsity weights
       new_weights <-  private$weights[-indices[2], -indices[2]]
 
+      ## Precision matrix: re-derived from new_M/new_S (already consistent
+      ## with the merge), not hand-edited from the parent's Omegaq -- see
+      ## omega_from_M_S().
+      new_Omegaq <- private$omega_from_M_S(new_M, new_S, new_weights)
+
+      ## See split()'s comment: mark as warm-started so EM_initialize()
+      ## reuses this state instead of a fresh heuristic Sigmaq/Omegaq.
       if (in_place) {
-        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
+        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+                    alpha = colMeans(new_C), warm_started = TRUE)
         self$sparsity_weights <- new_weights
         return(self)
       } else {
         new_NB <- self$clone()
-        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
+        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+                      alpha = colMeans(new_C), warm_started = TRUE)
         new_NB$sparsity_weights <- new_weights
         return(new_NB)
       }
@@ -466,9 +506,10 @@ NormalBlockBase <- R6::R6Class(
     clustering_approx = NA, # name of the clustering heuristic, key into clustering_methods
     ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed)
     niter             = NA, # number of EM iterations required by the inference, if applicable
-    warm_started      = FALSE, # set by warm_start_from(): tells EM_initialize() to reuse
-                                # the current B/dm1/Omegaq (and C/M/S/alpha or gamma/mu)
-                                # instead of (re-)deriving them from the heuristic clustering.
+    warm_started      = FALSE, # set by warm_start_from() and by split()/merge(): tells
+                                # EM_initialize() to reuse the current B/dm1/Omegaq (and
+                                # C/M/S/alpha or gamma/mu) instead of (re-)deriving them
+                                # from the heuristic clustering.
                                 # Deliberately NOT inferred from "are these fields non-NA",
                                 # which would also be true for split()/merge() clones (those
                                 # keep their own, different, already-tested initialization path).
@@ -497,6 +538,27 @@ NormalBlockBase <- R6::R6Class(
         }
       }
       Omega
+    },
+
+    ## Closed-form M-step estimate of Omegaq directly from M/S (Sigma_hat =
+    ## M'M/n + diag(S)), the same formula the (V)EM's own M-step uses (see
+    ## Sigma_hat_ in src/normal_block_unknown_clusters.h). Used by split()/
+    ## merge() to seed the new model's Omegaq from its freshly built M/S/C
+    ## (already consistent with the new clustering) instead of hand-editing
+    ## the parent's Omegaq, which reflects the *old* clustering. `weights`
+    ## is passed explicitly (rather than reading self$sparsity_weights, as
+    ## get_Omegaq() does) because split()/merge() call this before the new,
+    ## resized sparsity_weights have been assigned anywhere.
+    omega_from_M_S = function(M, S, weights) {
+      s_vec <- if (is.matrix(S)) colMeans(S) else S
+      Sigma_hat <- crossprod(M) / self$n + diag(s_vec, ncol(M))
+      Omega <- if (private$sparsity_ == 0) {
+        solve(Sigma_hat)
+      } else {
+        glasso_out <- glassoFast::glassoFast(Sigma_hat, rho = private$sparsity_ * weights)
+        if (anyNA(glasso_out$wi)) solve(Sigma_hat) else Matrix::symmpart(glasso_out$wi)
+      }
+      ensure_pd(Omega)
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

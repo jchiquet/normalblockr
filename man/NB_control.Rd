@@ -15,7 +15,8 @@ NB_control(
   clustering_init = "ward2",
   verbose = TRUE,
   heuristic = FALSE,
-  noise_covariance = c("diagonal", "spherical")
+  noise_covariance = c("diagonal", "spherical"),
+  refine = FALSE
 )
 }
 \arguments{
@@ -70,6 +71,15 @@ likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
 are all `NA` on the resulting model.}
 
 \item{noise_covariance}{variance can be variable specific ("diagonal", the default) or common ("spherical")}
+
+\item{refine}{for [NormalBlockCollectionClusters] only: whether
+`optimize()` should automatically call `refine()` afterwards, which tries
+to improve each model in the collection from its already-fitted,
+smaller-q neighbor (see `refine()`'s documentation for the rationale and
+an empirical before/after comparison). Default `FALSE` -- it adds real
+cost (roughly 2-2.5x), so it is opt-in; call `collection$refine()`
+directly at any point afterwards to get the same effect without setting
+this.}
 }
 \description{
 Control the model settings and various optimization parameters

@@ -159,7 +159,8 @@ All possible parameters of the child classes
   alpha = NA,
   M = NA,
   S = NA,
-  ll_list = NA
+  ll_list = NA,
+  warm_started = NA
 )}
     \if{html}{\out{</div>}}
   }
@@ -177,6 +178,10 @@ All possible parameters of the child classes
       \item{\code{M}}{variational mean for posterior distribution of W}
       \item{\code{S}}{variational diagonal of variances for posterior distribution of W}
       \item{\code{ll_list}}{list of log-lik (elbo) values}
+      \item{\code{warm_started}}{whether `EM_initialize()` should treat the model as
+already initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand)
+rather than recomputing a fresh heuristic initialization -- set by
+[warm_start_from()] and by [split()]/[merge()].}
     }
     \if{html}{\out{</div>}}
   }
@@ -272,7 +277,16 @@ default FALSE (send a copy)}
 by splitting the clusters of the current model
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$candidates_split()}
+    \preformatted{NormalBlockBase$candidates_split(trial_niter = 5)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{trial_niter}}{number of EM iterations used to cheaply score each
+candidate before [SelectionNClusters] fully re-optimizes the best few
+(`train_best_candidates()`'s `max_training`) -- kept short on purpose.}
+    }
     \if{html}{\out{</div>}}
   }
 }
@@ -285,7 +299,20 @@ by splitting the clusters of the current model
 by merging the clusters of the current model
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$candidates_merge()}
+    \preformatted{NormalBlockBase$candidates_merge(max_candidates = 30, trial_niter = 2)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{max_candidates}}{merge candidates are, unlike split's, quadratic
+in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
+the most promising ones (largest `|Omegaq[i, j]|`, i.e. the most
+strongly related cluster pairs in the current fit) are actually built
+and trial-optimized, since merging two nearly independent blocks is
+rarely competitive anyway. Set to `Inf` to always try every pair.}
+      \item{\code{trial_niter}}{see [candidates_split()]}
+    }
     \if{html}{\out{</div>}}
   }
 }

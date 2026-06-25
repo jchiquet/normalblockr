@@ -25,14 +25,11 @@ R6 class for a collection of normal-block models with different number of cluste
     \item \href{#method-NormalBlockCollectionClusters-get_model}{\code{NormalBlockCollectionClusters$get_model()}}
     \item \href{#method-NormalBlockCollectionClusters-get_best_model}{\code{NormalBlockCollectionClusters$get_best_model()}}
     \item \href{#method-NormalBlockCollectionClusters-plot}{\code{NormalBlockCollectionClusters$plot()}}
+    \item \href{#method-NormalBlockCollectionClusters-optimize}{\code{NormalBlockCollectionClusters$optimize()}}
+    \item \href{#method-NormalBlockCollectionClusters-refine}{\code{NormalBlockCollectionClusters$refine()}}
     \item \href{#method-NormalBlockCollectionClusters-clone}{\code{NormalBlockCollectionClusters$clone()}}
   }
 }
-\if{html}{\out{<details open><summary>Inherited methods</summary>
-<ul>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-optimize'><code>NormalBlockCollection$optimize()</code></a></span></li>
-</ul>
-</details>}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockCollectionClusters-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-initialize}{}}}
@@ -133,6 +130,115 @@ Either "ICL" or "BIC". "ICL" is the default criterion}
   }
   \subsection{Returns}{
     a [`ggplot2::ggplot`] graph
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockCollectionClusters-optimize"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-optimize}{}}}
+\subsection{\code{NormalBlockCollectionClusters$optimize()}}{
+  optimizes every model in the collection, then -- if
+`control$refine` is `TRUE` (see [NB_control()], default `FALSE`) --
+calls [refine()] automatically.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockCollectionClusters$optimize(
+  control = list(niter = 100, threshold = 1e-04, verbose = TRUE)
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{control}}{optimization parameters (niter, threshold, verbose)}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockCollectionClusters-refine"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-refine}{}}}
+\subsection{\code{NormalBlockCollectionClusters$refine()}}{
+  Tries to improve every model in the collection with a
+single short split-and-reoptimize trial seeded from its immediate
+smaller-q neighbor (`"split"`), a single short merge-and-reoptimize
+trial seeded from its immediate larger-q neighbor (`"merge"`), or
+both (the default), keeping a candidate only if it strictly lowers
+the model's deviance. Each model in the collection is independently
+cold-started (a heuristic clustering on the residuals, see
+`private$clustering_methods` in [NormalBlockBase]), which on real
+data turns out to sometimes settle into a milder local optimum than
+a neighboring q's solution would, once incrementally split or merged
+by one cluster -- a gap that a simple "deviance must not increase in
+q" check cannot reliably catch (see Details).
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockCollectionClusters$refine(
+  trial_niter = 2,
+  max_candidates = 30,
+  directions = c("split", "merge"),
+  verbose = self$control$verbose
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{trial_niter}}{number of EM iterations used for the cheap trial
+candidates (passed to `candidates_split()`/`candidates_merge()`)
+before fully re-optimizing only the best one.}
+      \item{\code{max_candidates}}{passed to `candidates_merge()` (ignored for
+`"split"`, which is never combinatorial in q) -- see its
+documentation.}
+      \item{\code{directions}}{which neighbor(s) to seed refinement candidates
+from: `"split"` (smaller-q neighbor), `"merge"` (larger-q neighbor),
+or both (the default).}
+      \item{\code{verbose}}{whether to print, for each q attempted, whether the
+candidate from that neighbor improved on it. Defaults to
+`control$verbose` (the value set at construction, see
+[NB_control()]).}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Details}{
+    Two earlier, cheaper attempts at *targeting* which q to
+refine -- flagging only outright deviance increases, then flagging
+deviance drops that are unusually small relative to neighboring q's
+-- both found essentially nothing to fix on a real dataset
+(`brca_rppa`) where a full split/merge search (see
+`inst/clustering_initialization_benchmark`) was known to find a
+systematically and uniformly better deviance at almost every q: the
+gap there was spread evenly across the whole q range, leaving no
+local anomaly for either diagnostic to detect. `refine()` instead
+tries unconditionally at every q and discards whatever doesn't help,
+which is more costly but, empirically, closes much of that gap.
+`"split"` alone (seeding only from q-1) already recovers a sizeable
+part of it for about 1.5-2x the cost of fitting the collection alone;
+adding `"merge"` (seeding also from q+1) closes substantially more of
+it on `brca_rppa` -- the two directions catch different cases, since
+a smaller-q neighbor's split and a larger-q neighbor's merge are
+different (and independently cold-started) starting points -- for
+roughly twice the cost of `"split"` alone, still well under the full
+forward/backward search of [SelectionNClusters]. Since nothing is
+ever kept unless it strictly improves, this never makes any
+individual model worse: on a second real dataset (`university`)
+where the collection's independent per-q cold starts were already
+*better* than chaining models together (the opposite failure mode:
+an early bad split propagating to every larger q), both directions
+found close to nothing to fix rather than degrading anything -- it
+is a one-sided improvement, not a different optimization trajectory
+that could go either way.
+
+Only contiguous q pairs (`q` and `q - 1`, or `q` and `q + 1`, both
+present in the collection) are refined; non-contiguous q's (a
+`q_list` with gaps) are left untouched on the corresponding side,
+since splitting/merging a `q -/+ k` (k > 1) model does not produce a
+candidate at `q`.
+  }
+  \subsection{Returns}{
+    invisibly returns `self`; improved models replace the
+originals in `$models` in place.
   }
 }
 

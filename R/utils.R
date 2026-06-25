@@ -32,6 +32,21 @@ clip_probabilities <- function(x, zero = .Machine$double.eps) {
   check_zero_boundary(check_one_boundary(x, zero), zero)
 }
 
+# Projects a symmetric matrix onto the positive-definite cone by flooring its
+# eigenvalues, leaving an already-PD matrix unchanged (up to symmetrization).
+# Used by split()/merge() (NormalBlockBase.R): their new_Omegaq is built by
+# hand-editing a handful of entries of an existing precision matrix (halving/
+# averaging diagonal entries, zero-filling the new row/column), which has no
+# general guarantee of staying PD -- and an indefinite Omegaq handed directly
+# to the (V)EM solver fails on log_det_sympd(). A plain numeric safeguard
+# rather than a principled re-derivation, since the entries being edited are
+# themselves already a crude split/merge heuristic, not an exact update.
+ensure_pd <- function(M, floor = 1e-6) {
+  M <- (M + t(M)) / 2
+  eig <- eigen(M, symmetric = TRUE)
+  eig$vectors %*% diag(pmax(eig$values, floor), nrow(M)) %*% t(eig$vectors)
+}
+
 # computes xlogx, setting it to 0 if x = 0
 xlogx <- function(x) ifelse(x < .Machine$double.eps, 0, x * log(x))
 

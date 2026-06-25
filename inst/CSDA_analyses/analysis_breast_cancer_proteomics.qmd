@@ -45,6 +45,12 @@ NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30)
 NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
 ```
 
+```{r refine}
+NB_prot_subtype$refine(trial_niter = 3)
+NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
+```
+
+
 ```{r model-selection}
 selected_NB <- NB_prot_subtype$get_best_model("ICL")
 paste0("ICL selects ", selected_NB$q, " clusters.")

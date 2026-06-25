@@ -97,6 +97,14 @@ normal_block <- function(data,
 #' recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no
 #' likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
 #' are all `NA` on the resulting model.
+#' @param refine for [NormalBlockCollectionClusters] only: whether
+#' `optimize()` should automatically call `refine()` afterwards, which tries
+#' to improve each model in the collection from its already-fitted,
+#' smaller-q neighbor (see `refine()`'s documentation for the rationale and
+#' an empirical before/after comparison). Default `FALSE` -- it adds real
+#' cost (roughly 2-2.5x), so it is opt-in; call `collection$refine()`
+#' directly at any point afterwards to get the same effect without setting
+#' this.
 #' @export
 NB_control <- function(
     niter                = 100,
@@ -109,7 +117,8 @@ NB_control <- function(
     clustering_init      = "ward2",
     verbose              = TRUE,
     heuristic            = FALSE,
-    noise_covariance     = c("diagonal", "spherical")) {
+    noise_covariance     = c("diagonal", "spherical"),
+    refine               = FALSE) {
 
   if (!is.null(sparsity_weights))
     stopifnot(all(is.matrix(sparsity_weights), isSymmetric(sparsity_weights)))
@@ -128,7 +137,8 @@ NB_control <- function(
                  clustering_init      = clustering_init      ,
                  verbose              = verbose              ,
                  heuristic            = heuristic            ,
-                 noise_covariance     = match.arg(noise_covariance)))
+                 noise_covariance     = match.arg(noise_covariance),
+                 refine               = refine               ))
 }
 
 
