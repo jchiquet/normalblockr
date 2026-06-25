@@ -14,7 +14,7 @@ test_that("normal block with diagonal residual covariance and unknown q", {
   clustering_init   <- list(clustering_init_1, clustering_init_2, clustering_init_3)
 
   data  <- normalblockr:::NormalBlockData$new(Y, X)
-  model <- normalblockr:::NormalBlockUnknownQ$new(data, c(1, 2, 3), zero_inflation = FALSE,
+  model <- normalblockr:::NormalBlockCollectionClusters$new(data, c(1, 2, 3), zero_inflation = FALSE,
                             control = NB_control(clustering_init = clustering_init))
   model$optimize()
   model_BIC <- model$get_best_model("BIC")
@@ -23,7 +23,7 @@ test_that("normal block with diagonal residual covariance and unknown q", {
 
 test_that("normal block with unknown q, heuristic", {
   data  <- NormalBlockData$new(Y, X)
-  model <- normalblockr:::NormalBlockUnknownQ$new(data, c(2, 3, 4), sparsity = 0.05,
+  model <- normalblockr:::NormalBlockCollectionClusters$new(data, c(2, 3, 4), sparsity = 0.05,
                             control = NB_control(heuristic = TRUE))
   model$optimize()
   model_3 <- model$get_model(3)

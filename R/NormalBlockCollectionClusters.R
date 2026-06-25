@@ -1,25 +1,25 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NormalBlockUnknownQ #################################
+##  CLASS NormalBlockCollectionClusters #################################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 #' R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.
 #' @export
-NormalBlockUnknownQ <- R6::R6Class(
-  classname = "NormalBlockUnknownQ",
+NormalBlockCollectionClusters <- R6::R6Class(
+  classname = "NormalBlockCollectionClusters",
   inherit   = NormalBlockCollection,
 
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @description Create a new [`NormalBlockUnknownQ`] object.
+    #' @description Create a new [`NormalBlockCollectionClusters`] object.
     #' @param mydata object of NormalBlockData class, with responses and design matrix
     #' @param q_list list of q values (number of groups) in the collection
     #' @param zero_inflation whether the models in the collection should be zero-inflated or not
     #' @param sparsity sparsity penalty on the network density
     #' @param control structured list of more specific parameters, to generate with NB_control
-    #' @return A new [`NormalBlockUnknownQ`] object
+    #' @return A new [`NormalBlockCollectionClusters`] object
     initialize = function(mydata, q_list, zero_inflation = FALSE,
                           sparsity = 0, control = NB_control()) {
       stopifnot("each nb_blocks value can only be present once in nb_blocks" =

@@ -84,8 +84,8 @@ normal_block <- function(data,
 #' single best raw rank (kmeans does, marginally, but with far more and
 #' larger monotonicity violations). When fitting a collection over several
 #' values of q
-#' (`normal_block(blocks = <vector>)`, [NormalBlockUnknownQ],
-#' [NormalBlockUnknownQChangingSparsity]) with the heuristic name "sbm" (and no
+#' (`normal_block(blocks = <vector>)`, [NormalBlockCollectionClusters],
+#' [NormalBlockCollectionClustersSparsity]) with the heuristic name "sbm" (and no
 #' per-q list of explicit clusterings), a single SBM exploration runs over the
 #' whole range of q and is reused for every model in the collection instead of
 #' repeating an independent (and increasingly costly) exploration for each q;
@@ -154,11 +154,11 @@ get_model <- function(data,
 
   if (is_collection) {
     class_name <- if (changing_sparsity && unknown_q_list) {
-      "NormalBlockUnknownQChangingSparsity"
+      "NormalBlockCollectionClustersSparsity"
     } else if (changing_sparsity) {
-      "NormalBlockChangingSparsity"
+      "NormalBlockCollectionSparsity"
     } else {
-      "NormalBlockUnknownQ"
+      "NormalBlockCollectionClusters"
     }
   } else {
     class_name <- if (is.matrix(blocks)) "NormalBlockKnownClusters" else "NormalBlockUnknownClusters"

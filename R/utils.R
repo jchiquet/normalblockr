@@ -66,7 +66,7 @@ sigmoid <- function(x){
 
 # OLS residuals of Y on X (used to seed the clustering heuristics). Factored
 # out of NormalBlockBase$multivariate_normal_inference() so that collections
-# fitting several q values (NormalBlockUnknownQ, NormalBlockUnknownQChangingSparsity)
+# fitting several q values (NormalBlockCollectionClusters, NormalBlockCollectionClustersSparsity)
 # can get the same residual once, instead of recomputing it once per model
 # (see sbm_clustering_path()).
 ols_residuals <- function(data) {
@@ -182,7 +182,7 @@ sbm_clustering_path <- function(R, q_list) {
 }
 
 # Builds the shared sbm_clustering_path() for a collection over q_list
-# (NormalBlockUnknownQ/NormalBlockUnknownQChangingSparsity), or returns NULL
+# (NormalBlockCollectionClusters/NormalBlockCollectionClustersSparsity), or returns NULL
 # when the optimization doesn't apply: clustering_init isn't the heuristic
 # name "sbm" applied uniformly (it names a different heuristic, or is already
 # an explicit clustering/list of clusterings -- in which case every model

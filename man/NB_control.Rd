@@ -54,8 +54,8 @@ converge, it gives the best balance of the two -- not because it has the
 single best raw rank (kmeans does, marginally, but with far more and
 larger monotonicity violations). When fitting a collection over several
 values of q
-(`normal_block(blocks = <vector>)`, [NormalBlockUnknownQ],
-[NormalBlockUnknownQChangingSparsity]) with the heuristic name "sbm" (and no
+(`normal_block(blocks = <vector>)`, [NormalBlockCollectionClusters],
+[NormalBlockCollectionClustersSparsity]) with the heuristic name "sbm" (and no
 per-q list of explicit clusterings), a single SBM exploration runs over the
 whole range of q and is reused for every model in the collection instead of
 repeating an independent (and increasingly costly) exploration for each q;

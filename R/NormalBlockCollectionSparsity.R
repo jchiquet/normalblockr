@@ -1,12 +1,12 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NormalBlockChangingSparsity #########################
+##  CLASS NormalBlockCollectionSparsity #########################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 #' R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.
 #' @export
-NormalBlockChangingSparsity <- R6::R6Class(
-  classname = "NormalBlockChangingSparsity",
+NormalBlockCollectionSparsity <- R6::R6Class(
+  classname = "NormalBlockCollectionSparsity",
   inherit   = NormalBlockCollection,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
@@ -15,11 +15,11 @@ NormalBlockChangingSparsity <- R6::R6Class(
     #' @field data object of NormalBlockData class, with responses and design matrix
     data   = NA,
 
-    #' @description Create a new [`NormalBlockChangingSparsity`] object.
+    #' @description Create a new [`NormalBlockCollectionSparsity`] object.
     #' @param mydata object of NormalBlockData class, with responses and design matrix
     #' @param zero_inflation boolean to specify whether data is zero-inflated
     #' @param control structured list of parameters to handle sparsity control
-    #' @return A new [`NormalBlockChangingSparsity`] object
+    #' @return A new [`NormalBlockCollectionSparsity`] object
     initialize = function(mydata, blocks, zero_inflation = FALSE,
                           control = NB_control()) {
 
@@ -165,7 +165,7 @@ NormalBlockChangingSparsity <- R6::R6Class(
       stabs_out <- lapply(subsamples, function(subsample) {
         mydata <- NormalBlockData$new(Y = self$data$Y[subsample, , drop = FALSE],
                                   X = self$data$X[subsample, , drop = FALSE])
-        myNB <- NormalBlockChangingSparsity$new(
+        myNB <- NormalBlockCollectionSparsity$new(
           mydata, blocks, self$control$zero_inflation, control_stabs)
         myNB$optimize(control_stabs)
 

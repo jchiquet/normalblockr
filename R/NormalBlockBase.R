@@ -154,7 +154,7 @@ NormalBlockBase <- R6::R6Class(
     #' @description Seed this model's starting parameters from another,
     #' already-optimized model with the same q, instead of the heuristic
     #' clustering-derived values set at construction time. Used by
-    #' [NormalBlockChangingSparsity] to warm-start each penalty in a sparsity
+    #' [NormalBlockCollectionSparsity] to warm-start each penalty in a sparsity
     #' path from the previous (adjacent) one's converged solution -- adjacent
     #' penalties along a sorted path usually have similar optima, so this
     #' typically needs far fewer EM iterations than starting cold each time

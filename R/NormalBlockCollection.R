@@ -5,9 +5,9 @@
 #' R6 abstract class for a collection of normal-block models
 #'
 #' Shared scaffolding for the collections explored by [get_model()]/
-#' [normal_block()]: a sweep over sparsity penalties ([`NormalBlockChangingSparsity`]),
-#' over the number of clusters ([`NormalBlockUnknownQ`]), or over both
-#' ([`NormalBlockUnknownQChangingSparsity`]). Concrete subclasses set
+#' [normal_block()]: a sweep over sparsity penalties ([`NormalBlockCollectionSparsity`]),
+#' over the number of clusters ([`NormalBlockCollectionClusters`]), or over both
+#' ([`NormalBlockCollectionClustersSparsity`]). Concrete subclasses set
 #' `private$progress_field`/`private$progress_label` in their `initialize()`
 #' and provide their own `get_best_model()`, delegating the (row of
 #' `self$criteria` minimizing a criterion) lookup to `private$best_id()`.
@@ -58,8 +58,8 @@ NormalBlockCollection <- R6::R6Class(
       id
     },
 
-    ## Shared chart for plot() in NormalBlockUnknownQ (x_var = "q") and
-    ## NormalBlockChangingSparsity (x_var = "sparsity"): one line per
+    ## Shared chart for plot() in NormalBlockCollectionClusters (x_var = "q") and
+    ## NormalBlockCollectionSparsity (x_var = "sparsity"): one line per
     ## criterion against x_var, with a dashed vline marking the best model
     ## under vline_crit. Was previously duplicated near-verbatim in both.
     plot_criteria_path = function(x_var, criteria, vline_crit) {
