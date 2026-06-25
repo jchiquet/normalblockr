@@ -1,7 +1,6 @@
 ---
 title: "Breast cancer proteomics data analysis [Brigham & Women's Hospital & Harvard Medical School (2012)]"
 format: html
-editor: visual
 ---
 
 ## Useful libraries
@@ -18,25 +17,17 @@ set.seed(1)
 
 ## Loading & formatting data
 
-Loading clinical data to get cancer subtypes as covariates.
-
-```{r, loading-clinical-data}
-clinical  <- read_rds("brca_clinical.rds")
-```
-
-Loading proteomics data to analyse.
+Loading proteomics data to analyse and clinical data to get cancer subtypes as covariates.
 
 ```{r data-load}
-RPPA_expr <- read_rds("RPPA_expr.rds")
-RPPA_meta <- read_rds("RPPA_meta.rds")
-RPPA_clin <- clinical[match(rownames(RPPA_expr), clinical$sampleId), ]
+data(brca_rppa)
 ```
 
 Formatting data for Normal-Block.
 
 ```{r Normal-Block-formatting}
-Y            <- as.matrix(RPPA_expr) %>% scale()
-X_subtype    <- model.matrix(~ 0 + PAM50_SUBTYPE, data = RPPA_clin)
+Y          <- as.matrix(brca_rppa$expr) %>% scale()
+X_subtype  <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
 data_subtype <- NormalBlockData$new(Y, X_subtype)
 ```
 
@@ -45,16 +36,19 @@ data_subtype <- NormalBlockData$new(Y, X_subtype)
 ### Running the integrated inference procedure for 1 to 40 clusters.
 
 ```{r running-normal-block}
-NB_prot_subtype <- normal_block(data_subtype, blocks = 1:40)
+NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30)
 ```
 
+Longer, but try to avoid local minima.
+
 ```{r running-normal-block}
-select_q_prot_subtype <- SelectionNClusters$new(
+ <- SelectionNClusters$new(
   data_subtype, c(1,30),
   zero_inflation = FALSE,
   sparsity = 0,
-  control = NB_control()
+  control = NB_control(clustering_init = "ward2")
 )
+select_q_prot_subtype$fit()
 ```
 
 ### Model selection: criteria to fix the number of clusters
