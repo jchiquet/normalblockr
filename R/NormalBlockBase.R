@@ -317,17 +317,21 @@ NormalBlockBase <- R6::R6Class(
       ## sorting by increasing group label
       indices <- sort(indices)
 
-      ## Cluster merge
-      new_C <- private$C[, -indices[2]]
+      ## Cluster merge. drop = FALSE throughout: merging from q = 2 down to
+      ## q = 1 would otherwise silently drop these to plain vectors/a scalar
+      ## (R's default behavior when only one row/column remains), breaking
+      ## the matrix-indexed assignments right below and omega_from_M_S()'s
+      ## ncol() call further down.
+      new_C <- private$C[, -indices[2], drop = FALSE]
       new_C[, indices[1]] <- private$C[, indices[1]] + private$C[, indices[2]]
 
       ## Variational means
-      new_M <- private$M[, -indices[2]]
+      new_M <- private$M[, -indices[2], drop = FALSE]
       new_M[, indices[1]] <- .5 * (private$M[, indices[1]] + private$M[, indices[2]])
 
       ## Variational variances
       if (is.matrix(private$S)) {
-        new_S <- private$S[, -indices[2]]
+        new_S <- private$S[, -indices[2], drop = FALSE]
         new_S[, indices[1]] <- .5 * (private$S[, indices[1]] + private$S[, indices[2]])
       } else {
         new_S <- private$S[-indices[2]]
@@ -335,7 +339,7 @@ NormalBlockBase <- R6::R6Class(
       }
 
       ## Sparsity weights
-      new_weights <-  private$weights[-indices[2], -indices[2]]
+      new_weights <-  private$weights[-indices[2], -indices[2], drop = FALSE]
 
       ## Precision matrix: re-derived from new_M/new_S (already consistent
       ## with the merge), not hand-edited from the parent's Omegaq -- see

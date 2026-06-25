@@ -45,8 +45,10 @@ NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30)
 NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
 ```
 
+### Refinement: try to enhance optimisation based on ICL shape
+
 ```{r refine}
-NB_prot_subtype$refine(trial_niter = 3)
+NB_prot_subtype$refine()
 NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
 ```
 

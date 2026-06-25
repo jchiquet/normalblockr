@@ -35,6 +35,20 @@ test_that("merge() decreases q by one and keeps every parameter conformable", {
   expect_equal(dim(merged_model$model_par$Omegaq), c(merged_model$q, merged_model$q))
 })
 
+test_that("merge() from q = 2 down to q = 1 does not error (R's drop = TRUE default would collapse the relevant matrices to vectors/a scalar)", {
+  model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model$optimize(control = list(niter = 5, threshold = -1))
+
+  merged_model <- model$merge(c(1, 2))
+
+  expect_equal(merged_model$q, 1)
+  expect_equal(dim(merged_model$memberships), c(model$p, 1))
+  expect_equal(dim(merged_model$var_par$M), c(model$n, 1))
+  expect_length(merged_model$var_par$S, 1)
+  expect_equal(dim(merged_model$model_par$Omegaq), c(1, 1))
+  expect_no_error(merged_model$optimize(control = list(niter = 5, threshold = -1)))
+})
+
 test_that("split() then merge() round-trips back to the original q", {
   model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
