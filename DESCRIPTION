@@ -31,7 +31,6 @@ Imports:
     ggplot2,
     igraph,
     sbm,
-    ClustOfVar,
     corrplot,
     scales,
     MASS,

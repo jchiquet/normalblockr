@@ -573,44 +573,58 @@ NormalBlockBase <- R6::R6Class(
     ## (n x p) into an initial clustering of the p variables into self$q
     ## groups (a vector of length p with values in 1:q). One single table
     ## instead of one ad hoc private method per algorithm -- selectable via
-    ## NB_control(clustering_init = ...) ("kmeans"/"ward2"/"sbm"/"kmeansvar"/
-    ## "spectral"; "hclustvar" is reserved for the fallback below, not
-    ## user-selectable).
-    ## Benchmarked on two real datasets (inst/normal_block_models.qmd): no
-    ## single method dominates everywhere -- e.g. kmeansvar is unremarkable on
-    ## breast cancer proteomics data but wins decisively (20/24 q values) on
-    ## university webpages text data, hence it being offered as a genuine
-    ## alternative rather than dropping ClustOfVar from the dependencies.
+    ## NB_control(clustering_init = ...) ("ward2"/"kmeans"/"sbm"/"spectral").
+    ## Benchmarked on three real datasets
+    ## (inst/clustering_initialization_benchmark): no single method dominates
+    ## everywhere, but combining each method's BIC rank with how often its
+    ## deviance path violates the model's theoretical guarantee (deviance is
+    ## non-increasing in q) favors ward2 as the most reliable single default
+    ## -- kmeans has a marginally better raw BIC rank on average but violates
+    ## that monotonicity far more often and with much larger jumps, i.e. its
+    ## apparent edge partly reflects less reliable (V)EM convergence rather
+    ## than a systematically better fit. A 5th method, kmeansvar (from the
+    ## ClustOfVar package), was dropped after that same benchmark showed it
+    ## was both the worst-ranked and the least reliable by this monotonicity
+    ## measure on every dataset tested -- removing it also drops ClustOfVar
+    ## from the package's dependencies.
     ## spectral clusters the eigenvectors of cov(R) (top q, each row rescaled
     ## to unit L2 norm -- the classic Ng-Jordan-Weiss normalization) instead
     ## of the residuals themselves: the model's clustering target is the
     ## *covariance* structure, not the residual values, so an eigen-embedding
     ## of cov(R) is a closer match (and far cheaper than sbm). Without the
-    ## row normalization it is mediocre everywhere; with it, it ties
-    ## kmeansvar on university webpages at a fraction of the cost while
-    ## staying reasonable (never worst) on breast cancer.
+    ## row normalization it is mediocre everywhere; with it, it is
+    ## competitive on university webpages at a fraction of sbm's cost.
     clustering_methods = list(
-      kmeans    = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
-      ward2     = function(R, q) cutree(hclust(dist(1 - cor(R)), method = "ward.D2"), q),
-      sbm       = function(R, q) {
+      kmeans   = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
+      ward2    = function(R, q) {
+        ## cor() is NA for any pair involving a (near-)constant column (e.g.
+        ## a rare ZI variable with a single non-zero residual): treated as
+        ## "uncorrelated" (cor = 0, i.e. the neutral, maximal 1-cor distance)
+        ## rather than letting dist()/hclust() fail on NA input.
+        cor_R <- suppressWarnings(cor(R))
+        cor_R[is.na(cor_R)] <- 0
+        cutree(hclust(dist(1 - cor_R), method = "ward.D2"), q)
+      },
+      sbm      = function(R, q) {
         options <- list(verbosity = 0, exploreMin = q, exploreMax = q, plot = FALSE, nbCores = 1)
         mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)
         mySBM$setModel(q)
         mySBM$memberships
       },
-      kmeansvar = function(R, q) ClustOfVar::kmeansvar(X.quanti = R, init = q, nstart = 30)$cluster,
-      spectral  = function(R, q) {
+      spectral = function(R, q) {
         U <- eigen(cov(R), symmetric = TRUE)$vectors[, seq_len(q), drop = FALSE]
         U <- U / pmax(sqrt(rowSums(U^2)), 1e-10)
         kmeans(U, q, nstart = 30, iter.max = 50)$cluster
-      },
-      hclustvar = function(R, q) cutree(ClustOfVar::hclustvar(R), q)
+      }
     ),
 
     heuristic_clustering = function(R) {
       clustering <- private$clustering_methods[[private$clustering_approx]](R, self$q)
       if (length(unique(clustering)) < self$q) {
-        clustering <- private$clustering_methods$hclustvar(R, self$q)
+        ## ward2's hclust()/cutree() always yields exactly q groups (modulo
+        ## exact tied merge heights), making it a robust fallback whenever
+        ## the chosen heuristic collapses to fewer than q clusters.
+        clustering <- private$clustering_methods$ward2(R, self$q)
       }
       C <- as_indicator(clustering)
       if (min(colSums(C)) < 1) warning("Initialization failed to place elements in each cluster")

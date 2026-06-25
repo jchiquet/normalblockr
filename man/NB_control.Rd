@@ -12,7 +12,7 @@ NB_control(
   n_sparsity_penalties = 30,
   min_ratio = 0.01,
   fixed_tau = FALSE,
-  clustering_init = "kmeans",
+  clustering_init = "ward2",
   verbose = TRUE,
   heuristic = FALSE,
   noise_covariance = c("diagonal", "spherical")
@@ -38,19 +38,22 @@ are only used if penalties is not specified}
 useful for calls to fixed_q models in stability_selection}
 
 \item{clustering_init}{how to obtain the initial clustering of the q unknown
-blocks. Either the name of a clustering heuristic -- one of "kmeans"
-(default), "ward2", "sbm", "kmeansvar" (from the ClustOfVar package, like
-the internal "hclustvar" fallback used whenever the chosen method collapses
-to fewer than q clusters) or "spectral" (k-means on the row-normalized
+blocks. Either the name of a clustering heuristic -- one of "ward2"
+(default), "kmeans", "sbm" or "spectral" (k-means on the row-normalized
 eigenvectors of cov(R), a cheap proxy for clustering the residuals'
 covariance structure rather than their values) -- or an actual clustering
 to use directly, as a vector of labels or a p x q indicator matrix. When q
 is unknown (a collection over several q values), can also be a list with
 one such heuristic name/clustering per q value. No single heuristic
-dominates on every dataset (see inst/normal_block_models.qmd for a
-benchmark); "kmeans" is the default because it was never the worst of the 5
-on either of the two benchmarked datasets, not because it ever won. When
-fitting a collection over several values of q
+dominates on every dataset (see
+inst/clustering_initialization_benchmark for a benchmark); "ward2" is the
+default because, combining each method's BIC rank with how often its
+deviance path violates the model's theoretical guarantee (deviance should
+be non-increasing in q) as a measure of how reliably it lets the (V)EM
+converge, it gives the best balance of the two -- not because it has the
+single best raw rank (kmeans does, marginally, but with far more and
+larger monotonicity violations). When fitting a collection over several
+values of q
 (`normal_block(blocks = <vector>)`, [NormalBlockUnknownQ],
 [NormalBlockUnknownQChangingSparsity]) with the heuristic name "sbm" (and no
 per-q list of explicit clusterings), a single SBM exploration runs over the
