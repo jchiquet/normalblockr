@@ -9,7 +9,10 @@ R6 class for a generic normal model
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{
-    \item{\code{Y}}{the matrix of responses}
+    \item{\code{Y}}{the matrix of responses (rescaled column-wise if `scale = TRUE`)}
+
+    \item{\code{Y_scale}}{the per-column standard deviation Y was divided by (all
+1's if `scale = FALSE`)}
 
     \item{\code{X}}{the matrix of covariates}
 
@@ -53,7 +56,7 @@ R6 class for a generic normal model
   Create a new [`NormalBlockData`] object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockData$new(Y, X, X0 = NULL, formula = NULL)}
+    \preformatted{NormalBlockData$new(Y, X, X0 = NULL, formula = NULL, scale = TRUE)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -63,6 +66,9 @@ R6 class for a generic normal model
       \item{\code{X}}{design matrix (called X in the model).}
       \item{\code{X0}}{zero-inflation design matrix, if applicable.}
       \item{\code{formula}}{describes the relationship between Y and X, useful if not all of X's covariates should be used.}
+      \item{\code{scale}}{whether to rescale each column of Y by its own standard
+deviation (no centering). Default TRUE -- see the class-level
+documentation for the rationale and its limits.}
     }
     \if{html}{\out{</div>}}
   }

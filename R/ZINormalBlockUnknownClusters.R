@@ -21,7 +21,7 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
     #' @param control structured list of more specific parameters
     #' @return A new [`ZINormalBlockUnknownClusters`] object
     initialize = function(data, q, sparsity = 0, control = NB_control()) {
-      super$initialize(data, q, sparsity, control)
+      super$initialize(data, q, sparsity, control, zero_inflation = TRUE)
       self$fixed_tau  <- control$fixed_tau
     }
   ),
@@ -38,7 +38,7 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
       zi_diag <- private$zi_diag_normal_inference()
       if (anyNA(private$C))
         private$C <- private$heuristic_clustering(zi_diag$R)
-      private$C <- check_one_boundary(check_zero_boundary(private$C))
+      private$C <- clip_probabilities(private$C)
       Sigmaq <- private$heuristic_Sigmaq_from_Sigma(cov(zi_diag$R))
       Omegaq <- private$get_Omegaq(Sigmaq)
       list(B = zi_diag$B, dm1 = zi_diag$dm1, Omegaq = Omegaq,
@@ -50,7 +50,10 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
     ## Methods for integrated inference ------------------------
 
     EM_initialize = function() {
-      c(private$get_heuristic_parameters(),  list(
+      if (private$warm_started) {
+        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq, kappa = private$kappa,
+             alpha = private$alpha, C = private$C, M = private$M, S = private$S)
+      } else c(private$get_heuristic_parameters(),  list(
           M = matrix(rep(0, self$n * self$q), nrow = self$n),
           S = matrix(rep(0.1, self$n * self$q), nrow = self$n)
         )
@@ -100,7 +103,7 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
       } else {res <- NA}
       res
     },
-    #' @field fitted Y values predicted by the model Y values predicted by the model
+    #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
       if (private$approx) {
         res <- self$data$X %*% private$B
@@ -108,10 +111,10 @@ ZINormalBlockUnknownClusters <- R6::R6Class(
         res <- self$data$X %*% private$B + private$M %*% t(private$C)
       }
       res <- res * self$data$zeros_bar
-      res
+      private$rescale_to_original(res)
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function(value)
+    who_am_I = function()
     {paste("zero-inflated", private$res_covariance, "normal-block model with", self$q, "unknown blocks")}
   )
 )

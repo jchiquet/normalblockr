@@ -30,11 +30,24 @@ NormalBlockUnknownQ <- R6::R6Class(
       self$control <- control
       self$control$zero_inflation <- zero_inflation
 
+      ## A single wide SBM exploration over the whole q_list range visits
+      ## every intermediate block count on its way there, so it gives a
+      ## clustering for every q in q_list at a fraction of the cost of letting
+      ## each model run its own independent exploration (clustering_init =
+      ## "sbm" otherwise repeats the explore step once per q -- see
+      ## sbm_path_for_collection()/sbm_clustering_path() in R/utils.R).
+      sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
+
       # instantiates an NormalBlockUnknownClusters model for each q in nb_blocks
       this_control <- control
       self$models <- map(rank(q_list),
           function(r) {
-            this_control$clustering_init <- control$clustering_init[[r]]
+            this_control$clustering_init <-
+              if (!is.null(sbm_path)) sbm_path[[as.character(q_list[r])]]
+              ## a list means one explicit clustering per q; anything else
+              ## (a heuristic name, or NULL) applies identically to every q
+              else if (is.list(control$clustering_init)) control$clustering_init[[r]]
+              else control$clustering_init
             model <- get_model(mydata,
                                q_list[r],
                                sparsity = sparsity,
@@ -67,19 +80,8 @@ NormalBlockUnknownQ <- R6::R6Class(
     #' @param criteria vector of characters. The criteria to plot in `c("deviance", "BIC", "ICL")`. Defaults to all of them.
     #' @return a [`ggplot2::ggplot`] graph
     plot = function(criteria = c("deviance", "ICL", "BIC", "EBIC")) {
-      vlines <- sapply(intersect(criteria, c("ICL")) , function(crit) self$get_best_model(crit)$q)
       stopifnot(!anyNA(self$criteria[criteria]))
-
-      dplot <- self$criteria %>%
-        dplyr::select(dplyr::all_of(c("q", criteria))) %>%
-        tidyr::gather(key = "criterion", value = "value", -q) %>%
-        dplyr::group_by(criterion)
-      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = q, y = value, group = criterion, colour = criterion)) +
-        ggplot2::geom_line() + ggplot2::geom_point() +
-        ggplot2::ggtitle(label    = "Model selection criteria",
-                         subtitle = "Lower is better" ) +
-        ggplot2::theme_bw() + ggplot2::geom_vline(xintercept = vlines, linetype = "dashed", alpha = 0.25)
-      p
+      private$plot_criteria_path("q", criteria, "ICL")
     }
   ),
 
@@ -88,8 +90,8 @@ NormalBlockUnknownQ <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field q_list number of blocks
-    q_list = function(value) map_dbl(self$models, "q"),
+    q_list = function() map_dbl(self$models, "q"),
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(value){paste0(self$control$noise_covariance, " normal-block model with unknown q")}
+    who_am_I  = function(){paste0(self$control$noise_covariance, " normal-block model with unknown q")}
   )
 )

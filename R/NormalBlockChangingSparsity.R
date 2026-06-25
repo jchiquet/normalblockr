@@ -62,6 +62,28 @@ NormalBlockChangingSparsity <- R6::R6Class(
       private$progress_label <- "penalty"
     },
 
+    #' @description optimizes every model in the sparsity path, warm-starting
+    #' each one (after the first) from the previous, adjacent penalty's
+    #' converged parameters (see [NormalBlockBase]'s `warm_start_from()`)
+    #' instead of re-deriving everything from the heuristic clustering, the
+    #' way the generic [NormalBlockCollection] `optimize()` would. `blocks`
+    #' (hence q) is fixed across the whole path, only the sparsity penalty
+    #' changes, so the warm start is always between models of matching shape.
+    #' @param control optimization parameters (niter and threshold)
+    optimize = function(control = list(niter = 100, threshold = 1e-4, verbose = TRUE)) {
+      previous <- NULL
+      self$models <- lapply(self$models, function(model) {
+        if (control$verbose)
+          cat("\t", private$progress_label, "=", model[[private$progress_field]], "          \r")
+        flush.console()
+        if (!is.null(previous)) model$warm_start_from(previous)
+        model$optimize(control)
+        previous <<- model
+        model
+      })
+      invisible(self)
+    },
+
     #' @description returns the NormalBlockKnownClusters model corresponding to given penalty
     #' @param sparsity sparsity penalty asked by user
     #' @return A NormalBlockKnownClusters (sparse) object with given value penalty
@@ -106,18 +128,8 @@ NormalBlockChangingSparsity <- R6::R6Class(
     #' @param log.x logical: should the x-axis be represented in log-scale? Default is `TRUE`.
     #' @return a [`ggplot`] graph
     plot = function(criteria = c("deviance", "BIC", "EBIC", "ICL"), log.x = TRUE) {
-      vlines <- sapply(intersect(criteria, c("BIC")) , function(crit) self$get_best_model(crit)$sparsity)
       stopifnot(!is.null(self$criteria[criteria]))
-
-      dplot <- self$criteria %>%
-        dplyr::select(dplyr::all_of(c("sparsity", criteria))) %>%
-        tidyr::gather(key = "criterion", value = "value", -sparsity) %>%
-        dplyr::group_by(criterion)
-      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = sparsity, y = value, group = criterion, colour = criterion)) +
-        ggplot2::geom_line() + ggplot2::geom_point() +
-        ggplot2::ggtitle(label    = "Model selection criteria",
-                         subtitle = "Lower is better" ) +
-        ggplot2::theme_bw() + ggplot2::geom_vline(xintercept = vlines, linetype = "dashed", alpha = 0.25)
+      p <- private$plot_criteria_path("sparsity", criteria, "BIC")
       if (log.x) p <- p + ggplot2::coord_trans(x = "log10")
       p
     },
@@ -192,9 +204,9 @@ NormalBlockChangingSparsity <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field q number of blocks
-    q = function(value) ifelse(is.matrix(private$blocks_), ncol(private$blocks_), private$blocks_),
+    q = function() ifelse(is.matrix(private$blocks_), ncol(private$blocks_), private$blocks_),
     #' @field blocks group matrix or number of blocks.
-    blocks = function(value) private$blocks_,
+    blocks = function() private$blocks_,
     #' @field sparsity list of sparsity penalties
     sparsity = function() private$sparsity_,
     #' @field sparsity_details list of information about model's penalties
@@ -220,7 +232,7 @@ NormalBlockChangingSparsity <- R6::R6Class(
       stability
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(value){
+    who_am_I  = function(){
       paste0("Collection of ",
              ifelse(self$control$zero_inflation, " zero-inflated ", ""),
                     self$control$noise_covariance, " normal-block models with ",

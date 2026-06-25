@@ -67,12 +67,36 @@ normal_block <- function(data,
 #' @param min_ratio ratio for sparsity between max penalty (0 edge penalty) and min penalty to test
 #' @param fixed_tau whether tau should be fixed at clustering_init during optimization
 #' useful for calls to fixed_q models in stability_selection
-#' @param clustering_init proposal of initial value for clustering, when q is
-#' unknown, can be a list with one clustering for each q value
+#' @param clustering_init how to obtain the initial clustering of the q unknown
+#' blocks. Either the name of a clustering heuristic -- one of "ward2"
+#' (default), "kmeans", "sbm" or "spectral" (k-means on the row-normalized
+#' eigenvectors of cov(R), a cheap proxy for clustering the residuals'
+#' covariance structure rather than their values) -- or an actual clustering
+#' to use directly, as a vector of labels or a p x q indicator matrix. When q
+#' is unknown (a collection over several q values), can also be a list with
+#' one such heuristic name/clustering per q value. No single heuristic
+#' dominates on every dataset (see
+#' inst/clustering_initialization_benchmark for a benchmark); "ward2" is the
+#' default because, combining each method's BIC rank with how often its
+#' deviance path violates the model's theoretical guarantee (deviance should
+#' be non-increasing in q) as a measure of how reliably it lets the (V)EM
+#' converge, it gives the best balance of the two -- not because it has the
+#' single best raw rank (kmeans does, marginally, but with far more and
+#' larger monotonicity violations). When fitting a collection over several
+#' values of q
+#' (`normal_block(blocks = <vector>)`, [NormalBlockUnknownQ],
+#' [NormalBlockUnknownQChangingSparsity]) with the heuristic name "sbm" (and no
+#' per-q list of explicit clusterings), a single SBM exploration runs over the
+#' whole range of q and is reused for every model in the collection instead of
+#' repeating an independent (and increasingly costly) exploration for each q;
+#' any q its own model-selection does not reach falls back to a cheap "ward2"
+#' clustering rather than a dedicated (and potentially expensive) SBM call.
 #' @param verbose telling if information should be printed during optimization
 #' @param noise_covariance variance can be variable specific ("diagonal", the default) or common ("spherical")
-#' @param heuristic weather to use heuristic approach or not. Default is FALSE
-#' @param clustering_approx to use for clustering with heuristic inference method
+#' @param heuristic whether to use the heuristic approach (moment-based, no (V)EM
+#' recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no
+#' likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
+#' are all `NA` on the resulting model.
 #' @export
 NB_control <- function(
     niter                = 100,
@@ -82,14 +106,17 @@ NB_control <- function(
     n_sparsity_penalties = 30,
     min_ratio            = 0.01,
     fixed_tau            = FALSE,
-    clustering_init      = NULL,
+    clustering_init      = "ward2",
     verbose              = TRUE,
     heuristic            = FALSE,
-    noise_covariance     = c("diagonal", "spherical"),
-    clustering_approx    = c("ward2", "kmeans", "sbm")) {
+    noise_covariance     = c("diagonal", "spherical")) {
 
   if (!is.null(sparsity_weights))
     stopifnot(all(is.matrix(sparsity_weights), isSymmetric(sparsity_weights)))
+  if (is.character(clustering_init) && length(clustering_init) == 1) {
+    stopifnot("clustering_init, when given as a single string, must name a known heuristic ('kmeans', 'ward2', 'sbm' or 'spectral') -- otherwise pass an actual clustering (a vector of labels, a p x q indicator matrix, or a list of either for a collection over several q values)" =
+                clustering_init %in% c("kmeans", "ward2", "sbm", "spectral"))
+  }
 
   structure(list(niter                = niter                ,
                  threshold            = threshold            ,
@@ -101,8 +128,7 @@ NB_control <- function(
                  clustering_init      = clustering_init      ,
                  verbose              = verbose              ,
                  heuristic            = heuristic            ,
-                 noise_covariance     = match.arg(noise_covariance),
-                 clustering_approx    = match.arg(clustering_approx)))
+                 noise_covariance     = match.arg(noise_covariance)))
 }
 
 

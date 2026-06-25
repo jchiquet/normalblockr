@@ -31,7 +31,7 @@ generate_normal_block_data(
 
 \item{omega_structure}{the structure of the graph on which the precision matrix between groups is built. Can be a symmetric matrix with q rows/columns or a character picked in "erdos-renyi", "preferential_attachment", "community" in which case a graph is drawn with sensible generation parameters. See generate_precision_matrix for details.}
 
-\item{u_v}{two-size vector of positive numbers u and v controlling the generation of the precision matrix Omega: u is the off-diagonal elements of the precision matrix, controlling the magnitude of partial correlations with v a positive number being added to the diagonal elements of the precision matrix. The default value is c(0.3, 0.1).}
+\item{u_v}{two-size vector of positive numbers v and u controlling the generation of the precision matrix Omega: v scales the off-diagonal elements of the precision matrix (magnitude of partial correlations), and u is a positive number added to the diagonal elements to ensure positive-definiteness. The default value is c(0.3, 0.1).}
 
 \item{SNR}{Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desried SNR.}
 

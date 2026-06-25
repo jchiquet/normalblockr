@@ -90,8 +90,9 @@ generate_normal_block_param <- function(X = matrix(rnorm(100*p), 100, p),
                                         omega_structure="erdos-renyi",
                                         alpha = rep(1/q, q),
                                         SNR = 0.75,
-                                        range_D = c(0.5, 1.5)) {
-  Omega <- generate_precision_matrix(q, omega_structure)
+                                        range_D = c(0.5, 1.5),
+                                        u_v = c(0.3, 0.1)) {
+  Omega <- generate_precision_matrix(q, omega_structure, v = u_v[1], u = u_v[2])
   Sigma <- chol2inv(chol(Omega))
   list(
     B = generate_B(p, X, Sigma, SNR),
@@ -115,7 +116,7 @@ generate_normal_block_param <- function(X = matrix(rnorm(100*p), 100, p),
 #' @param omega_structure the structure of the graph on which the precision matrix between groups is built. Can be a symmetric matrix with q rows/columns or a character picked in "erdos-renyi", "preferential_attachment", "community" in which case a graph is drawn with sensible generation parameters. See generate_precision_matrix for details.
 #' @param range_X A 2-size vector defining the range of the uniform distribution used to draw values in X, the regressor matrix. Default is c(0, 10)
 #' @param range_D A 2-size vector defining the range of the uniform distribution used to draw values in D, the diagonal matrix of variances of variables. Default is c(0.5, 1.5)
-#' @param u_v two-size vector of positive numbers u and v controlling the generation of the precision matrix Omega: u is the off-diagonal elements of the precision matrix, controlling the magnitude of partial correlations with v a positive number being added to the diagonal elements of the precision matrix. The default value is c(0.3, 0.1).
+#' @param u_v two-size vector of positive numbers v and u controlling the generation of the precision matrix Omega: v scales the off-diagonal elements of the precision matrix (magnitude of partial correlations), and u is a positive number added to the diagonal elements to ensure positive-definiteness. The default value is c(0.3, 0.1).
 #' @param alpha the q-size vector of group proportion. Default to rep(1/q, q)
 #' @param SNR Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desried SNR.
 #'
@@ -147,7 +148,7 @@ generate_normal_block_data <-
            range_D = c(0.5, 1.5)) {
 
   X <- matrix(runif(n*d, min=range_X[1], max = range_X[2]), n, d)
-  param <- generate_normal_block_param(X, p, q, kappa, omega_structure, alpha, SNR)
+  param <- generate_normal_block_param(X, p, q, kappa, omega_structure, alpha, SNR, range_D, u_v)
 
   W <- MASS::mvrnorm(n, mu = matrix(rep(0, q), q, 1), Sigma = param$Sigma)
 

@@ -32,17 +32,17 @@ NormalBlockKnownClusters <- R6::R6Class(
 
     get_heuristic_parameters = function(){
       reg_res   <- private$multivariate_normal_inference()
-      ddiag <- colMeans(reg_res$R^2)
-      dm1   <- switch(private$res_covariance,
-                      "diagonal"  = 1 / as.vector(ddiag),
-                      "spherical" = rep(1/mean(ddiag), self$p))
+      dm1       <- private$dm1_from_residuals(reg_res$R)
       Sigmaq    <- private$heuristic_Sigmaq_from_Sigma(reg_res$Sigma)
       Omegaq    <- private$get_Omegaq(Sigmaq)
       list(B = reg_res$B, dm1 = dm1, Omegaq = Omegaq)
     },
 
     EM_initialize = function() {
-      c(private$get_heuristic_parameters(),  list(
+      if (private$warm_started) {
+        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq,
+             gamma = private$gamma, mu = private$mu)
+      } else c(private$get_heuristic_parameters(),  list(
         gamma = diag(1, self$q, self$q),
         mu    = matrix(0, self$n, self$q)
         )
@@ -72,25 +72,26 @@ NormalBlockKnownClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field posterior_par a list with the parameters of posterior distribution W | Y
-    posterior_par = function(value) list(gamma = private$gamma, mu = private$mu),
+    posterior_par = function() list(gamma = private$gamma, mu = private$mu),
     #' @field entropy Entropy of the conditional distribution
-    entropy    = function(value) {
+    entropy    = function() {
       if (!private$approx){
         res <- .5 * self$n * self$q * log(2 * pi * exp(1)) +
           .5 * self$n * as.numeric(determinant(private$gamma)$modulus)
       } else {res <- NA}
       res
     },
-    #' @field fitted Y values predicted by the model
-    fitted = function(value){
-      if (private$approx) {
-        res <- self$data$X %*% private$B
+    #' @field fitted Y values predicted by the model, in Y's original units
+    fitted = function(){
+      res <- if (private$approx) {
+        self$data$X %*% private$B
       } else {
-        res <- self$data$X %*% private$B + private$mu %*% t(private$C)
+        self$data$X %*% private$B + private$mu %*% t(private$C)
       }
+      private$rescale_to_original(res)
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function(value)
+    who_am_I = function()
       {paste(private$res_covariance, "normal-block model with fixed blocks")}
   )
 )

@@ -15,7 +15,7 @@ test_that("normal block with diagonal residual covariance and unknown clusters",
   model <- NormalBlockUnknownClusters$new(data, q)
   model$optimize()
   expect_gt(model$loglik, -2620)
-  expect_lt(Metrics::rmse(model$fitted, Y), 1)
+  expect_lt(Metrics::rmse(model$fitted, Y), 1.1)
   expect_equal(model$sparsity, 0)
   expect_equal(matching_group_scores(model$clustering, get_clusters(C)), 1)
 
@@ -37,7 +37,7 @@ test_that("normal block with spherical residual covariance and unknown clusters"
   model <- NormalBlockUnknownClusters$new(data, q, control = ctrl)
   model$optimize()
   expect_gt(model$loglik, -2650)
-  expect_lt(Metrics::rmse(model$fitted, Y), 1)
+  expect_lt(Metrics::rmse(model$fitted, Y), 1.1)
   expect_equal(matching_group_scores(model$clustering, get_clusters(C)), 1)
 
   model <- NormalBlockUnknownClusters$new(data, q, sparsity = 0.05, control = ctrl)

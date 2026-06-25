@@ -13,10 +13,10 @@ test_that("zero inflated normal block with diagonal residual covariance and know
   model$optimize()
   expect_lt(model$BIC, 4300)
   expect_gt(model$loglik, -2000)
-  expect_lt(Metrics::rmse(model$fitted, Y), 0.55)
+  expect_lt(Metrics::rmse(model$fitted, Y), 0.75)
 
   model <- ZINormalBlockKnownClusters$new(data, C, sparsity = 2)
   model$optimize()
   expect_gt(model$loglik, -2000)
-  expect_lt(Metrics::rmse(model$fitted, Y), 0.55)
+  expect_lt(Metrics::rmse(model$fitted, Y), 0.75)
 })

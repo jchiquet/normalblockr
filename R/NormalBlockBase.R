@@ -17,8 +17,12 @@ NormalBlockBase <- R6::R6Class(
     #' @param q number of block/cluster
     #' @param sparsity sparsity penalty on the network density
     #' @param control structured list of more specific parameters, to generate with NB_control
+    #' @param zero_inflation whether the concrete subclass models zero-inflation;
+    #' set by the ZI subclasses themselves, not meant to be set by the end user.
+    #' When `FALSE`, the (costly) zero-inflation probability fit (`kappa`/`B0`)
+    #' is skipped entirely, since it would otherwise never be used downstream.
     #' @return A new [`NormalBlockBase`] object
-    initialize = function(data, q, sparsity = 0, control = NB_control()) {
+    initialize = function(data, q, sparsity = 0, control = NB_control(), zero_inflation = FALSE) {
       self$data <- data
 
       stopifnot("There cannot be more blocks than there are entities to cluster" = q <= ncol(self$data$Y))
@@ -30,14 +34,7 @@ NormalBlockBase <- R6::R6Class(
       private$optimizer <- ifelse(control$heuristic,
                                   private$heuristic_optimize,
                                   private$EM_optimize)
-      ## pointer to the chosen clustering function for heuristic approach
       private$approx <- control$heuristic
-      private$clustering_approx <-
-        switch(control$clustering_approx,
-               "kmeans"    = private$heuristic_cluster_residuals_kmeans,
-               "ward2"     = private$heuristic_cluster_sigma_ward2,
-               "sbm"       = private$heuristic_cluster_sigma_sbm
-        )
 
       ## penalty mask
       private$sparsity_ <- sparsity
@@ -48,8 +45,15 @@ NormalBlockBase <- R6::R6Class(
       }
       private$weights <- weights
 
+      ## control$clustering_init is either the name of a clustering heuristic
+      ## (a single string, deferred to heuristic_clustering(), looked up in
+      ## private$clustering_methods) or an actual clustering to use directly
+      ## (a vector of labels or a p x q indicator matrix).
       cl0 <- control$clustering_init
-      if (!is.null(cl0)) {
+      if (is.character(cl0) && length(cl0) == 1) {
+        private$clustering_approx <- cl0
+        private$C <- matrix(NA, self$data$n, q)
+      } else if (!is.null(cl0)) {
         if (!is.vector(cl0) & !is.matrix(cl0)) stop("Labels must be encoded in vector of labels or indicator matrix")
         if (is.vector(cl0)) {
           if (any(cl0 < 1 | cl0 > q))
@@ -72,22 +76,29 @@ NormalBlockBase <- R6::R6Class(
         private$C <- matrix(NA, self$data$n, q)
       }
 
-      if(self$data$npY < self$n * self$p){
-        B0_list <- lapply(1:self$data$p,
-                          f <- function(j){
-                            df <- data.frame("zeros" = data$zeros[,j], self$data$X0)
-                            model <- glm(zeros ~ 0 + ., family=binomial(link = "logit"), data=df)
-                            return(model$coefficients)})
-        private$B0 <- t(sapply(B0_list, unlist))
-      }else{
-        private$B0 <- matrix(rep(-Inf, self$data$p * self$data$d0), nrow = self$data$d0)
+      ## Zero-inflation probabilities (kappa/B0) and the resulting fixed
+      ## log-likelihood contribution (ZI_cond_mean) are only ever read by the
+      ## ZI subclasses (see zi_diag_normal_inference(), and the ZI EM_optimize()/
+      ## fitted/model_par methods) -- skip the p logistic regressions entirely
+      ## for plain (non zero-inflated) models, where they would just be wasted
+      ## work (private$kappa/B0/ZI_cond_mean stay at their NA default).
+      if (zero_inflation) {
+        if(self$data$npY < self$n * self$p){
+          B0_list <- lapply(1:self$data$p,
+                            f <- function(j){
+                              df <- data.frame("zeros" = data$zeros[,j], self$data$X0)
+                              model <- glm(zeros ~ 0 + ., family=binomial(link = "logit"), data=df)
+                              return(model$coefficients)})
+          private$B0 <- t(sapply(B0_list, unlist))
+        }else{
+          private$B0 <- matrix(rep(-Inf, self$data$p * self$data$d0), nrow = self$data$d0)
+        }
+
+        private$kappa <- apply(self$data$X0 %*% private$B0, MARGIN = c(1,2), FUN = sigmoid)
+        private$ZI_cond_mean <-
+          sum(xlogy(data$zeros, private$kappa)) +
+          sum(xlogy(data$zeros_bar, 1 - private$kappa))
       }
-
-      private$kappa <- apply(self$data$X0 %*% private$B0, MARGIN = c(1,2), FUN = sigmoid)
-      private$ZI_cond_mean <-
-        sum(xlogy(data$zeros, private$kappa)) +
-        sum(xlogy(data$zeros_bar, 1 - private$kappa))
-
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -138,6 +149,37 @@ NormalBlockBase <- R6::R6Class(
     optimize = function(control = list(niter = 100, threshold = 1e-4)) {
       optim_out <- private$optimizer(control)
       do.call(self$update, optim_out)
+    },
+
+    #' @description Seed this model's starting parameters from another,
+    #' already-optimized model with the same q, instead of the heuristic
+    #' clustering-derived values set at construction time. Used by
+    #' [NormalBlockChangingSparsity] to warm-start each penalty in a sparsity
+    #' path from the previous (adjacent) one's converged solution -- adjacent
+    #' penalties along a sorted path usually have similar optima, so this
+    #' typically needs far fewer EM iterations than starting cold each time
+    #' (the same rationale as warm-starting in glmnet/glassoFast's own
+    #' regularization paths). `B0`/`kappa` (zero-inflation) are deliberately
+    #' left untouched: they depend only on the data, not on sparsity/blocks,
+    #' so they are already set correctly and independently on every model.
+    #' @param other a [NormalBlockBase] object, already optimized
+    #' @return Update the current object in place with `other`'s parameters
+    warm_start_from = function(other) {
+      stopifnot("warm_start_from() requires both models to have the same q" = self$q == other$q)
+      args <- other$model_par
+      args$B0 <- NULL
+      if (!is.null(other$var_par)) {
+        args$C     <- other$var_par$tau
+        args$M     <- other$var_par$M
+        args$S     <- other$var_par$S
+        args$alpha <- colMeans(other$var_par$tau)
+      } else if (!is.null(other$posterior_par)) {
+        args$gamma <- other$posterior_par$gamma
+        args$mu    <- other$posterior_par$mu
+      }
+      do.call(self$update, args)
+      private$warm_started <- TRUE
+      invisible(self)
     },
 
     #' @description Create a clone of the current [`NormalBlockBase`] object after splitting cluster `cl`
@@ -421,9 +463,15 @@ NormalBlockBase <- R6::R6Class(
     weights           = NA, # sparsity weights specific to each pairs of group
     res_covariance    = NA, # shape of the residuals covariance (diagonal or spherical)
     approx            = NA, # use approximation/heuristic approach or not
-    clustering_approx = NA, # clustering function in the heuristic approach
+    clustering_approx = NA, # name of the clustering heuristic, key into clustering_methods
     ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed)
     niter             = NA, # number of EM iterations required by the inference, if applicable
+    warm_started      = FALSE, # set by warm_start_from(): tells EM_initialize() to reuse
+                                # the current B/dm1/Omegaq (and C/M/S/alpha or gamma/mu)
+                                # instead of (re-)deriving them from the heuristic clustering.
+                                # Deliberately NOT inferred from "are these fields non-NA",
+                                # which would also be true for split()/merge() clones (those
+                                # keep their own, different, already-tested initialization path).
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated (V)EM inference --------------
@@ -455,48 +503,55 @@ NormalBlockBase <- R6::R6Class(
     ## Methods for heuristic inference----------------------
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    ## Converts a per-variable quantity from the internal fitting scale
+    ## (data$Y, rescaled column-wise by NormalBlockData(scale = TRUE)) back to
+    ## Y's original units. Y_scaled = Y_original / Y_scale, so an additive
+    ## quantity like B or a fitted value picks up one factor of Y_scale
+    ## (power = 1: X_original = Y_scale * X_scaled), while dm1 = 1/variance
+    ## picks up Y_scale^-2 (Var(Y_original) = Y_scale^2 * Var(Y_scaled), so
+    ## dm1_original = dm1_scaled / Y_scale^2, power = -2). Used by the public
+    ## B/dm1 bindings and by fitted() in the 4 leaf classes -- model_par$B/
+    ## model_par$dm1 stay on the internal scale unchanged, since
+    ## warm_start_from() copies them directly into another model's private
+    ## state and must not have them silently rescaled.
+    rescale_to_original = function(M, power = 1) {
+      factor <- self$data$Y_scale^power
+      if (is.matrix(M)) M * matrix(factor, nrow(M), ncol(M), byrow = TRUE) else M * factor
+    },
+
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## MLE of MV Normal distribution
     multivariate_normal_inference = function(){
       B     <- self$data$XtXm1 %*% self$data$XtY
-      R     <- self$data$Y - self$data$X %*% B
+      R     <- ols_residuals(self$data)
       Sigma <- cov(R)
       list(B = B, R = R, Sigma = Sigma)
     },
 
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## MLE of ZI Diagonal Normal distribution
-    zi_diag_normal_inference = function(){
-      B     <- self$data$XtXm1 %*% self$data$XtY
-      dm1   <- self$data$nY / colSums(self$data$zeros_bar * (self$data$Y - self$data$X %*% B)^2)
-      for (i in 1:3) { # a couple of iterates is enough
-        B     <- private$zi_diag_normal_optim_B(dm1)
-        dm1   <- self$data$nY / colSums(self$data$zeros_bar * (self$data$Y - self$data$X %*% B)^2)
-      }
-      R <- self$data$zeros_bar * (self$data$Y - self$data$X %*% B)
-      list(B = B, dm1 = dm1, kappa = private$kappa, R = R)
+    ## Per-variable inverse variance from a residual matrix, respecting
+    ## res_covariance ("diagonal": one dm1 per variable; "spherical": a
+    ## single shared value repeated p times). Shared by
+    ## NormalBlockKnownClusters/NormalBlockUnknownClusters's
+    ## get_heuristic_parameters() (previously duplicated verbatim in both).
+    ## ddiag is floored away from exact zero: a variable with an
+    ## (near-)constant residual otherwise produces dm1 = Inf (e.g. a
+    ## variable observed at very few points relative to X's degrees of
+    ## freedom -- see zi_weighted_fit() in R/utils.R for the same guard on
+    ## the zero-inflation side).
+    dm1_from_residuals = function(R) {
+      ddiag <- pmax(colMeans(R^2), .Machine$double.eps)
+      switch(private$res_covariance,
+             "diagonal"  = 1 / as.vector(ddiag),
+             "spherical" = rep(1 / mean(ddiag), self$p))
     },
 
-    ## Closed-form weighted least squares solve for B: the zero-inflation
-    ## mask makes the weight matrix vary by both row and column, so each
-    ## column of B is solved independently (mirrors nb_optim::solve_wls in
-    ## src/zi_closed_form_solvers.h -- no iterative optimizer is needed since
-    ## the objective is exactly quadratic in B). Uses a pseudo-inverse rather
-    ## than solve() because, e.g. with a one-hot design and enough zero
-    ## inflation, a whole design level can be all-zero for some variable,
-    ## making XtWX exactly singular; ginv() falls back to the minimum-norm
-    ## solution instead of erroring (mirroring arma::solve()'s automatic
-    ## pinv fallback on the C++ side).
-    zi_diag_normal_optim_B = function(dm1) {
-      DM1 <- matrix(dm1, self$data$n, self$data$p, byrow = TRUE) * self$data$zeros_bar
-      B <- matrix(0, self$d, self$p)
-      for (j in seq_len(self$data$p)) {
-        w <- DM1[, j]
-        XtWX <- crossprod(self$data$X, self$data$X * w)
-        XtWy <- crossprod(self$data$X, self$data$Y[, j] * w)
-        B[, j] <- MASS::ginv(XtWX) %*% XtWy
-      }
-      B
+    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ## MLE of ZI Diagonal Normal distribution
+    ## (the weighted-least-squares fit itself lives in zi_weighted_fit(),
+    ## R/utils.R, shared with the collection-level zi_residuals())
+    zi_diag_normal_inference = function(){
+      fit <- zi_weighted_fit(self$data)
+      list(B = fit$B, dm1 = fit$dm1, kappa = private$kappa, R = fit$R)
     },
 
     heuristic_optimize = function(control){
@@ -514,31 +569,66 @@ NormalBlockBase <- R6::R6Class(
       Sigma_q
     },
 
+    ## Registry of clustering heuristics used to turn the OLS/ZI residuals R
+    ## (n x p) into an initial clustering of the p variables into self$q
+    ## groups (a vector of length p with values in 1:q). One single table
+    ## instead of one ad hoc private method per algorithm -- selectable via
+    ## NB_control(clustering_init = ...) ("ward2"/"kmeans"/"sbm"/"spectral").
+    ## Benchmarked on three real datasets
+    ## (inst/clustering_initialization_benchmark): no single method dominates
+    ## everywhere, but combining each method's BIC rank with how often its
+    ## deviance path violates the model's theoretical guarantee (deviance is
+    ## non-increasing in q) favors ward2 as the most reliable single default
+    ## -- kmeans has a marginally better raw BIC rank on average but violates
+    ## that monotonicity far more often and with much larger jumps, i.e. its
+    ## apparent edge partly reflects less reliable (V)EM convergence rather
+    ## than a systematically better fit. A 5th method, kmeansvar (from the
+    ## ClustOfVar package), was dropped after that same benchmark showed it
+    ## was both the worst-ranked and the least reliable by this monotonicity
+    ## measure on every dataset tested -- removing it also drops ClustOfVar
+    ## from the package's dependencies.
+    ## spectral clusters the eigenvectors of cov(R) (top q, each row rescaled
+    ## to unit L2 norm -- the classic Ng-Jordan-Weiss normalization) instead
+    ## of the residuals themselves: the model's clustering target is the
+    ## *covariance* structure, not the residual values, so an eigen-embedding
+    ## of cov(R) is a closer match (and far cheaper than sbm). Without the
+    ## row normalization it is mediocre everywhere; with it, it is
+    ## competitive on university webpages at a fraction of sbm's cost.
+    clustering_methods = list(
+      kmeans   = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
+      ward2    = function(R, q) {
+        ## cor() is NA for any pair involving a (near-)constant column (e.g.
+        ## a rare ZI variable with a single non-zero residual): treated as
+        ## "uncorrelated" (cor = 0, i.e. the neutral, maximal 1-cor distance)
+        ## rather than letting dist()/hclust() fail on NA input.
+        cor_R <- suppressWarnings(cor(R))
+        cor_R[is.na(cor_R)] <- 0
+        cutree(hclust(dist(1 - cor_R), method = "ward.D2"), q)
+      },
+      sbm      = function(R, q) {
+        options <- list(verbosity = 0, exploreMin = q, exploreMax = q, plot = FALSE, nbCores = 1)
+        mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)
+        mySBM$setModel(q)
+        mySBM$memberships
+      },
+      spectral = function(R, q) {
+        U <- eigen(cov(R), symmetric = TRUE)$vectors[, seq_len(q), drop = FALSE]
+        U <- U / pmax(sqrt(rowSums(U^2)), 1e-10)
+        kmeans(U, q, nstart = 30, iter.max = 50)$cluster
+      }
+    ),
+
     heuristic_clustering = function(R) {
-      clustering <- private$clustering_approx(R)
+      clustering <- private$clustering_methods[[private$clustering_approx]](R, self$q)
       if (length(unique(clustering)) < self$q) {
-        clustering <- cutree(ClustOfVar::hclustvar(R), self$q)
+        ## ward2's hclust()/cutree() always yields exactly q groups (modulo
+        ## exact tied merge heights), making it a robust fallback whenever
+        ## the chosen heuristic collapses to fewer than q clusters.
+        clustering <- private$clustering_methods$ward2(R, self$q)
       }
       C <- as_indicator(clustering)
       if (min(colSums(C)) < 1) warning("Initialization failed to place elements in each cluster")
       C
-    },
-
-    heuristic_cluster_sigma_ward2 = function(R){
-      hc <- hclust(dist(1 - cor(R)), method = "ward.D2")
-      cutree(hc, self$q)
-    },
-
-    heuristic_cluster_sigma_sbm = function(R){
-      options <- list(verbosity=0, exploreMin=self$q, exploreMax=self$q,
-                      verbosity=0, plot=FALSE, nbCores=1)
-      mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)
-      mySBM$setModel(self$q)
-      mySBM$memberships
-    },
-
-    heuristic_cluster_residuals_kmeans = function(R) {
-      kmeans(t(R), self$q, nstart = 30, iter.max = 50)$cluster
     }
 
   ),
@@ -548,7 +638,7 @@ NormalBlockBase <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field inference_method inference procedure used (heuristic or integrated with EM)
-    inference_method = function(value) ifelse(private$approx, "heuristic", "integrated"),
+    inference_method = function() ifelse(private$approx, "heuristic", "integrated"),
     #' @field n number of samples
     n = function() self$data$n,
     #' @field p number of responses per sample
@@ -558,21 +648,37 @@ NormalBlockBase <- R6::R6Class(
     #' @field d0 number of zi variables (dimensions in X0)
     d0 = function() self$data$d0,
     #' @field q number of blocks
-    q = function(value) as.integer(ncol(private$C)),
+    q = function() as.integer(ncol(private$C)),
     #' @field n_edges number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)
-    n_edges  = function(value) sum(private$Omegaq[upper.tri(private$Omegaq, diag = FALSE)] != 0),
-    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix))
-    model_par = function(value) list(B = private$B, B0 = private$B0,
+    n_edges  = function() sum(private$Omegaq[upper.tri(private$Omegaq, diag = FALSE)] != 0),
+    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
+    model_par = function() list(B = private$B, B0 = private$B0,
                                      dm1 = private$dm1, Omegaq = private$Omegaq),
+    #' @field B_original regression coefficients (d x p), converted back to
+    #' Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
+    #' column-wise rescaling, if any). Use `model_par$B` instead for the
+    #' coefficients on the internal fitting scale.
+    B_original = function() private$rescale_to_original(private$B, power = 1),
+    #' @field dm1_original inverse residual variance per variable
+    #' (1 / Var(Y_j)), converted back to Y's original units. Use
+    #' `model_par$dm1` instead for the internal fitting scale. With
+    #' `noise_covariance = "spherical"`, `model_par$dm1` is a single value
+    #' repeated p times (one shared variance on the fitting scale); once
+    #' converted back per-variable, the p values returned here generally
+    #' differ from one another whenever Y's columns were rescaled by
+    #' different factors -- correctly so, since a single shared *scaled*
+    #' variance does not correspond to a single shared variance in the
+    #' original, heterogeneous-scale units.
+    dm1_original = function() private$rescale_to_original(private$dm1, power = -2),
     #' @field nb_param number of parameters in the model
-    nb_param = function(value) {
+    nb_param = function() {
       nb_param_D <- ifelse(private$res_covariance == "diagonal", self$p, 1)
       as.integer(self$p * self$d + self$q + self$n_edges + nb_param_D)
     },
     #' @field objective evolution of the objective function during (V)EM algorithm
     objective = function() private$ll_list[-1],
     #' @field loglik (or its variational lower bound)
-    loglik = function(value) if (private$approx) NA else private$ll_list[[length(private$ll_list)]] + self$sparsity_term,
+    loglik = function() if (private$approx) NA else private$ll_list[[length(private$ll_list)]] + self$sparsity_term,
     #' @field deviance (or its variational lower bound)
     deviance = function() -2 * self$loglik,
     #' @field BIC (or its variational lower bound)
@@ -582,7 +688,7 @@ NormalBlockBase <- R6::R6Class(
     #' @field ICL variational lower bound of the ICL
     ICL        = function() self$BIC + 2 * self$entropy,
     #' @field EBIC variational lower bound of the EBIC
-    EBIC   = function(value) self$BIC + 2 * ifelse(self$n_edges > 0, self$n_edges * log(self$q), 0),
+    EBIC   = function() self$BIC + 2 * ifelse(self$n_edges > 0, self$n_edges * log(self$q), 0),
     #' @field criteria a vector with loglik, BIC and number of parameters
     criteria   = function() {
       data.frame(nb_param = self$nb_param, q = self$q, n_edges = self$n_edges, sparsity = self$sparsity,
@@ -609,21 +715,21 @@ NormalBlockBase <- R6::R6Class(
       }
     },
     #' @field sparsity_term (sparsity_term term in log-likelihood due to sparsity)
-    sparsity_term = function(value) self$sparsity * sum(abs(self$sparsity_weights * private$Omegaq)),
+    sparsity_term = function() self$sparsity * sum(abs(self$sparsity_weights * private$Omegaq)),
     #' @field get_res_covariance whether the residual covariance is diagonal or spherical
-    get_res_covariance = function(value) private$res_covariance,
+    get_res_covariance = function() private$res_covariance,
     #' @field memberships cluster memberships
-    memberships = function(value) private$C,
+    memberships = function() private$C,
     #' @field clustering given as the list of elements contained in each cluster
-    clustering = function(value) {
+    clustering = function() {
       cl <- get_clusters(private$C)
       names(cl) <- colnames(self$data$Y)
       cl
     },
     #' @field cluster_sizes given as a vector of cluster sizes
-    cluster_sizes = function(value) table(self$clustering),
+    cluster_sizes = function() tabulate(self$clustering, nbins = self$q),
     #' @field elements_per_cluster given as the list of elements contained in each cluster
-    elements_per_cluster = function(value) {
+    elements_per_cluster = function() {
       if (is.null(names(self$clustering)))
         base::split(1:self$p, self$clustering)
       else

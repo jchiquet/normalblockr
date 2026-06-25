@@ -20,7 +20,7 @@ ZINormalBlockKnownClusters <- R6::R6Class(
     initialize = function(data, C, sparsity = 0, control = NB_control()) {
       stopifnot("C must be a matrix" = is.matrix(C))
       stopifnot("There cannot be empty clusters" = min(colSums(C)) > 0)
-      super$initialize(data, ncol(C), sparsity, control = control)
+      super$initialize(data, ncol(C), sparsity, control = control, zero_inflation = TRUE)
       private$C  <- C
     }
   ),
@@ -38,7 +38,10 @@ ZINormalBlockKnownClusters <- R6::R6Class(
     },
 
     EM_initialize = function() {
-      c(private$get_heuristic_parameters(),  list(
+      if (private$warm_started) {
+        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq, kappa = private$kappa,
+             gamma = private$gamma, mu = private$mu)
+      } else c(private$get_heuristic_parameters(),  list(
         gamma = rep(list(diag(1, self$q, self$q)), self$n),
         mu    = matrix(0, self$n, self$q)
         )
@@ -68,9 +71,9 @@ ZINormalBlockKnownClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field posterior_par a list with the parameters of posterior distribution W | Y
-    posterior_par = function(value) list(gamma = private$gamma, mu = private$mu),
+    posterior_par = function() list(gamma = private$gamma, mu = private$mu),
     #' @field entropy Entropy of the conditional distribution
-    entropy    = function(value) {
+    entropy    = function() {
       if (!private$approx){
         log_det_Gamma <- private$gamma %>%
           map(determinant, logarithm = TRUE) %>%
@@ -87,7 +90,7 @@ ZINormalBlockKnownClusters <- R6::R6Class(
       par$kappa <- private$kappa
       par
     },
-    #' @field fitted Y values predicted by the model
+    #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
       if (private$approx) {
         res <- self$data$X %*% private$B
@@ -95,10 +98,10 @@ ZINormalBlockKnownClusters <- R6::R6Class(
         res <- self$data$X %*% private$B + private$mu %*% t(private$C)
       }
       res <- res * self$data$zeros_bar
-      res
+      private$rescale_to_original(res)
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function(value)
+    who_am_I = function()
     {paste("zero-inflated", private$res_covariance, "normal-block model with fixed blocks")}
   )
 )

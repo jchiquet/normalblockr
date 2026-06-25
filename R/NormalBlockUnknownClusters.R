@@ -39,13 +39,10 @@ NormalBlockUnknownClusters <- R6::R6Class(
       reg_res   <- private$multivariate_normal_inference()
       if (anyNA(private$C)) # if no initial clustering provided
         private$C <- private$heuristic_clustering(reg_res$R)
-      private$C <- check_one_boundary(check_zero_boundary(private$C))
+      private$C <- clip_probabilities(private$C)
       Sigmaq    <- private$heuristic_Sigmaq_from_Sigma(reg_res$Sigma)
       Omegaq    <- private$get_Omegaq(Sigmaq)
-      ddiag <- colMeans(reg_res$R^2)
-      dm1   <- switch(private$res_covariance,
-                      "diagonal"  = 1 / as.vector(ddiag),
-                      "spherical" = rep(1/mean(ddiag), self$p))
+      dm1       <- private$dm1_from_residuals(reg_res$R)
       list(B = reg_res$B, Omegaq = Omegaq, dm1 = dm1,
            C = private$C, alpha = colMeans(private$C))
     },
@@ -54,7 +51,10 @@ NormalBlockUnknownClusters <- R6::R6Class(
     ## Methods for integrated inference ------------------------
 
     EM_initialize = function() {
-      c(private$get_heuristic_parameters(),  list(
+      if (private$warm_started) {
+        list(B = private$B, Omegaq = private$Omegaq, dm1 = private$dm1,
+             C = private$C, alpha = private$alpha, M = private$M, S = private$S)
+      } else c(private$get_heuristic_parameters(),  list(
             M = matrix(rep(0, self$n * self$q), nrow = self$n),
             S = rep(0.1, self$q)
           )
@@ -100,16 +100,17 @@ NormalBlockUnknownClusters <- R6::R6Class(
       } else {res <- NA}
       res
     },
-    #' @field fitted Y values predicted by the model
+    #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
-      if (private$approx) {
-        res <- self$data$X %*% private$B
+      res <- if (private$approx) {
+        self$data$X %*% private$B
       } else {
-        res <- self$data$X %*% private$B + tcrossprod(private$M, private$C)
+        self$data$X %*% private$B + tcrossprod(private$M, private$C)
       }
+      private$rescale_to_original(res)
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(value) {
+    who_am_I  = function() {
       paste(private$res_covariance, "normal-block model with", self$q, "unknown blocks")
     }
   )

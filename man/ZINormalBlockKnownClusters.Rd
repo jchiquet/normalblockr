@@ -20,7 +20,7 @@ R6 class for a Zero-Inflated normal-block model with a known clustering.
 
     \item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix), kappa (zero-inflation probabilities)}
 
-    \item{\code{fitted}}{Y values predicted by the model}
+    \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }
@@ -47,6 +47,7 @@ R6 class for a Zero-Inflated normal-block model with a known clustering.
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="split"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-split'><code>NormalBlockBase$split()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-warm_start_from'><code>NormalBlockBase$warm_start_from()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}

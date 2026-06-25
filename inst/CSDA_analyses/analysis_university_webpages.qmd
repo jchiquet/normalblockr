@@ -1,0 +1,45 @@
+---
+title: "University webpages analysis - The 4 universities dataset"
+format: html
+---
+
+## Useful libraries and functions
+
+### Libraries
+
+```{r useful-libraries}
+library(normalblockr)
+library(tidyverse)
+set.seed(1)
+```
+
+## Loading & formatting data
+
+We load the dataset the same way Tan et al. (2015) did.
+
+```{r data-university}
+data(university)
+Y_web    <- log(1 + university$frequencies[, university$terms])
+data_web <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))
+```
+
+## Running Normal-Block on the dataset
+
+```{r running-normal-block}
+nb_web_sparse <- normal_block(data = data_web, blocks = 15, sparsity = 0.005)
+```
+
+```{r clustering-results}
+elements_per_cluster <- split(colnames(data_web$Y), nb_web_sparse$clustering)
+
+df <- tibble(
+    cluster = names(elements_per_cluster),
+    words = map_chr(elements_per_cluster, ~ paste(.x, collapse = ", "))
+) %>% mutate(cluster = paste("cluster", cluster))
+
+df
+```
+
+```{r network-results}
+nb_web_sparse$plot_network()
+```

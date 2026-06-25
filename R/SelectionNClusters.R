@@ -189,6 +189,6 @@ SelectionNClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field best_model best model explored so far in term of ICL
-    best_model = function(value) self$best_models$model[[which.min(self$best_models$ICL)]]
+    best_model = function() self$best_models$model[[which.min(self$best_models$ICL)]]
   )
 )

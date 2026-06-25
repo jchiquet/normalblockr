@@ -25,9 +25,22 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
       self$control <- control
       self$control$zero_inflation <- zero_inflation
       control_ <- control
+
+      ## See NormalBlockUnknownQ$initialize() for the rationale: one wide SBM
+      ## exploration over the whole q_list range replaces one independent
+      ## exploration per q. control_$clustering_init is then read by every
+      ## get_model() call inside NormalBlockChangingSparsity$initialize()
+      ## (including across its own sparsity sweep), so setting it once here
+      ## per q is enough.
+      sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
+
       self$models <- purrr::map(seq_along(q_list), function(rank) {
-        if (!is.null(control$clustering_init))
+        if (!is.null(sbm_path))
+          control_$clustering_init <- sbm_path[[as.character(q_list[rank])]]
+        else if (is.list(control$clustering_init)) # one explicit clustering per q
           control_$clustering_init <- control$clustering_init[[rank]]
+        ## else: a heuristic name (or NULL) applies identically to every q,
+        ## already carried over since control_ <- control above
         model <- NormalBlockChangingSparsity$new(mydata, q_list[rank], zero_inflation, control_)
       })
       private$progress_field <- "q"
@@ -94,7 +107,7 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field q_list  number of blocks
-    q_list = function(value) map_dbl(self$models, "q"),
+    q_list = function() map_dbl(self$models, "q"),
     #' @field sparsity list of penalties used for each q
     sparsity = function(){
       self$criteria %>%
@@ -102,7 +115,7 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
         dplyr::summarize(sparsity = paste(round(sparsity, 2), collapse = ", "))
     },
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(value){
+    who_am_I  = function(){
       paste("Collection of ",
             ifelse(self$control$zero_inflation, " zero-inflated", ""),
             self$control$noise_covariance,
