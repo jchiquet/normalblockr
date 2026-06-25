@@ -510,8 +510,8 @@ NormalBlockBase <- R6::R6Class(
     ## (power = 1: X_original = Y_scale * X_scaled), while dm1 = 1/variance
     ## picks up Y_scale^-2 (Var(Y_original) = Y_scale^2 * Var(Y_scaled), so
     ## dm1_original = dm1_scaled / Y_scale^2, power = -2). Used by the public
-    ## B/dm1 bindings and by fitted() in the 4 leaf classes -- model_par$B/
-    ## model_par$dm1 stay on the internal scale unchanged, since
+    ## B_original/dm1_original bindings and by fitted() in the 4 leaf classes
+    ## -- model_par$B/model_par$dm1 stay on the internal scale unchanged, since
     ## warm_start_from() copies them directly into another model's private
     ## state and must not have them silently rescaled.
     rescale_to_original = function(M, power = 1) {
@@ -596,15 +596,9 @@ NormalBlockBase <- R6::R6Class(
     ## competitive on university webpages at a fraction of sbm's cost.
     clustering_methods = list(
       kmeans   = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
-      ward2    = function(R, q) {
-        ## cor() is NA for any pair involving a (near-)constant column (e.g.
-        ## a rare ZI variable with a single non-zero residual): treated as
-        ## "uncorrelated" (cor = 0, i.e. the neutral, maximal 1-cor distance)
-        ## rather than letting dist()/hclust() fail on NA input.
-        cor_R <- suppressWarnings(cor(R))
-        cor_R[is.na(cor_R)] <- 0
-        cutree(hclust(dist(1 - cor_R), method = "ward.D2"), q)
-      },
+      ## ward2_tree() (R/utils.R) also backs sbm_clustering_path()'s own
+      ## fallback -- same computation, shared rather than duplicated.
+      ward2    = function(R, q) cutree(ward2_tree(R), q),
       sbm      = function(R, q) {
         options <- list(verbosity = 0, exploreMin = q, exploreMax = q, plot = FALSE, nbCores = 1)
         mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)

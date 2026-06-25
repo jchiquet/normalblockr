@@ -124,6 +124,22 @@ zi_weighted_fit <- function(data) {
 # sbm_clustering_path()).
 zi_residuals <- function(data) zi_weighted_fit(data)$R
 
+# Hierarchical (Ward.D2) clustering tree of the p columns of R by their
+# pairwise correlation distance (1 - cor). Shared by
+# NormalBlockBase$private$clustering_methods$ward2 (the "ward2"
+# clustering_init heuristic, and the fallback whenever any chosen heuristic
+# collapses to fewer than q clusters) and sbm_clustering_path()'s own
+# fallback below -- same computation, two call sites.
+# cor() is NA for any pair involving a (near-)constant column (e.g. a rare
+# ZI variable with a single non-zero residual): treated as "uncorrelated"
+# (cor = 0, i.e. the neutral, maximal 1 - cor distance) rather than letting
+# dist()/hclust() fail on NA input.
+ward2_tree <- function(R) {
+  cor_R <- suppressWarnings(stats::cor(R))
+  cor_R[is.na(cor_R)] <- 0
+  stats::hclust(stats::dist(1 - cor_R), method = "ward.D2")
+}
+
 # Clusters the (n x p) residual matrix R into every q in q_list using a
 # SINGLE sbm::estimateSimpleSBM exploration over [min(q_list), max(q_list)],
 # instead of one independent exploration per q. A wide SBM exploration
@@ -150,7 +166,7 @@ sbm_clustering_path <- function(R, q_list) {
                   plot = FALSE, nbCores = 1)
   mySBM <- sbm::estimateSimpleSBM(stats::cov(R), "gaussian", estimOptions = options)
   explored <- mySBM$storedModels$nbBlocks
-  fallback_tree <- stats::hclust(stats::dist(1 - stats::cor(R)), method = "ward.D2")
+  fallback_tree <- ward2_tree(R)
 
   stats::setNames(
     lapply(q_list, function(q) {

@@ -69,6 +69,13 @@ test_that("NormalBlockUnknownQChangingSparsity also uses the shared sbm path", {
   expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
 })
 
+test_that("sbm_clustering_path()'s ward2 fallback does not error on a (near-)constant column", {
+  R_const <- R
+  R_const[, 1] <- 0; R_const[1, 1] <- 5 # a single non-zero residual for variable 1
+  expect_no_warning(path <- sbm_clustering_path(R_const, 2:20))
+  for (q in 2:20) expect_equal(length(unique(path[[as.character(q)]])), q)
+})
+
 test_that("zero-inflated collections also use the shared sbm path, clustering on zi_residuals() instead of ols_residuals()", {
   exzi   <- generate_normal_block_data(n = 60, p = 24, d = 1, q = 4, kappa = rep(0.3, 24))
   datazi <- NormalBlockData$new(exzi$Y, exzi$X, X0 = matrix(1, nrow(exzi$Y), 1))
