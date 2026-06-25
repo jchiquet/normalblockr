@@ -440,7 +440,7 @@ NormalBlockBase <- R6::R6Class(
         igraph::V(G)$label.cex <- V.deg / max(V.deg) + .5
         igraph::V(G)$size <- tabulate(self$clustering, nbins = self$q) * 100 / self$p
         igraph::V(G)$label.color <- rgb(0, 0, .2, .8)
-        igraph::V(G)$frame.color <- NA
+        igraph::V(G)$frame.color <- "transparent" # NA triggers an igraph plot() warning; same (invisible) rendering
         ## Nice edges
         igraph::E(G)$color <- ifelse(igraph::E(G)$weight > 0, edge.color[1], edge.color[2])
         if (type == "support")
