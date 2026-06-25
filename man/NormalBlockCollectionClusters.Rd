@@ -161,17 +161,16 @@ calls [refine()] automatically.
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-refine}{}}}
 \subsection{\code{NormalBlockCollectionClusters$refine()}}{
   Tries to improve every model in the collection with a
-single short split-and-reoptimize trial seeded from its immediate
-smaller-q neighbor (`"split"`), a single short merge-and-reoptimize
-trial seeded from its immediate larger-q neighbor (`"merge"`), or
-both (the default), keeping a candidate only if it strictly lowers
-the model's deviance. Each model in the collection is independently
-cold-started (a heuristic clustering on the residuals, see
-`private$clustering_methods` in [NormalBlockBase]), which on real
-data turns out to sometimes settle into a milder local optimum than
-a neighboring q's solution would, once incrementally split or merged
-by one cluster -- a gap that a simple "deviance must not increase in
-q" check cannot reliably catch (see Details).
+short split-and-reoptimize trial seeded from its smaller-q neighbor
+(`"split"`), a short merge-and-reoptimize trial seeded from its
+larger-q neighbor (`"merge"`), or both (the default); a candidate
+replaces the original only if it strictly lowers the deviance. Useful
+because every model in the collection is cold-started independently
+(a heuristic clustering on the residuals, see
+`private$clustering_methods` in [NormalBlockBase]) and can settle
+into a milder local optimum than an adjacent q's solution would, once
+split/merged by one cluster -- a gap that "deviance must not increase
+in q" alone cannot reliably catch (see Details).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionClusters$refine(
@@ -202,39 +201,28 @@ candidate from that neighbor improved on it. Defaults to
     \if{html}{\out{</div>}}
   }
   \subsection{Details}{
-    Two earlier, cheaper attempts at *targeting* which q to
-refine -- flagging only outright deviance increases, then flagging
-deviance drops that are unusually small relative to neighboring q's
--- both found essentially nothing to fix on a real dataset
-(`brca_rppa`) where a full split/merge search (see
-`inst/clustering_initialization_benchmark`) was known to find a
-systematically and uniformly better deviance at almost every q: the
-gap there was spread evenly across the whole q range, leaving no
-local anomaly for either diagnostic to detect. `refine()` instead
-tries unconditionally at every q and discards whatever doesn't help,
-which is more costly but, empirically, closes much of that gap.
-`"split"` alone (seeding only from q-1) already recovers a sizeable
-part of it for about 1.5-2x the cost of fitting the collection alone;
-adding `"merge"` (seeding also from q+1) closes substantially more of
-it on `brca_rppa` -- the two directions catch different cases, since
-a smaller-q neighbor's split and a larger-q neighbor's merge are
-different (and independently cold-started) starting points -- for
-roughly twice the cost of `"split"` alone, still well under the full
-forward/backward search of [SelectionNClusters]. Since nothing is
-ever kept unless it strictly improves, this never makes any
-individual model worse: on a second real dataset (`university`)
-where the collection's independent per-q cold starts were already
-*better* than chaining models together (the opposite failure mode:
-an early bad split propagating to every larger q), both directions
-found close to nothing to fix rather than degrading anything -- it
-is a one-sided improvement, not a different optimization trajectory
-that could go either way.
+    Two cheaper attempts at targeting *which* q to refine --
+flagging outright deviance increases, then flagging drops unusually
+small relative to neighboring q's -- found nothing to fix on a real
+dataset (`brca_rppa`) where a full split/merge search was known to do
+systematically better at almost every q: the gap was spread evenly
+across the whole range, leaving no local anomaly to detect.
+`refine()` instead tries unconditionally everywhere and discards
+whatever doesn't help. On `brca_rppa`, `"split"` alone already
+recovers part of that gap (~1.5-2x the cost of fitting the collection
+alone); adding `"merge"` closes substantially more of it -- the two
+directions catch different cases, since split-from-below and
+merge-from-above are different, independently cold-started starting
+points -- for about twice the cost again, still well under
+[SelectionNClusters]'s full forward/backward search. Because nothing
+is kept unless strictly better, this never makes a model worse: on a
+second dataset (`university`) where independent cold starts were
+already better than chaining models together, both directions found
+close to nothing to fix rather than degrading anything.
 
-Only contiguous q pairs (`q` and `q - 1`, or `q` and `q + 1`, both
-present in the collection) are refined; non-contiguous q's (a
-`q_list` with gaps) are left untouched on the corresponding side,
-since splitting/merging a `q -/+ k` (k > 1) model does not produce a
-candidate at `q`.
+Only contiguous q pairs (`q` and `q -/+ 1`, both present in the
+collection) are refined; gaps in `q_list` are left untouched on that
+side.
   }
   \subsection{Returns}{
     invisibly returns `self`; improved models replace the
