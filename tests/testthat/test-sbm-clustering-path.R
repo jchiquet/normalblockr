@@ -1,6 +1,6 @@
 ###############################################################################
 ## Tests for sbm_clustering_path() (R/utils.R) and its use inside
-## NormalBlockUnknownQ / NormalBlockUnknownQChangingSparsity: a single wide SBM
+## NormalBlockCollectionClusters / NormalBlockCollectionClustersSparsity: a single wide SBM
 ## exploration over the whole q_list range replaces one independent
 ## exploration per q whenever clustering_init = "sbm" is applied uniformly
 ## (not as an explicit per-q clustering). See inst/normal_block_models.qmd for the
@@ -37,8 +37,8 @@ test_that("sbm_clustering_path() falls back to a cheap ward2 clustering for q's 
   for (q in q_list) expect_equal(length(unique(path[[as.character(q)]])), q)
 })
 
-test_that("NormalBlockUnknownQ with clustering_init = 'sbm' eagerly resolves it from the shared path", {
-  coll <- NormalBlockUnknownQ$new(data, 2:5, control = NB_control(verbose = FALSE, clustering_init = "sbm"))
+test_that("NormalBlockCollectionClusters with clustering_init = 'sbm' eagerly resolves it from the shared path", {
+  coll <- NormalBlockCollectionClusters$new(data, 2:5, control = NB_control(verbose = FALSE, clustering_init = "sbm"))
 
   for (model in coll$models) {
     ## every model converges to a valid q-cluster initialization once
@@ -52,7 +52,7 @@ test_that("NormalBlockUnknownQ with clustering_init = 'sbm' eagerly resolves it 
 
 test_that("an explicit clustering_init is never overridden by the sbm path", {
   cl_init <- list(rep(1:2, length.out = data$p), rep(1:3, length.out = data$p))
-  coll <- NormalBlockUnknownQ$new(data, c(2, 3), control = NB_control(
+  coll <- NormalBlockCollectionClusters$new(data, c(2, 3), control = NB_control(
     verbose = FALSE, clustering_init = cl_init
   ))
 
@@ -62,18 +62,25 @@ test_that("an explicit clustering_init is never overridden by the sbm path", {
   }
 })
 
-test_that("NormalBlockUnknownQChangingSparsity also uses the shared sbm path", {
-  coll <- NormalBlockUnknownQChangingSparsity$new(data, c(2, 3), control = NB_control(
+test_that("NormalBlockCollectionClustersSparsity also uses the shared sbm path", {
+  coll <- NormalBlockCollectionClustersSparsity$new(data, c(2, 3), control = NB_control(
     verbose = FALSE, clustering_init = "sbm", n_sparsity_penalties = 3
   ))
   expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
+})
+
+test_that("sbm_clustering_path()'s ward2 fallback does not error on a (near-)constant column", {
+  R_const <- R
+  R_const[, 1] <- 0; R_const[1, 1] <- 5 # a single non-zero residual for variable 1
+  expect_no_warning(path <- sbm_clustering_path(R_const, 2:20))
+  for (q in 2:20) expect_equal(length(unique(path[[as.character(q)]])), q)
 })
 
 test_that("zero-inflated collections also use the shared sbm path, clustering on zi_residuals() instead of ols_residuals()", {
   exzi   <- generate_normal_block_data(n = 60, p = 24, d = 1, q = 4, kappa = rep(0.3, 24))
   datazi <- NormalBlockData$new(exzi$Y, exzi$X, X0 = matrix(1, nrow(exzi$Y), 1))
 
-  coll <- NormalBlockUnknownQ$new(datazi, 2:3, zero_inflation = TRUE,
+  coll <- NormalBlockCollectionClusters$new(datazi, 2:3, zero_inflation = TRUE,
                                   control = NB_control(verbose = FALSE, clustering_init = "sbm"))
   ## clustering_init is now eagerly injected from the shared path, just like
   ## for non-ZI collections -- private$C is already a valid q-cluster

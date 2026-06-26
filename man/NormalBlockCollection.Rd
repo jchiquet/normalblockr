@@ -5,9 +5,9 @@
 \title{R6 abstract class for a collection of normal-block models}
 \description{
 Shared scaffolding for the collections explored by [get_model()]/
-[normal_block()]: a sweep over sparsity penalties ([`NormalBlockChangingSparsity`]),
-over the number of clusters ([`NormalBlockUnknownQ`]), or over both
-([`NormalBlockUnknownQChangingSparsity`]). Concrete subclasses set
+[normal_block()]: a sweep over sparsity penalties ([`NormalBlockCollectionSparsity`]),
+over the number of clusters ([`NormalBlockCollectionClusters`]), or over both
+([`NormalBlockCollectionClustersSparsity`]). Concrete subclasses set
 `private$progress_field`/`private$progress_label` in their `initialize()`
 and provide their own `get_best_model()`, delegating the (row of
 `self$criteria` minimizing a criterion) lookup to `private$best_id()`.
@@ -43,7 +43,7 @@ and provide their own `get_best_model()`, delegating the (row of
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollection$optimize(
-  control = list(niter = 100, threshold = 1e-04, verbose = TRUE)
+  control = list(niter = 500, threshold = 1e-04, verbose = TRUE)
 )}
     \if{html}{\out{</div>}}
   }

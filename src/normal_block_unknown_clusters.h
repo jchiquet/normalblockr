@@ -27,7 +27,7 @@ class NormalBlockUnknownClusters : public NormalBlockBase {
                         // changes M_/S_ between M_step() and objective())
 
   void E_step() override {
-    R_ = data_.Y - data_.X * B_;
+    R_ = data_.Y - XB();
 
     arma::mat dm1C = C_;
     dm1C.each_col() %= dm1_;
@@ -49,8 +49,8 @@ class NormalBlockUnknownClusters : public NormalBlockBase {
 
   void M_step() override {
     arma::mat MCT = M_ * C_.t();
-    B_ = data_.XtXm1 * (data_.X.t() * (data_.Y - MCT));
-    R_ = data_.Y - data_.X * B_;
+    set_B(data_.XtXm1 * (data_.X.t() * (data_.Y - MCT)));
+    R_ = data_.Y - XB();
 
     arma::mat M2plusS = arma::square(M_);
     M2plusS.each_row() += S_.t();
@@ -101,6 +101,35 @@ public:
   const arma::vec& alpha() const { return alpha_; }
   const arma::mat& M() const { return M_; }
   const arma::vec& S() const { return S_; }
+
+  std::unique_ptr<NormalBlockBase> clone() const override {
+    return std::make_unique<NormalBlockUnknownClusters<NoisePolicy>>(*this);
+  }
+  void restore_from(const NormalBlockBase& other) override {
+    copy_tracked_state_from(other);
+    const auto& o = static_cast<const NormalBlockUnknownClusters<NoisePolicy>&>(other);
+    C_ = o.C_;
+    alpha_ = o.alpha_;
+    M_ = o.M_;
+    S_ = o.S_;
+    Gamma_ = o.Gamma_;
+    R_ = o.R_;
+    Sigma_hat_ = o.Sigma_hat_;
+  }
+  // The same SQUAREM mechanism as NormalBlockKnownClusters applies here too
+  // (extrapolate only B_/dm1_/Omegaq_, refresh tau/alpha/M/S via a real
+  // VE+M cycle, accept based on objective()) -- but unlike that class, this
+  // is *not* relying on objective() being a general (always-valid)
+  // criterion; it doesn't need to be. Every call to objective() inside
+  // try_squarem_step() happens right after a fresh E_step()+M_step() pair,
+  // exactly the regime the existing profiled ELBO shortcut is already valid
+  // in (verified algebraically: unlike the known-clusters case before its
+  // fix, this formula has no sign bug -- the M-step-optimality collapse
+  // checks out term for term). Validated on real data (see git history):
+  // clean, growing speedup with q (e.g. q=25 on `brca_rppa`: 168 plain VEM
+  // iterations vs 45 accelerated), comparable monotonicity to plain VEM's
+  // own small pre-existing wobble (not made meaningfully worse).
+  bool supports_acceleration() const override { return sparsity_ <= 0.0; }
 };
 
 #endif // NORMALBLOCKR_NORMAL_BLOCK_UNKNOWN_CLUSTERS_H

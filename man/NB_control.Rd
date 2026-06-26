@@ -5,7 +5,7 @@
 \title{NB_control}
 \usage{
 NB_control(
-  niter = 100,
+  niter = 500,
   threshold = 1e-04,
   sparsity_weights = NULL,
   sparsity_penalties = NULL,
@@ -15,7 +15,8 @@ NB_control(
   clustering_init = "ward2",
   verbose = TRUE,
   heuristic = FALSE,
-  noise_covariance = c("diagonal", "spherical")
+  noise_covariance = c("diagonal", "spherical"),
+  refine = FALSE
 )
 }
 \arguments{
@@ -39,28 +40,19 @@ useful for calls to fixed_q models in stability_selection}
 
 \item{clustering_init}{how to obtain the initial clustering of the q unknown
 blocks. Either the name of a clustering heuristic -- one of "ward2"
-(default), "kmeans", "sbm" or "spectral" (k-means on the row-normalized
-eigenvectors of cov(R), a cheap proxy for clustering the residuals'
-covariance structure rather than their values) -- or an actual clustering
-to use directly, as a vector of labels or a p x q indicator matrix. When q
-is unknown (a collection over several q values), can also be a list with
-one such heuristic name/clustering per q value. No single heuristic
-dominates on every dataset (see
-inst/clustering_initialization_benchmark for a benchmark); "ward2" is the
-default because, combining each method's BIC rank with how often its
-deviance path violates the model's theoretical guarantee (deviance should
-be non-increasing in q) as a measure of how reliably it lets the (V)EM
-converge, it gives the best balance of the two -- not because it has the
-single best raw rank (kmeans does, marginally, but with far more and
-larger monotonicity violations). When fitting a collection over several
-values of q
-(`normal_block(blocks = <vector>)`, [NormalBlockUnknownQ],
-[NormalBlockUnknownQChangingSparsity]) with the heuristic name "sbm" (and no
-per-q list of explicit clusterings), a single SBM exploration runs over the
-whole range of q and is reused for every model in the collection instead of
-repeating an independent (and increasingly costly) exploration for each q;
-any q its own model-selection does not reach falls back to a cheap "ward2"
-clustering rather than a dedicated (and potentially expensive) SBM call.}
+(default), "kmeans", "sbm" or "spectral" (a cheap proxy for "sbm": k-means
+on the row-normalized eigenvectors of cov(R)) -- or an actual clustering to
+use directly, as a vector of labels or a p x q indicator matrix. When q is
+unknown (a collection over several q values), can also be a list with one
+such heuristic name/clustering per q value. No single heuristic dominates
+on every dataset (see inst/clustering_initialization_benchmark); "ward2" is
+the default for giving the best balance of BIC rank and how rarely its
+deviance path violates the model's "non-increasing in q" guarantee -- a
+reliability signal "kmeans" lacks despite a marginally better raw rank.
+With the heuristic name "sbm" on a collection (and no per-q list of
+explicit clusterings), a single SBM exploration runs over the whole range
+of q and is reused for every model instead of repeating one per q; any q
+it doesn't reach falls back to a cheap "ward2" clustering.}
 
 \item{verbose}{telling if information should be printed during optimization}
 
@@ -70,6 +62,13 @@ likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
 are all `NA` on the resulting model.}
 
 \item{noise_covariance}{variance can be variable specific ("diagonal", the default) or common ("spherical")}
+
+\item{refine}{for [NormalBlockCollectionClusters] only: whether
+`optimize()` should automatically call `refine()` afterwards (see its
+documentation for the rationale and an empirical before/after comparison).
+Default `FALSE` -- it adds real cost (roughly 3x the time of fitting the
+collection alone), so it is opt-in; call `collection$refine()` directly at
+any point afterwards for the same effect without setting this.}
 }
 \description{
 Control the model settings and various optimization parameters

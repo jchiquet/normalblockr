@@ -11,7 +11,7 @@
 
 \item{new_X}{New set of covariates.}
 
-\item{...}{not use, only here for S3 compatibility}
+\item{...}{not used, only here for S3 compatibility}
 }
 \value{
 A n*p prediction matrix for new observations

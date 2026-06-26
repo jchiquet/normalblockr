@@ -33,17 +33,17 @@ test_that("clustering_init proposals are validated for unknown-clusters models",
   )
 })
 
-test_that("NormalBlockUnknownQ validates the list of candidate block counts", {
+test_that("NormalBlockCollectionClusters validates the list of candidate block counts", {
   data <- NormalBlockData$new(ex$Y, ex$X)
-  expect_error(NormalBlockUnknownQ$new(data, c(2, 2, 3)), "only be present once")
-  expect_error(NormalBlockUnknownQ$new(data, c(2, 3, 100)), "more blocks than there are entities")
+  expect_error(NormalBlockCollectionClusters$new(data, c(2, 2, 3)), "only be present once")
+  expect_error(NormalBlockCollectionClusters$new(data, c(2, 3, 100)), "more blocks than there are entities")
 })
 
-test_that("NormalBlockChangingSparsity validates blocks and sparsity_penalties", {
+test_that("NormalBlockCollectionSparsity validates blocks and sparsity_penalties", {
   data <- NormalBlockData$new(ex$Y, ex$X)
-  expect_error(NormalBlockChangingSparsity$new(data, blocks = c(2, 3)), "clustering matrix or a fixed number")
+  expect_error(NormalBlockCollectionSparsity$new(data, blocks = c(2, 3)), "clustering matrix or a fixed number")
   expect_error(
-    NormalBlockChangingSparsity$new(data, blocks = 2, control = NB_control(sparsity_penalties = c(-1, 0.1))),
+    NormalBlockCollectionSparsity$new(data, blocks = 2, control = NB_control(sparsity_penalties = c(-1, 0.1))),
     "strictly positive"
   )
 })

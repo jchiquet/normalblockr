@@ -159,7 +159,8 @@ All possible parameters of the child classes
   alpha = NA,
   M = NA,
   S = NA,
-  ll_list = NA
+  ll_list = NA,
+  warm_started = NA
 )}
     \if{html}{\out{</div>}}
   }
@@ -177,6 +178,10 @@ All possible parameters of the child classes
       \item{\code{M}}{variational mean for posterior distribution of W}
       \item{\code{S}}{variational diagonal of variances for posterior distribution of W}
       \item{\code{ll_list}}{list of log-lik (elbo) values}
+      \item{\code{warm_started}}{whether `EM_initialize()` should treat the model as
+already initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand)
+rather than recomputing a fresh heuristic initialization -- set by
+[warm_start_from()] and by [split()]/[merge()].}
     }
     \if{html}{\out{</div>}}
   }
@@ -192,13 +197,22 @@ All possible parameters of the child classes
   calls optimization (EM or heuristic) and updates relevant fields
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$optimize(control = list(niter = 100, threshold = 1e-04))}
+    \preformatted{NormalBlockBase$optimize(
+  control = list(niter = 500, threshold = 1e-04),
+  warn = TRUE
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{control}}{a list for controlling the optimization proces}
+      \item{\code{warn}}{whether to warn when the (V)EM stops at the `niter` cap
+without reaching `threshold` (see `private$warn_if_not_converged()`).
+Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
+scoring in `candidates_split()`/`candidates_merge()`, the sparsity-path
+warm-start probe in [NormalBlockCollectionSparsity]) where stopping at
+the cap is expected and not a sign of trouble.}
     }
     \if{html}{\out{</div>}}
   }
@@ -214,7 +228,7 @@ All possible parameters of the child classes
   Seed this model's starting parameters from another,
 already-optimized model with the same q, instead of the heuristic
 clustering-derived values set at construction time. Used by
-[NormalBlockChangingSparsity] to warm-start each penalty in a sparsity
+[NormalBlockCollectionSparsity] to warm-start each penalty in a sparsity
 path from the previous (adjacent) one's converged solution -- adjacent
 penalties along a sorted path usually have similar optima, so this
 typically needs far fewer EM iterations than starting cold each time
@@ -272,7 +286,16 @@ default FALSE (send a copy)}
 by splitting the clusters of the current model
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$candidates_split()}
+    \preformatted{NormalBlockBase$candidates_split(trial_niter = 5)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{trial_niter}}{number of EM iterations used to cheaply score each
+candidate before [SelectionNClusters] fully re-optimizes the best few
+(`train_best_candidates()`'s `max_training`) -- kept short on purpose.}
+    }
     \if{html}{\out{</div>}}
   }
 }
@@ -285,7 +308,20 @@ by splitting the clusters of the current model
 by merging the clusters of the current model
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$candidates_merge()}
+    \preformatted{NormalBlockBase$candidates_merge(max_candidates = 30, trial_niter = 2)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{max_candidates}}{merge candidates are, unlike split's, quadratic
+in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
+the most promising ones (largest `|Omegaq[i, j]|`, i.e. the most
+strongly related cluster pairs in the current fit) are actually built
+and trial-optimized, since merging two nearly independent blocks is
+rarely competitive anyway. Set to `Inf` to always try every pair.}
+      \item{\code{trial_niter}}{see [candidates_split()]}
+    }
     \if{html}{\out{</div>}}
   }
 }
@@ -362,20 +398,28 @@ default FALSE (send a copy)}
 \if{html}{\out{<a id="method-NormalBlockBase-plot_loglik"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockBase-plot_loglik}{}}}
 \subsection{\code{NormalBlockBase$plot_loglik()}}{
-  plots log-likelihood values during model optimization
+  plots the evolution of the objective (log-likelihood or ELBO)
+across the (V)EM iterations of the last call to `optimize()`.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$plot_loglik(type = "b", log = "xy", neg = TRUE)}
+    \preformatted{NormalBlockBase$plot_loglik(show_increment = TRUE)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{type}}{char for line type (see plot.default)}
-      \item{\code{log}}{char for logarithmic axes (see plot.default)}
-      \item{\code{neg}}{boolean plot negative log-likelihood (useful when log="y")}
+      \item{\code{show_increment}}{whether to add, below the objective trace, a second
+panel with the (log10) absolute increment between consecutive iterations
+and the convergence `threshold` used to stop optimize() (dashed line).
+That second panel is what actually tells convergence apart from merely
+running out of iterations: the objective trace alone tends to look flat
+well before the increment has actually crossed the threshold, especially
+as the number of blocks grows (see inst/CSDA_analyses).}
     }
     \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a [`ggplot2::ggplot`] graph
   }
 }
 
@@ -416,7 +460,8 @@ default FALSE (send a copy)}
 \if{html}{\out{<a id="method-NormalBlockBase-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockBase-plot}{}}}
 \subsection{\code{NormalBlockBase$plot()}}{
-  plot together latent network and log-likelihood values during model optimization
+  plots the evolution of the objective during model optimization
+(see `plot_loglik()`)
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockBase$plot()}

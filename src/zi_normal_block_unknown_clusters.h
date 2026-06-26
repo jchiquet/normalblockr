@@ -37,10 +37,10 @@ class ZINormalBlockUnknownClusters : public NormalBlockBase {
                         // changes M_/S_ between M_step() and objective())
 
   void E_step() override {
-    R_ = zi_data_.Y - zi_data_.X * B_;
+    R_ = zi_data_.Y - XB();
     DM1_ = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
 
-    M_ = nb_optim::solve_tau_ridge(DM1_, R_, C_, Omegaq_);
+    M_ = nb_optim::solve_M_ridge(DM1_, R_, C_, Omegaq_);
 
     arma::mat DM1C = DM1_ * C_;                // n x q
     DM1C.each_row() += Omegaq_.diag().t();
@@ -57,8 +57,8 @@ class ZINormalBlockUnknownClusters : public NormalBlockBase {
 
   void M_step() override {
     arma::mat MCT = M_ * C_.t();
-    B_ = nb_optim::solve_wls(DM1_, zi_data_.Y, zi_data_.X, MCT);
-    R_ = zi_data_.Y - zi_data_.X * B_;
+    set_B(nb_optim::solve_wls(DM1_, zi_data_.Y, zi_data_.X, MCT));
+    R_ = zi_data_.Y - XB();
 
     arma::mat A = arma::square(R_) - 2.0 * (R_ % MCT) + (arma::square(M_) + S_) * C_.t();
     arma::vec weighted_ssq = arma::vectorise(arma::sum(zi_data_.zeros_bar % A, 0));
@@ -109,6 +109,32 @@ public:
   const arma::vec& alpha() const { return alpha_; }
   const arma::mat& M() const { return M_; }
   const arma::mat& S() const { return S_; }
+
+  std::unique_ptr<NormalBlockBase> clone() const override {
+    return std::make_unique<ZINormalBlockUnknownClusters<NoisePolicy>>(*this);
+  }
+  void restore_from(const NormalBlockBase& other) override {
+    copy_tracked_state_from(other);
+    const auto& o = static_cast<const ZINormalBlockUnknownClusters<NoisePolicy>&>(other);
+    C_ = o.C_;
+    alpha_ = o.alpha_;
+    M_ = o.M_;
+    S_ = o.S_;
+    R_ = o.R_;
+    DM1_ = o.DM1_;
+    Sigma_hat_ = o.Sigma_hat_;
+  }
+  // Same mechanism as NormalBlockUnknownClusters (see its
+  // supports_acceleration()): no sign bug in this profiled ELBO (same "+1"
+  // shortcut structure), and every objective() call inside
+  // try_squarem_step() happens right after a fresh VE-step+M-step pair, the
+  // exact regime that shortcut is valid in. Validated on synthetic
+  // zero-inflated data (see git history): clean, growing speedup with q
+  // (e.g. q=25: 2378 plain VEM iterations vs 279 accelerated), and the only
+  // non-monotonicity observed (q=2, q=5) is a pre-existing artifact of this
+  // model's first iteration specifically (reproduces identically with
+  // acceleration off), unrelated to this gate.
+  bool supports_acceleration() const override { return sparsity_ <= 0.0; }
 };
 
 #endif // NORMALBLOCKR_ZI_NORMAL_BLOCK_UNKNOWN_CLUSTERS_H

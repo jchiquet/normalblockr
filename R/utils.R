@@ -32,6 +32,21 @@ clip_probabilities <- function(x, zero = .Machine$double.eps) {
   check_zero_boundary(check_one_boundary(x, zero), zero)
 }
 
+# Projects a symmetric matrix onto the positive-definite cone by flooring its
+# eigenvalues, leaving an already-PD matrix unchanged (up to symmetrization).
+# Used by split()/merge() (NormalBlockBase.R): their new_Omegaq is built by
+# hand-editing a handful of entries of an existing precision matrix (halving/
+# averaging diagonal entries, zero-filling the new row/column), which has no
+# general guarantee of staying PD -- and an indefinite Omegaq handed directly
+# to the (V)EM solver fails on log_det_sympd(). A plain numeric safeguard
+# rather than a principled re-derivation, since the entries being edited are
+# themselves already a crude split/merge heuristic, not an exact update.
+ensure_pd <- function(M, floor = 1e-6) {
+  M <- (M + t(M)) / 2
+  eig <- eigen(M, symmetric = TRUE)
+  eig$vectors %*% diag(pmax(eig$values, floor), nrow(M)) %*% t(eig$vectors)
+}
+
 # computes xlogx, setting it to 0 if x = 0
 xlogx <- function(x) ifelse(x < .Machine$double.eps, 0, x * log(x))
 
@@ -66,7 +81,7 @@ sigmoid <- function(x){
 
 # OLS residuals of Y on X (used to seed the clustering heuristics). Factored
 # out of NormalBlockBase$multivariate_normal_inference() so that collections
-# fitting several q values (NormalBlockUnknownQ, NormalBlockUnknownQChangingSparsity)
+# fitting several q values (NormalBlockCollectionClusters, NormalBlockCollectionClustersSparsity)
 # can get the same residual once, instead of recomputing it once per model
 # (see sbm_clustering_path()).
 ols_residuals <- function(data) {
@@ -124,6 +139,22 @@ zi_weighted_fit <- function(data) {
 # sbm_clustering_path()).
 zi_residuals <- function(data) zi_weighted_fit(data)$R
 
+# Hierarchical (Ward.D2) clustering tree of the p columns of R by their
+# pairwise correlation distance (1 - cor). Shared by
+# NormalBlockBase$private$clustering_methods$ward2 (the "ward2"
+# clustering_init heuristic, and the fallback whenever any chosen heuristic
+# collapses to fewer than q clusters) and sbm_clustering_path()'s own
+# fallback below -- same computation, two call sites.
+# cor() is NA for any pair involving a (near-)constant column (e.g. a rare
+# ZI variable with a single non-zero residual): treated as "uncorrelated"
+# (cor = 0, i.e. the neutral, maximal 1 - cor distance) rather than letting
+# dist()/hclust() fail on NA input.
+ward2_tree <- function(R) {
+  cor_R <- suppressWarnings(stats::cor(R))
+  cor_R[is.na(cor_R)] <- 0
+  stats::hclust(stats::dist(1 - cor_R), method = "ward.D2")
+}
+
 # Clusters the (n x p) residual matrix R into every q in q_list using a
 # SINGLE sbm::estimateSimpleSBM exploration over [min(q_list), max(q_list)],
 # instead of one independent exploration per q. A wide SBM exploration
@@ -150,7 +181,7 @@ sbm_clustering_path <- function(R, q_list) {
                   plot = FALSE, nbCores = 1)
   mySBM <- sbm::estimateSimpleSBM(stats::cov(R), "gaussian", estimOptions = options)
   explored <- mySBM$storedModels$nbBlocks
-  fallback_tree <- stats::hclust(stats::dist(1 - stats::cor(R)), method = "ward.D2")
+  fallback_tree <- ward2_tree(R)
 
   stats::setNames(
     lapply(q_list, function(q) {
@@ -166,7 +197,7 @@ sbm_clustering_path <- function(R, q_list) {
 }
 
 # Builds the shared sbm_clustering_path() for a collection over q_list
-# (NormalBlockUnknownQ/NormalBlockUnknownQChangingSparsity), or returns NULL
+# (NormalBlockCollectionClusters/NormalBlockCollectionClustersSparsity), or returns NULL
 # when the optimization doesn't apply: clustering_init isn't the heuristic
 # name "sbm" applied uniformly (it names a different heuristic, or is already
 # an explicit clustering/list of clusterings -- in which case every model

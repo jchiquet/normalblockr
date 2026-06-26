@@ -12,7 +12,7 @@ C <- testdata$parameters$C ; q <- ncol(C)
 data <- NormalBlockData$new(Y, X)
 
 test_that("normal block with changing sparsity, integrated inference", {
-  model <- normalblockr:::NormalBlockChangingSparsity$new(data, q, control = NB_control(verbose = FALSE))
+  model <- normalblockr:::NormalBlockCollectionSparsity$new(data, q, control = NB_control(verbose = FALSE))
   model$optimize()
   model$stability_selection()
   model_StARS <- model$get_best_model("StARS")
@@ -21,7 +21,7 @@ test_that("normal block with changing sparsity, integrated inference", {
 
 
 test_that("normal block with fixed clusters, spherical residual covariance and heuristic inference", {
-  model <- normalblockr:::NormalBlockChangingSparsity$new(data, C,
+  model <- normalblockr:::NormalBlockCollectionSparsity$new(data, C,
                                                    control = NB_control(noise_covariance = "spherical",
                                                                         heuristic = TRUE,
                                                                         verbose = FALSE))
@@ -37,13 +37,13 @@ test_that("optimize() warm-starts each penalty from the previous one, reducing t
   ## by a couple of iterations) on very short paths -- 15 gives a robust,
   ## comfortable margin on this dataset.
   set.seed(123)
-  warm <- normalblockr:::NormalBlockChangingSparsity$new(data, C, control = NB_control(verbose = FALSE, n_sparsity_penalties = 15))
+  warm <- normalblockr:::NormalBlockCollectionSparsity$new(data, C, control = NB_control(verbose = FALSE, n_sparsity_penalties = 15))
   warm$optimize(NB_control(verbose = FALSE))
 
   ## same penalties, but optimized independently (the pre-warm-start behaviour:
   ## every model starts from its own heuristic-derived initial parameters)
   set.seed(123)
-  cold <- normalblockr:::NormalBlockChangingSparsity$new(data, C, control = NB_control(verbose = FALSE, n_sparsity_penalties = 15))
+  cold <- normalblockr:::NormalBlockCollectionSparsity$new(data, C, control = NB_control(verbose = FALSE, n_sparsity_penalties = 15))
   cold$models <- lapply(cold$models, function(model) { model$optimize(NB_control(verbose = FALSE)); model })
 
   niter_warm <- sapply(warm$models, function(m) length(m$objective))

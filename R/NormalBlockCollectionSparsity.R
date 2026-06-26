@@ -1,12 +1,12 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NormalBlockChangingSparsity #########################
+##  CLASS NormalBlockCollectionSparsity #########################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 #' R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.
 #' @export
-NormalBlockChangingSparsity <- R6::R6Class(
-  classname = "NormalBlockChangingSparsity",
+NormalBlockCollectionSparsity <- R6::R6Class(
+  classname = "NormalBlockCollectionSparsity",
   inherit   = NormalBlockCollection,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
@@ -15,11 +15,12 @@ NormalBlockChangingSparsity <- R6::R6Class(
     #' @field data object of NormalBlockData class, with responses and design matrix
     data   = NA,
 
-    #' @description Create a new [`NormalBlockChangingSparsity`] object.
+    #' @description Create a new [`NormalBlockCollectionSparsity`] object.
     #' @param mydata object of NormalBlockData class, with responses and design matrix
+    #' @param blocks either a clustering matrix (known, fixed clustering) or a single integer (number of blocks to infer)
     #' @param zero_inflation boolean to specify whether data is zero-inflated
     #' @param control structured list of parameters to handle sparsity control
-    #' @return A new [`NormalBlockChangingSparsity`] object
+    #' @return A new [`NormalBlockCollectionSparsity`] object
     initialize = function(mydata, blocks, zero_inflation = FALSE,
                           control = NB_control()) {
 
@@ -40,7 +41,7 @@ NormalBlockChangingSparsity <- R6::R6Class(
         sparsity <- control$sparsity_penalties
       } else {
         init_model <- get_model(mydata, blocks, 0, zero_inflation, control)
-        init_model$optimize(control = list(niter=5, threshold=1e-4, verbose=FALSE))
+        init_model$optimize(control = list(niter=5, threshold=1e-4, verbose=FALSE), warn = FALSE)
         Sigmaq   <- solve(init_model$model_par$Omegaq)
         diag_pen <- max(diag(init_model$sparsity_weights)) > 0
         weights  <- init_model$sparsity_weights
@@ -70,7 +71,7 @@ NormalBlockChangingSparsity <- R6::R6Class(
     #' (hence q) is fixed across the whole path, only the sparsity penalty
     #' changes, so the warm start is always between models of matching shape.
     #' @param control optimization parameters (niter and threshold)
-    optimize = function(control = list(niter = 100, threshold = 1e-4, verbose = TRUE)) {
+    optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {
       previous <- NULL
       self$models <- lapply(self$models, function(model) {
         if (control$verbose)
@@ -129,7 +130,7 @@ NormalBlockChangingSparsity <- R6::R6Class(
     #' @return a [`ggplot`] graph
     plot = function(criteria = c("deviance", "BIC", "EBIC", "ICL"), log.x = TRUE) {
       stopifnot(!is.null(self$criteria[criteria]))
-      p <- private$plot_criteria_path("sparsity", criteria, "BIC")
+      p <- private$plot_criteria_path("sparsity", criteria)
       if (log.x) p <- p + ggplot2::coord_trans(x = "log10")
       p
     },
@@ -165,7 +166,7 @@ NormalBlockChangingSparsity <- R6::R6Class(
       stabs_out <- lapply(subsamples, function(subsample) {
         mydata <- NormalBlockData$new(Y = self$data$Y[subsample, , drop = FALSE],
                                   X = self$data$X[subsample, , drop = FALSE])
-        myNB <- NormalBlockChangingSparsity$new(
+        myNB <- NormalBlockCollectionSparsity$new(
           mydata, blocks, self$control$zero_inflation, control_stabs)
         myNB$optimize(control_stabs)
 

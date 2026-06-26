@@ -1,23 +1,23 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NormalBlockUnknownQChangingSparsity ###############
+##  CLASS NormalBlockCollectionClustersSparsity ###############
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 #' R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.
 #' @export
-NormalBlockUnknownQChangingSparsity <- R6::R6Class(
-  classname = "NormalBlockUnknownQChangingSparsity",
+NormalBlockCollectionClustersSparsity <- R6::R6Class(
+  classname = "NormalBlockCollectionClustersSparsity",
   inherit   = NormalBlockCollection,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @description Create a new [`NormalBlockUnknownQChangingSparsity`] object.
+    #' @description Create a new [`NormalBlockCollectionClustersSparsity`] object.
     #' @param mydata object of NormalBlockData class, with responses and design matrix
     #' @param q_list list of q values (number of groups) in the collection
     #' @param zero_inflation boolean to specify whether data is zero-inflated
     #' @param control structured list of parameters to handle sparsity control
-    #' @return A new [`NormalBlockUnknownQChangingSparsity`] object
+    #' @return A new [`NormalBlockCollectionClustersSparsity`] object
     initialize = function(mydata, q_list, zero_inflation = FALSE,
                           control = NB_control()) {
 
@@ -26,10 +26,10 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
       self$control$zero_inflation <- zero_inflation
       control_ <- control
 
-      ## See NormalBlockUnknownQ$initialize() for the rationale: one wide SBM
+      ## See NormalBlockCollectionClusters$initialize() for the rationale: one wide SBM
       ## exploration over the whole q_list range replaces one independent
       ## exploration per q. control_$clustering_init is then read by every
-      ## get_model() call inside NormalBlockChangingSparsity$initialize()
+      ## get_model() call inside NormalBlockCollectionSparsity$initialize()
       ## (including across its own sparsity sweep), so setting it once here
       ## per q is enough.
       sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
@@ -41,17 +41,17 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
           control_$clustering_init <- control$clustering_init[[rank]]
         ## else: a heuristic name (or NULL) applies identically to every q,
         ## already carried over since control_ <- control above
-        model <- NormalBlockChangingSparsity$new(mydata, q_list[rank], zero_inflation, control_)
+        model <- NormalBlockCollectionSparsity$new(mydata, q_list[rank], zero_inflation, control_)
       })
       private$progress_field <- "q"
       private$progress_label <- "number of blocks"
     },
 
-    #' @description returns a collection of NB_unknown models corresponding to given q
+    #' @description returns a collection of models corresponding to given q
     #' or one single model if penalty is also given
     #' @param q number of blocks asked by user.
-    #' @param sparsity sparsity penalty penalty asked by user
-    #' @return either a NormalBlockChangingSparsity or a NormalBlockUnknownClusters object
+    #' @param sparsity sparsity penalty asked by user
+    #' @return either a NormalBlockCollectionSparsity or a NormalBlockUnknownClusters object
     get_model = function(q, sparsity = NA) {
       stopifnot("No such model in the collection. Acceptable values can be found via $q" = q %in% self$q_list)
       model <- self$models[[which(self$q_list == q)]]
@@ -68,8 +68,8 @@ NormalBlockUnknownQChangingSparsity <- R6::R6Class(
 
     #' @description Extract best model in the collection
     #' @param crit a character for the criterion used to performed the selection.
-    #' Either "BIC", "EBIC" or "ICL. "ICL" is the default criterion
-    #' @return a [`NB_unknown`] object
+    #' Either "BIC", "EBIC" or "ICL". "ICL" is the default criterion
+    #' @return a [`NormalBlockUnknownClusters`] object
     get_best_model = function(crit = c("ICL", "BIC", "EBIC")) {
       crit <- match.arg(crit)
       id <- private$best_id(crit, check_inference = FALSE)

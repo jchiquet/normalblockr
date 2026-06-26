@@ -1,10 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^data-raw$
 ^LICENSE\.md$
 ^\.github$
-^inst/onema
-^inst/itraq
-^inst/NORMAL_BLOCK_PAPER_ILLUSTRATIONS
+^inst/CSDA_analyses
 ^inst/normal_block_models.*
 
 ^_pkgdown\.yml$
@@ -13,3 +12,4 @@
 
 snowflake.log
 Rplots.pdf
+^\.claude$

@@ -106,7 +106,7 @@ generate_normal_block_param <- function(X = matrix(rnorm(100*p), 100, p),
 
 #' Generate Normal Block Data
 #'
-#' A function to draw data from the normal block model (see details). The function returns both the generated data and the corrresponding model parameters, in a list.
+#' A function to draw data from the normal block model (see details). The function returns both the generated data and the corresponding model parameters, in a list.
 #'
 #' @param n number of individuals. Default to 100.
 #' @param p number of variables. Default to 40.
@@ -118,7 +118,7 @@ generate_normal_block_param <- function(X = matrix(rnorm(100*p), 100, p),
 #' @param range_D A 2-size vector defining the range of the uniform distribution used to draw values in D, the diagonal matrix of variances of variables. Default is c(0.5, 1.5)
 #' @param u_v two-size vector of positive numbers v and u controlling the generation of the precision matrix Omega: v scales the off-diagonal elements of the precision matrix (magnitude of partial correlations), and u is a positive number added to the diagonal elements to ensure positive-definiteness. The default value is c(0.3, 0.1).
 #' @param alpha the q-size vector of group proportion. Default to rep(1/q, q)
-#' @param SNR Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desried SNR.
+#' @param SNR Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desired SNR.
 #'
 #' @returns A named list with the following element
 #' - Y a matrix of responses
@@ -129,7 +129,7 @@ generate_normal_block_param <- function(X = matrix(rnorm(100*p), 100, p),
 #'    - D: diagonal matrix of variance of the variables
 #'    - Omega: precision matrix of the groups
 #'    - Sigma: covariance matrix of the groups
-#'    - kappa: vector of ZI inflation proabilities (one per variable)
+#'    - kappa: vector of ZI inflation probabilities (one per variable)
 #'
 #' @importFrom igraph sample_pa sample_sbm sample_gnp as_adjacency_matrix
 #' @importFrom stats rbinom rmultinom rnorm runif var

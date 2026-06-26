@@ -36,7 +36,7 @@ inline arma::mat solve_wls(const arma::mat& W, const arma::mat& Y,
 // zero-inflated model. The objective is row-separable (mirrors the
 // known-cluster E-step's per-row Gamma_i/Mu_i): each row solves an
 // independent q x q ridge system M_i = (Omega + diag(DM1C_i))^{-1} (DM1*R*C)_i.
-inline arma::mat solve_tau_ridge(const arma::mat& DM1, const arma::mat& R,
+inline arma::mat solve_M_ridge(const arma::mat& DM1, const arma::mat& R,
                                   const arma::mat& C, const arma::mat& Omega) {
   arma::uword n = DM1.n_rows, q = C.n_cols;
   arma::mat DM1C = DM1 * C;          // n x q

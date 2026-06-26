@@ -118,6 +118,10 @@ NormalBlockBase <- R6::R6Class(
     #' @param M variational mean for posterior distribution of W
     #' @param S variational diagonal of variances for posterior distribution of W
     #' @param ll_list  list of log-lik (elbo) values
+    #' @param warm_started whether `EM_initialize()` should treat the model as
+    #' already initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand)
+    #' rather than recomputing a fresh heuristic initialization -- set by
+    #' [warm_start_from()] and by [split()]/[merge()].
     #' @return Update the current [`normal`] object
     update = function(B = NA,
                       dm1 = NA,
@@ -129,7 +133,8 @@ NormalBlockBase <- R6::R6Class(
                       alpha = NA,
                       M = NA,
                       S = NA,
-                      ll_list = NA) {
+                      ll_list = NA,
+                      warm_started = NA) {
       if (!anyNA(B))       private$B       <- B
       if (!anyNA(dm1))     private$dm1     <- dm1
       if (!anyNA(C))       private$C       <- C
@@ -141,20 +146,31 @@ NormalBlockBase <- R6::R6Class(
       if (!anyNA(M))       private$M       <- M
       if (!anyNA(S))       private$S       <- S
       if (!anyNA(ll_list)) private$ll_list <- ll_list
+      if (!anyNA(warm_started)) private$warm_started <- warm_started
     },
 
     #' @description calls optimization (EM or heuristic) and updates relevant fields
     #' @param control a list for controlling the optimization proces
+    #' @param warn whether to warn when the (V)EM stops at the `niter` cap
+    #' without reaching `threshold` (see `private$warn_if_not_converged()`).
+    #' Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
+    #' scoring in `candidates_split()`/`candidates_merge()`, the sparsity-path
+    #' warm-start probe in [NormalBlockCollectionSparsity]) where stopping at
+    #' the cap is expected and not a sign of trouble.
     #' @return optimizes the model and updates its parameters
-    optimize = function(control = list(niter = 100, threshold = 1e-4)) {
+    optimize = function(control = list(niter = 500, threshold = 1e-4), warn = TRUE) {
+      private$niter_max  <- control$niter
+      private$threshold  <- control$threshold
       optim_out <- private$optimizer(control)
       do.call(self$update, optim_out)
+      if (warn) private$warn_if_not_converged()
+      invisible(self)
     },
 
     #' @description Seed this model's starting parameters from another,
     #' already-optimized model with the same q, instead of the heuristic
     #' clustering-derived values set at construction time. Used by
-    #' [NormalBlockChangingSparsity] to warm-start each penalty in a sparsity
+    #' [NormalBlockCollectionSparsity] to warm-start each penalty in a sparsity
     #' path from the previous (adjacent) one's converged solution -- adjacent
     #' penalties along a sorted path usually have similar optima, so this
     #' typically needs far fewer EM iterations than starting cold each time
@@ -204,24 +220,24 @@ NormalBlockBase <- R6::R6Class(
       new_C[split2, index] <- .Machine$double.eps
       new_C <- new_C / rowSums(new_C)
 
-      ## Variational means
-      new_M <- cbind(private$M, 0)
-      new_M[split2, self$q + 1] <- new_M[split2, index]
-      new_M[split2, index] <- 0
+      ## Variational means: the new block starts as a copy of its parent's
+      ## column. split1/split2 (above) are computed over *variables*
+      ## (length p, from self$clustering) and must not be reused to index
+      ## M/S, which are indexed by *individuals* (length n): doing so used
+      ## to silently scramble rows via recycling whenever p happened to
+      ## divide n evenly, and errors outright otherwise -- e.g. the
+      ## zero-inflated case, where S is also n x q rather than length q.
+      ## EM_initialize()'s first E-step differentiates the duplicated
+      ## columns immediately afterwards anyway, since it is driven by C/tau,
+      ## which already differs between the two new blocks.
+      new_M <- cbind(private$M, private$M[, index])
 
       ## Variational variances
       if (is.matrix(private$S)) {
-        new_S <- cbind(private$S, 0.1)
-        new_S[split2, self$q + 1] <- new_C[split2, index]
-        new_S[split2, index] <- 0.1
+        new_S <- cbind(private$S, private$S[, index])
       } else {
-        new_S <- c(private$S, mean(private$S))
+        new_S <- c(private$S, private$S[index])
       }
-
-      ## Precision matrix
-      new_Omegaq <- cbind(rbind(private$Omegaq,  0), 0)
-      new_Omegaq[index, index] <- private$Omegaq[index, index]/2
-      new_Omegaq[self$q + 1, self$q + 1] <- private$Omegaq[index, index]/2
 
       ## Sparsity weights
       if (self$q == 1) {
@@ -233,13 +249,27 @@ NormalBlockBase <- R6::R6Class(
                              c(weights_cl, 0))
       }
 
+      ## Precision matrix: re-derived from new_M/new_S (already consistent
+      ## with the split), not hand-edited from the parent's Omegaq -- see
+      ## omega_from_M_S().
+      new_Omegaq <- private$omega_from_M_S(new_M, new_S, new_weights)
+
+      ## Mark the result as already initialized (C/Omegaq/M/S/alpha freshly
+      ## derived above, B/dm1 carried over unchanged from the parent -- valid
+      ## since their dimension doesn't depend on q) so that EM_initialize()
+      ## reuses this state instead of discarding it for a fresh heuristic
+      ## Sigmaq/Omegaq estimate, which is both wasted work and a numerical
+      ## stability risk (a candidate clustering from a split/merge is not
+      ## constrained to be "nice" the way a clustering heuristic's output is).
       if (in_place) {
-        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
+        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+                    alpha = colMeans(new_C), warm_started = TRUE)
         self$sparsity_weights <- new_weights
         return(invisible(self))
       } else {
         new_NB <- self$clone()
-        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
+        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+                      alpha = colMeans(new_C), warm_started = TRUE)
         new_NB$sparsity_weights <- new_weights
         return(invisible(new_NB))
       }
@@ -247,27 +277,48 @@ NormalBlockBase <- R6::R6Class(
 
     #' @description generate and select a set of candidate models
     #' by splitting the clusters of the current model
-    candidates_split = function() {
+    #' @param trial_niter number of EM iterations used to cheaply score each
+    #' candidate before [SelectionNClusters] fully re-optimizes the best few
+    #' (`train_best_candidates()`'s `max_training`) -- kept short on purpose.
+    candidates_split = function(trial_niter = 5) {
       # do not split groups with less than 2 guys
       candidates <- map((1:self$q)[self$cluster_sizes > 1], self$split)
-      # keep candidates with at least 2 guys per cluster and non empty split
+      # keep candidates with at least 2 guys per cluster and non empty split.
+      # Compared against the number of currently *live* (non-empty) clusters
+      # rather than self$q: the (V)EM can converge to an empty cluster (a
+      # known general failure mode, e.g. plot_network()'s cluster_sizes fix),
+      # in which case self$q overcounts and every split would otherwise look
+      # invalid, silently stalling explore_forward() before n_clusters_range[2].
       clustering_sizes <- map(candidates, "clustering") %>% map(table)
       min_sizes  <- clustering_sizes %>% map_dbl(min)
       n_clusters <- clustering_sizes %>% map_dbl(length)
-      candidates <- candidates[min_sizes > 1 & n_clusters == self$q + 1]
+      n_live <- length(unique(self$clustering))
+      candidates <- candidates[min_sizes > 1 & n_clusters == n_live + 1]
 
       for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = 5, threshold = 1e-4))
+        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4), warn = FALSE)
       candidates
     },
 
     #' @description generate and select a set of candidate models
     #' by merging the clusters of the current model
-    candidates_merge = function() {
+    #' @param max_candidates merge candidates are, unlike split's, quadratic
+    #' in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
+    #' the most promising ones (largest `|Omegaq[i, j]|`, i.e. the most
+    #' strongly related cluster pairs in the current fit) are actually built
+    #' and trial-optimized, since merging two nearly independent blocks is
+    #' rarely competitive anyway. Set to `Inf` to always try every pair.
+    #' @param trial_niter see [candidates_split()]
+    candidates_merge = function(max_candidates = 30, trial_niter = 2) {
       stopifnot("need at least two clusters to merge them" = self$q > 1)
-      candidates <- map(combn(self$q, 2, simplify = FALSE), self$merge)
+      pairs <- combn(self$q, 2, simplify = FALSE)
+      if (length(pairs) > max_candidates) {
+        score <- map_dbl(pairs, function(ij) abs(private$Omegaq[ij[1], ij[2]]))
+        pairs <- pairs[order(score, decreasing = TRUE)[1:max_candidates]]
+      }
+      candidates <- map(pairs, self$merge)
       for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = 5, threshold = 1e-4))
+        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4), warn = FALSE)
       candidates
     },
 
@@ -281,38 +332,46 @@ NormalBlockBase <- R6::R6Class(
       ## sorting by increasing group label
       indices <- sort(indices)
 
-      ## Cluster merge
-      new_C <- private$C[, -indices[2]]
+      ## Cluster merge. drop = FALSE throughout: merging from q = 2 down to
+      ## q = 1 would otherwise silently drop these to plain vectors/a scalar
+      ## (R's default behavior when only one row/column remains), breaking
+      ## the matrix-indexed assignments right below and omega_from_M_S()'s
+      ## ncol() call further down.
+      new_C <- private$C[, -indices[2], drop = FALSE]
       new_C[, indices[1]] <- private$C[, indices[1]] + private$C[, indices[2]]
 
       ## Variational means
-      new_M <- private$M[, -indices[2]]
+      new_M <- private$M[, -indices[2], drop = FALSE]
       new_M[, indices[1]] <- .5 * (private$M[, indices[1]] + private$M[, indices[2]])
 
       ## Variational variances
       if (is.matrix(private$S)) {
-        new_S <- private$S[, -indices[2]]
+        new_S <- private$S[, -indices[2], drop = FALSE]
         new_S[, indices[1]] <- .5 * (private$S[, indices[1]] + private$S[, indices[2]])
       } else {
         new_S <- private$S[-indices[2]]
         new_S[indices[1]] <- .5 * (private$S[indices[1]] + private$S[indices[2]])
       }
 
-      ## Precision matrix
-      new_Omegaq <- private$Omegaq[-indices[2], -indices[2]]
-      new_Omegaq[indices[1], indices[1]] <-
-        .5 * (private$Omegaq[indices[1], indices[1]] + private$Omegaq[indices[2], indices[2]])
-
       ## Sparsity weights
-      new_weights <-  private$weights[-indices[2], -indices[2]]
+      new_weights <-  private$weights[-indices[2], -indices[2], drop = FALSE]
 
+      ## Precision matrix: re-derived from new_M/new_S (already consistent
+      ## with the merge), not hand-edited from the parent's Omegaq -- see
+      ## omega_from_M_S().
+      new_Omegaq <- private$omega_from_M_S(new_M, new_S, new_weights)
+
+      ## See split()'s comment: mark as warm-started so EM_initialize()
+      ## reuses this state instead of a fresh heuristic Sigmaq/Omegaq.
       if (in_place) {
-        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
+        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+                    alpha = colMeans(new_C), warm_started = TRUE)
         self$sparsity_weights <- new_weights
         return(self)
       } else {
         new_NB <- self$clone()
-        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S)
+        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+                      alpha = colMeans(new_C), warm_started = TRUE)
         new_NB$sparsity_weights <- new_weights
         return(new_NB)
       }
@@ -347,13 +406,76 @@ NormalBlockBase <- R6::R6Class(
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Graphical methods------------------
-    #' @param type char for line type (see plot.default)
-    #' @param log char for logarithmic axes (see plot.default)
-    #' @param neg boolean plot negative log-likelihood (useful when log="y")
-    #' @description plots log-likelihood values during model optimization
-    plot_loglik = function(type = "b", log = "xy", neg = TRUE) {
-      neg <- ifelse(neg, -1, 1)
-      plot(seq_along(self$objective), neg * self$objective, type = type, log = log)
+    #' @param show_increment whether to add, below the objective trace, a second
+    #' panel with the (log10) absolute increment between consecutive iterations
+    #' and the convergence `threshold` used to stop optimize() (dashed line).
+    #' That second panel is what actually tells convergence apart from merely
+    #' running out of iterations: the objective trace alone tends to look flat
+    #' well before the increment has actually crossed the threshold, especially
+    #' as the number of blocks grows (see inst/CSDA_analyses).
+    #' @description plots the evolution of the objective (log-likelihood or ELBO)
+    #' across the (V)EM iterations of the last call to `optimize()`.
+    #' @return a [`ggplot2::ggplot`] graph
+    plot_loglik = function(show_increment = TRUE) {
+      ll  <- private$ll_list
+      obj <- self$objective
+      if (length(obj) == 0 || all(is.na(obj))) {
+        message("No objective trace to plot (heuristic inference does not compute a log-likelihood/ELBO).")
+        return(invisible(NULL))
+      }
+
+      ## The objective (log-lik/ELBO) trace climbs fast then flattens out
+      ## visually on a linear scale, well before it has actually converged
+      ## (the same effect show_increment exists to catch). When every value
+      ## is negative -- always true in practice in this model, since the
+      ## leading -0.5*n*p*log(2*pi) term dominates -- plotting log10(-obj)
+      ## instead spreads out the near-convergence iterations (where -obj is
+      ## smallest) at the expense of the early, already-obvious big jumps,
+      ## the same log-scale trick already used for the increment panel
+      ## below. Left as the raw value in the (rare) edge case where that
+      ## doesn't hold, e.g. a tiny/degenerate fit where the objective is
+      ## not guaranteed negative.
+      obj_is_neg <- all(obj < 0)
+      obj_facet  <- if (obj_is_neg) "log10(-objective)" else "objective"
+      obj_value  <- if (obj_is_neg) log10(-obj) else obj
+
+      dplot <- tibble::tibble(iteration = seq_along(obj), value = obj_value, facet = obj_facet)
+      last_increment <- abs(diff(ll))[length(obj)]
+      converged <- !is.na(private$threshold) && last_increment < private$threshold
+      subtitle  <- if (is.na(private$niter_max)) {
+        sprintf("%d iterations", length(obj))
+      } else if (converged) {
+        sprintf("converged after %d iterations (threshold = %.1e)", length(obj), private$threshold)
+      } else {
+        sprintf("stopped at the %d-iteration cap -- last increment (%.3g) still above threshold (%.1e)",
+                private$niter_max, last_increment, private$threshold)
+      }
+
+      if (show_increment) {
+        dplot <- dplyr::bind_rows(
+          dplot,
+          tibble::tibble(iteration = seq_along(obj), value = log10(abs(diff(ll))), facet = "log10(|increment|)")
+        )
+      }
+      dplot$facet <- factor(dplot$facet, levels = c(obj_facet, "log10(|increment|)"))
+
+      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = iteration, y = value)) +
+        ggplot2::geom_line() + ggplot2::geom_point(size = .8) +
+        ggplot2::ggtitle(label = "(V)EM optimization", subtitle = subtitle) +
+        ggplot2::xlab("iteration") + ggplot2::ylab(NULL) +
+        ggplot2::theme_bw()
+
+      if (show_increment) {
+        p <- p + ggplot2::facet_wrap(~ facet, ncol = 1, scales = "free_y", strip.position = "left")
+        if (!is.na(private$threshold))
+          p <- p + ggplot2::geom_hline(
+            data = data.frame(facet = factor("log10(|increment|)", levels = levels(dplot$facet)),
+                               yintercept = log10(private$threshold)),
+            ggplot2::aes(yintercept = yintercept),
+            linetype = "dashed", colour = "red", alpha = .6
+          )
+      }
+      p
     },
 
     #' @description plot the latent network.
@@ -391,7 +513,7 @@ NormalBlockBase <- R6::R6Class(
         igraph::V(G)$label.cex <- V.deg / max(V.deg) + .5
         igraph::V(G)$size <- tabulate(self$clustering, nbins = self$q) * 100 / self$p
         igraph::V(G)$label.color <- rgb(0, 0, .2, .8)
-        igraph::V(G)$frame.color <- NA
+        igraph::V(G)$frame.color <- "transparent" # NA triggers an igraph plot() warning; same (invisible) rendering
         ## Nice edges
         igraph::E(G)$color <- ifelse(igraph::E(G)$weight > 0, edge.color[1], edge.color[2])
         if (type == "support")
@@ -418,9 +540,10 @@ NormalBlockBase <- R6::R6Class(
       invisible(G)
     },
 
-    #' @description plot together latent network and log-likelihood values during model optimization
+    #' @description plots the evolution of the objective during model optimization
+    #' (see `plot_loglik()`)
     plot = function(){
-      self$plot_loglik(type = "b", log = "xy", neg = TRUE)
+      self$plot_loglik()
     },
 
 
@@ -466,12 +589,34 @@ NormalBlockBase <- R6::R6Class(
     clustering_approx = NA, # name of the clustering heuristic, key into clustering_methods
     ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed)
     niter             = NA, # number of EM iterations required by the inference, if applicable
-    warm_started      = FALSE, # set by warm_start_from(): tells EM_initialize() to reuse
-                                # the current B/dm1/Omegaq (and C/M/S/alpha or gamma/mu)
-                                # instead of (re-)deriving them from the heuristic clustering.
+    niter_max         = NA, # niter cap passed to the last optimize() call (for plot_loglik()'s
+                             # and warn_if_not_converged()'s "did it actually converge or just
+                             # hit the cap?" diagnostic)
+    threshold         = NA, # convergence threshold passed to the last optimize() call (idem)
+    warm_started      = FALSE, # set by warm_start_from() and by split()/merge(): tells
+                                # EM_initialize() to reuse the current B/dm1/Omegaq (and
+                                # C/M/S/alpha or gamma/mu) instead of (re-)deriving them
+                                # from the heuristic clustering.
                                 # Deliberately NOT inferred from "are these fields non-NA",
                                 # which would also be true for split()/merge() clones (those
                                 # keep their own, different, already-tested initialization path).
+
+    ## Warns when the (V)EM stopped because it hit the niter cap rather than
+    ## because it actually converged below threshold -- silently otherwise
+    ## (heuristic fits have no ll_list/niter to check). This is increasingly
+    ## likely as the number of blocks q grows: more latent structure means a
+    ## higher fraction of missing information, hence a slower EM convergence
+    ## rate (see inst/CSDA_analyses) -- the fix for genuinely slow cases is to
+    ## raise `niter` in NB_control(), not to loosen `threshold`.
+    warn_if_not_converged = function() {
+      if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())
+      last_increment <- abs(diff(private$ll_list))[private$niter]
+      if (last_increment >= private$threshold)
+        warning(sprintf(
+          "%s: (V)EM stopped at the niter cap (%d) without reaching the convergence threshold (last increment = %.3g, threshold = %.1e). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.",
+          self$who_am_I, private$niter_max, last_increment, private$threshold), call. = FALSE)
+      invisible()
+    },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated (V)EM inference --------------
@@ -499,6 +644,27 @@ NormalBlockBase <- R6::R6Class(
       Omega
     },
 
+    ## Closed-form M-step estimate of Omegaq directly from M/S (Sigma_hat =
+    ## M'M/n + diag(S)), the same formula the (V)EM's own M-step uses (see
+    ## Sigma_hat_ in src/normal_block_unknown_clusters.h). Used by split()/
+    ## merge() to seed the new model's Omegaq from its freshly built M/S/C
+    ## (already consistent with the new clustering) instead of hand-editing
+    ## the parent's Omegaq, which reflects the *old* clustering. `weights`
+    ## is passed explicitly (rather than reading self$sparsity_weights, as
+    ## get_Omegaq() does) because split()/merge() call this before the new,
+    ## resized sparsity_weights have been assigned anywhere.
+    omega_from_M_S = function(M, S, weights) {
+      s_vec <- if (is.matrix(S)) colMeans(S) else S
+      Sigma_hat <- crossprod(M) / self$n + diag(s_vec, ncol(M))
+      Omega <- if (private$sparsity_ == 0) {
+        solve(Sigma_hat)
+      } else {
+        glasso_out <- glassoFast::glassoFast(Sigma_hat, rho = private$sparsity_ * weights)
+        if (anyNA(glasso_out$wi)) solve(Sigma_hat) else Matrix::symmpart(glasso_out$wi)
+      }
+      ensure_pd(Omega)
+    },
+
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for heuristic inference----------------------
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -510,8 +676,8 @@ NormalBlockBase <- R6::R6Class(
     ## (power = 1: X_original = Y_scale * X_scaled), while dm1 = 1/variance
     ## picks up Y_scale^-2 (Var(Y_original) = Y_scale^2 * Var(Y_scaled), so
     ## dm1_original = dm1_scaled / Y_scale^2, power = -2). Used by the public
-    ## B/dm1 bindings and by fitted() in the 4 leaf classes -- model_par$B/
-    ## model_par$dm1 stay on the internal scale unchanged, since
+    ## B_original/dm1_original bindings and by fitted() in the 4 leaf classes
+    ## -- model_par$B/model_par$dm1 stay on the internal scale unchanged, since
     ## warm_start_from() copies them directly into another model's private
     ## state and must not have them silently rescaled.
     rescale_to_original = function(M, power = 1) {
@@ -561,7 +727,12 @@ NormalBlockBase <- R6::R6Class(
 
     heuristic_Sigmaq_from_Sigma = function(Sigma){
       Sigma_q <- (t(private$C) %*% Sigma %*% private$C) / outer(colSums(private$C), colSums(private$C))
-      ### TODO: why is there any NA?
+      ## NA happens when a cluster ends up empty (colSums(C) == 0 for that
+      ## column): every entry of outer(colSums(C), colSums(C)) involving it
+      ## is then a division by 0 (see the "Initialization failed to place
+      ## elements in each cluster" warning a few lines below this method's
+      ## caller -- the heuristic clustering this feeds from does not reject
+      ## empty clusters outright, unlike the known-clusters constructors).
       if (anyNA(Sigma_q)) {
         diag(Sigma_q)[is.na(diag(Sigma_q))] <- mean(diag(Sigma_q)[!is.na(diag(Sigma_q))])
         Sigma_q[is.na(Sigma_q)] <- 0
@@ -596,15 +767,9 @@ NormalBlockBase <- R6::R6Class(
     ## competitive on university webpages at a fraction of sbm's cost.
     clustering_methods = list(
       kmeans   = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
-      ward2    = function(R, q) {
-        ## cor() is NA for any pair involving a (near-)constant column (e.g.
-        ## a rare ZI variable with a single non-zero residual): treated as
-        ## "uncorrelated" (cor = 0, i.e. the neutral, maximal 1-cor distance)
-        ## rather than letting dist()/hclust() fail on NA input.
-        cor_R <- suppressWarnings(cor(R))
-        cor_R[is.na(cor_R)] <- 0
-        cutree(hclust(dist(1 - cor_R), method = "ward.D2"), q)
-      },
+      ## ward2_tree() (R/utils.R) also backs sbm_clustering_path()'s own
+      ## fallback -- same computation, shared rather than duplicated.
+      ward2    = function(R, q) cutree(ward2_tree(R), q),
       sbm      = function(R, q) {
         options <- list(verbosity = 0, exploreMin = q, exploreMax = q, plot = FALSE, nbCores = 1)
         mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)

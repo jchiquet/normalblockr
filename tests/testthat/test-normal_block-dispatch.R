@@ -23,29 +23,29 @@ test_that("normal_block() dispatches unknown-clusters models (single integer blo
   expect_s3_class(m2, "ZINormalBlockUnknownClusters")
 })
 
-test_that("normal_block() dispatches NormalBlockChangingSparsity for sparsity = TRUE", {
+test_that("normal_block() dispatches NormalBlockCollectionSparsity for sparsity = TRUE", {
   control <- fast
   control$sparsity_penalties <- c(0.1, 0.05)
   m1 <- normal_block(data, blocks = 2, sparsity = TRUE, zero_inflation = FALSE, control = control)
-  expect_s3_class(m1, "NormalBlockChangingSparsity")
+  expect_s3_class(m1, "NormalBlockCollectionSparsity")
   ## zero_inflation propagates to the models in the collection, not to the
   ## collection's own class name
   m2 <- normal_block(data, blocks = C, sparsity = TRUE, zero_inflation = TRUE, control = control)
-  expect_s3_class(m2, "NormalBlockChangingSparsity")
+  expect_s3_class(m2, "NormalBlockCollectionSparsity")
   expect_s3_class(m2$models[[1]], "ZINormalBlockKnownClusters")
 })
 
-test_that("normal_block() dispatches NormalBlockUnknownQ for a vector of candidate block counts", {
+test_that("normal_block() dispatches NormalBlockCollectionClusters for a vector of candidate block counts", {
   m1 <- normal_block(data, blocks = c(2, 3), zero_inflation = FALSE, control = fast)
-  expect_s3_class(m1, "NormalBlockUnknownQ")
+  expect_s3_class(m1, "NormalBlockCollectionClusters")
   m2 <- normal_block(data, blocks = c(2, 3), zero_inflation = TRUE, control = fast)
-  expect_s3_class(m2, "NormalBlockUnknownQ")
+  expect_s3_class(m2, "NormalBlockCollectionClusters")
   expect_s3_class(m2$models[[1]], "ZINormalBlockUnknownClusters")
 })
 
-test_that("normal_block() dispatches NormalBlockUnknownQChangingSparsity for sparsity = TRUE and a vector of block counts", {
+test_that("normal_block() dispatches NormalBlockCollectionClustersSparsity for sparsity = TRUE and a vector of block counts", {
   control <- fast
   control$sparsity_penalties <- c(0.1, 0.05)
   m1 <- normal_block(data, blocks = c(2, 3), sparsity = TRUE, zero_inflation = FALSE, control = control)
-  expect_s3_class(m1, "NormalBlockUnknownQChangingSparsity")
+  expect_s3_class(m1, "NormalBlockCollectionClustersSparsity")
 })

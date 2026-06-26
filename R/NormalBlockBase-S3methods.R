@@ -14,7 +14,7 @@ isNB <- function(object) {inherits(object, "NormalBlockBase")}
 #' @title Extracts model coefficients from objects returned by [NormalBlockBase()] and its variants
 #' @description Extract coefficients from an NormalBlockBase object.
 #' @param object An object of class NormalBlockBase.
-#' @param ... not use, only here for S3 compatibility
+#' @param ... not used, only here for S3 compatibility
 #' @return A matrix of coefficients extracted from the NormalBlockBase model.
 #' @export
 coef.NormalBlockBase <- function(object, ...){
@@ -22,11 +22,11 @@ coef.NormalBlockBase <- function(object, ...){
   object$model_par$B
 }
 
-#' @title Extracts model coefficients from objects returned by [NormalBlockBase()] and its variants
-#' @description Extract coefficients from an NormalBlockBase object.
+#' @title Extracts the latent-block covariance matrix from objects returned by [NormalBlockBase()] and its variants
+#' @description Extract the covariance matrix between latent blocks (the inverse of `Omegaq`) from a NormalBlockBase object.
 #' @param object An object of class NormalBlockBase.
-#' @param ... not use, only here for S3 compatibility
-#' @return A matrix of coefficients extracted from the NormalBlockBase model.
+#' @param ... not used, only here for S3 compatibility
+#' @return The q x q covariance matrix between latent blocks.
 #' @importFrom stats sigma
 #' @export
 sigma.NormalBlockBase <- function(object, ...){
@@ -37,8 +37,8 @@ sigma.NormalBlockBase <- function(object, ...){
 #' @title Extracts fitted values from objects returned by [NormalBlockBase()] and its variants
 #' @description Extract fitted values from an NormalBlockBase object.
 #' @param object An object of class NormalBlockBase.
-#' @param ... not use, only here for S3 compatibility
-#' @return A matrix of Fitted values extracted from the object object.
+#' @param ... not used, only here for S3 compatibility
+#' @return A matrix of fitted values extracted from the object.
 #' @export
 fitted.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
@@ -50,7 +50,7 @@ fitted.NormalBlockBase <- function(object, ...){
 #' @description Predicts observations Y for new covariates X.
 #' @param object An object of class NormalBlockBase.
 #' @param new_X New set of covariates.
-#' @param ... not use, only here for S3 compatibility
+#' @param ... not used, only here for S3 compatibility
 #' @return A n*p prediction matrix for new observations
 #' @export
 predict.NormalBlockBase <- function(object, new_X, ...){

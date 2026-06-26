@@ -69,37 +69,34 @@ normal_block <- function(data,
 #' useful for calls to fixed_q models in stability_selection
 #' @param clustering_init how to obtain the initial clustering of the q unknown
 #' blocks. Either the name of a clustering heuristic -- one of "ward2"
-#' (default), "kmeans", "sbm" or "spectral" (k-means on the row-normalized
-#' eigenvectors of cov(R), a cheap proxy for clustering the residuals'
-#' covariance structure rather than their values) -- or an actual clustering
-#' to use directly, as a vector of labels or a p x q indicator matrix. When q
-#' is unknown (a collection over several q values), can also be a list with
-#' one such heuristic name/clustering per q value. No single heuristic
-#' dominates on every dataset (see
-#' inst/clustering_initialization_benchmark for a benchmark); "ward2" is the
-#' default because, combining each method's BIC rank with how often its
-#' deviance path violates the model's theoretical guarantee (deviance should
-#' be non-increasing in q) as a measure of how reliably it lets the (V)EM
-#' converge, it gives the best balance of the two -- not because it has the
-#' single best raw rank (kmeans does, marginally, but with far more and
-#' larger monotonicity violations). When fitting a collection over several
-#' values of q
-#' (`normal_block(blocks = <vector>)`, [NormalBlockUnknownQ],
-#' [NormalBlockUnknownQChangingSparsity]) with the heuristic name "sbm" (and no
-#' per-q list of explicit clusterings), a single SBM exploration runs over the
-#' whole range of q and is reused for every model in the collection instead of
-#' repeating an independent (and increasingly costly) exploration for each q;
-#' any q its own model-selection does not reach falls back to a cheap "ward2"
-#' clustering rather than a dedicated (and potentially expensive) SBM call.
+#' (default), "kmeans", "sbm" or "spectral" (a cheap proxy for "sbm": k-means
+#' on the row-normalized eigenvectors of cov(R)) -- or an actual clustering to
+#' use directly, as a vector of labels or a p x q indicator matrix. When q is
+#' unknown (a collection over several q values), can also be a list with one
+#' such heuristic name/clustering per q value. No single heuristic dominates
+#' on every dataset (see inst/clustering_initialization_benchmark); "ward2" is
+#' the default for giving the best balance of BIC rank and how rarely its
+#' deviance path violates the model's "non-increasing in q" guarantee -- a
+#' reliability signal "kmeans" lacks despite a marginally better raw rank.
+#' With the heuristic name "sbm" on a collection (and no per-q list of
+#' explicit clusterings), a single SBM exploration runs over the whole range
+#' of q and is reused for every model instead of repeating one per q; any q
+#' it doesn't reach falls back to a cheap "ward2" clustering.
 #' @param verbose telling if information should be printed during optimization
 #' @param noise_covariance variance can be variable specific ("diagonal", the default) or common ("spherical")
 #' @param heuristic whether to use the heuristic approach (moment-based, no (V)EM
 #' recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no
 #' likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
 #' are all `NA` on the resulting model.
+#' @param refine for [NormalBlockCollectionClusters] only: whether
+#' `optimize()` should automatically call `refine()` afterwards (see its
+#' documentation for the rationale and an empirical before/after comparison).
+#' Default `FALSE` -- it adds real cost (roughly 3x the time of fitting the
+#' collection alone), so it is opt-in; call `collection$refine()` directly at
+#' any point afterwards for the same effect without setting this.
 #' @export
 NB_control <- function(
-    niter                = 100,
+    niter                = 500,
     threshold            = 1e-4,
     sparsity_weights     = NULL,
     sparsity_penalties   = NULL,
@@ -109,7 +106,8 @@ NB_control <- function(
     clustering_init      = "ward2",
     verbose              = TRUE,
     heuristic            = FALSE,
-    noise_covariance     = c("diagonal", "spherical")) {
+    noise_covariance     = c("diagonal", "spherical"),
+    refine               = FALSE) {
 
   if (!is.null(sparsity_weights))
     stopifnot(all(is.matrix(sparsity_weights), isSymmetric(sparsity_weights)))
@@ -128,7 +126,8 @@ NB_control <- function(
                  clustering_init      = clustering_init      ,
                  verbose              = verbose              ,
                  heuristic            = heuristic            ,
-                 noise_covariance     = match.arg(noise_covariance)))
+                 noise_covariance     = match.arg(noise_covariance),
+                 refine               = refine               ))
 }
 
 
@@ -139,7 +138,7 @@ NB_control <- function(
 #' OR float to run model with a single penalty value
 #' @param zero_inflation boolean to indicate if Y is zero-inflated and adjust fitted model as a consequence
 #' @param control a list-like structure for detailed control on parameters should be
-#' generated with normal_block_control() for collections of sparse models
+#' generated with NB_control() for collections of sparse models
 #' @param data contains the matrix of responses (Y) and the design matrix (X).
 #' @export
 get_model <- function(data,
@@ -154,11 +153,11 @@ get_model <- function(data,
 
   if (is_collection) {
     class_name <- if (changing_sparsity && unknown_q_list) {
-      "NormalBlockUnknownQChangingSparsity"
+      "NormalBlockCollectionClustersSparsity"
     } else if (changing_sparsity) {
-      "NormalBlockChangingSparsity"
+      "NormalBlockCollectionSparsity"
     } else {
-      "NormalBlockUnknownQ"
+      "NormalBlockCollectionClusters"
     }
   } else {
     class_name <- if (is.matrix(blocks)) "NormalBlockKnownClusters" else "NormalBlockUnknownClusters"

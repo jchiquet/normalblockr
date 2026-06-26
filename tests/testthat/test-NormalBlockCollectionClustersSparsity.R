@@ -13,7 +13,7 @@ C <- testdata$parameters$C ; q <- ncol(C)
 data  <- normalblockr:::NormalBlockData$new(Y, X)
 
 test_that("normal block with spherical residual covariance and unknown clusters", {
-  model <- normalblockr:::NormalBlockUnknownQChangingSparsity$new(data, c(2,3,4))
+  model <- normalblockr:::NormalBlockCollectionClustersSparsity$new(data, c(2,3,4))
   model$optimize()
   model_BIC <- model$get_best_model("BIC")
   expect_lt(model_BIC$BIC, 5509)
@@ -22,7 +22,7 @@ test_that("normal block with spherical residual covariance and unknown clusters"
 
 test_that("normal block with spherical residual covariance and unknown clusters heuristic", {
   data <- NormalBlockData$new(Y, X)
-  model <- normalblockr:::NormalBlockUnknownQChangingSparsity$new(data, c(2,3,4),
+  model <- normalblockr:::NormalBlockCollectionClustersSparsity$new(data, c(2,3,4),
                                               control = NB_control(heuristic = TRUE))
   model$optimize()
   model_1 <- model$get_model(3, 0.1)

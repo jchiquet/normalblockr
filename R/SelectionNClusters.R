@@ -4,8 +4,17 @@
 
 #' R6 class for selecting the number of clusters (q) by forward/backward
 #' split-and-merge exploration, comparing models with the ICL
+#'
+#' Kept internal/unexported for reference: empirically (see
+#' [NormalBlockCollectionClusters]'s `refine()` documentation) chaining every
+#' q from a single starting point this way is no longer recommended over
+#' [NormalBlockCollectionClusters]'s independent per-q cold starts followed
+#' by `refine()` -- the latter matches or beats this class's quality at a
+#' fraction of the cost on every real dataset tested, and has no equivalent
+#' to this class's failure mode (an early bad split/merge propagating to
+#' every larger q it explores from there).
 #' @import tibble
-#' @export
+#' @keywords internal
 SelectionNClusters <- R6::R6Class(
   classname = "SelectionNClusters",
 

@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{An object of class NormalBlockBase.}
 
-\item{...}{not use, only here for S3 compatibility}
+\item{...}{not used, only here for S3 compatibility}
 }
 \value{
 A matrix of coefficients extracted from the NormalBlockBase model.
