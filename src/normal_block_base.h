@@ -37,22 +37,24 @@ protected:
 
   // Opt-in gate for the SQUAREM-style acceleration in run_em() (see its
   // docstring). Defaults to off. Currently overridden to (conditionally)
-  // `true` by NormalBlockKnownClusters and ZINormalBlockKnownClusters only
-  // (both: sparsity_ <= 0; see each class's own override for why sparsity_ >
-  // 0 is excluded). Both rely on objective() being the *general* (valid at
-  // any theta) marginal log-likelihood, recomputing Mu_/Gamma_ fresh from
-  // (B_, dm1_, Omegaq_) on every call rather than reading anything E_step()
-  // cached -- without that, the objective-comparison acceptance test in
-  // try_squarem_step() would be comparing apples to oranges (theta_old's
-  // posterior plugged into theta_new's M-step output is not log p(Y;
-  // theta_new), only a lower bound for it). NormalBlockUnknownClusters
-  // additionally carries cluster-membership probabilities (tau) and prior
-  // probabilities (alpha) that the extrapolated vector below doesn't track,
-  // which go stale relative to an aggressively extrapolated theta even if
-  // its own objective() were made general the same way -- not attempted.
-  // ZINormalBlockUnknownClusters inherits that same problem. Override to
-  // return `true` only once a subclass has been validated the same way (see
-  // git history for both currently-accelerated classes' validation).
+  // `true` by all four leaf classes (each: sparsity_ <= 0; see each class's
+  // own override for why sparsity_ > 0 is excluded -- glassoFast's
+  // approximate M-step makes even *plain* EM/VEM's own ascent unreliable
+  // there, and SQUAREM's larger jumps amplify that pre-existing
+  // instability for a much smaller speedup than the unpenalized case).
+  // tau/alpha/M/S (the variational state of the two *Unknown* classes) and
+  // Mu/Gamma (the posterior moments of the two *Known* classes) are never
+  // part of the extrapolated vector below -- they are always refreshed by a
+  // real E_step()/VE-step before every objective() comparison, so the
+  // comparison is sound regardless of which subclass: for the Known
+  // classes, because objective() is then the *general* marginal
+  // log-likelihood (valid at any theta, not just an M-step optimum -- the
+  // fix that this acceleration originally needed, see git history); for
+  // the Unknown classes, because every such comparison happens right after
+  // a fresh VE-step+M-step pair, exactly the regime their existing
+  // *profiled* ELBO shortcut was already valid in (no analogous sign bug
+  // there to begin with). Override to return `true` only once a subclass
+  // has been validated this way (see git history for all four).
   virtual bool supports_acceleration() const { return false; }
 
   // Used by every subclass's restore_from() override to copy back the
