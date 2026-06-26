@@ -6,9 +6,10 @@ output:
   rmarkdown::html_vignette:
     toc: true
     toc_depth: 4
+bibliography: references.bib
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Analyzing multivariate Gaussian data with the Normal-Block model}
+  %\VignetteIndexEntry{Analyzing multivariate Gaussian data with the Normal-Block model - First steps}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -21,11 +22,11 @@ knitr::opts_chunk$set(
 
 # Preliminaries
 
-This vignette illustrates the use of the normal-block function and the methods accompanying the R6 normal-block classes.
+This vignette illustrates the use of the `normal_block()` function and the methods accompanying its R6 classes.
 
-From a statistical point of view, the function normal-block adjusts a multivariate Normal-Block model (Gaussian graphical model with a latent clustering structure) to a table of observations, possibly after correcting for the effects of covariates. Depending on the parameters given, the function uses the clustering that is given or infers one, integrates zero-inflation or not, infers a sparse network or not... The parameters inference can either be done with an integrated variational Expectation-Maximization approach (recommended) or with a heuristic approach.
+From a statistical point of view, the `normal_block()` function fits a multivariate Normal-Block model (a Gaussian graphical model with a latent clustering structure) to a table of observations, possibly after correcting for the effect of covariates. Depending on the arguments given, the function uses a clustering supplied by the user or infers one, includes zero-inflation or not, infers a sparse network or not, and so on. Parameter inference can either be done with an integrated variational Expectation-Maximization approach (recommended) or with a faster heuristic approach.
 
-Theoretical explanations for this model can be found in the pre-print "An integrated method for clustering and association network inference" (Chiquet et al., 2024).
+Theoretical explanations for this model can be found in @tous2026. See `inst/normal_block_models.qmd` in the package sources for the full estimation details (criteria, E/M updates).
 
 ### Requirements
 
@@ -45,7 +46,7 @@ Fix the seed to make the results reproducible.
 set.seed(1)
 ```
 
-Simulate data with generate_normal_block_data.
+Simulate data with `generate_normal_block_data()`.
 
 ## Fix simulation parameters
 
@@ -55,21 +56,21 @@ Several parameters need to be defined to simulate the data:
 n = 100 # Number of samples (number of rows in the matrix of observations)
 p = 40  # Number of entities observed (number of columns in the matrix of observations)
 d = 2   # Number of covariates
-Q = 3   # Number of clusters
+q = 3   # Number of clusters
 kappa = 0 # Mean zero-inflation probability (can also be a vector to define one ZI-probability for each variable). kappa = 0 means that there is no zero-inflation.
 omega_structure = "erdos-renyi" # Network structure.
 u_v = c(0.3, 0.1) # Parameters to generate an association matrix from a graph, details given in the bibliography.
 SNR = 0.75 # Signal to Noise Ratio, defines the relative weight of the covariates and the variance
-alpha = rep(1/Q, Q) # Vector giving probabilities of belonging to each cluster
+alpha = rep(1/q, q) # Vector giving probabilities of belonging to each cluster
 range_X = c(0, 10)  # Min and max values for the covariates 
 range_D = c(0.5, 1.5) # Min and max values for the individual entities variances 
 ```
 
 ## Simulation 1 (no zero-inflation)
-**generate_normal_block_data** generates data under the Normal-Block model. It returns a list that contains the simulated covariates $X$ and observations $Y$, the simulation parameters (including the clustering $C$). 
+`generate_normal_block_data()` generates data under the Normal-Block model. It returns a list containing the simulated covariates $X$ and observations $Y$, and the simulation parameters (including the clustering $C$).
 
 ```{r, simulation1}
-my_nb_data <- generate_normal_block_data(n, p, d, Q, kappa, omega_structure, u_v,
+my_nb_data <- generate_normal_block_data(n, p, d, q, kappa, omega_structure, u_v,
                                         SNR, alpha, range_X, range_D)
 ```
 
@@ -85,8 +86,10 @@ To generate zero-inflated data, we set-up kappa as a vector of zero-inflation pr
 ```{r, simulation2}
 kappa_zi <- rnorm(p, mean = 0.7, sd = 0.05)
 kappa_zi <- unlist(lapply(kappa_zi, f <- function(x) return(max(0, min(x, 0.9)))))
-my_nb_data_zi <- generate_normal_block_data(n, p, d, q = 5, kappa_zi, omega_structure,
-                                            u_v, SNR, alpha, range_X, range_D)
+my_nb_data_zi <- generate_normal_block_data(n = n, p = p, d = d, q = 5, kappa = kappa_zi,
+                                            omega_structure = omega_structure, u_v = u_v,
+                                            SNR = SNR, alpha = alpha,
+                                            range_X = range_X, range_D = range_D)
 ```
 For a better visualization of the zero-inflated data, we set-up the 0 to be shown in white.
 
@@ -103,17 +106,17 @@ pheatmap::pheatmap(my_nb_data_zi$Y,
 ```
 
 
-# Prepare the data for a normal-block analysis
-A specific data object of class **NormalBlockData** needs to be created to analyse the data with normalblockr.
+# Prepare the data for a Normal-Block analysis
+A specific data object of class `NormalBlockData` needs to be created to analyse the data with `normalblockr`.
 
-One can either use Y and X only to generate the **NormalBlockData** object.
+One can use $Y$ and $X$ alone to create the `NormalBlockData` object.
 
 ```{r, NormalBlockData}
 my_data    <- NormalBlockData$new(my_nb_data$Y, my_nb_data$X)
 my_data_zi <- NormalBlockData$new(my_nb_data_zi$Y, my_nb_data_zi$X)
 ```
 
-Alternatively, if one only wants to include some of the covariates contained in X, a formula can be used to specify which one:
+Alternatively, if one only wants to include some of the covariates contained in $X$, a formula can be used to specify which one:
 
 ```{r, NormalBlockData-alt}
 colnames(my_data$X) <- c("X1", "X2")
@@ -121,31 +124,31 @@ my_data_alt    <- NormalBlockData$new(my_data$Y, my_data$X, formula = ~ 0 + X1)
 ```
 
 
-# Run a normal-block analysis
-All normal-block analyses can be run with the **normal_block** function. The function is called with different parametrisations depending on whether the clustering or the number of clusters is known or not, and according to the requested level of sparsity, among other factors. Details about this can be found in the function's documentation. 
+# Run a Normal-Block analysis
+All Normal-Block analyses are run with the `normal_block()` function, called with different arguments depending on whether the clustering (or the number of clusters) is known, and on the requested level of sparsity, among other factors. See `?normal_block` for full details.
 
-By default, the parameters are inferred using a variational Expectation Maximization approach with 100 iterations. A finer control of the optimization is possible with the **control** parameter of **normal_block** that must be a list generated by the **NB_control** function.
+By default, the parameters are inferred using a variational Expectation-Maximization approach, with up to 500 iterations. Finer control of the optimization is possible through the `control` argument of `normal_block()`, a list generated by `NB_control()`.
 
 ## With non-zero-inflated data
 ### Fixed clustering
-When the variables' clustering is known, one can directly give them as an input to the **normal_block** function.
+When the variables' clustering is known, it can be given directly as an input to `normal_block()`.
 
 ```{r, simulation1-NB1}
 my_NB <- normal_block(data = my_data,
                       blocks = my_nb_data$parameters$C)
 ```
 
-The model convergence can be checked with **plot**.
+Convergence of the model can be checked with `plot()`.
 
 ```{r, simulation1-NB1-plot}
 plot(my_NB)
 ```
 
-A summary of the results is accessible via **print**.
+A summary of the results is accessible via `print()`.
 ```{r, simulation1-NB1-print}
 print(my_NB)
 ```
-The inter-clusters association network can be visualized with the **plot_network** function.
+The inter-cluster association network can be visualized with the `plot_network()` function.
 
 ```{r, simulation1-NB1-plot_network}
  my_NB$plot_network()
@@ -153,7 +156,7 @@ The inter-clusters association network can be visualized with the **plot_network
 
 
 ### Fixed number of clusters
-When the variables' clustering is unknown, one can simply fix the number of clusters in the **blocks** parameter.
+When the variables' clustering is unknown, the number of clusters can simply be fixed via the `blocks` argument.
 
 ```{r, simulation1-NB2}
 my_NB <- normal_block(data = my_data,
@@ -161,7 +164,7 @@ my_NB <- normal_block(data = my_data,
 print(my_NB)
 plot(my_NB)
 ```
-The clustering inferred by the **normal_block** function can be compared with the real clustering if it is known.
+The clustering inferred by `normal_block()` can be compared with the true clustering, when it is known:
 
 ```{r, simulation1-ARI}
 aricode::ARI(my_NB$clustering, apply(my_nb_data$parameters$C, 1, which.max))
@@ -169,19 +172,19 @@ aricode::ARI(my_NB$clustering, apply(my_nb_data$parameters$C, 1, which.max))
 
 
 ### Unknown number of clusters
-When the number of clusters is unknown, one can give the **normal_block** function a range of possible numbers and get a collection of Normal-Block models, one per number of clusters.
+When the number of clusters is unknown, `normal_block()` can be given a range of candidate values instead, returning a collection of Normal-Block models, one per number of clusters.
 
 ```{r, simulation1-NB3}
 my_NB_unknown <- normal_block(data = my_data,
                       blocks = 2:5)
 ```
-**my_NB_unknown** is a collection of Normal-Block models. It is possible to select a specific one either by picking a number of clusters or by selecting the best model for a given criterion (BIC, deviance, EBIC, ICL). The values for these criteria for each model can be seen with the **plot** function.
+`my_NB_unknown` is a collection of Normal-Block models. A specific one can be selected either by its number of clusters or as the best model for a given criterion (BIC, deviance, EBIC or ICL). The value of each criterion, for every model in the collection, can be visualized with `plot()`.
 
 ```{r, simulation1-NB3-plot}
 plot(my_NB_unknown)
 ```
 
-The model selection is done with **get_model** when a specific number of clusters is required and with **get_best_model** to select the best model for a given criterion.
+Model selection is done with `get_model()` when a specific number of clusters is required, and with `get_best_model()` to select the best model for a given criterion.
 
 ```{r, simulation1-NB3-model-selection}
 myNB_3   <- my_NB_unknown$get_model(3)
@@ -190,9 +193,9 @@ myNB_BIC <- my_NB_unknown$get_best_model("BIC")
 
 
 ### Playing with sparsity
-By default, no penalty is applied on the association network. One can add a penalty by using the sparsity parameter of the **normal_block** function. This can be done with any of the above parametrisation (fixed clustering, fixed number of clusters, unknown number of clusters). Let us show an example with a fixed clustering.
+By default, no penalty is applied to the association network. A penalty can be added via the `sparsity` argument of `normal_block()`, with any of the parametrizations seen above (fixed clustering, fixed number of clusters, or unknown number of clusters). The example below uses a fixed clustering.
 
-If one wants to use a fixed $l_1$ penalty (see Tous & Chiquet, 2024) on the network, that value should be given in the sparsity parameter.
+To use a fixed $\ell_1$ penalty [@tous2026] on the network, pass that value to the `sparsity` argument:
 ```{r, simulation1-NB-fixed-sparsity}
 my_NB_sparse_low <- normal_block(data = my_data,
                                  blocks = my_nb_data$parameters$C,
@@ -201,14 +204,14 @@ my_NB_sparse_high <- normal_block(data = my_data,
                                   blocks = my_nb_data$parameters$C,
                                   sparsity = 10)
 ```
-The bigger the penalty, the sparser the network.
+The larger the penalty, the sparser the network.
 ```{r, simulation1-NB-low-sparsity-plot}
 my_NB_sparse_low$plot_network()
 ```
 ```{r, simulation1-NB-high-sparsity-plot}
 my_NB_sparse_high$plot_network()
 ```
-It is usually hard to know a priori what would be the best sparsity penalty. One can allow the **normal_block** function to explore different sparsity levels by simply setting **sparsity = TRUE**. The **normal_block** function then creates a collection of Normal-Block models, one per sparsity penalty.
+It is usually hard to know a priori which sparsity penalty is best. `normal_block()` can instead explore a range of sparsity levels by simply setting `sparsity = TRUE`, which returns a collection of Normal-Block models, one per sparsity penalty.
 
 ```{r, simulation1-NB-changing-sparsity}
 my_NB_sparse <- normal_block(data = my_data,
@@ -216,7 +219,7 @@ my_NB_sparse <- normal_block(data = my_data,
                              sparsity = TRUE)
 ```
 
-The different criteria can then be plotted as a function of the penalty, using **plot**.
+The different criteria can then be plotted as a function of the penalty, using `plot()`.
 ```{r, simulation1-NB-changing-sparsity-plot}
 plot(my_NB_sparse)
 ```
@@ -226,7 +229,7 @@ myNB_sparse_0.1   <- my_NB_sparse$get_model(0.1)
 myNB_sparse_BIC   <- my_NB_sparse$get_best_model("BIC")
 ```
 
-One can also make both the sparsity penalty and the number of clusters vary. 
+Both the sparsity penalty and the number of clusters can also be left to vary jointly.
 
 ```{r, simulation1-NB-sparse_unknown}
 my_NB_sparse_unknown <-  normal_block(data = my_data,
@@ -234,18 +237,18 @@ my_NB_sparse_unknown <-  normal_block(data = my_data,
                                       sparsity = TRUE)
 ```
 
-The result is a collection of normal-block models with different numbers of clusters and ifferent penalties.
+The result is a collection of Normal-Block models with different numbers of clusters and different penalties.
 ```{r, simulation1-NB-sparse_unknown-who-am-I}
 my_NB_sparse_unknown$who_am_I
 ```
 
 
-The plot function allows one to analyse each criterion as a function of the number of clusters and of the penalties. By default, the penalties to be tested are computed by the **normal_block** function for each number of clusters and they can be different from one number to another, this explains the blanks in the plot.
+`plot()` allows each criterion to be analysed as a function of both the number of clusters and the penalty. By default, the penalties tested are computed by `normal_block()` separately for each number of clusters, and can differ from one to another -- which is what the blanks in the plot come from.
 ```{r, simulation1-NB-sparse_unknown-plot}
 plot(my_NB_sparse_unknown, "BIC")
 ```
 
-Model selection is also done using the **get_model** and **get_best_model** functions. Using  **get_model**, one can either fix the n umber of clusters only and get a collection of model with different sparsity levels, or fix both the number of clusters and the sparsity level. 
+Model selection is also done using `get_model()` and `get_best_model()`. With `get_model()`, one can fix only the number of clusters, getting back a collection of models with different sparsity levels, or fix both the number of clusters and the sparsity level.
 
 ```{r, simulation1-NB-sparse_unknown-selection}
 my_NB_sparse_3     <- my_NB_sparse_unknown$get_model(3)
@@ -253,7 +256,7 @@ my_NB_sparse_3_0.1 <- my_NB_sparse_unknown$get_model(3, 0.1)
 ```
 
 ## With zero-inflated data
-The process is similar with zero-inflated data but one needs to specifgy that the data is zero-inflated in the **normal_block** function. We show an example with a fixed number of blocks and no penalty on the network.
+The process is similar with zero-inflated data, but `zero_inflation = TRUE` must be passed to `normal_block()`. The example below uses a fixed number of blocks and no penalty on the network.
 
 ```{r, simulation2-NB}
 my_NB_zi <- normal_block(data = my_data_zi,
@@ -273,5 +276,6 @@ aricode::ARI(my_NB_zi$clustering,
              apply(my_nb_data_zi$parameters$C, 1, which.max))
 ```
 
+# References
 
 

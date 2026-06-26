@@ -15,13 +15,14 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 
 ## Description
 
-> The Normal-Block model[^1] can be used to analyse multivariate
-> Gaussian data with underlying latent structure. The model infers a
-> structure of statistical dependencies between the clusters identified
-> (or given) in the observations. This package implements an efficient
-> (variational) EM algorithm to fit it, accompanied by a set of
-> functions for model selection, visualization and diagnostic. See [all
-> the dedicated
+> The Normal-Block model[^1] is a Gaussian graphical model with a latent
+> clustering structure, designed for the multivariate analysis of
+> continuous data: it clusters variables and, building on the graphical
+> lasso, infers a network of statistical dependencies *between clusters*
+> rather than between individual variables. This package implements an
+> efficient (variational) EM algorithm to fit it, accompanied by a set
+> of functions for model selection, visualization and diagnostic. See
+> [all the dedicated
 > vignettes](https://jeannetous.github.io/normalblockr/articles/) for a
 > comprehensive introduction.
 
