@@ -727,7 +727,12 @@ NormalBlockBase <- R6::R6Class(
 
     heuristic_Sigmaq_from_Sigma = function(Sigma){
       Sigma_q <- (t(private$C) %*% Sigma %*% private$C) / outer(colSums(private$C), colSums(private$C))
-      ### TODO: why is there any NA?
+      ## NA happens when a cluster ends up empty (colSums(C) == 0 for that
+      ## column): every entry of outer(colSums(C), colSums(C)) involving it
+      ## is then a division by 0 (see the "Initialization failed to place
+      ## elements in each cluster" warning a few lines below this method's
+      ## caller -- the heuristic clustering this feeds from does not reject
+      ## empty clusters outright, unlike the known-clusters constructors).
       if (anyNA(Sigma_q)) {
         diag(Sigma_q)[is.na(diag(Sigma_q))] <- mean(diag(Sigma_q)[!is.na(diag(Sigma_q))])
         Sigma_q[is.na(Sigma_q)] <- 0

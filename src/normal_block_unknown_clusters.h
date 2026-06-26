@@ -27,7 +27,7 @@ class NormalBlockUnknownClusters : public NormalBlockBase {
                         // changes M_/S_ between M_step() and objective())
 
   void E_step() override {
-    R_ = data_.Y - data_.X * B_;
+    R_ = data_.Y - XB();
 
     arma::mat dm1C = C_;
     dm1C.each_col() %= dm1_;
@@ -49,8 +49,8 @@ class NormalBlockUnknownClusters : public NormalBlockBase {
 
   void M_step() override {
     arma::mat MCT = M_ * C_.t();
-    B_ = data_.XtXm1 * (data_.X.t() * (data_.Y - MCT));
-    R_ = data_.Y - data_.X * B_;
+    set_B(data_.XtXm1 * (data_.X.t() * (data_.Y - MCT)));
+    R_ = data_.Y - XB();
 
     arma::mat M2plusS = arma::square(M_);
     M2plusS.each_row() += S_.t();

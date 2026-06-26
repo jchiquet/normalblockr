@@ -9,10 +9,10 @@
 \arguments{
 \item{object}{An object of class NormalBlockBase.}
 
-\item{...}{not use, only here for S3 compatibility}
+\item{...}{not used, only here for S3 compatibility}
 }
 \value{
-A matrix of Fitted values extracted from the object object.
+A matrix of fitted values extracted from the object.
 }
 \description{
 Extract fitted values from an NormalBlockBase object.

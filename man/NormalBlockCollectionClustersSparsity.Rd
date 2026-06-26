@@ -69,7 +69,7 @@ R6 class for a collection of normal-block models with different number of cluste
 \if{html}{\out{<a id="method-NormalBlockCollectionClustersSparsity-get_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClustersSparsity-get_model}{}}}
 \subsection{\code{NormalBlockCollectionClustersSparsity$get_model()}}{
-  returns a collection of NB_unknown models corresponding to given q
+  returns a collection of models corresponding to given q
 or one single model if penalty is also given
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
@@ -80,7 +80,7 @@ or one single model if penalty is also given
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{q}}{number of blocks asked by user.}
-      \item{\code{sparsity}}{sparsity penalty penalty asked by user}
+      \item{\code{sparsity}}{sparsity penalty asked by user}
     }
     \if{html}{\out{</div>}}
   }
@@ -105,12 +105,12 @@ or one single model if penalty is also given
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{crit}}{a character for the criterion used to performed the selection.
-Either "BIC", "EBIC" or "ICL. "ICL" is the default criterion}
+Either "BIC", "EBIC" or "ICL". "ICL" is the default criterion}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    a [`NB_unknown`] object
+    a [`NormalBlockUnknownClusters`] object
   }
 }
 

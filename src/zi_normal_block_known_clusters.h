@@ -37,7 +37,7 @@ class ZINormalBlockKnownClusters : public NormalBlockBase {
   }
 
   void E_step() override {
-    R_ = zi_data_.Y - zi_data_.X * B_;
+    R_ = zi_data_.Y - XB();
     dm1_mat_ = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
     arma::mat dm1C = dm1_mat_ * C_;             // n x q
     arma::mat Rdm1C = (R_ % dm1_mat_) * C_;     // n x q
@@ -50,8 +50,8 @@ class ZINormalBlockKnownClusters : public NormalBlockBase {
 
   void M_step() override {
     arma::mat MuCT = Mu_ * C_.t();
-    B_ = nb_optim::solve_wls(dm1_mat_, zi_data_.Y, zi_data_.X, MuCT);
-    R_ = zi_data_.Y - zi_data_.X * B_;
+    set_B(nb_optim::solve_wls(dm1_mat_, zi_data_.Y, zi_data_.X, MuCT));
+    R_ = zi_data_.Y - XB();
 
     arma::mat RmMuCT = R_ - MuCT;
     arma::mat CgC(zi_data_.n, zi_data_.p);
@@ -94,7 +94,7 @@ public:
   // profiled shortcut (and the same sign bug, +log|Gamma^{(i),-1}| instead
   // of +log|Gamma^{(i)}|) described in NormalBlockKnownClusters::objective().
   double objective() const override {
-    arma::mat R = zi_data_.Y - zi_data_.X * B_;
+    arma::mat R = zi_data_.Y - XB();
     arma::mat dm1_mat = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
     arma::mat dm1C = dm1_mat * C_;          // n x q
     arma::mat Rdm1C = (R % dm1_mat) * C_;   // n x q

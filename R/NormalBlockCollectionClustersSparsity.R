@@ -47,10 +47,10 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
       private$progress_label <- "number of blocks"
     },
 
-    #' @description returns a collection of NB_unknown models corresponding to given q
+    #' @description returns a collection of models corresponding to given q
     #' or one single model if penalty is also given
     #' @param q number of blocks asked by user.
-    #' @param sparsity sparsity penalty penalty asked by user
+    #' @param sparsity sparsity penalty asked by user
     #' @return either a NormalBlockCollectionSparsity or a NormalBlockUnknownClusters object
     get_model = function(q, sparsity = NA) {
       stopifnot("No such model in the collection. Acceptable values can be found via $q" = q %in% self$q_list)
@@ -68,8 +68,8 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
 
     #' @description Extract best model in the collection
     #' @param crit a character for the criterion used to performed the selection.
-    #' Either "BIC", "EBIC" or "ICL. "ICL" is the default criterion
-    #' @return a [`NB_unknown`] object
+    #' Either "BIC", "EBIC" or "ICL". "ICL" is the default criterion
+    #' @return a [`NormalBlockUnknownClusters`] object
     get_best_model = function(crit = c("ICL", "BIC", "EBIC")) {
       crit <- match.arg(crit)
       id <- private$best_id(crit, check_inference = FALSE)

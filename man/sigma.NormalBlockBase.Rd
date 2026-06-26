@@ -2,18 +2,18 @@
 % Please edit documentation in R/NormalBlockBase-S3methods.R
 \name{sigma.NormalBlockBase}
 \alias{sigma.NormalBlockBase}
-\title{Extracts model coefficients from objects returned by [NormalBlockBase()] and its variants}
+\title{Extracts the latent-block covariance matrix from objects returned by [NormalBlockBase()] and its variants}
 \usage{
 \method{sigma}{NormalBlockBase}(object, ...)
 }
 \arguments{
 \item{object}{An object of class NormalBlockBase.}
 
-\item{...}{not use, only here for S3 compatibility}
+\item{...}{not used, only here for S3 compatibility}
 }
 \value{
-A matrix of coefficients extracted from the NormalBlockBase model.
+The q x q covariance matrix between latent blocks.
 }
 \description{
-Extract coefficients from an NormalBlockBase object.
+Extract the covariance matrix between latent blocks (the inverse of `Omegaq`) from a NormalBlockBase object.
 }

@@ -33,7 +33,7 @@ generate_normal_block_data(
 
 \item{u_v}{two-size vector of positive numbers v and u controlling the generation of the precision matrix Omega: v scales the off-diagonal elements of the precision matrix (magnitude of partial correlations), and u is a positive number added to the diagonal elements to ensure positive-definiteness. The default value is c(0.3, 0.1).}
 
-\item{SNR}{Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desried SNR.}
+\item{SNR}{Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desired SNR.}
 
 \item{alpha}{the q-size vector of group proportion. Default to rep(1/q, q)}
 
@@ -51,8 +51,8 @@ A named list with the following element
    - D: diagonal matrix of variance of the variables
    - Omega: precision matrix of the groups
    - Sigma: covariance matrix of the groups
-   - kappa: vector of ZI inflation proabilities (one per variable)
+   - kappa: vector of ZI inflation probabilities (one per variable)
 }
 \description{
-A function to draw data from the normal block model (see details). The function returns both the generated data and the corrresponding model parameters, in a list.
+A function to draw data from the normal block model (see details). The function returns both the generated data and the corresponding model parameters, in a list.
 }

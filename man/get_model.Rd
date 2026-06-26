@@ -24,7 +24,7 @@ OR float to run model with a single penalty value}
 \item{zero_inflation}{boolean to indicate if Y is zero-inflated and adjust fitted model as a consequence}
 
 \item{control}{a list-like structure for detailed control on parameters should be
-generated with normal_block_control() for collections of sparse models}
+generated with NB_control() for collections of sparse models}
 }
 \description{
 Creates appropriate new normal block model depending on the parametrization

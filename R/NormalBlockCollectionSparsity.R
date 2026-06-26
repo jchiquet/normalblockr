@@ -17,6 +17,7 @@ NormalBlockCollectionSparsity <- R6::R6Class(
 
     #' @description Create a new [`NormalBlockCollectionSparsity`] object.
     #' @param mydata object of NormalBlockData class, with responses and design matrix
+    #' @param blocks either a clustering matrix (known, fixed clustering) or a single integer (number of blocks to infer)
     #' @param zero_inflation boolean to specify whether data is zero-inflated
     #' @param control structured list of parameters to handle sparsity control
     #' @return A new [`NormalBlockCollectionSparsity`] object

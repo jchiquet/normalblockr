@@ -68,7 +68,7 @@ R6 class for a collection of normal-block models with a fixed clustering (blocks
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
-      \item{\code{blocks}}{group matrix or number of blocks.}
+      \item{\code{blocks}}{either a clustering matrix (known, fixed clustering) or a single integer (number of blocks to infer)}
       \item{\code{zero_inflation}}{boolean to specify whether data is zero-inflated}
       \item{\code{control}}{structured list of parameters to handle sparsity control}
     }

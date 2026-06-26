@@ -35,6 +35,29 @@ protected:
     return nb_omega::estimate(Sigma_hat, sparsity_, sparsity_weights_);
   }
 
+  // Lazily-cached data_.X * B_, the one product every concrete E_step()/
+  // M_step() needs (as Y - XB()) at least once per (V)EM step. Without this
+  // cache, the *same* X*B_ product (O(n*d*p)) gets recomputed up to three
+  // times per settled B_ value: once inside M_step() itself (to get the new
+  // residual), once more in the *next* E_step() (B_ hasn't changed since),
+  // and -- for the two known-clusters classes, whose objective() is the
+  // general criterion and needs R explicitly -- a third time in objective()
+  // (called right after M_step(), same B_ again). Subclasses must update B_
+  // through set_B() (never assign B_ directly) for this cache to stay
+  // correct; set_state()/copy_tracked_state_from() below (the only other
+  // places B_ changes) invalidate it themselves.
+  void set_B(const arma::mat& new_B) {
+    B_ = new_B;
+    XB_valid_ = false;
+  }
+  const arma::mat& XB() const {
+    if (!XB_valid_) {
+      XB_cache_ = data_.X * B_;
+      XB_valid_ = true;
+    }
+    return XB_cache_;
+  }
+
   // Opt-in gate for the SQUAREM-style acceleration in run_em() (see its
   // docstring). Defaults to off. Currently overridden to (conditionally)
   // `true` by all four leaf classes (each: sparsity_ <= 0; see each class's
@@ -64,6 +87,7 @@ protected:
     B_ = other.B_;
     dm1_ = other.dm1_;
     Omegaq_ = other.Omegaq_;
+    XB_valid_ = false;
   }
 
 public:
@@ -172,6 +196,8 @@ public:
 private:
   std::vector<double> objective_trace_;
   int niter_ = 0;
+  mutable arma::mat XB_cache_;
+  mutable bool XB_valid_ = false;
 
   // p = vec(B_, dm1_, Omegaq_): the parameters SQUAREM extrapolates over.
   arma::vec get_state() const {
@@ -183,6 +209,7 @@ private:
     B_      = arma::reshape(p.subvec(0, nB - 1), B_.n_rows, B_.n_cols);
     dm1_    = p.subvec(nB, nB + nd - 1);
     Omegaq_ = arma::reshape(p.subvec(nB + nd, p.n_elem - 1), Omegaq_.n_rows, Omegaq_.n_cols);
+    XB_valid_ = false;
   }
 
   // Cheap guard against numerically degenerate candidates -- not a quality

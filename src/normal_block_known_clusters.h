@@ -23,14 +23,14 @@ class NormalBlockKnownClusters : public NormalBlockBase {
     arma::mat dm1C = C_;
     dm1C.each_col() %= dm1_;
     Gamma_ = arma::inv_sympd(Omegaq_ + arma::diagmat(C_.t() * dm1_));
-    arma::mat R = data_.Y - data_.X * B_;
+    arma::mat R = data_.Y - XB();
     Mu_ = R * dm1C * Gamma_;
   }
 
   void M_step() override {
     arma::mat YmMuCT = data_.Y - Mu_ * C_.t();
-    B_ = data_.XtXm1 * (data_.X.t() * YmMuCT);
-    arma::mat resid = YmMuCT - data_.X * B_;
+    set_B(data_.XtXm1 * (data_.X.t() * YmMuCT));
+    arma::mat resid = YmMuCT - XB();
     arma::vec ddiag = arma::vectorise(arma::mean(arma::square(resid), 0));
     ddiag += C_ * Gamma_.diag();
     dm1_ = NoisePolicy::update_dm1(ddiag);
@@ -80,7 +80,7 @@ public:
   // Sigma_hat's exact inverse, so it stays exactly log p(Y; theta) however
   // Omegaq was obtained (plain inversion or graphical lasso).
   double objective() const override {
-    arma::mat R = data_.Y - data_.X * B_;
+    arma::mat R = data_.Y - XB();
     arma::mat Gamma_inv = Omegaq_ + arma::diagmat(C_.t() * dm1_);
     auto Gamma_fresh = nb_utils::inv_and_log_det_sympd(Gamma_inv);
     arma::mat dm1C = C_;
