@@ -44,17 +44,21 @@ NormalBlockCollection <- R6::R6Class(
     progress_field = NA_character_, # name of the field reported by optimize()'s progress message
     progress_label = NA_character_, # human-readable label for that field
 
-    ## Row of self$criteria minimizing `crit`, after checking that the
-    ## criterion is well-defined for the whole collection. Centralizes the
-    ## `length(...) > 1` guard so that the id is always defined, even for a
-    ## collection reduced to a single model.
-    best_id = function(crit, check_inference = TRUE) {
+    ## Row of crit_df minimizing `crit`, after checking that the criterion is
+    ## well-defined for the whole collection. Centralizes the `length(...) >
+    ## 1` guard so that the id is always defined, even for a collection
+    ## reduced to a single model. `crit_df` defaults to (a fresh) self$criteria
+    ## but can be passed in explicitly to reuse one already computed by the
+    ## caller (see plot_criteria_path() below) instead of rebuilding it --
+    ## self$criteria rebuilds the whole collection's criteria data frame from
+    ## every model's own `criteria` field on every access, not a free lookup.
+    best_id = function(crit, check_inference = TRUE, crit_df = self$criteria) {
       if (check_inference)
         stopifnot("Log-likelihood based criteria do not apply to the heuristic method" =
                     self$models[[1]]$inference_method == "integrated")
-      stopifnot(!anyNA(self$criteria[[crit]]))
+      stopifnot(!anyNA(crit_df[[crit]]))
       id <- 1
-      if (length(self$criteria[[crit]]) > 1) id <- which.min(self$criteria[[crit]])
+      if (length(crit_df[[crit]]) > 1) id <- which.min(crit_df[[crit]])
       id
     },
 
@@ -69,9 +73,16 @@ NormalBlockCollection <- R6::R6Class(
     ## "deviance" is excluded by default: it is monotonic along x_var (more
     ## blocks/less penalty always fits at least as well), so it has no
     ## interior best model the way a penalized criterion does.
+    ##
+    ## self$criteria is computed once, locally (crit_df), and reused for both
+    ## the line plot and every vline's position: vline x-positions are read
+    ## directly off crit_df via best_id(), not via get_best_model(), which
+    ## would (a) rebuild self$criteria all over again and (b) clone() a whole
+    ## fitted model just to read a single scalar (q or sparsity) off it.
     plot_criteria_path = function(x_var, criteria, vline_crit = setdiff(criteria, "deviance")) {
       vline_crit <- intersect(criteria, vline_crit)
-      dplot <- self$criteria %>%
+      crit_df <- self$criteria
+      dplot <- crit_df %>%
         dplyr::select(dplyr::all_of(c(x_var, criteria))) %>%
         tidyr::gather(key = "criterion", value = "value", -dplyr::all_of(x_var)) %>%
         dplyr::group_by(criterion)
@@ -82,7 +93,7 @@ NormalBlockCollection <- R6::R6Class(
       if (length(vline_crit) > 0) {
         dvlines <- tibble::tibble(
           criterion = vline_crit,
-          x         = sapply(vline_crit, function(crit) self$get_best_model(crit)[[x_var]])
+          x         = sapply(vline_crit, function(crit) crit_df[[x_var]][[private$best_id(crit, crit_df = crit_df)]])
         )
         p <- p + ggplot2::geom_vline(data = dvlines, ggplot2::aes(xintercept = x, colour = criterion),
                                       linetype = "dashed", alpha = 0.6, show.legend = FALSE)
