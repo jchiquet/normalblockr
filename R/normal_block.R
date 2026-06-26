@@ -96,7 +96,7 @@ normal_block <- function(data,
 #' any point afterwards for the same effect without setting this.
 #' @export
 NB_control <- function(
-    niter                = 100,
+    niter                = 500,
     threshold            = 1e-4,
     sparsity_weights     = NULL,
     sparsity_penalties   = NULL,

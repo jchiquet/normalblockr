@@ -88,7 +88,7 @@ NormalBlockCollectionClusters <- R6::R6Class(
     #' `control$refine` is `TRUE` (see [NB_control()], default `FALSE`) --
     #' calls [refine()] automatically.
     #' @param control optimization parameters (niter, threshold, verbose)
-    optimize = function(control = list(niter = 100, threshold = 1e-4, verbose = TRUE)) {
+    optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {
       super$optimize(control)
       if (isTRUE(self$control$refine)) self$refine()
       invisible(self)

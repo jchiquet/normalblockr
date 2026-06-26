@@ -23,14 +23,17 @@ A list with 3 elements:
   (`FRACTION_GENOME_ALTERED`, `HER2_STATUS`, `METASTASIS_CODED`).}
   \item{gene_annotation}{a data frame with one row per protein, in the
   same order as the columns of `expr`: `protein` (matches `colnames(expr)`),
-  `entrezGeneId`, `hugoGeneSymbol` and `type` (`"protein"` or
-  `"phosphoprotein"`).}
+  `entrezGeneId`, `hugoGeneSymbol`, `type` (`"protein-coding"` or
+  `"phosphoprotein"`) and `go_bp_term` (a Gene Ontology Biological Process
+  classification, one term per protein, or `"unknown"` if none could be
+  found -- see Details).}
 }
 }
 \source{
 TCGA breast cancer cohort (Cancer Genome Atlas Network, 2012,
 \doi{10.1038/nature11412}), downloaded via cBioPortal (`brca_tcga_pub`
-study, \url{https://www.cbioportal.org}).
+study, \url{https://www.cbioportal.org}). `go_bp_term` (see Details) was
+added afterwards from `org.Hs.eg.db`.
 }
 \usage{
 brca_rppa
@@ -41,9 +44,24 @@ breast cancer tumor samples from The Cancer Genome Atlas (TCGA), along with
 the PAM50 molecular subtype of each sample. Used as the running example in
 Tous & Chiquet (2026).
 }
+\details{
+`go_bp_term` is derived from `org.Hs.eg.db`, queried by
+`entrezGeneId` for `"protein-coding"` rows. Phospho-site antibodies
+(`type == "phosphoprotein"`, e.g. `"EGFR_PY1068"`) carry a placeholder,
+negative `entrezGeneId` (there is no separate gene for a specific
+phosphorylation site, only the underlying gene) and are instead queried by
+gene symbol (the part of `protein` before the first `"_"`). Each protein
+typically has dozens of GO Biological Process terms; `go_bp_term` keeps,
+for each protein, the one term shared by the most *other* proteins in this
+dataset -- giving a handful of non-trivial groups rather than one
+near-singleton group per protein, more useful for comparing against an
+inferred clustering. See `data-raw/brca_rppa_go_annotation.R` for the full
+extraction code.
+}
 \examples{
 expr <- brca_rppa$expr
 X <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
 nb_data <- NormalBlockData$new(expr, X)
+table(brca_rppa$gene_annotation$go_bp_term)
 }
 \keyword{datasets}

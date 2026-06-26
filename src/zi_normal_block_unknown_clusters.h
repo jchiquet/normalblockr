@@ -109,6 +109,21 @@ public:
   const arma::vec& alpha() const { return alpha_; }
   const arma::mat& M() const { return M_; }
   const arma::mat& S() const { return S_; }
+
+  std::unique_ptr<NormalBlockBase> clone() const override {
+    return std::make_unique<ZINormalBlockUnknownClusters<NoisePolicy>>(*this);
+  }
+  void restore_from(const NormalBlockBase& other) override {
+    copy_tracked_state_from(other);
+    const auto& o = static_cast<const ZINormalBlockUnknownClusters<NoisePolicy>&>(other);
+    C_ = o.C_;
+    alpha_ = o.alpha_;
+    M_ = o.M_;
+    S_ = o.S_;
+    R_ = o.R_;
+    DM1_ = o.DM1_;
+    Sigma_hat_ = o.Sigma_hat_;
+  }
 };
 
 #endif // NORMALBLOCKR_ZI_NORMAL_BLOCK_UNKNOWN_CLUSTERS_H

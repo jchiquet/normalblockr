@@ -25,7 +25,7 @@ NormalBlockCollection <- R6::R6Class(
 
     #' @description optimizes every model (or sub-collection) in the collection
     #' @param control optimization parameters (niter and threshold)
-    optimize = function(control = list(niter = 100, threshold = 1e-4, verbose = TRUE)) {
+    optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {
       self$models <- lapply(self$models, function(model) {
         if (control$verbose)
           cat("\t", private$progress_label, "=", model[[private$progress_field]], "          \r")

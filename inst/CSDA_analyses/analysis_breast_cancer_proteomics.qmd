@@ -23,17 +23,45 @@ Loading proteomics data to analyse and clinical data to get cancer subtypes as c
 data(brca_rppa)
 ```
 
-Formatting data for Normal-Block.
-
 ```{r Normal-Block-formatting}
 Y          <- as.matrix(brca_rppa$expr)
-X_subtype  <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
+X_subtype <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
 data_subtype <- NormalBlockData$new(Y, X_subtype)
 ```
 
-## Applying Normal-Block to the data
+## Applying Normal-Block with a fixed, data-driven grouping
 
-### Running the integrated inference procedure for 1 to 40 clusters.
+Before letting Normal-Block infer its own grouping of the proteins, we build a
+simple, fully data-driven baseline: a hierarchical (Ward) clustering of the
+proteins from their expression profiles alone, with no reference to the
+Normal-Block model. By default `normalblockr` scales the data, so the a
+priori clustering is computed on the same (column-)scaled matrix for
+consistency. Six clusters is an arbitrary but visually natural cut of the
+dendrogram (highlighted below); the unsupervised exploration in the next
+section will pick its own number of blocks independently.
+
+```{r hclust-based group}
+hc_expr <-
+  brca_rppa$expr |> scale() |> t() |> dist() |> hclust("ward.D2")
+plot(hc_expr, labels = FALSE, hang = -1,
+     main = "Hierarchical clustering of proteins (Ward, on scaled expression)",
+     xlab = "proteins", sub = "")
+rect.hclust(hc_expr, k = 6, border = "red")
+group <- cutree(hc_expr, 6) |> normalblockr:::as_indicator()
+```
+
+This fixed grouping is then handed to Normal-Block as known clusters -- the
+model only estimates the association network between the 6 blocks, not the
+grouping itself.
+
+```{r running-normal-block-known-group}
+NB_prot_group <- normal_block(data_subtype, blocks = group)
+plot(NB_prot_group)
+```
+
+## Applying Normal-Block with an unknown, inferred grouping
+
+### Running the integrated inference procedure for 1 to 30 clusters.
 
 ```{r running-normal-block}
 NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30)
@@ -72,4 +100,30 @@ df_inter <- data.frame(
 inter_kegg <- compareCluster(Entrez~group, data = df_inter, fun='enrichKEGG', pvalueCutoff = 0.001)
 inter_kegg <- setReadable(inter_kegg, OrgDb = "org.Hs.eg.db", keyType="ENTREZID")
 dotplot(inter_kegg, font.size = 8)
+```
+
+## Comparison with the data-driven clustering
+
+How much does Normal-Block's own, unsupervised grouping of the proteins
+agree with the purely data-driven hierarchical clustering used as a fixed
+baseline above? For every q explored in `NB_prot_subtype`, we compute the
+Adjusted Rand Index (ARI) between its inferred clustering and the q = 6
+hierarchical-clustering baseline (blue dashed line); the red dashed line
+marks the model ICL actually selected.
+
+```{r comparison-with-hclust}
+df_ari <- tibble(
+  q   = purrr::map_dbl(NB_prot_subtype$models, "q"),
+  ARI = purrr::map_dbl(purrr::map(NB_prot_subtype$models, "clustering"),
+                        aricode::ARI, NB_prot_group$clustering)
+)
+ggplot(df_ari, aes(x = q, y = ARI)) +
+  geom_line() + geom_point() +
+  geom_vline(xintercept = ncol(group), linetype = "dashed", colour = "blue", alpha = .5) +
+  geom_vline(xintercept = selected_NB$q, linetype = "dashed", colour = "red", alpha = .5) +
+  scale_x_continuous(breaks = scales::pretty_breaks()) +
+  ggtitle(label = "Agreement with the hierarchical-clustering baseline",
+          subtitle = "blue: baseline's q -- red: ICL-selected q") +
+  xlab("number of clusters (q)") + ylab("Adjusted Rand Index") +
+  theme_bw()
 ```

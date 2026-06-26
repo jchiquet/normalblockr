@@ -143,7 +143,7 @@ calls [refine()] automatically.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionClusters$optimize(
-  control = list(niter = 100, threshold = 1e-04, verbose = TRUE)
+  control = list(niter = 500, threshold = 1e-04, verbose = TRUE)
 )}
     \if{html}{\out{</div>}}
   }

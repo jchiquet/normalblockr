@@ -151,10 +151,20 @@ NormalBlockBase <- R6::R6Class(
 
     #' @description calls optimization (EM or heuristic) and updates relevant fields
     #' @param control a list for controlling the optimization proces
+    #' @param warn whether to warn when the (V)EM stops at the `niter` cap
+    #' without reaching `threshold` (see `private$warn_if_not_converged()`).
+    #' Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
+    #' scoring in `candidates_split()`/`candidates_merge()`, the sparsity-path
+    #' warm-start probe in [NormalBlockCollectionSparsity]) where stopping at
+    #' the cap is expected and not a sign of trouble.
     #' @return optimizes the model and updates its parameters
-    optimize = function(control = list(niter = 100, threshold = 1e-4)) {
+    optimize = function(control = list(niter = 500, threshold = 1e-4), warn = TRUE) {
+      private$niter_max  <- control$niter
+      private$threshold  <- control$threshold
       optim_out <- private$optimizer(control)
       do.call(self$update, optim_out)
+      if (warn) private$warn_if_not_converged()
+      invisible(self)
     },
 
     #' @description Seed this model's starting parameters from another,
@@ -286,7 +296,7 @@ NormalBlockBase <- R6::R6Class(
       candidates <- candidates[min_sizes > 1 & n_clusters == n_live + 1]
 
       for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4))
+        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4), warn = FALSE)
       candidates
     },
 
@@ -308,7 +318,7 @@ NormalBlockBase <- R6::R6Class(
       }
       candidates <- map(pairs, self$merge)
       for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4))
+        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4), warn = FALSE)
       candidates
     },
 
@@ -396,13 +406,61 @@ NormalBlockBase <- R6::R6Class(
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Graphical methods------------------
-    #' @param type char for line type (see plot.default)
-    #' @param log char for logarithmic axes (see plot.default)
-    #' @param neg boolean plot negative log-likelihood (useful when log="y")
-    #' @description plots log-likelihood values during model optimization
-    plot_loglik = function(type = "b", log = "xy", neg = TRUE) {
-      neg <- ifelse(neg, -1, 1)
-      plot(seq_along(self$objective), neg * self$objective, type = type, log = log)
+    #' @param show_increment whether to add, below the objective trace, a second
+    #' panel with the (log10) absolute increment between consecutive iterations
+    #' and the convergence `threshold` used to stop optimize() (dashed line).
+    #' That second panel is what actually tells convergence apart from merely
+    #' running out of iterations: the objective trace alone tends to look flat
+    #' well before the increment has actually crossed the threshold, especially
+    #' as the number of blocks grows (see inst/CSDA_analyses).
+    #' @description plots the evolution of the objective (log-likelihood or ELBO)
+    #' across the (V)EM iterations of the last call to `optimize()`.
+    #' @return a [`ggplot2::ggplot`] graph
+    plot_loglik = function(show_increment = TRUE) {
+      ll  <- private$ll_list
+      obj <- self$objective
+      if (length(obj) == 0 || all(is.na(obj))) {
+        message("No objective trace to plot (heuristic inference does not compute a log-likelihood/ELBO).")
+        return(invisible(NULL))
+      }
+
+      dplot <- tibble::tibble(iteration = seq_along(obj), value = obj, facet = "objective")
+      last_increment <- abs(diff(ll))[length(obj)]
+      converged <- !is.na(private$threshold) && last_increment < private$threshold
+      subtitle  <- if (is.na(private$niter_max)) {
+        sprintf("%d iterations", length(obj))
+      } else if (converged) {
+        sprintf("converged after %d iterations (threshold = %.1e)", length(obj), private$threshold)
+      } else {
+        sprintf("stopped at the %d-iteration cap -- last increment (%.3g) still above threshold (%.1e)",
+                private$niter_max, last_increment, private$threshold)
+      }
+
+      if (show_increment) {
+        dplot <- dplyr::bind_rows(
+          dplot,
+          tibble::tibble(iteration = seq_along(obj), value = log10(abs(diff(ll))), facet = "log10(|increment|)")
+        )
+      }
+      dplot$facet <- factor(dplot$facet, levels = c("objective", "log10(|increment|)"))
+
+      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = iteration, y = value)) +
+        ggplot2::geom_line() + ggplot2::geom_point(size = .8) +
+        ggplot2::ggtitle(label = "(V)EM optimization", subtitle = subtitle) +
+        ggplot2::xlab("iteration") + ggplot2::ylab(NULL) +
+        ggplot2::theme_bw()
+
+      if (show_increment) {
+        p <- p + ggplot2::facet_wrap(~ facet, ncol = 1, scales = "free_y", strip.position = "left")
+        if (!is.na(private$threshold))
+          p <- p + ggplot2::geom_hline(
+            data = data.frame(facet = factor("log10(|increment|)", levels = levels(dplot$facet)),
+                               yintercept = log10(private$threshold)),
+            ggplot2::aes(yintercept = yintercept),
+            linetype = "dashed", colour = "red", alpha = .6
+          )
+      }
+      p
     },
 
     #' @description plot the latent network.
@@ -467,9 +525,10 @@ NormalBlockBase <- R6::R6Class(
       invisible(G)
     },
 
-    #' @description plot together latent network and log-likelihood values during model optimization
+    #' @description plots the evolution of the objective during model optimization
+    #' (see `plot_loglik()`)
     plot = function(){
-      self$plot_loglik(type = "b", log = "xy", neg = TRUE)
+      self$plot_loglik()
     },
 
 
@@ -515,6 +574,10 @@ NormalBlockBase <- R6::R6Class(
     clustering_approx = NA, # name of the clustering heuristic, key into clustering_methods
     ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed)
     niter             = NA, # number of EM iterations required by the inference, if applicable
+    niter_max         = NA, # niter cap passed to the last optimize() call (for plot_loglik()'s
+                             # and warn_if_not_converged()'s "did it actually converge or just
+                             # hit the cap?" diagnostic)
+    threshold         = NA, # convergence threshold passed to the last optimize() call (idem)
     warm_started      = FALSE, # set by warm_start_from() and by split()/merge(): tells
                                 # EM_initialize() to reuse the current B/dm1/Omegaq (and
                                 # C/M/S/alpha or gamma/mu) instead of (re-)deriving them
@@ -522,6 +585,23 @@ NormalBlockBase <- R6::R6Class(
                                 # Deliberately NOT inferred from "are these fields non-NA",
                                 # which would also be true for split()/merge() clones (those
                                 # keep their own, different, already-tested initialization path).
+
+    ## Warns when the (V)EM stopped because it hit the niter cap rather than
+    ## because it actually converged below threshold -- silently otherwise
+    ## (heuristic fits have no ll_list/niter to check). This is increasingly
+    ## likely as the number of blocks q grows: more latent structure means a
+    ## higher fraction of missing information, hence a slower EM convergence
+    ## rate (see inst/CSDA_analyses) -- the fix for genuinely slow cases is to
+    ## raise `niter` in NB_control(), not to loosen `threshold`.
+    warn_if_not_converged = function() {
+      if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())
+      last_increment <- abs(diff(private$ll_list))[private$niter]
+      if (last_increment >= private$threshold)
+        warning(sprintf(
+          "%s: (V)EM stopped at the niter cap (%d) without reaching the convergence threshold (last increment = %.3g, threshold = %.1e). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.",
+          self$who_am_I, private$niter_max, last_increment, private$threshold), call. = FALSE)
+      invisible()
+    },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated (V)EM inference --------------

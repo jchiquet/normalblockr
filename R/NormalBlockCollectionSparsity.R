@@ -40,7 +40,7 @@ NormalBlockCollectionSparsity <- R6::R6Class(
         sparsity <- control$sparsity_penalties
       } else {
         init_model <- get_model(mydata, blocks, 0, zero_inflation, control)
-        init_model$optimize(control = list(niter=5, threshold=1e-4, verbose=FALSE))
+        init_model$optimize(control = list(niter=5, threshold=1e-4, verbose=FALSE), warn = FALSE)
         Sigmaq   <- solve(init_model$model_par$Omegaq)
         diag_pen <- max(diag(init_model$sparsity_weights)) > 0
         weights  <- init_model$sparsity_weights
@@ -70,7 +70,7 @@ NormalBlockCollectionSparsity <- R6::R6Class(
     #' (hence q) is fixed across the whole path, only the sparsity penalty
     #' changes, so the warm start is always between models of matching shape.
     #' @param control optimization parameters (niter and threshold)
-    optimize = function(control = list(niter = 100, threshold = 1e-4, verbose = TRUE)) {
+    optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {
       previous <- NULL
       self$models <- lapply(self$models, function(model) {
         if (control$verbose)

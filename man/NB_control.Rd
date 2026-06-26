@@ -5,7 +5,7 @@
 \title{NB_control}
 \usage{
 NB_control(
-  niter = 100,
+  niter = 500,
   threshold = 1e-04,
   sparsity_weights = NULL,
   sparsity_penalties = NULL,

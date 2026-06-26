@@ -43,7 +43,7 @@ and provide their own `get_best_model()`, delegating the (row of
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollection$optimize(
-  control = list(niter = 100, threshold = 1e-04, verbose = TRUE)
+  control = list(niter = 500, threshold = 1e-04, verbose = TRUE)
 )}
     \if{html}{\out{</div>}}
   }

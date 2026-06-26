@@ -93,7 +93,7 @@ changes, so the warm start is always between models of matching shape.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionSparsity$optimize(
-  control = list(niter = 100, threshold = 1e-04, verbose = TRUE)
+  control = list(niter = 500, threshold = 1e-04, verbose = TRUE)
 )}
     \if{html}{\out{</div>}}
   }

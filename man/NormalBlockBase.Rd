@@ -197,13 +197,22 @@ rather than recomputing a fresh heuristic initialization -- set by
   calls optimization (EM or heuristic) and updates relevant fields
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$optimize(control = list(niter = 100, threshold = 1e-04))}
+    \preformatted{NormalBlockBase$optimize(
+  control = list(niter = 500, threshold = 1e-04),
+  warn = TRUE
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{control}}{a list for controlling the optimization proces}
+      \item{\code{warn}}{whether to warn when the (V)EM stops at the `niter` cap
+without reaching `threshold` (see `private$warn_if_not_converged()`).
+Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
+scoring in `candidates_split()`/`candidates_merge()`, the sparsity-path
+warm-start probe in [NormalBlockCollectionSparsity]) where stopping at
+the cap is expected and not a sign of trouble.}
     }
     \if{html}{\out{</div>}}
   }
@@ -389,20 +398,28 @@ default FALSE (send a copy)}
 \if{html}{\out{<a id="method-NormalBlockBase-plot_loglik"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockBase-plot_loglik}{}}}
 \subsection{\code{NormalBlockBase$plot_loglik()}}{
-  plots log-likelihood values during model optimization
+  plots the evolution of the objective (log-likelihood or ELBO)
+across the (V)EM iterations of the last call to `optimize()`.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$plot_loglik(type = "b", log = "xy", neg = TRUE)}
+    \preformatted{NormalBlockBase$plot_loglik(show_increment = TRUE)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{type}}{char for line type (see plot.default)}
-      \item{\code{log}}{char for logarithmic axes (see plot.default)}
-      \item{\code{neg}}{boolean plot negative log-likelihood (useful when log="y")}
+      \item{\code{show_increment}}{whether to add, below the objective trace, a second
+panel with the (log10) absolute increment between consecutive iterations
+and the convergence `threshold` used to stop optimize() (dashed line).
+That second panel is what actually tells convergence apart from merely
+running out of iterations: the objective trace alone tends to look flat
+well before the increment has actually crossed the threshold, especially
+as the number of blocks grows (see inst/CSDA_analyses).}
     }
     \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a [`ggplot2::ggplot`] graph
   }
 }
 
@@ -443,7 +460,8 @@ default FALSE (send a copy)}
 \if{html}{\out{<a id="method-NormalBlockBase-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockBase-plot}{}}}
 \subsection{\code{NormalBlockBase$plot()}}{
-  plot together latent network and log-likelihood values during model optimization
+  plots the evolution of the objective during model optimization
+(see `plot_loglik()`)
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockBase$plot()}
