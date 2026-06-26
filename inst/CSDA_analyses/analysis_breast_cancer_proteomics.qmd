@@ -12,6 +12,7 @@ library(aricode)
 library(clusterProfiler)
 library(pathview)
 library(enrichplot)
+library(org.Hs.eg.db)
 set.seed(1)
 ```
 
@@ -89,14 +90,27 @@ paste0("ICL selects ", selected_NB$q, " clusters.")
 
 ## Enrichment analysis
 
+Phospho-site antibodies (e.g. `EGFR_PY1068`) carry a placeholder, *negative*
+`entrezGeneId` (there is no separate gene for "EGFR phosphorylated at
+Y1068", only EGFR itself -- same convention already handled in
+`data-raw/brca_rppa_go_annotation.R`). Left as-is, `enrichKEGG` cannot map
+those IDs to anything, which both throws away ~a quarter of the proteins
+and triggers clusterProfiler's "no gene can be mapped" warning for any
+cluster unlucky enough to be made up mostly of phospho-sites. Resolving
+each phospho-site to its underlying gene's real Entrez ID via its symbol
+fixes both.
+
 ```{r enrichment}
-EntrezGeneID <-
-  setNames(brca_rppa$gene_annotation$entrezGeneId,
-           brca_rppa$gene_annotation$protein)
-df_inter <- data.frame(
-    Entrez = brca_rppa$gene_annotation$entrezGeneId,
-    group  = selected_NB$clustering
-  )
+ga         <- brca_rppa$gene_annotation
+is_phospho <- ga$type == "phosphoprotein"
+gene_symbol      <- sub("_.*", "", ga$protein)
+symbol_to_entrez <- AnnotationDbi::select(org.Hs.eg.db, keys = unique(gene_symbol[is_phospho]),
+                                           columns = "ENTREZID", keytype = "SYMBOL")
+EntrezGeneID <- ga$entrezGeneId
+EntrezGeneID[is_phospho] <- symbol_to_entrez$ENTREZID[match(gene_symbol[is_phospho], symbol_to_entrez$SYMBOL)]
+EntrezGeneID <- setNames(EntrezGeneID, ga$protein)
+
+df_inter <- data.frame(Entrez = EntrezGeneID, group = selected_NB$clustering)
 inter_kegg <- compareCluster(Entrez~group, data = df_inter, fun='enrichKEGG', pvalueCutoff = 0.001)
 inter_kegg <- setReadable(inter_kegg, OrgDb = "org.Hs.eg.db", keyType="ENTREZID")
 dotplot(inter_kegg, font.size = 8)
