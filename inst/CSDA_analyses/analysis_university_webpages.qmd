@@ -26,8 +26,6 @@ data_web <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))
 ## Running Normal-Block on the dataset
 
 ```{r running-normal-block}
-nb_web_sparse <- normal_block(data = data_web, blocks = 15, sparsity = 0.005)
-
 nb_web_sparse <- normal_block(data = data_web, blocks = 15, sparsity = TRUE)
 ```
 

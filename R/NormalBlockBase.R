@@ -424,7 +424,22 @@ NormalBlockBase <- R6::R6Class(
         return(invisible(NULL))
       }
 
-      dplot <- tibble::tibble(iteration = seq_along(obj), value = obj, facet = "objective")
+      ## The objective (log-lik/ELBO) trace climbs fast then flattens out
+      ## visually on a linear scale, well before it has actually converged
+      ## (the same effect show_increment exists to catch). When every value
+      ## is negative -- always true in practice in this model, since the
+      ## leading -0.5*n*p*log(2*pi) term dominates -- plotting log10(-obj)
+      ## instead spreads out the near-convergence iterations (where -obj is
+      ## smallest) at the expense of the early, already-obvious big jumps,
+      ## the same log-scale trick already used for the increment panel
+      ## below. Left as the raw value in the (rare) edge case where that
+      ## doesn't hold, e.g. a tiny/degenerate fit where the objective is
+      ## not guaranteed negative.
+      obj_is_neg <- all(obj < 0)
+      obj_facet  <- if (obj_is_neg) "log10(-objective)" else "objective"
+      obj_value  <- if (obj_is_neg) log10(-obj) else obj
+
+      dplot <- tibble::tibble(iteration = seq_along(obj), value = obj_value, facet = obj_facet)
       last_increment <- abs(diff(ll))[length(obj)]
       converged <- !is.na(private$threshold) && last_increment < private$threshold
       subtitle  <- if (is.na(private$niter_max)) {
@@ -442,7 +457,7 @@ NormalBlockBase <- R6::R6Class(
           tibble::tibble(iteration = seq_along(obj), value = log10(abs(diff(ll))), facet = "log10(|increment|)")
         )
       }
-      dplot$facet <- factor(dplot$facet, levels = c("objective", "log10(|increment|)"))
+      dplot$facet <- factor(dplot$facet, levels = c(obj_facet, "log10(|increment|)"))
 
       p <- ggplot2::ggplot(dplot, ggplot2::aes(x = iteration, y = value)) +
         ggplot2::geom_line() + ggplot2::geom_point(size = .8) +

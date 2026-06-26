@@ -81,7 +81,7 @@ NormalBlockCollectionClusters <- R6::R6Class(
     #' @return a [`ggplot2::ggplot`] graph
     plot = function(criteria = c("deviance", "ICL", "BIC", "EBIC")) {
       stopifnot(!anyNA(self$criteria[criteria]))
-      private$plot_criteria_path("q", criteria, "ICL")
+      private$plot_criteria_path("q", criteria)
     },
 
     #' @description optimizes every model in the collection, then -- if

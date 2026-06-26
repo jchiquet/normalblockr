@@ -60,18 +60,34 @@ NormalBlockCollection <- R6::R6Class(
 
     ## Shared chart for plot() in NormalBlockCollectionClusters (x_var = "q") and
     ## NormalBlockCollectionSparsity (x_var = "sparsity"): one line per
-    ## criterion against x_var, with a dashed vline marking the best model
-    ## under vline_crit. Was previously duplicated near-verbatim in both.
-    plot_criteria_path = function(x_var, criteria, vline_crit) {
-      vlines <- sapply(intersect(criteria, vline_crit), function(crit) self$get_best_model(crit)[[x_var]])
+    ## criterion against x_var, with a dashed vline at each criterion's own
+    ## best model, colour-matched to that criterion's line (so which vline
+    ## belongs to which criterion is unambiguous without a second legend --
+    ## a single grey vline used to mark only one hardcoded criterion's best
+    ## model regardless of how many were actually plotted, which made it
+    ## impossible to tell, e.g., the BIC-best from the ICL-best at a glance).
+    ## "deviance" is excluded by default: it is monotonic along x_var (more
+    ## blocks/less penalty always fits at least as well), so it has no
+    ## interior best model the way a penalized criterion does.
+    plot_criteria_path = function(x_var, criteria, vline_crit = setdiff(criteria, "deviance")) {
+      vline_crit <- intersect(criteria, vline_crit)
       dplot <- self$criteria %>%
         dplyr::select(dplyr::all_of(c(x_var, criteria))) %>%
         tidyr::gather(key = "criterion", value = "value", -dplyr::all_of(x_var)) %>%
         dplyr::group_by(criterion)
-      ggplot2::ggplot(dplot, ggplot2::aes(x = .data[[x_var]], y = value, group = criterion, colour = criterion)) +
+      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = .data[[x_var]], y = value, group = criterion, colour = criterion)) +
         ggplot2::geom_line() + ggplot2::geom_point() +
         ggplot2::ggtitle(label = "Model selection criteria", subtitle = "Lower is better") +
-        ggplot2::theme_bw() + ggplot2::geom_vline(xintercept = vlines, linetype = "dashed", alpha = 0.25)
+        ggplot2::theme_bw()
+      if (length(vline_crit) > 0) {
+        dvlines <- tibble::tibble(
+          criterion = vline_crit,
+          x         = sapply(vline_crit, function(crit) self$get_best_model(crit)[[x_var]])
+        )
+        p <- p + ggplot2::geom_vline(data = dvlines, ggplot2::aes(xintercept = x, colour = criterion),
+                                      linetype = "dashed", alpha = 0.6, show.legend = FALSE)
+      }
+      p
     }
   ),
 
