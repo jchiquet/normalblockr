@@ -2,5 +2,7 @@ pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  breast-cancer-proteomics: breast-cancer-proteomics.html
   normal-block: normal-block.html
-last_built: 2026-06-25T14:44Z
+  zero-inflated-normal-block: zero-inflated-normal-block.html
+last_built: 2026-06-26T16:22Z

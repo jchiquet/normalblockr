@@ -21,7 +21,7 @@ predict(object, new_X, ...)
 
 - ...:
 
-  not use, only here for S3 compatibility
+  not used, only here for S3 compatibility
 
 ## Value
 

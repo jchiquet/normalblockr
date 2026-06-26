@@ -2,9 +2,9 @@
 
 Shared scaffolding for the collections explored by \[get_model()\]/
 \[normal_block()\]: a sweep over sparsity penalties
-(\[\`NormalBlockChangingSparsity\`\]), over the number of clusters
-(\[\`NormalBlockUnknownQ\`\]), or over both
-(\[\`NormalBlockUnknownQChangingSparsity\`\]). Concrete subclasses set
+(\[\`NormalBlockCollectionSparsity\`\]), over the number of clusters
+(\[\`NormalBlockCollectionClusters\`\]), or over both
+(\[\`NormalBlockCollectionClustersSparsity\`\]). Concrete subclasses set
 \`private\$progress_field\`/\`private\$progress_label\` in their
 \`initialize()\` and provide their own \`get_best_model()\`, delegating
 the (row of \`self\$criteria\` minimizing a criterion) lookup to
@@ -45,7 +45,7 @@ optimizes every model (or sub-collection) in the collection
 #### Usage
 
     NormalBlockCollection$optimize(
-      control = list(niter = 100, threshold = 1e-04, verbose = TRUE)
+      control = list(niter = 500, threshold = 1e-04, verbose = TRUE)
     )
 
 #### Arguments

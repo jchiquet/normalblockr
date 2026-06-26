@@ -1,6 +1,7 @@
-# Extracts model coefficients from objects returned by \[NormalBlockBase()\] and its variants
+# Extracts the latent-block covariance matrix from objects returned by \[NormalBlockBase()\] and its variants
 
-Extract coefficients from an NormalBlockBase object.
+Extract the covariance matrix between latent blocks (the inverse of
+\`Omegaq\`) from a NormalBlockBase object.
 
 ## Usage
 
@@ -17,8 +18,8 @@ sigma(object, ...)
 
 - ...:
 
-  not use, only here for S3 compatibility
+  not used, only here for S3 compatibility
 
 ## Value
 
-A matrix of coefficients extracted from the NormalBlockBase model.
+The q x q covariance matrix between latent blocks.

@@ -1,19 +1,21 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>/404.html</loc></url>
 <url><loc>/LICENSE.html</loc></url>
+<url><loc>/articles/breast-cancer-proteomics.html</loc></url>
 <url><loc>/articles/index.html</loc></url>
 <url><loc>/articles/normal-block.html</loc></url>
+<url><loc>/articles/zero-inflated-normal-block.html</loc></url>
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/NB_control.html</loc></url>
 <url><loc>/reference/NormalBlockBase.html</loc></url>
-<url><loc>/reference/NormalBlockChangingSparsity.html</loc></url>
 <url><loc>/reference/NormalBlockCollection.html</loc></url>
+<url><loc>/reference/NormalBlockCollectionClusters.html</loc></url>
+<url><loc>/reference/NormalBlockCollectionClustersSparsity.html</loc></url>
+<url><loc>/reference/NormalBlockCollectionSparsity.html</loc></url>
 <url><loc>/reference/NormalBlockData.html</loc></url>
 <url><loc>/reference/NormalBlockKnownClusters.html</loc></url>
 <url><loc>/reference/NormalBlockUnknownClusters.html</loc></url>
-<url><loc>/reference/NormalBlockUnknownQ.html</loc></url>
-<url><loc>/reference/NormalBlockUnknownQChangingSparsity.html</loc></url>
 <url><loc>/reference/SelectionNClusters.html</loc></url>
 <url><loc>/reference/ZINormalBlockKnownClusters.html</loc></url>
 <url><loc>/reference/ZINormalBlockUnknownClusters.html</loc></url>

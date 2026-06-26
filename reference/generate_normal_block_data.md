@@ -1,7 +1,7 @@
 # Generate Normal Block Data
 
 A function to draw data from the normal block model (see details). The
-function returns both the generated data and the corrresponding model
+function returns both the generated data and the corresponding model
 parameters, in a list.
 
 ## Usage
@@ -64,7 +64,7 @@ generate_normal_block_data(
 - SNR:
 
   Signal to noise ratio: magnitude of the regression parameters B will
-  be adjusted so that tr(var(XB)) and tr(Sigma) match the desried SNR.
+  be adjusted so that tr(var(XB)) and tr(Sigma) match the desired SNR.
 
 - alpha:
 
@@ -88,4 +88,4 @@ regressor/design matrix - a list of model parameters, encompassing - B:
 matrix of regression coefficients - C: matrix of group membership - D:
 diagonal matrix of variance of the variables - Omega: precision matrix
 of the groups - Sigma: covariance matrix of the groups - kappa: vector
-of ZI inflation proabilities (one per variable)
+of ZI inflation probabilities (one per variable)

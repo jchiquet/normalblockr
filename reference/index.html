@@ -18,7 +18,9 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -60,17 +62,31 @@
 
         <dt>
 
-          <code><a href="NormalBlockChangingSparsity.html">NormalBlockChangingSparsity</a></code>
-
-        </dt>
-        <dd>R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.</dd>
-
-        <dt>
-
           <code><a href="NormalBlockCollection.html">NormalBlockCollection</a></code>
 
         </dt>
         <dd>R6 abstract class for a collection of normal-block models</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockCollectionClusters.html">NormalBlockCollectionClusters</a></code>
+
+        </dt>
+        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockCollectionClustersSparsity.html">NormalBlockCollectionClustersSparsity</a></code>
+
+        </dt>
+        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockCollectionSparsity.html">NormalBlockCollectionSparsity</a></code>
+
+        </dt>
+        <dd>R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.</dd>
 
         <dt>
 
@@ -92,27 +108,6 @@
 
         </dt>
         <dd>R6 class for a normal-block model with fixed number of clusters (but unknown clustering).</dd>
-
-        <dt>
-
-          <code><a href="NormalBlockUnknownQ.html">NormalBlockUnknownQ</a></code>
-
-        </dt>
-        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.</dd>
-
-        <dt>
-
-          <code><a href="NormalBlockUnknownQChangingSparsity.html">NormalBlockUnknownQChangingSparsity</a></code>
-
-        </dt>
-        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.</dd>
-
-        <dt>
-
-          <code><a href="SelectionNClusters.html">SelectionNClusters</a></code>
-
-        </dt>
-        <dd>R6 class for selecting the number of clusters (q) by forward/backward split-and-merge exploration, comparing models with the ICL</dd>
 
         <dt>
 
@@ -196,7 +191,7 @@
           <code><a href="sigma.NormalBlockBase.html">sigma(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
-        <dd>Extracts model coefficients from objects returned by [NormalBlockBase()] and its variants</dd>
+        <dd>Extracts the latent-block covariance matrix from objects returned by [NormalBlockBase()] and its variants</dd>
 
         <dt>
 

@@ -17,8 +17,8 @@ fitted(object, ...)
 
 - ...:
 
-  not use, only here for S3 compatibility
+  not used, only here for S3 compatibility
 
 ## Value
 
-A matrix of Fitted values extracted from the object object.
+A matrix of fitted values extracted from the object.

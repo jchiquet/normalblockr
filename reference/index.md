@@ -5,11 +5,17 @@
 - [`NB_control()`](NB_control.md) : NB_control
 - [`NormalBlockBase`](NormalBlockBase.md) : R6 abstract class for a
   generic sparse Normal Block model
-- [`NormalBlockChangingSparsity`](NormalBlockChangingSparsity.md) : R6
-  class for a collection of normal-block models with a fixed clustering
-  (blocks) and different sparsity levels.
 - [`NormalBlockCollection`](NormalBlockCollection.md) : R6 abstract
   class for a collection of normal-block models
+- [`NormalBlockCollectionClusters`](NormalBlockCollectionClusters.md) :
+  R6 class for a collection of normal-block models with different number
+  of clusters (q) and a fixed sparsity level.
+- [`NormalBlockCollectionClustersSparsity`](NormalBlockCollectionClustersSparsity.md)
+  : R6 class for a collection of normal-block models with different
+  number of clusters (q) and different sparsity levels.
+- [`NormalBlockCollectionSparsity`](NormalBlockCollectionSparsity.md) :
+  R6 class for a collection of normal-block models with a fixed
+  clustering (blocks) and different sparsity levels.
 - [`NormalBlockData`](NormalBlockData.md) : R6 class for a generic
   normal model
 - [`NormalBlockKnownClusters`](NormalBlockKnownClusters.md) : R6 class
@@ -17,15 +23,6 @@
 - [`NormalBlockUnknownClusters`](NormalBlockUnknownClusters.md) : R6
   class for a normal-block model with fixed number of clusters (but
   unknown clustering).
-- [`NormalBlockUnknownQ`](NormalBlockUnknownQ.md) : R6 class for a
-  collection of normal-block models with different number of
-  clusters (q) and a fixed sparsity level.
-- [`NormalBlockUnknownQChangingSparsity`](NormalBlockUnknownQChangingSparsity.md)
-  : R6 class for a collection of normal-block models with different
-  number of clusters (q) and different sparsity levels.
-- [`SelectionNClusters`](SelectionNClusters.md) : R6 class for selecting
-  the number of clusters (q) by forward/backward split-and-merge
-  exploration, comparing models with the ICL
 - [`ZINormalBlockKnownClusters`](ZINormalBlockKnownClusters.md) : R6
   class for a Zero-Inflated normal-block model with a known clustering.
 - [`ZINormalBlockUnknownClusters`](ZINormalBlockUnknownClusters.md) : R6
@@ -51,7 +48,7 @@
 - [`predict(`*`<NormalBlockBase>`*`)`](predict.NormalBlockBase.md) :
   Predicts observations Y for new covariates X.
 - [`sigma(`*`<NormalBlockBase>`*`)`](sigma.NormalBlockBase.md) :
-  Extracts model coefficients from objects returned by
+  Extracts the latent-block covariance matrix from objects returned by
   \[NormalBlockBase()\] and its variants
 - [`university`](university.md) : University webpages text data (CMU "4
   Universities" / WebKB)

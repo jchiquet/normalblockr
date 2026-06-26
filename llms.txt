@@ -1,13 +1,45 @@
-# normalblockr
+# normalblockr: Gaussian graphical models with latent clustering structure for multivariate continuous data
 
-Normal-Block is a graphical model designed for the multivariate analysis
-of continuous data. It clusters variables and builds on Graphical-Lasso
-to infer a network of statistical dependencies between clusters.
+## Description
+
+> The Normal-Block model[^1] is a Gaussian graphical model with a latent
+> clustering structure, designed for the multivariate analysis of
+> continuous data: it clusters variables and, building on the graphical
+> lasso, infers a network of statistical dependencies *between clusters*
+> rather than between individual variables. This package implements an
+> efficient (variational) EM algorithm to fit it, accompanied by a set
+> of functions for model selection, visualization and diagnostic. See
+> [all the dedicated
+> vignettes](https://jeannetous.github.io/normalblockr/articles/) for a
+> comprehensive introduction.
+
+**normalblockr** covers the following model variants, all built around
+the same [`normal_block()`](reference/normal_block.md)/`NormalBlockData`
+interface:
+
+- **Known clusters**: the grouping of variables is given (e.g. from
+  prior knowledge); only the association network between clusters is
+  estimated, by EM.
+- **Unknown clusters**: the grouping is inferred jointly with everything
+  else by a variational EM, either for a single number of clusters or
+  over a range explored as a collection, with model selection via
+  BIC/EBIC/ICL.
+- **Sparse (graphical-lasso) network**: an $`\ell_1`$ penalty[^2] on the
+  inter-cluster precision matrix, for a single penalty value or a path
+  explored as a collection.
+- **Zero-inflated extension**: an excess-of-zeros layer for data
+  (e.g. abundance/biomass tables) with more exact zeros than a plain
+  Normal model can represent.
+
+Any combination of these is reached through the same
+[`normal_block()`](reference/normal_block.md) function – known or
+unknown clustering, sparse or not, zero-inflated or not are independent
+choices, not separate model classes to learn.
 
 ## Installation
 
-You can install the development version of normalblockr from
-[GitHub](https://github.com/) with:
+**normalblockr** is not (yet) on CRAN; install the development version
+from [GitHub](https://github.com/jeannetous/normalblockr):
 
 ``` r
 
@@ -15,57 +47,254 @@ You can install the development version of normalblockr from
 pak::pak("jeannetous/normalblockr")
 ```
 
-## Usage
+## Illustration
 
-All fitting is done using the function normal_block. An object of the
-class normal_data must be created (using observations Y and covariates
-X) and used as an input to normal_block. normal_block parameters allow
-to choose between sparse / not sparse models, fixed or unknown blocks…
-
-The package comes with a small artificial data set simulated under the
-model.
+We illustrate the known-/unknown-clusters and sparse variants on
+`brca_rppa`[^3]: reverse-phase protein array measurements of 163
+proteins across 346 breast cancer tumor samples from The Cancer Genome
+Atlas, together with each sample’s PAM50 molecular subtype.
 
 ``` r
 
-testdata <- readRDS("tests/testthat/testdata/testdata_normal.RDS")
-Y        <- testdata$Y ; X <- testdata$X
-C        <- testdata$parameters$C ; Q <- ncol(C)
-data     <- NormalBlockData$new(Y, X) 
-model    <- normal_block(data, blocks = C)
+library(normalblockr)
+data(brca_rppa)
+Y    <- as.matrix(brca_rppa$expr)
+X    <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
+data <- NormalBlockData$new(Y, X)
 ```
 
-### Sparse model
+### Known clusters
+
+A simple, fully data-driven grouping (hierarchical clustering on the raw
+expression profiles, with no reference to the Normal-Block model) handed
+to [`normal_block()`](reference/normal_block.md) as fixed – only the
+network between the 6 blocks is estimated.
 
 ``` r
 
-model    <- normal_block(data, blocks = C, sparsity = TRUE)
+hc    <- brca_rppa$expr |> scale() |> t() |> dist() |> hclust("ward.D2")
+group <- cutree(hc, 6) |> normalblockr:::as_indicator()
+m_known <- normal_block(data, blocks = group)
 ```
 
-### With unobserved clustering
+``` R
+Fitting a diagonal normal-block model with fixed blocks 
+
+DONE
+```
 
 ``` r
 
-model    <- normal_block(data, blocks = 2:5, sparsity = TRUE)
-model$plot()
-model_BIC <- model$get_best_model("BIC")
+m_known
 ```
 
-### With zero-inflated data
+``` R
+A diagonal normal-block model with fixed blocks .
+===========================================================================
+ nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
+      999 6      15        0 -70387.84 140775.7 146616.3 144073.3 146670    14
+===========================================================================
+* Useful fields
+    $model_par, $posterior_par / $var_par, $clustering 
+    $loglik, $BIC, $ICL, $objective, $nb_param, $criteria
+* Useful S3 methods
+    print(), coef(), sigma(), fitted(), predict() 
+```
+
+### Unknown number of clusters
+
+Leave the clustering for the model to infer, over a range of candidate
+cluster counts explored as a collection, then select by ICL.
 
 ``` r
 
-testdata_zi <- readRDS("tests/testthat/testdata/testdata_normal_zi.RDS")
-Y        <- testdata_zi$Y ; X <- testdata_zi$X
-C        <- testdata_zi$parameters$C ; Q <- ncol(C)
-data_zi  <- NormalBlockData$new(Y, X) 
-model    <- normal_block(data_zi, blocks = C, zero_inflation = TRUE)
+m_unknown <- normal_block(data, blocks = 2:10)
 ```
 
-### References
+``` R
+Fitting a diagonal normal-block model with unknown q 
+     number of blocks = 2           
+     number of blocks = 3           
+     number of blocks = 4           
+     number of blocks = 5           
+     number of blocks = 6           
+     number of blocks = 7           
+     number of blocks = 8           
+     number of blocks = 9           
+     number of blocks = 10           
+DONE
+```
 
-Please cite our work using the following reference: Tous, J., & Chiquet,
-J. (2025). An integrated method for clustering and association network
-inference. arXiv preprint arXiv:2503.22467.
+``` r
+
+m_unknown$plot(c("deviance", "BIC", "ICL", "EBIC"))
+```
+
+![](reference/figures/README-unknown-1.png)
+
+``` r
+
+m_unknown$get_best_model("ICL")
+```
+
+``` R
+A diagonal normal-block model with 10 unknown blocks .
+===========================================================================
+ nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+     1042 10      45        0 -68179.63 136359.3 142451.2 139402.8 142658.5
+ niter
+    16
+===========================================================================
+* Useful fields
+    $model_par, $posterior_par / $var_par, $clustering 
+    $loglik, $BIC, $ICL, $objective, $nb_param, $criteria
+* Useful S3 methods
+    print(), coef(), sigma(), fitted(), predict() 
+```
+
+### Sparse network
+
+Treating a clustering as fixed (known, or selected above), explore a
+path of graphical-lasso penalties on the inter-cluster network and
+select by BIC. Unlike the dense, unpenalized network, this is the one
+actually worth visualizing.
+
+``` r
+
+m_sparse <- normal_block(data, blocks = group, sparsity = TRUE)
+```
+
+``` R
+Fitting a Collection of diagonal normal-block models with fixed blocks, with different sparsity penalties. 
+     penalty = 0.2565018           
+     penalty = 0.2188391           
+     penalty = 0.1867065           
+     penalty = 0.1592919           
+     penalty = 0.1359028           
+     penalty = 0.1159479           
+     penalty = 0.098923           
+     penalty = 0.08439792           
+     penalty = 0.07200559           
+     penalty = 0.06143286           
+     penalty = 0.05241254           
+     penalty = 0.04471669           
+     penalty = 0.03815085           
+     penalty = 0.03254907           
+     penalty = 0.02776982           
+     penalty = 0.02369232           
+     penalty = 0.02021353           
+     penalty = 0.01724553           
+     penalty = 0.01471333           
+     penalty = 0.01255294           
+     penalty = 0.01070977           
+     penalty = 0.009137229           
+     penalty = 0.00779559           
+     penalty = 0.006650947           
+     penalty = 0.005674374           
+     penalty = 0.004841193           
+     penalty = 0.004130351           
+     penalty = 0.003523882           
+     penalty = 0.003006463           
+     penalty = 0.002565018           
+DONE
+```
+
+``` r
+
+sp_best  <- m_sparse$get_best_model("BIC")
+sp_best$plot_network()
+```
+
+![](reference/figures/README-sparse-1.png)
+
+### Zero-inflated data
+
+For data with an excess of exact zeros beyond what a plain Normal model
+would represent (e.g. abundance/biomass tables), `zero_inflation = TRUE`
+adds a per-variable excess-of-zero layer. Illustrated on `onema`[^4]:
+total biomass of 46 fish species across 399 French stream electrofishing
+stations, where seven in ten entries are exact zeros.
+
+``` r
+
+data(onema)
+X_zi    <- model.matrix(~ 1 + temperature_med, data = onema$covariates)
+Y_zi    <- log(1 + onema$biomass)
+data_zi <- NormalBlockData$new(Y_zi, X_zi)
+m_zi    <- normal_block(data_zi, blocks = 2:8, zero_inflation = TRUE)
+```
+
+``` R
+Fitting a diagonal normal-block model with unknown q 
+     number of blocks = 2           
+     number of blocks = 3           
+     number of blocks = 4           
+     number of blocks = 5           
+     number of blocks = 6           
+     number of blocks = 7           
+     number of blocks = 8           
+DONE
+```
+
+``` r
+
+m_zi$get_best_model("ICL")
+```
+
+``` R
+A zero-inflated diagonal normal-block model with 6 unknown blocks .
+===========================================================================
+ nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+      210 6      15        0 -13519.35 27038.71 28296.39 27090.47 28350.14
+ niter
+    20
+===========================================================================
+* Useful fields
+    $model_par, $posterior_par / $var_par, $clustering 
+    $loglik, $BIC, $ICL, $objective, $nb_param, $criteria
+* Useful S3 methods
+    print(), coef(), sigma(), fitted(), predict() 
+```
+
+## Learning more
+
+- [`normal-block`](https://jeannetous.github.io/normalblockr/articles/normal-block.html)
+  ([`vignette("normal-block")`](articles/normal-block.md)): a general
+  introduction on simulated data – known/unknown clusters, sparsity,
+  zero-inflation.
+- [`zero-inflated-normal-block`](https://jeannetous.github.io/normalblockr/articles/zero-inflated-normal-block.html)
+  ([`vignette("zero-inflated-normal-block")`](articles/zero-inflated-normal-block.md)):
+  a full worked example on `onema`, with the math behind the
+  zero-inflation extension.
+- [`breast-cancer-proteomics`](https://jeannetous.github.io/normalblockr/articles/breast-cancer-proteomics.html)
+  ([`vignette("breast-cancer-proteomics")`](articles/breast-cancer-proteomics.md)):
+  a full worked example on `brca_rppa` – known vs. inferred clustering,
+  model selection, the post-hoc `refine()` step, sparsifying the
+  selected network.
+- `inst/normal_block_models.qmd` in the package sources: a reference
+  card with every model variant’s exact criterion and E/M (or VE/M)
+  updates, as implemented in `src/`.
+
+## References
+
+[^1]: Tous, J., & Chiquet, J. (2026). An integrated method for
+    clustering and association network inference. Computational
+    Statistics & Data Analysis, 219, 108347.
+    [doi:10.1016/j.csda.2026.108347](https://doi.org/10.1016/j.csda.2026.108347)
+
+[^2]: Friedman, J., Hastie, T. and Tibshirani, R. Sparse inverse
+    covariance estimation with the graphical lasso. Biostatistics, 9(3),
+    2008.
+
+[^3]: Cancer Genome Atlas Network. Comprehensive molecular portraits of
+    human breast tumours. Nature, 490, 2012, 61-70.
+    [doi:10.1038/nature11412](https://doi.org/10.1038/nature11412)
+
+[^4]: Danet, A., Mouchet, M., Bonnaffé, W., Thébault, E., Fontaine, C.
+    Species richness and food-web structure jointly drive community
+    biomass and its temporal stability in fish communities, data set,
+    2021, Zenodo.
+    [doi:10.5281/zenodo.5095656](https://doi.org/10.5281/zenodo.5095656)
 
 # Package index
 
@@ -74,11 +303,17 @@ inference. arXiv preprint arXiv:2503.22467.
 - [`NB_control()`](NB_control.md) : NB_control
 - [`NormalBlockBase`](NormalBlockBase.md) : R6 abstract class for a
   generic sparse Normal Block model
-- [`NormalBlockChangingSparsity`](NormalBlockChangingSparsity.md) : R6
-  class for a collection of normal-block models with a fixed clustering
-  (blocks) and different sparsity levels.
 - [`NormalBlockCollection`](NormalBlockCollection.md) : R6 abstract
   class for a collection of normal-block models
+- [`NormalBlockCollectionClusters`](NormalBlockCollectionClusters.md) :
+  R6 class for a collection of normal-block models with different number
+  of clusters (q) and a fixed sparsity level.
+- [`NormalBlockCollectionClustersSparsity`](NormalBlockCollectionClustersSparsity.md)
+  : R6 class for a collection of normal-block models with different
+  number of clusters (q) and different sparsity levels.
+- [`NormalBlockCollectionSparsity`](NormalBlockCollectionSparsity.md) :
+  R6 class for a collection of normal-block models with a fixed
+  clustering (blocks) and different sparsity levels.
 - [`NormalBlockData`](NormalBlockData.md) : R6 class for a generic
   normal model
 - [`NormalBlockKnownClusters`](NormalBlockKnownClusters.md) : R6 class
@@ -86,15 +321,6 @@ inference. arXiv preprint arXiv:2503.22467.
 - [`NormalBlockUnknownClusters`](NormalBlockUnknownClusters.md) : R6
   class for a normal-block model with fixed number of clusters (but
   unknown clustering).
-- [`NormalBlockUnknownQ`](NormalBlockUnknownQ.md) : R6 class for a
-  collection of normal-block models with different number of
-  clusters (q) and a fixed sparsity level.
-- [`NormalBlockUnknownQChangingSparsity`](NormalBlockUnknownQChangingSparsity.md)
-  : R6 class for a collection of normal-block models with different
-  number of clusters (q) and different sparsity levels.
-- [`SelectionNClusters`](SelectionNClusters.md) : R6 class for selecting
-  the number of clusters (q) by forward/backward split-and-merge
-  exploration, comparing models with the ICL
 - [`ZINormalBlockKnownClusters`](ZINormalBlockKnownClusters.md) : R6
   class for a Zero-Inflated normal-block model with a known clustering.
 - [`ZINormalBlockUnknownClusters`](ZINormalBlockUnknownClusters.md) : R6
@@ -120,7 +346,7 @@ inference. arXiv preprint arXiv:2503.22467.
 - [`predict(`*`<NormalBlockBase>`*`)`](predict.NormalBlockBase.md) :
   Predicts observations Y for new covariates X.
 - [`sigma(`*`<NormalBlockBase>`*`)`](sigma.NormalBlockBase.md) :
-  Extracts model coefficients from objects returned by
+  Extracts the latent-block covariance matrix from objects returned by
   \[NormalBlockBase()\] and its variants
 - [`university`](university.md) : University webpages text data (CMU "4
   Universities" / WebKB)
@@ -129,5 +355,9 @@ inference. arXiv preprint arXiv:2503.22467.
 
 ### All vignettes
 
+- [Normal-Block models: a worked example with breast cancer proteomics
+  data](breast-cancer-proteomics.md):
 - [Analyzing multivariate Gaussian data with the Normal-Block model -
   First steps](normal-block.md):
+- [Zero-inflated Normal-Block models: a worked example with fish biomass
+  data](zero-inflated-normal-block.md):

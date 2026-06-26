@@ -24,7 +24,9 @@ Tous &amp;amp; Chiquet (2026)."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -77,8 +79,10 @@ Tous &amp; Chiquet (2026).</p>
   <dt>gene_annotation</dt>
 <dd><p>a data frame with one row per protein, in the
   same order as the columns of `expr`: `protein` (matches `colnames(expr)`),
-  `entrezGeneId`, `hugoGeneSymbol` and `type` (`"protein"` or
-  `"phosphoprotein"`).</p></dd>
+  `entrezGeneId`, `hugoGeneSymbol`, `type` (`"protein-coding"` or
+  `"phosphoprotein"`) and `go_bp_term` (a Gene Ontology Biological Process
+  classification, one term per protein, or `"unknown"` if none could be
+  found – see Details).</p></dd>
 
 
 </dl></div>
@@ -87,7 +91,23 @@ Tous &amp; Chiquet (2026).</p>
     <p>TCGA breast cancer cohort (Cancer Genome Atlas Network, 2012,
 <a href="https://doi.org/10.1038/nature11412" class="external-link">doi:10.1038/nature11412</a>
 ), downloaded via cBioPortal (`brca_tcga_pub`
-study, <a href="https://www.cbioportal.org" class="external-link">https://www.cbioportal.org</a>).</p>
+study, <a href="https://www.cbioportal.org" class="external-link">https://www.cbioportal.org</a>). `go_bp_term` (see Details) was
+added afterwards from `org.Hs.eg.db`.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>`go_bp_term` is derived from `org.Hs.eg.db`, queried by
+`entrezGeneId` for `"protein-coding"` rows. Phospho-site antibodies
+(`type == "phosphoprotein"`, e.g. `"EGFR_PY1068"`) carry a placeholder,
+negative `entrezGeneId` (there is no separate gene for a specific
+phosphorylation site, only the underlying gene) and are instead queried by
+gene symbol (the part of `protein` before the first `"_"`). Each protein
+typically has dozens of GO Biological Process terms; `go_bp_term` keeps,
+for each protein, the one term shared by the most *other* proteins in this
+dataset – giving a handful of non-trivial groups rather than one
+near-singleton group per protein, more useful for comparing against an
+inferred clustering. See `data-raw/brca_rppa_go_annotation.R` for the full
+extraction code.</p>
     </div>
 
     <div class="section level2">
@@ -95,6 +115,64 @@ study, <a href="https://www.cbioportal.org" class="external-link">https://www.cb
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">expr</span> <span class="op">&lt;-</span> <span class="va">brca_rppa</span><span class="op">$</span><span class="va">expr</span></span></span>
 <span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">PAM50_SUBTYPE</span>, data <span class="op">=</span> <span class="va">brca_rppa</span><span class="op">$</span><span class="va">covariates</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">nb_data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">expr</span>, <span class="va">X</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">brca_rppa</span><span class="op">$</span><span class="va">gene_annotation</span><span class="op">$</span><span class="va">go_bp_term</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                DNA damage response </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                 12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                              G1/S transition of mitotic cell cycle </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  5 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                  apoptotic process </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                 19 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                      axon guidance </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                      cell adhesion </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                               cell differentiation </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                      cell division </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                    cell-cell junction organization </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                              cellular response to insulin stimulus </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  intracellular signal transduction </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                            lipid metabolic process </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                           negative regulation of apoptotic process </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                 21 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               negative regulation of cell population proliferation </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                             negative regulation of gene expression </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          negative regulation of transcription by RNA polymerase II </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> phosphatidylinositol 3-kinase/protein kinase B signal transduction </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 positive regulation of DNA-templated transcription </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               positive regulation of cell population proliferation </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  5 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                             positive regulation of gene expression </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          positive regulation of transcription by RNA polymerase II </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                 15 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                            protein phosphorylation </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                          regulation of DNA-templated transcription </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                    regulation of apoptotic process </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   regulation of transcription by RNA polymerase II </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                          regulation of translation </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                       response to oxidative stress </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                    response to xenobiotic stimulus </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                  3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                signal transduction </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                 56 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

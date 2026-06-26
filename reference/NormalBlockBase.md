@@ -237,7 +237,8 @@ All possible parameters of the child classes
       alpha = NA,
       M = NA,
       S = NA,
-      ll_list = NA
+      ll_list = NA,
+      warm_started = NA
     )
 
 #### Arguments
@@ -286,6 +287,13 @@ All possible parameters of the child classes
 
   list of log-lik (elbo) values
 
+- `warm_started`:
+
+  whether \`EM_initialize()\` should treat the model as already
+  initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand) rather than
+  recomputing a fresh heuristic initialization – set by
+  \[warm_start_from()\] and by \[split()\]/\[merge()\].
+
 #### Returns
 
 Update the current \[\`normal\`\] object
@@ -298,13 +306,25 @@ calls optimization (EM or heuristic) and updates relevant fields
 
 #### Usage
 
-    NormalBlockBase$optimize(control = list(niter = 100, threshold = 1e-04))
+    NormalBlockBase$optimize(
+      control = list(niter = 500, threshold = 1e-04),
+      warn = TRUE
+    )
 
 #### Arguments
 
 - `control`:
 
   a list for controlling the optimization proces
+
+- `warn`:
+
+  whether to warn when the (V)EM stops at the \`niter\` cap without
+  reaching \`threshold\` (see \`private\$warn_if_not_converged()\`). Set
+  to \`FALSE\` for deliberately-truncated trial fits (cheap candidate
+  scoring in \`candidates_split()\`/\`candidates_merge()\`, the
+  sparsity-path warm-start probe in \[NormalBlockCollectionSparsity\])
+  where stopping at the cap is expected and not a sign of trouble.
 
 #### Returns
 
@@ -316,15 +336,16 @@ optimizes the model and updates its parameters
 
 Seed this model's starting parameters from another, already-optimized
 model with the same q, instead of the heuristic clustering-derived
-values set at construction time. Used by \[NormalBlockChangingSparsity\]
-to warm-start each penalty in a sparsity path from the previous
-(adjacent) one's converged solution – adjacent penalties along a sorted
-path usually have similar optima, so this typically needs far fewer EM
-iterations than starting cold each time (the same rationale as
-warm-starting in glmnet/glassoFast's own regularization paths).
-\`B0\`/\`kappa\` (zero-inflation) are deliberately left untouched: they
-depend only on the data, not on sparsity/blocks, so they are already set
-correctly and independently on every model.
+values set at construction time. Used by
+\[NormalBlockCollectionSparsity\] to warm-start each penalty in a
+sparsity path from the previous (adjacent) one's converged solution –
+adjacent penalties along a sorted path usually have similar optima, so
+this typically needs far fewer EM iterations than starting cold each
+time (the same rationale as warm-starting in glmnet/glassoFast's own
+regularization paths). \`B0\`/\`kappa\` (zero-inflation) are
+deliberately left untouched: they depend only on the data, not on
+sparsity/blocks, so they are already set correctly and independently on
+every model.
 
 #### Usage
 
@@ -376,7 +397,16 @@ of the current model
 
 #### Usage
 
-    NormalBlockBase$candidates_split()
+    NormalBlockBase$candidates_split(trial_niter = 5)
+
+#### Arguments
+
+- `trial_niter`:
+
+  number of EM iterations used to cheaply score each candidate before
+  \[SelectionNClusters\] fully re-optimizes the best few
+  (\`train_best_candidates()\`'s \`max_training\`) – kept short on
+  purpose.
 
 ------------------------------------------------------------------------
 
@@ -387,7 +417,22 @@ the current model
 
 #### Usage
 
-    NormalBlockBase$candidates_merge()
+    NormalBlockBase$candidates_merge(max_candidates = 30, trial_niter = 2)
+
+#### Arguments
+
+- `max_candidates`:
+
+  merge candidates are, unlike split's, quadratic in q (\`choose(q,
+  q-2)\` pairs) – beyond \`max_candidates\` pairs, only the most
+  promising ones (largest \`\|Omegaq\[i, j\]\|\`, i.e. the most strongly
+  related cluster pairs in the current fit) are actually built and
+  trial-optimized, since merging two nearly independent blocks is rarely
+  competitive anyway. Set to \`Inf\` to always try every pair.
+
+- `trial_niter`:
+
+  see \[candidates_split()\]
 
 ------------------------------------------------------------------------
 
@@ -461,25 +506,28 @@ a square matrix of size \`self\$q\`
 
 ### `NormalBlockBase$plot_loglik()`
 
-plots log-likelihood values during model optimization
+plots the evolution of the objective (log-likelihood or ELBO) across the
+(V)EM iterations of the last call to \`optimize()\`.
 
 #### Usage
 
-    NormalBlockBase$plot_loglik(type = "b", log = "xy", neg = TRUE)
+    NormalBlockBase$plot_loglik(show_increment = TRUE)
 
 #### Arguments
 
-- `type`:
+- `show_increment`:
 
-  char for line type (see plot.default)
+  whether to add, below the objective trace, a second panel with the
+  (log10) absolute increment between consecutive iterations and the
+  convergence \`threshold\` used to stop optimize() (dashed line). That
+  second panel is what actually tells convergence apart from merely
+  running out of iterations: the objective trace alone tends to look
+  flat well before the increment has actually crossed the threshold,
+  especially as the number of blocks grows (see inst/CSDA_analyses).
 
-- `log`:
+#### Returns
 
-  char for logarithmic axes (see plot.default)
-
-- `neg`:
-
-  boolean plot negative log-likelihood (useful when log="y")
+a \[\`ggplot2::ggplot\`\] graph
 
 ------------------------------------------------------------------------
 
@@ -540,8 +588,8 @@ plot the latent network.
 
 ### `NormalBlockBase$plot()`
 
-plot together latent network and log-likelihood values during model
-optimization
+plots the evolution of the objective during model optimization (see
+\`plot_loglik()\`)
 
 #### Usage
 

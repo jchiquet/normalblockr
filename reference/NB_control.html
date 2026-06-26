@@ -18,7 +18,9 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -43,7 +45,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">NB_control</span><span class="op">(</span></span>
-<span>  niter <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  niter <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="fl">1e-04</span>,</span>
 <span>  sparsity_weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sparsity_penalties <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -53,7 +55,8 @@
 <span>  clustering_init <span class="op">=</span> <span class="st">"ward2"</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  heuristic <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  noise_covariance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"diagonal"</span>, <span class="st">"spherical"</span><span class="op">)</span></span>
+<span>  noise_covariance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"diagonal"</span>, <span class="st">"spherical"</span><span class="op">)</span>,</span>
+<span>  refine <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,28 +99,19 @@ useful for calls to fixed_q models in stability_selection</p></dd>
 <dt id="arg-clustering-init">clustering_init<a class="anchor" aria-label="anchor" href="#arg-clustering-init"></a></dt>
 <dd><p>how to obtain the initial clustering of the q unknown
 blocks. Either the name of a clustering heuristic – one of "ward2"
-(default), "kmeans", "sbm" or "spectral" (k-means on the row-normalized
-eigenvectors of cov(R), a cheap proxy for clustering the residuals'
-covariance structure rather than their values) – or an actual clustering
-to use directly, as a vector of labels or a p x q indicator matrix. When q
-is unknown (a collection over several q values), can also be a list with
-one such heuristic name/clustering per q value. No single heuristic
-dominates on every dataset (see
-inst/clustering_initialization_benchmark for a benchmark); "ward2" is the
-default because, combining each method's BIC rank with how often its
-deviance path violates the model's theoretical guarantee (deviance should
-be non-increasing in q) as a measure of how reliably it lets the (V)EM
-converge, it gives the best balance of the two – not because it has the
-single best raw rank (kmeans does, marginally, but with far more and
-larger monotonicity violations). When fitting a collection over several
-values of q
-(`normal_block(blocks = &lt;vector&gt;)`, [NormalBlockUnknownQ],
-[NormalBlockUnknownQChangingSparsity]) with the heuristic name "sbm" (and no
-per-q list of explicit clusterings), a single SBM exploration runs over the
-whole range of q and is reused for every model in the collection instead of
-repeating an independent (and increasingly costly) exploration for each q;
-any q its own model-selection does not reach falls back to a cheap "ward2"
-clustering rather than a dedicated (and potentially expensive) SBM call.</p></dd>
+(default), "kmeans", "sbm" or "spectral" (a cheap proxy for "sbm": k-means
+on the row-normalized eigenvectors of cov(R)) – or an actual clustering to
+use directly, as a vector of labels or a p x q indicator matrix. When q is
+unknown (a collection over several q values), can also be a list with one
+such heuristic name/clustering per q value. No single heuristic dominates
+on every dataset (see inst/clustering_initialization_benchmark); "ward2" is
+the default for giving the best balance of BIC rank and how rarely its
+deviance path violates the model's "non-increasing in q" guarantee – a
+reliability signal "kmeans" lacks despite a marginally better raw rank.
+With the heuristic name "sbm" on a collection (and no per-q list of
+explicit clusterings), a single SBM exploration runs over the whole range
+of q and is reused for every model instead of repeating one per q; any q
+it doesn't reach falls back to a cheap "ward2" clustering.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
@@ -133,6 +127,15 @@ are all `NA` on the resulting model.</p></dd>
 
 <dt id="arg-noise-covariance">noise_covariance<a class="anchor" aria-label="anchor" href="#arg-noise-covariance"></a></dt>
 <dd><p>variance can be variable specific ("diagonal", the default) or common ("spherical")</p></dd>
+
+
+<dt id="arg-refine">refine<a class="anchor" aria-label="anchor" href="#arg-refine"></a></dt>
+<dd><p>for [NormalBlockCollectionClusters] only: whether
+`optimize()` should automatically call `refine()` afterwards (see its
+documentation for the rationale and an empirical before/after comparison).
+Default `FALSE` – it adds real cost (roughly 3x the time of fitting the
+collection alone), so it is opt-in; call `collection$refine()` directly at
+any point afterwards for the same effect without setting this.</p></dd>
 
 </dl></div>
 

@@ -40,4 +40,4 @@ get_model(
 - control:
 
   a list-like structure for detailed control on parameters should be
-  generated with normal_block_control() for collections of sparse models
+  generated with NB_control() for collections of sparse models
