@@ -52,7 +52,10 @@ reliability signal "kmeans" lacks despite a marginally better raw rank.
 With the heuristic name "sbm" on a collection (and no per-q list of
 explicit clusterings), a single SBM exploration runs over the whole range
 of q and is reused for every model instead of repeating one per q; any q
-it doesn't reach falls back to a cheap "ward2" clustering.}
+it doesn't reach falls back to a cheap "ward2" clustering. The special
+value "best_of_inits" fits every model with [NormalBlockBase]'s
+`best_of_inits()` instead of a single heuristic (try several, keep the
+best-ELBO fit); not supported together with `sparsity = TRUE`.}
 
 \item{verbose}{telling if information should be printed during optimization}
 

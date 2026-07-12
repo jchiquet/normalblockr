@@ -50,7 +50,9 @@ and provide their own `get_best_model()`, delegating the (row of
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{control}}{optimization parameters (niter and threshold)}
+      \item{\code{control}}{optimization parameters (niter and threshold). When
+`control$clustering_init` is `"best_of_inits"`, each leaf model is fit
+via its own `best_of_inits()` instead of a plain `optimize()`.}
     }
     \if{html}{\out{</div>}}
   }

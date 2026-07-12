@@ -36,6 +36,10 @@ normal_block <- function(data,
   stopifnot(is.null(control$sparsity_weights) | is.matrix(control$sparsity_weights))
   if (!is.null(control$sparsity_weights)) stopifnot(isSymmetric(control$sparsity_weights))
   if (is.list(control$clustering_init)) stopifnot(length(control$clustering_init) == length(blocks))
+  stopifnot(
+    "clustering_init = 'best_of_inits' is not supported together with sparsity = TRUE (a sparsity path warm-starts a single clustering across all penalties)" =
+      !(uses_best_of_inits(control) && isTRUE(sparsity))
+  )
 
   model <- get_model(data, blocks, sparsity = sparsity,
                      zero_inflation = zero_inflation,
@@ -44,7 +48,11 @@ normal_block <- function(data,
   ## Estimation/optimization
   if (control$verbose) cat("Fitting a", model$who_am_I, "\n")
 
-  model$optimize(control)
+  if (uses_best_of_inits(control) && !is.null(model$best_of_inits)) {
+    model <- model$best_of_inits(control = control)
+  } else {
+    model$optimize(control)
+  }
 
   ## Finishing
   if (control$verbose) cat("\nDONE\n")
@@ -81,7 +89,10 @@ normal_block <- function(data,
 #' With the heuristic name "sbm" on a collection (and no per-q list of
 #' explicit clusterings), a single SBM exploration runs over the whole range
 #' of q and is reused for every model instead of repeating one per q; any q
-#' it doesn't reach falls back to a cheap "ward2" clustering.
+#' it doesn't reach falls back to a cheap "ward2" clustering. The special
+#' value "best_of_inits" fits every model with [NormalBlockBase]'s
+#' `best_of_inits()` instead of a single heuristic (try several, keep the
+#' best-ELBO fit); not supported together with `sparsity = TRUE`.
 #' @param verbose telling if information should be printed during optimization
 #' @param noise_covariance variance can be variable specific ("diagonal", the default) or common ("spherical")
 #' @param heuristic whether to use the heuristic approach (moment-based, no (V)EM
@@ -112,8 +123,8 @@ NB_control <- function(
   if (!is.null(sparsity_weights))
     stopifnot(all(is.matrix(sparsity_weights), isSymmetric(sparsity_weights)))
   if (is.character(clustering_init) && length(clustering_init) == 1) {
-    stopifnot("clustering_init, when given as a single string, must name a known heuristic ('kmeans', 'ward2', 'sbm' or 'spectral') -- otherwise pass an actual clustering (a vector of labels, a p x q indicator matrix, or a list of either for a collection over several q values)" =
-                clustering_init %in% c("kmeans", "ward2", "sbm", "spectral"))
+    stopifnot("clustering_init, when given as a single string, must name a known heuristic ('kmeans', 'ward2', 'sbm' or 'spectral'), or be 'best_of_inits' -- otherwise pass an actual clustering (a vector of labels, a p x q indicator matrix, or a list of either for a collection over several q values)" =
+                clustering_init %in% c("kmeans", "ward2", "sbm", "spectral", "best_of_inits"))
   }
 
   structure(list(niter                = niter                ,

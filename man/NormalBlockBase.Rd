@@ -89,6 +89,7 @@ original, heterogeneous-scale units.}
   \itemize{
     \item \href{#method-NormalBlockBase-initialize}{\code{NormalBlockBase$new()}}
     \item \href{#method-NormalBlockBase-update}{\code{NormalBlockBase$update()}}
+    \item \href{#method-NormalBlockBase-best_of_inits}{\code{NormalBlockBase$best_of_inits()}}
     \item \href{#method-NormalBlockBase-optimize}{\code{NormalBlockBase$optimize()}}
     \item \href{#method-NormalBlockBase-warm_start_from}{\code{NormalBlockBase$warm_start_from()}}
     \item \href{#method-NormalBlockBase-split}{\code{NormalBlockBase$split()}}
@@ -160,7 +161,8 @@ All possible parameters of the child classes
   M = NA,
   S = NA,
   ll_list = NA,
-  warm_started = NA
+  warm_started = NA,
+  clustering_init = NA
 )}
     \if{html}{\out{</div>}}
   }
@@ -182,11 +184,59 @@ All possible parameters of the child classes
 already initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand)
 rather than recomputing a fresh heuristic initialization -- set by
 [warm_start_from()] and by [split()]/[merge()].}
+      \item{\code{clustering_init}}{name of a clustering heuristic (see
+`NB_control(clustering_init = )`): switches to it and forces
+`EM_initialize()` to re-derive the clustering from it at the next
+`optimize()` call, instead of reusing the current state. Used by
+[best_of_inits()].}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
     Update the current [`normal`] object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockBase-best_of_inits"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockBase-best_of_inits}{}}}
+\subsection{\code{NormalBlockBase$best_of_inits()}}{
+  Try several clustering-initialization heuristics and keep
+the best-ELBO converged fit -- different heuristics can converge to
+substantially different (V)EM local optima at the same q. Every
+candidate is first screened with a short `trial_niter` run (same idea
+as `candidates_split()`/`candidates_merge()`), and only the
+`max_training` best-screened ones are fully retrained with `control`.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockBase$best_of_inits(
+  inits = c("ward2", "kmeans", "spectral"),
+  trial_niter = 10,
+  max_training = 2,
+  control = list(niter = 500, threshold = 1e-04)
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{inits}}{vector of clustering-heuristic names to try (see
+`NB_control(clustering_init = )`). "sbm" is excluded by default since
+its cost is dominated by the heuristic itself, not by the VEM
+iterations `trial_niter` screens away.}
+      \item{\code{trial_niter}}{number of (V)EM iterations used to cheaply screen
+every candidate in `inits` before fully retraining the best few}
+      \item{\code{max_training}}{how many of the screened candidates (best `loglik`
+after `trial_niter` iterations) get fully retrained with `control`}
+      \item{\code{control}}{`optimize()` control list (`niter`/`threshold`) used
+for the final full retraining of the `max_training` best candidates}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a new, already-optimized [`NormalBlockBase`] object. Does not
+mutate the current object; reassign the result
+(`model <- model$best_of_inits()`).
   }
 }
 
