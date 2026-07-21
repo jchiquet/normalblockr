@@ -38,29 +38,15 @@ are only used if penalties is not specified}
 \item{fixed_tau}{whether tau should be fixed at clustering_init during optimization
 useful for calls to fixed_q models in stability_selection}
 
-\item{clustering_init}{how to obtain the initial clustering of the q unknown
-blocks. Either the name of a clustering heuristic (one of "ward2"
-- the default-, "kmeans", "sbm" or "spectral"), or an actual clustering to
-use directly, as a vector of labels or a p x q indicator matrix. When q is
-unknown (a collection over several q values), can also be a list with one
-such heuristic name/clustering per q value. No single heuristic dominates
-on every dataset ; "ward2" is the default for giving the best balance of
-BIC rank and how rarely its deviance path violates the model's
-"non-increasing in q" guarantee -- a reliability signal "kmeans" lacks despite a
-marginally better raw rank. With the heuristic name "sbm" on a collection, a
-single SBM exploration runs over the whole range of q and is reused for every model
-instead of repeating one per q; any q it doesn't reach falls back to a cheap "ward2"
-clustering. The special value "best_of_inits" fits every model with [NormalBlockBase]'s
-`best_of_inits()` instead of a single heuristic (try several, keep the
-best-ELBO fit); not supported together with `sparsity = TRUE`. For a
-collection over a wide, contiguous q range, `refine` (below) can absorb
-much of what `"best_of_inits"` fixes (its split candidates propagate from
-an already-refined neighbor), so the pair does not reliably beat a cheaper
-single heuristic + `refine` -- see
-`inst/clustering_initialization_benchmark`'s "Does best_of_inits() still
-help once refine() is in the picture?" section for the evidence.
-`"best_of_inits"`'s clear-cut value is without `refine`, or over a
-narrow/non-contiguous q range.}
+\item{clustering_init}{how to obtain the initial clustering of the q
+unknown blocks: a heuristic name ("ward2", the default, "kmeans", "sbm" or
+"spectral"), an actual clustering (a vector of labels or a p x q indicator
+matrix, or a list of either per q for a collection), or "best_of_inits" to
+try several heuristics per model and keep the best-ELBO fit (see
+[NormalBlockBase]'s `best_of_inits()`; not supported with `sparsity =
+TRUE`). See `inst/methods_initialization_and_refine.md` for the
+heuristics' rationale, why no single one dominates, and how this interacts
+with `refine` (below).}
 
 \item{verbose}{telling if information should be printed during optimization}
 
@@ -72,10 +58,8 @@ are all `NA` on the resulting model.}
 \item{noise_covariance}{variance can be variable specific ("diagonal", the default) or common ("spherical")}
 
 \item{refine}{for [NormalBlockCollectionClusters] only: whether
-`optimize()` should automatically call `refine()` afterwards (see its
-documentation for the rationale and an empirical before/after comparison).
-Default `FALSE` -- it adds real cost (roughly 3x the time of fitting the
-collection alone), so it is opt-in; call `collection$refine()` directly at
+`optimize()` should automatically call `refine()` afterwards. Default
+`FALSE` since it adds real cost; call `collection$refine()` directly at
 any point afterwards for the same effect without setting this.}
 }
 \description{

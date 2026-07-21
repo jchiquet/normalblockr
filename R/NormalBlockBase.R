@@ -122,10 +122,9 @@ NormalBlockBase <- R6::R6Class(
     #' already initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand)
     #' rather than recomputing a fresh heuristic initialization -- set by
     #' [warm_start_from()] and by [split()]/[merge()].
-    #' @param clustering_init name of a clustering heuristic (see
-    #' `NB_control(clustering_init = )`): switches to it and forces
-    #' `EM_initialize()` to re-derive the clustering from it at the next
-    #' `optimize()` call, instead of reusing the current state. Used by
+    #' @param clustering_init name of a clustering heuristic to switch to,
+    #' re-derived at the next `optimize()` call instead of reusing the
+    #' current state (see `NB_control(clustering_init = )`). Used by
     #' [best_of_inits()].
     #' @return Update the current [`normal`] object
     update = function(B = NA,
@@ -163,15 +162,12 @@ NormalBlockBase <- R6::R6Class(
     },
 
     #' @description Try several clustering-initialization heuristics and keep
-    #' the best-ELBO converged fit -- different heuristics can converge to
-    #' substantially different (V)EM local optima at the same q. Every
+    #' the best-ELBO converged fit (see `NB_control(clustering_init = )` and
+    #' `inst/methods_initialization_and_refine.md` for the rationale). Every
     #' candidate is first screened with a short `trial_niter` run (same idea
     #' as `candidates_split()`/`candidates_merge()`), and only the
     #' `max_training` best-screened ones are fully retrained with `control`.
-    #' @param inits vector of clustering-heuristic names to try (see
-    #' `NB_control(clustering_init = )`). "sbm" is excluded by default since
-    #' its cost is dominated by the heuristic itself, not by the VEM
-    #' iterations `trial_niter` screens away.
+    #' @param inits vector of clustering-heuristic names to try
     #' @param trial_niter number of (V)EM iterations used to cheaply screen
     #' every candidate in `inits` before fully retraining the best few
     #' @param max_training how many of the screened candidates (best `loglik`
@@ -795,29 +791,11 @@ NormalBlockBase <- R6::R6Class(
 
     ## Registry of clustering heuristics used to turn the OLS/ZI residuals R
     ## (n x p) into an initial clustering of the p variables into self$q
-    ## groups (a vector of length p with values in 1:q). One single table
-    ## instead of one ad hoc private method per algorithm -- selectable via
-    ## NB_control(clustering_init = ...) ("ward2"/"kmeans"/"sbm"/"spectral").
-    ## Benchmarked on three real datasets
-    ## (inst/clustering_initialization_benchmark): no single method dominates
-    ## everywhere, but combining each method's BIC rank with how often its
-    ## deviance path violates the model's theoretical guarantee (deviance is
-    ## non-increasing in q) favors ward2 as the most reliable single default
-    ## -- kmeans has a marginally better raw BIC rank on average but violates
-    ## that monotonicity far more often and with much larger jumps, i.e. its
-    ## apparent edge partly reflects less reliable (V)EM convergence rather
-    ## than a systematically better fit. A 5th method, kmeansvar (from the
-    ## ClustOfVar package), was dropped after that same benchmark showed it
-    ## was both the worst-ranked and the least reliable by this monotonicity
-    ## measure on every dataset tested -- removing it also drops ClustOfVar
-    ## from the package's dependencies.
-    ## spectral clusters the eigenvectors of cov(R) (top q, each row rescaled
-    ## to unit L2 norm -- the classic Ng-Jordan-Weiss normalization) instead
-    ## of the residuals themselves: the model's clustering target is the
-    ## *covariance* structure, not the residual values, so an eigen-embedding
-    ## of cov(R) is a closer match (and far cheaper than sbm). Without the
-    ## row normalization it is mediocre everywhere; with it, it is
-    ## competitive on university webpages at a fraction of sbm's cost.
+    ## groups (a vector of length p with values in 1:q), selectable via
+    ## NB_control(clustering_init = ...). See
+    ## inst/methods_initialization_and_refine.md and
+    ## inst/clustering_initialization_benchmark for the rationale and the
+    ## empirical comparison behind the "ward2" default.
     clustering_methods = list(
       kmeans   = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
       ## ward2_tree() (R/utils.R) also backs sbm_clustering_path()'s own
