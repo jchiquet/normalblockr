@@ -24,13 +24,20 @@ NormalBlockCollection <- R6::R6Class(
     control = NA,
 
     #' @description optimizes every model (or sub-collection) in the collection
-    #' @param control optimization parameters (niter and threshold)
+    #' @param control optimization parameters (niter and threshold). When
+    #' `control$clustering_init` is `"best_of_inits"`, each leaf model is fit
+    #' via its own `best_of_inits()` instead of a plain `optimize()`.
     optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {
+      boi <- uses_best_of_inits(control)
       self$models <- lapply(self$models, function(model) {
         if (control$verbose)
           cat("\t", private$progress_label, "=", model[[private$progress_field]], "          \r")
         flush.console()
-        model$optimize(control)
+        if (boi && !is.null(model$best_of_inits)) {
+          model <- model$best_of_inits(control = control)
+        } else {
+          model$optimize(control)
+        }
         model
       })
       invisible(self)

@@ -212,3 +212,8 @@ sbm_path_for_collection <- function(mydata, q_list, zero_inflation, control) {
   sbm_clustering_path(R, q_list)
 }
 
+# Whether NB_control(clustering_init = "best_of_inits") was requested (see
+# best_of_inits() in NormalBlockBase.R). identical() keeps this safe when
+# clustering_init is a list or an explicit clustering.
+uses_best_of_inits <- function(control) identical(control$clustering_init, "best_of_inits")
+

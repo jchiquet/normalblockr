@@ -42,6 +42,7 @@ R6 class for a normal-block model with fixed number of clusters (but unknown clu
 }
 \if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="best_of_inits"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-best_of_inits'><code>NormalBlockBase$best_of_inits()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="candidates_merge"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-candidates_merge'><code>NormalBlockBase$candidates_merge()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="candidates_split"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-candidates_split'><code>NormalBlockBase$candidates_split()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>NormalBlockBase$latent_network()</code></a></span></li>
