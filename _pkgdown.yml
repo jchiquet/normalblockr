@@ -2,3 +2,55 @@ url: ~
 template:
   bootstrap: 5
 
+reference:
+- title: 'User-facing functions'
+  desc: >
+    Main entry points for fitting a Normal-Block model and simulating data
+  contents:
+    - '`normal_block`'
+    - '`NB_control`'
+    - '`generate_normal_block_data`'
+
+- title: 'Model and data classes'
+  desc: >
+    R6 classes returned by normal_block(). NormalBlockData wraps the
+    responses and design matrix; NormalBlock*Clusters (optionally
+    ZI-prefixed) are single fitted models, known- or unknown-clustering;
+    NormalBlockCollection* are collections of models explored over a range
+    of q and/or sparsity penalties.
+  contents:
+    - '`NormalBlockData`'
+    - '`NormalBlockKnownClusters`'
+    - '`NormalBlockUnknownClusters`'
+    - '`ZINormalBlockKnownClusters`'
+    - '`ZINormalBlockUnknownClusters`'
+    - '`NormalBlockCollectionClusters`'
+    - '`NormalBlockCollectionSparsity`'
+    - '`NormalBlockCollectionClustersSparsity`'
+
+- title: 'Data sets'
+  desc: ~
+  contents:
+    - '`brca_rppa`'
+    - '`onema`'
+    - '`university`'
+
+- title: 'S3 methods'
+  desc: >
+    Standard extractors, common to every fitted model class
+  contents:
+    - '`coef.NormalBlockBase`'
+    - '`fitted.NormalBlockBase`'
+    - '`predict.NormalBlockBase`'
+    - '`sigma.NormalBlockBase`'
+
+- title: 'Internal'
+  desc: >
+    Abstract base classes, low-level helpers and exploratory code kept for
+    reference; not part of the user-facing API
+  contents:
+    - '`NormalBlockBase`'
+    - '`NormalBlockCollection`'
+    - '`SelectionNClusters`'
+    - '`get_model`'
+    - '`isNB`'
