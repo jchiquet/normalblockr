@@ -52,7 +52,10 @@ optimizes every model (or sub-collection) in the collection
 
 - `control`:
 
-  optimization parameters (niter and threshold)
+  optimization parameters (niter and threshold). When
+  \`control\$clustering_init\` is \`"best_of_inits"\`, each leaf model
+  is fit via its own \`best_of_inits()\` instead of a plain
+  \`optimize()\`.
 
 ------------------------------------------------------------------------
 

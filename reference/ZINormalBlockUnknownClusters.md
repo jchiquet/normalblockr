@@ -52,6 +52,7 @@ clusters (but unknown clustering).
 
 Inherited methods
 
+- [`NormalBlockBase$best_of_inits()`](NormalBlockBase.html#method-best_of_inits)
 - [`NormalBlockBase$candidates_merge()`](NormalBlockBase.html#method-candidates_merge)
 - [`NormalBlockBase$candidates_split()`](NormalBlockBase.html#method-candidates_split)
 - [`NormalBlockBase$latent_network()`](NormalBlockBase.html#method-latent_network)

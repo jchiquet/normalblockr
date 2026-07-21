@@ -58,22 +58,16 @@ NB_control(
 
 - clustering_init:
 
-  how to obtain the initial clustering of the q unknown blocks. Either
-  the name of a clustering heuristic – one of "ward2" (default),
-  "kmeans", "sbm" or "spectral" (a cheap proxy for "sbm": k-means on the
-  row-normalized eigenvectors of cov(R)) – or an actual clustering to
-  use directly, as a vector of labels or a p x q indicator matrix. When
-  q is unknown (a collection over several q values), can also be a list
-  with one such heuristic name/clustering per q value. No single
-  heuristic dominates on every dataset (see
-  inst/clustering_initialization_benchmark); "ward2" is the default for
-  giving the best balance of BIC rank and how rarely its deviance path
-  violates the model's "non-increasing in q" guarantee – a reliability
-  signal "kmeans" lacks despite a marginally better raw rank. With the
-  heuristic name "sbm" on a collection (and no per-q list of explicit
-  clusterings), a single SBM exploration runs over the whole range of q
-  and is reused for every model instead of repeating one per q; any q it
-  doesn't reach falls back to a cheap "ward2" clustering.
+  how to obtain the initial clustering of the q unknown blocks: a
+  heuristic name ("ward2", the default, "kmeans", "sbm" or "spectral"),
+  an actual clustering (a vector of labels or a p x q indicator matrix,
+  or a list of either per q for a collection), or "best_of_inits" to try
+  several heuristics per model and keep the best-ELBO fit (see
+  \[NormalBlockBase\]'s \`best_of_inits()\`; not supported with
+  \`sparsity = TRUE\`). See
+  \`inst/methods_initialization_and_refine.md\` for the heuristics'
+  rationale, why no single one dominates, and how this interacts with
+  \`refine\` (below).
 
 - verbose:
 
@@ -94,9 +88,6 @@ NB_control(
 - refine:
 
   for \[NormalBlockCollectionClusters\] only: whether \`optimize()\`
-  should automatically call \`refine()\` afterwards (see its
-  documentation for the rationale and an empirical before/after
-  comparison). Default \`FALSE\` – it adds real cost (roughly 3x the
-  time of fitting the collection alone), so it is opt-in; call
-  \`collection\$refine()\` directly at any point afterwards for the same
-  effect without setting this.
+  should automatically call \`refine()\` afterwards. Default \`FALSE\`
+  since it adds real cost; call \`collection\$refine()\` directly at any
+  point afterwards for the same effect without setting this.

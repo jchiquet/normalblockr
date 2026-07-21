@@ -182,6 +182,7 @@ original, heterogeneous-scale units.</p></dd>
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockBase-initialize"><code>NormalBlockBase$new()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-update"><code>NormalBlockBase$update()</code></a></p></li>
+<li><p><a href="#method-NormalBlockBase-best_of_inits"><code>NormalBlockBase$best_of_inits()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-optimize"><code>NormalBlockBase$optimize()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-warm_start_from"><code>NormalBlockBase$warm_start_from()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-split"><code>NormalBlockBase$split()</code></a></p></li>
@@ -252,7 +253,8 @@ is skipped entirely, since it would otherwise never be used downstream.</p></dd>
 <span>  M <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  S <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  ll_list <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  warm_started <span class="op">=</span> <span class="cn">NA</span></span>
+<span>  warm_started <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  clustering_init <span class="op">=</span> <span class="cn">NA</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
@@ -295,6 +297,12 @@ already initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand)
 rather than recomputing a fresh heuristic initialization – set by
 [warm_start_from()] and by [split()]/[merge()].</p></dd>
 
+      <dt><code>clustering_init</code></dt>
+<dd><p>name of a clustering heuristic to switch to,
+re-derived at the next `optimize()` call instead of reusing the
+current state (see `NB_control(clustering_init = )`). Used by
+[best_of_inits()].</p></dd>
+
 
 </dl><p></p></div>
 </div><p></p><div class="section">
@@ -304,16 +312,59 @@ rather than recomputing a fresh heuristic initialization – set by
 
 </div>
 
+<p></p><hr><a id="method-NormalBlockBase-best_of_inits"></a><div class="section">
+<h3 id="normalblockbase-best-of-inits-"><code>NormalBlockBase$best_of_inits()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-best-of-inits-"></a></h3>
+<p>Try several clustering-initialization heuristics and keep
+the best-ELBO converged fit (see `NB_control(clustering_init = )` and
+`inst/methods_initialization_and_refine.md` for the rationale). Every
+candidate is first screened with a short `trial_niter` run (same idea
+as `candidates_split()`/`candidates_merge()`), and only the
+`max_training` best-screened ones are fully retrained with `control`.</p><div class="section">
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">best_of_inits</span><span class="op">(</span></span>
+<span>  inits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ward2"</span>, <span class="st">"kmeans"</span>, <span class="st">"spectral"</span><span class="op">)</span>,</span>
+<span>  trial_niter <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  max_training <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">500</span>, threshold <span class="op">=</span> <span class="fl">1e-04</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>inits</code></dt>
+<dd><p>vector of clustering-heuristic names to try</p></dd>
+
+      <dt><code>trial_niter</code></dt>
+<dd><p>number of (V)EM iterations used to cheaply screen
+every candidate in `inits` before fully retraining the best few</p></dd>
+
+      <dt><code>max_training</code></dt>
+<dd><p>how many of the screened candidates (best `loglik`
+after `trial_niter` iterations) get fully retrained with `control`</p></dd>
+
+      <dt><code>control</code></dt>
+<dd><p>`optimize()` control list (`niter`/`threshold`) used
+for the final full retraining of the `max_training` best candidates</p></dd>
+
+
+</dl><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<p>a new, already-optimized [`NormalBlockBase`] object. Does not
+mutate the current object; reassign the result
+(`model &lt;- model$best_of_inits()`).</p>
+</div>
+
+</div>
+
 <p></p><hr><a id="method-NormalBlockBase-optimize"></a><div class="section">
 <h3 id="normalblockbase-optimize-"><code>NormalBlockBase$optimize()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-optimize-"></a></h3>
 <p>calls optimization (EM or heuristic) and updates relevant fields</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">optimize</span><span class="op">(</span></span>
 <span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">500</span>, threshold <span class="op">=</span> <span class="fl">1e-04</span><span class="op">)</span>,</span>
 <span>  warn <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>control</code></dt>
 <dd><p>a list for controlling the optimization proces</p></dd>
 
@@ -328,7 +379,7 @@ the cap is expected and not a sign of trouble.</p></dd>
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>optimizes the model and updates its parameters</p>
 </div>
 
@@ -347,17 +398,17 @@ typically needs far fewer EM iterations than starting cold each time
 regularization paths). `B0`/`kappa` (zero-inflation) are deliberately
 left untouched: they depend only on the data, not on sparsity/blocks,
 so they are already set correctly and independently on every model.</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">warm_start_from</span><span class="op">(</span><span class="va">other</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>other</code></dt>
 <dd><p>a [NormalBlockBase] object, already optimized</p></dd>
 
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
 <p>Update the current object in place with `other`'s parameters</p>
 </div>
 
@@ -367,10 +418,10 @@ so they are already set correctly and independently on every model.</p><div clas
 <h3 id="normalblockbase-split-"><code>NormalBlockBase$split()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-split-"></a></h3>
 <p>Create a clone of the current [`NormalBlockBase`] object after splitting cluster `cl`
 We split the cluster according to the species variances</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">split</span><span class="op">(</span><span class="va">index</span>, in_place <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
+<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>index</code></dt>
 <dd><p>index (integer) of the cluster to split</p></dd>
 
@@ -381,7 +432,7 @@ default FALSE (send a copy)</p></dd>
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p>A new [`NormalBlockBase`] object</p>
 </div>
 
@@ -391,10 +442,10 @@ default FALSE (send a copy)</p></dd>
 <h3 id="normalblockbase-candidates-split-"><code>NormalBlockBase$candidates_split()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-candidates-split-"></a></h3>
 <p>generate and select a set of candidate models
 by splitting the clusters of the current model</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">candidates_split</span><span class="op">(</span>trial_niter <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
+<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>trial_niter</code></dt>
 <dd><p>number of EM iterations used to cheaply score each
 candidate before [SelectionNClusters] fully re-optimizes the best few
@@ -410,10 +461,10 @@ candidate before [SelectionNClusters] fully re-optimizes the best few
 <h3 id="normalblockbase-candidates-merge-"><code>NormalBlockBase$candidates_merge()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-candidates-merge-"></a></h3>
 <p>generate and select a set of candidate models
 by merging the clusters of the current model</p><div class="section">
-<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">candidates_merge</span><span class="op">(</span>max_candidates <span class="op">=</span> <span class="fl">30</span>, trial_niter <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>max_candidates</code></dt>
 <dd><p>merge candidates are, unlike split's, quadratic
 in q (`choose(q, q-2)` pairs) – beyond `max_candidates` pairs, only
@@ -434,10 +485,10 @@ rarely competitive anyway. Set to `Inf` to always try every pair.</p></dd>
 <p></p><hr><a id="method-NormalBlockBase-merge"></a><div class="section">
 <h3 id="normalblockbase-merge-"><code>NormalBlockBase$merge()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-merge-"></a></h3>
 <p>Create a clone of the current [`NormalBlockBase`] object after merging clusters `cl1` and `cl2`</p><div class="section">
-<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">merge</span><span class="op">(</span><span class="va">indices</span>, in_place <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
+<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>indices</code></dt>
 <dd><p>indices (couple of integer) of the clusters to merge</p></dd>
 
@@ -448,7 +499,7 @@ default FALSE (send a copy)</p></dd>
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
+<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
 <p>A new [`NormalBlockBase`] object</p>
 </div>
 
@@ -457,17 +508,17 @@ default FALSE (send a copy)</p></dd>
 <p></p><hr><a id="method-NormalBlockBase-predict"></a><div class="section">
 <h3 id="normalblockbase-predict-"><code>NormalBlockBase$predict()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-predict-"></a></h3>
 <p>Predicts observations Y for new covariates X.</p><div class="section">
-<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">new_X</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
+<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>new_X</code></dt>
 <dd><p>new set of covariates.</p></dd>
 
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
+<h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
 <p>A n*p prediction matrix for new observations</p>
 </div>
 
@@ -476,17 +527,17 @@ default FALSE (send a copy)</p></dd>
 <p></p><hr><a id="method-NormalBlockBase-latent_network"></a><div class="section">
 <h3 id="normalblockbase-latent-network-"><code>NormalBlockBase$latent_network()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-latent-network-"></a></h3>
 <p>Extract interaction network in the latent space</p><div class="section">
-<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">latent_network</span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"partial_cor"</span>, <span class="st">"support"</span>, <span class="st">"precision"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
+<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>type</code></dt>
 <dd><p>edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)</p></dd>
 
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
+<h4 id="returns-8">Returns<a class="anchor" aria-label="anchor" href="#returns-8"></a></h4>
 <p>a square matrix of size `self$q`</p>
 </div>
 
@@ -496,10 +547,10 @@ default FALSE (send a copy)</p></dd>
 <h3 id="normalblockbase-plot-loglik-"><code>NormalBlockBase$plot_loglik()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-plot-loglik-"></a></h3>
 <p>plots the evolution of the objective (log-likelihood or ELBO)
 across the (V)EM iterations of the last call to `optimize()`.</p><div class="section">
-<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
+<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">plot_loglik</span><span class="op">(</span>show_increment <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
+<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>show_increment</code></dt>
 <dd><p>whether to add, below the objective trace, a second
 panel with the (log10) absolute increment between consecutive iterations
@@ -512,7 +563,7 @@ as the number of blocks grows (see inst/CSDA_analyses).</p></dd>
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-8">Returns<a class="anchor" aria-label="anchor" href="#returns-8"></a></h4>
+<h4 id="returns-9">Returns<a class="anchor" aria-label="anchor" href="#returns-9"></a></h4>
 <p>a [`ggplot2::ggplot`] graph</p>
 </div>
 
@@ -521,7 +572,7 @@ as the number of blocks grows (see inst/CSDA_analyses).</p></dd>
 <p></p><hr><a id="method-NormalBlockBase-plot_network"></a><div class="section">
 <h3 id="normalblockbase-plot-network-"><code>NormalBlockBase$plot_network()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-plot-network-"></a></h3>
 <p>plot the latent network.</p><div class="section">
-<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
+<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span></span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"partial_cor"</span>, <span class="st">"support"</span><span class="op">)</span>,</span>
 <span>  output <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"igraph"</span>, <span class="st">"corrplot"</span><span class="op">)</span>,</span>
@@ -532,7 +583,7 @@ as the number of blocks grows (see inst/CSDA_analyses).</p></dd>
 <span>  plot <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
+<h4 id="arguments-12">Arguments<a class="anchor" aria-label="anchor" href="#arguments-12"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>type</code></dt>
 <dd><p>edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).</p></dd>
 
@@ -564,7 +615,7 @@ as the number of blocks grows (see inst/CSDA_analyses).</p></dd>
 <h3 id="normalblockbase-plot-"><code>NormalBlockBase$plot()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-plot-"></a></h3>
 <p>plots the evolution of the objective during model optimization
 (see `plot_loglik()`)</p><div class="section">
-<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
+<h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -573,10 +624,10 @@ as the number of blocks grows (see inst/CSDA_analyses).</p></dd>
 <p></p><hr><a id="method-NormalBlockBase-print"></a><div class="section">
 <h3 id="normalblockbase-print-"><code>NormalBlockBase$print()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-print-"></a></h3>
 <p>User friendly print method</p><div class="section">
-<h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
+<h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span>model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="va">self</span><span class="op">$</span><span class="va">who_am_I</span>, <span class="st">".\n"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-12">Arguments<a class="anchor" aria-label="anchor" href="#arguments-12"></a></h4>
+<h4 id="arguments-13">Arguments<a class="anchor" aria-label="anchor" href="#arguments-13"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>model</code></dt>
 <dd><p>First line of the print output</p></dd>
 
@@ -589,10 +640,10 @@ as the number of blocks grows (see inst/CSDA_analyses).</p></dd>
 <p></p><hr><a id="method-NormalBlockBase-clone"></a><div class="section">
 <h3 id="normalblockbase-clone-"><code>NormalBlockBase$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
+<h4 id="usage-15">Usage<a class="anchor" aria-label="anchor" href="#usage-15"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-13">Arguments<a class="anchor" aria-label="anchor" href="#arguments-13"></a></h4>
+<h4 id="arguments-14">Arguments<a class="anchor" aria-label="anchor" href="#arguments-14"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -614,7 +665,7 @@ as the number of blocks grows (see inst/CSDA_analyses).</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

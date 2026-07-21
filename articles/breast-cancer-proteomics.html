@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Julien Chiquet
 &amp; Jeanne Tous</h4>
             
-            <h4 data-toc-skip class="date">2026-06-26</h4>
+            <h4 data-toc-skip class="date">2026-07-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jeannetous/normalblockr/blob/master/vignettes/breast-cancer-proteomics.Rmd" class="external-link"><code>vignettes/breast-cancer-proteomics.Rmd</code></a></small>
       <div class="d-none name"><code>breast-cancer-proteomics.Rmd</code></div>
@@ -223,7 +223,17 @@ between the 6 blocks, not the grouping itself.</p>
 accepts a range of candidate cluster counts and returns a collection of
 models, one per
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>q</mi><annotation encoding="application/x-tex">q</annotation></semantics></math>,
-fitted independently.</p>
+fitted independently, each cold-started from a clustering heuristic on
+the residuals (<code>ward2</code> by default). Different heuristics can
+converge to substantially different (V)EM local optima at the same
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>q</mi><annotation encoding="application/x-tex">q</annotation></semantics></math>;
+<code>NB_control(clustering_init = "best_of_inits")</code> tries several
+and keeps the best-ELBO fit, at extra cost – worth it when
+<code>refine()</code> (next section) won’t also be applied, but on this
+dataset’s full range <code>refine()</code> alone already recovers most
+of what it would add (see
+<code>inst/clustering_initialization_benchmark</code>), so we stick with
+the default here.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">NB_prot_subtype</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a diagonal normal-block model with unknown q </span></span>
@@ -384,7 +394,7 @@ Statistics &amp; Data Analysis</em> 219: 108347. <a href="https://doi.org/10.101
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

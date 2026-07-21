@@ -157,7 +157,15 @@ print(NB_prot_group)
 When the clustering is left unknown,
 [`normal_block()`](../reference/normal_block.md) accepts a range of
 candidate cluster counts and returns a collection of models, one per
-$`q`$, fitted independently.
+$`q`$, fitted independently, each cold-started from a clustering
+heuristic on the residuals (`ward2` by default). Different heuristics
+can converge to substantially different (V)EM local optima at the same
+$`q`$; `NB_control(clustering_init = "best_of_inits")` tries several and
+keeps the best-ELBO fit, at extra cost – worth it when `refine()` (next
+section) won’t also be applied, but on this dataset’s full range
+`refine()` alone already recovers most of what it would add (see
+`inst/clustering_initialization_benchmark`), so we stick with the
+default here.
 
 ``` r
 

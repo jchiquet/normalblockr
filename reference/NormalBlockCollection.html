@@ -98,7 +98,9 @@ and provide their own `get_best_model()`, delegating the (row of
 </div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>control</code></dt>
-<dd><p>optimization parameters (niter and threshold)</p></dd>
+<dd><p>optimization parameters (niter and threshold). When
+`control$clustering_init` is `"best_of_inits"`, each leaf model is fit
+via its own `best_of_inits()` instead of a plain `optimize()`.</p></dd>
 
 
 </dl><p></p></div>
@@ -134,7 +136,7 @@ and provide their own `get_best_model()`, delegating the (row of
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

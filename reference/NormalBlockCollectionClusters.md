@@ -175,13 +175,12 @@ Tries to improve every model in the collection with a short
 split-and-reoptimize trial seeded from its smaller-q neighbor
 (\`"split"\`), a short merge-and-reoptimize trial seeded from its
 larger-q neighbor (\`"merge"\`), or both (the default); a candidate
-replaces the original only if it strictly lowers the deviance. Useful
-because every model in the collection is cold-started independently (a
-heuristic clustering on the residuals, see
-\`private\$clustering_methods\` in \[NormalBlockBase\]) and can settle
-into a milder local optimum than an adjacent q's solution would, once
-split/merged by one cluster – a gap that "deviance must not increase in
-q" alone cannot reliably catch (see Details).
+replaces the original only if it strictly lowers the deviance, so this
+can only improve (or leave unchanged) each model it touches. Only
+contiguous q pairs (\`q\` and \`q -/+ 1\`, both present in the
+collection) are refined. See
+\`inst/methods_initialization_and_refine.md\` for the rationale and
+empirical evidence.
 
 #### Usage
 
@@ -216,31 +215,6 @@ q" alone cannot reliably catch (see Details).
   whether to print, for each q attempted, whether the candidate from
   that neighbor improved on it. Defaults to \`control\$verbose\` (the
   value set at construction, see \[NB_control()\]).
-
-#### Details
-
-Two cheaper attempts at targeting \*which\* q to refine – flagging
-outright deviance increases, then flagging drops unusually small
-relative to neighboring q's – found nothing to fix on a real dataset
-(\`brca_rppa\`) where a full split/merge search was known to do
-systematically better at almost every q: the gap was spread evenly
-across the whole range, leaving no local anomaly to detect. \`refine()\`
-instead tries unconditionally everywhere and discards whatever doesn't
-help. On \`brca_rppa\`, \`"split"\` alone already recovers part of that
-gap (~1.5-2x the cost of fitting the collection alone); adding
-\`"merge"\` closes substantially more of it – the two directions catch
-different cases, since split-from-below and merge-from-above are
-different, independently cold-started starting points – for about twice
-the cost again, still well under \[SelectionNClusters\]'s full
-forward/backward search. Because nothing is kept unless strictly better,
-this never makes a model worse: on a second dataset (\`university\`)
-where independent cold starts were already better than chaining models
-together, both directions found close to nothing to fix rather than
-degrading anything.
-
-Only contiguous q pairs (\`q\` and \`q -/+ 1\`, both present in the
-collection) are refined; gaps in \`q_list\` are left untouched on that
-side.
 
 #### Returns
 
