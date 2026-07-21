@@ -39,23 +39,28 @@ are only used if penalties is not specified}
 useful for calls to fixed_q models in stability_selection}
 
 \item{clustering_init}{how to obtain the initial clustering of the q unknown
-blocks. Either the name of a clustering heuristic -- one of "ward2"
-(default), "kmeans", "sbm" or "spectral" (a cheap proxy for "sbm": k-means
-on the row-normalized eigenvectors of cov(R)) -- or an actual clustering to
+blocks. Either the name of a clustering heuristic (one of "ward2"
+- the default-, "kmeans", "sbm" or "spectral"), or an actual clustering to
 use directly, as a vector of labels or a p x q indicator matrix. When q is
 unknown (a collection over several q values), can also be a list with one
 such heuristic name/clustering per q value. No single heuristic dominates
-on every dataset (see inst/clustering_initialization_benchmark); "ward2" is
-the default for giving the best balance of BIC rank and how rarely its
-deviance path violates the model's "non-increasing in q" guarantee -- a
-reliability signal "kmeans" lacks despite a marginally better raw rank.
-With the heuristic name "sbm" on a collection (and no per-q list of
-explicit clusterings), a single SBM exploration runs over the whole range
-of q and is reused for every model instead of repeating one per q; any q
-it doesn't reach falls back to a cheap "ward2" clustering. The special
-value "best_of_inits" fits every model with [NormalBlockBase]'s
+on every dataset ; "ward2" is the default for giving the best balance of
+BIC rank and how rarely its deviance path violates the model's
+"non-increasing in q" guarantee -- a reliability signal "kmeans" lacks despite a
+marginally better raw rank. With the heuristic name "sbm" on a collection, a
+single SBM exploration runs over the whole range of q and is reused for every model
+instead of repeating one per q; any q it doesn't reach falls back to a cheap "ward2"
+clustering. The special value "best_of_inits" fits every model with [NormalBlockBase]'s
 `best_of_inits()` instead of a single heuristic (try several, keep the
-best-ELBO fit); not supported together with `sparsity = TRUE`.}
+best-ELBO fit); not supported together with `sparsity = TRUE`. For a
+collection over a wide, contiguous q range, `refine` (below) can absorb
+much of what `"best_of_inits"` fixes (its split candidates propagate from
+an already-refined neighbor), so the pair does not reliably beat a cheaper
+single heuristic + `refine` -- see
+`inst/clustering_initialization_benchmark`'s "Does best_of_inits() still
+help once refine() is in the picture?" section for the evidence.
+`"best_of_inits"`'s clear-cut value is without `refine`, or over a
+narrow/non-contiguous q range.}
 
 \item{verbose}{telling if information should be printed during optimization}
 

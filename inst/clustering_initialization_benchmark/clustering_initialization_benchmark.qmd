@@ -40,10 +40,7 @@ data_onema <- NormalBlockData$new(
 
 `onema`'s biomass matrix is genuinely zero-inflated (most species are absent from most stations), so unlike the other two datasets it is benchmarked with `zero_inflation = TRUE` (`ZINormalBlockUnknownClusters`, clustering on `zi_residuals()` rather than `ols_residuals()`) -- the way `inst/study_onema.R` actually uses it, not an artificial non-ZI fit just for protocol uniformity.
 
-```{data(university)}
-Y_web    <- log(1 + university$frequencies[, university$terms])
-data_web <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))
-```
+`{data(university)} Y_web    <- log(1 + university$frequencies[, university$terms]) data_web <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))`
 
 ## The menu tested here (5 methods; since reduced to 4)
 
@@ -206,6 +203,59 @@ menu %>%
 **Decision**: `ward2` is now `NB_control()`'s default `clustering_init` (`kmeans`, `sbm`, `spectral` remain available, in roughly that order of preference), and `kmeansvar` has been removed from the registry entirely -- it was never the best choice and was also the least reliable, so there was no real benefit it brought to the menu that justified keeping the `ClustOfVar` dependency for it. The hidden fallback used whenever a chosen heuristic collapses to fewer than `q` clusters (previously `ClustOfVar::hclustvar`) is now `ward2` itself, which already gives the same "exactly q clusters, guaranteed" property via `cutree()`.
 
 **Practical takeaway**: `ward2` is the safest single choice balancing both raw fit quality and the reliability of the optimization that produced it, on either `deviance`/`BIC` or `ICL`. `kmeans`'s narrow raw-rank edge on `deviance`/`BIC` should not be read as it being the safer pick -- and on `ICL` it is outright the least safe of the 4 remaining methods. No single heuristic is uniformly best, so trying 2-3 of the 4 remains worth the extra cost whenever the stakes justify it.
+
+## Does `best_of_inits()` still help once `refine()` is in the picture?
+
+`best_of_inits()` (`R/NormalBlockBase.R`) tries several heuristics per model and keeps the best-ELBO fit; `refine()` (`NormalBlockCollectionClusters`) instead seeds split/merge candidates from a $q$'s already-fitted neighbor. Both were motivated by the same problem (a single cold-started fit can settle into a mediocre local optimum) but act on it differently, so it's worth checking whether combining them over a *whole, contiguous* $q$ range -- the way a user actually calls `normal_block(blocks = q_min:q_max)` -- still pays off, at the extra cost of both.
+
+```{r best-of-inits-refine-protocol, eval=FALSE}
+## Unlike the per-(q, method) protocol above, refine() only applies to a
+## whole collection (it needs adjacent q's), so this builds one collection
+## per (dataset, method) via normal_block() itself, and records criteria both
+## before and after a single refine() call -- see
+## results/compute_best_of_inits_refine_benchmark.R for the full script.
+## methods: kmeans, ward2, sbm, spectral, best_of_inits (without sbm, i.e.
+## inits = c("ward2", "kmeans", "spectral") -- sbm's cost is dominated by the
+## heuristic itself, not by VEM iterations, so it doesn't benefit from
+## best_of_inits()'s trial-niter screening, see best_of_inits()'s doc)
+## q ranges: brca 2:30, onema 2:8, web 2:15 (same as above)
+```
+
+```{r best-of-inits-refine-load}
+boi <- readRDS("results/best_of_inits_refine_benchmark.rds")
+boi_ranked <- boi %>%
+  group_by(dataset, stage, q) %>%
+  mutate(rank_BIC = rank(BIC, ties.method = "average"),
+         rank_ICL = rank(ICL, ties.method = "average")) %>%
+  ungroup()
+```
+
+```{r best-of-inits-refine-rank-table}
+boi_ranked %>%
+  group_by(stage, method) %>%
+  summarise(mean_rank_BIC = round(mean(rank_BIC), 2), wins_BIC = sum(rank_BIC == 1),
+            mean_rank_ICL = round(mean(rank_ICL), 2), wins_ICL = sum(rank_ICL == 1),
+            .groups = "drop") %>%
+  arrange(stage, mean_rank_BIC) %>%
+  knitr::kable(caption = "Pooled across all 3 datasets: mean rank and wins out of 50 (q, dataset) cells, before vs after refine()")
+```
+
+```{r best-of-inits-refine-cost-table}
+boi %>%
+  distinct(dataset, method, t_build, t_refine) %>%
+  mutate(total_s = round(t_build + t_refine, 1)) %>%
+  select(dataset, method, total_s) %>%
+  tidyr::pivot_wider(names_from = dataset, values_from = total_s) %>%
+  knitr::kable(caption = "Total cost (s): building the collection + one refine() call")
+```
+
+**Before `refine()`, `best_of_inits()` is clearly the best single choice** -- best mean rank on both `BIC` (1.86) and `ICL` (2.84), and the most `BIC` wins (19/50) by a wide margin. This is exactly what it is built to do.
+
+**After `refine()`, its edge shrinks and, on `ICL`, reverses**: `best_of_inits()` keeps the best mean `BIC` rank (2.22) but drops to 0 `ICL` wins out of 50 and the *worst* mean `ICL` rank (3.38) -- `kmeans` and `sbm` overtake it on both counts. Concretely, on `brca`'s full `q = 2:30` sweep, plain `kmeans` -- the cheapest method in the menu -- ends up strictly better than `best_of_inits()` on `BIC` at most $q \ge 15$ (e.g. $q=20$: 139461 vs 139581), after both are refined.
+
+The mechanism: `refine()`'s split candidates at $q$ are seeded from $q-1$'s *already-refined* model in the same collection, not from that $q$'s own original heuristic clustering -- so a single `refine()` call over a wide contiguous range lets one seed (often the smallest $q$) propagate forward through the whole chain. Where two different `clustering_init` choices happen to agree at a low $q$ (or one falls back to another, as `sbm` does to `ward2` once its own exploration doesn't reach that far -- see `sbm_path_for_collection()`), their refined collections can end up identical from that $q$ upward regardless of what each started from at every other $q$. This is visible directly in the data: `ward2` and `best_of_inits()` (whose own candidate menu includes `ward2`) coincide almost everywhere on `web` after refining, and `sbm`/`ward2` coincide on `brca` for every $q$ tested, even where their *pre-refine* `BIC` clearly differed.
+
+**Revised practical takeaway**: `refine()` absorbs a substantial part of what `best_of_inits()` was fixing, once it is run over the same wide, contiguous range a real `normal_block(blocks = q_min:q_max)` call would use. Combining both is never *worse* than either alone in this data (consistent with `refine()`'s "only replaces if strictly better" guarantee), but the earlier claim that combining the two is the way to get the best fit does not hold uniformly -- on `brca`, `kmeans + refine()` beats `best_of_inits() + refine()` on both `BIC` and `ICL`, at meaningfully lower cost (`r round(subset(boi, dataset=="brca" & method=="kmeans")$t_build[1] + subset(boi, dataset=="brca" & method=="kmeans")$t_refine[1], 1)`s vs `r round(subset(boi, dataset=="brca" & method=="best_of_inits")$t_build[1] + subset(boi, dataset=="brca" & method=="best_of_inits")$t_refine[1], 1)`s). `best_of_inits()`'s clear-cut value is when `refine()` is *not* going to be called, or the collection's $q$ range is narrow/non-contiguous (so `refine()` has little or nothing to propagate); when both are used together over a wide range, it is no longer safe to assume the pair dominates a cheaper single heuristic + `refine()`.
 
 ## Side investigation 1: a hand-rolled Armadillo k-means
 
