@@ -34,13 +34,13 @@ NormalBlockVarKnownClusters <- R6::R6Class(
       reg_res   <- private$multivariate_normal_inference()
       dm1       <- private$dm1_from_residuals(reg_res$R)
       Sigmaq    <- private$heuristic_Sigmaq_from_Sigma(reg_res$Sigma)
-      Omegaq    <- private$get_Omegaq(Sigmaq)
-      list(B = reg_res$B, dm1 = dm1, Omegaq = Omegaq)
+      Omega    <- private$get_Omega(Sigmaq)
+      list(B = reg_res$B, dm1 = dm1, Omega = Omega)
     },
 
     EM_initialize = function() {
       if (private$warm_started) {
-        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq,
+        list(B = private$B, dm1 = private$dm1, Omega = private$Omega,
              gamma = private$gamma, mu = private$mu)
       } else c(private$get_heuristic_parameters(),  list(
         gamma = diag(1, self$q, self$q),
@@ -55,13 +55,13 @@ NormalBlockVarKnownClusters <- R6::R6Class(
       init <- private$EM_initialize()
       res  <- NormalBlockVarKnownClusters_fit(
         Y = self$data$Y, X = self$data$X, C = private$C,
-        B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+        B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
         noise_covariance = private$res_covariance,
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter
-      list(B = res$B, dm1 = res$dm1, Omegaq = res$Omegaq,
+      list(B = res$B, dm1 = res$dm1, Omega = res$Omega,
            gamma = res$gamma, mu = res$mu, ll_list = res$objective)
     }
 

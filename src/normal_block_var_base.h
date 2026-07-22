@@ -21,9 +21,9 @@ protected:
   int q_;
   arma::mat B_;       // d x p, regression coefficients
   arma::vec dm1_;     // p, inverse variance per variable (1 / diag(D))
-  arma::mat Omegaq_;  // q x q, precision matrix of the blocks
-  double sparsity_;          // sparsity penalty applied to Omegaq (0 = unpenalized)
-  arma::mat sparsity_weights_; // q x q, per-pair penalty weights (see R/NormalBlockVarBase.R)
+  arma::mat Omega_;  // q x q, precision matrix of the blocks
+  double sparsity_;          // sparsity penalty applied to Omega (0 = unpenalized)
+  arma::mat sparsity_weights_; // q x q, per-pair penalty weights (see R/NormalBlockBase.R)
 
   virtual void E_step() = 0;
   virtual void M_step() = 0;
@@ -81,12 +81,12 @@ protected:
   virtual bool supports_acceleration() const { return false; }
 
   // Used by every subclass's restore_from() override to copy back the
-  // B_/dm1_/Omegaq_ slice of `other` (see restore_from()'s docstring on
+  // B_/dm1_/Omega_ slice of `other` (see restore_from()'s docstring on
   // clone() for why this can't just be `*this = other`).
   void copy_tracked_state_from(const NormalBlockVarBase& other) {
     B_ = other.B_;
     dm1_ = other.dm1_;
-    Omegaq_ = other.Omegaq_;
+    Omega_ = other.Omega_;
     XB_valid_ = false;
   }
 
@@ -94,7 +94,7 @@ public:
   NormalBlockVarBase(const NormalBlockData& data, int q,
                   const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omegaq0,
                   double sparsity, const arma::mat& sparsity_weights) :
-    data_(data), q_(q), B_(B0), dm1_(dm1_0), Omegaq_(Omegaq0),
+    data_(data), q_(q), B_(B0), dm1_(dm1_0), Omega_(Omega0),
     sparsity_(sparsity), sparsity_weights_(sparsity_weights) {}
 
   virtual ~NormalBlockVarBase() = default;
@@ -104,7 +104,7 @@ public:
 
   // Deep copy / restore of the *entire* concrete object (every subclass's
   // extra state -- Gamma_, Mu_, C_, alpha_, M_, S_... -- not just the
-  // B_/dm1_/Omegaq_ tracked by SQUAREM below). Used by run_em() to snapshot
+  // B_/dm1_/Omega_ tracked by SQUAREM below). Used by run_em() to snapshot
   // a known-good iterate before trying a SQUAREM extrapolation, and to back
   // out of it exactly if it turns out infeasible. `clone()` is implemented
   // per concrete subclass as `return std::make_unique<ThisClass>(*this)`,
@@ -123,7 +123,7 @@ public:
   //
   // Every cycle also attempts a SQUAREM extrapolation (Varadhan & Roland,
   // 2008) on top of plain EM: from three consecutive plain iterates
-  // p0 -> p1 -> p2 (p = vec(B_, dm1_, Omegaq_); everything else is a pure
+  // p0 -> p1 -> p2 (p = vec(B_, dm1_, Omega_); everything else is a pure
   // byproduct of E_step()/M_step() given those three, exactly as in plain
   // EM), it extrapolates a point much further along the p0->p1->p2
   // direction than two more EM steps would reach, then "stabilizes" it with
@@ -142,7 +142,7 @@ public:
   // for NormalBlockVarKnownClusters (see its objective(), and the comment on
   // supports_acceleration() below for which subclasses this does *not* hold
   // for yet). state_is_feasible() is now only a cheap guard against
-  // numerically degenerate candidates (dm1 <= 0, Omegaq not meaningfully
+  // numerically degenerate candidates (dm1 <= 0, Omega not meaningfully
   // PD) that would make E_step()/M_step() produce garbage outright -- the
   // objective comparison is what actually judges quality.
   void run_em(int maxit, double tol) {
@@ -189,7 +189,7 @@ public:
 
   const arma::mat& B() const { return B_; }
   const arma::vec& dm1() const { return dm1_; }
-  const arma::mat& Omegaq() const { return Omegaq_; }
+  const arma::mat& Omega() const { return Omega_; }
   const std::vector<double>& objective_trace() const { return objective_trace_; }
   int niter() const { return niter_; }
 
@@ -199,23 +199,23 @@ private:
   mutable arma::mat XB_cache_;
   mutable bool XB_valid_ = false;
 
-  // p = vec(B_, dm1_, Omegaq_): the parameters SQUAREM extrapolates over.
+  // p = vec(B_, dm1_, Omega_): the parameters SQUAREM extrapolates over.
   arma::vec get_state() const {
-    return arma::join_vert(arma::join_vert(arma::vectorise(B_), dm1_), arma::vectorise(Omegaq_));
+    return arma::join_vert(arma::join_vert(arma::vectorise(B_), dm1_), arma::vectorise(Omega_));
   }
 
   void set_state(const arma::vec& p) {
     arma::uword nB = B_.n_elem, nd = dm1_.n_elem;
     B_      = arma::reshape(p.subvec(0, nB - 1), B_.n_rows, B_.n_cols);
     dm1_    = p.subvec(nB, nB + nd - 1);
-    Omegaq_ = arma::reshape(p.subvec(nB + nd, p.n_elem - 1), Omegaq_.n_rows, Omegaq_.n_cols);
+    Omega_ = arma::reshape(p.subvec(nB + nd, p.n_elem - 1), Omega_.n_rows, Omega_.n_cols);
     XB_valid_ = false;
   }
 
   // Cheap guard against numerically degenerate candidates -- not a quality
   // judgment (objective() comparison in try_squarem_step() is what actually
   // decides that now). dm1 must stay positive (it is an inverse variance)
-  // and Omegaq must stay symmetric positive-definite with *some* margin:
+  // and Omega must stay symmetric positive-definite with *some* margin:
   // a technically-PD but near-machine-singular candidate can make
   // log_det_sympd()/inv_sympd() return outright garbage (not just lose a
   // few digits) rather than erroring, which would corrupt the very
@@ -227,7 +227,7 @@ private:
   bool state_is_feasible(const arma::vec& p) const {
     arma::uword nB = B_.n_elem, nd = dm1_.n_elem;
     if (arma::any(p.subvec(nB, nB + nd - 1) <= 0.0)) return false;
-    arma::mat Omega_cand = arma::reshape(p.subvec(nB + nd, p.n_elem - 1), Omegaq_.n_rows, Omegaq_.n_cols);
+    arma::mat Omega_cand = arma::reshape(p.subvec(nB + nd, p.n_elem - 1), Omega_.n_rows, Omega_.n_cols);
     arma::vec eigval;
     if (!arma::eig_sym(eigval, arma::symmatu(Omega_cand))) return false;
     return eigval.min() > 1e-8 * eigval.max();

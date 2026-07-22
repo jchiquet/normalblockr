@@ -40,8 +40,8 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
         private$C <- private$heuristic_clustering(zi_diag$R)
       private$C <- clip_probabilities(private$C)
       Sigmaq <- private$heuristic_Sigmaq_from_Sigma(cov(zi_diag$R))
-      Omegaq <- private$get_Omegaq(Sigmaq)
-      list(B = zi_diag$B, dm1 = zi_diag$dm1, Omegaq = Omegaq,
+      Omega <- private$get_Omega(Sigmaq)
+      list(B = zi_diag$B, dm1 = zi_diag$dm1, Omega = Omega,
            alpha = colMeans(private$C), kappa = private$kappa,
            C = private$C)
     },
@@ -51,7 +51,7 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
 
     EM_initialize = function() {
       if (private$warm_started) {
-        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq, kappa = private$kappa,
+        list(B = private$B, dm1 = private$dm1, Omega = private$Omega, kappa = private$kappa,
              alpha = private$alpha, C = private$C, M = private$M, S = private$S)
       } else c(private$get_heuristic_parameters(),  list(
           M = matrix(rep(0, self$n * self$q), nrow = self$n),
@@ -67,14 +67,14 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
       res  <- ZINormalBlockVarUnknownClusters_fit(
         Y = self$data$Y, X = self$data$X,
         zeros_bar = self$data$zeros_bar, zi_cond_mean = private$ZI_cond_mean,
-        B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+        B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,
         C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
         noise_covariance = private$res_covariance, fixed_tau = self$fixed_tau,
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter
-      list(B = res$B, dm1 = res$dm1, Omegaq = res$Omegaq, alpha = res$alpha,
+      list(B = res$B, dm1 = res$dm1, Omega = res$Omega, alpha = res$alpha,
            C = res$C, M = res$M, S = res$S, ll_list = res$objective)
     }
 
@@ -88,7 +88,7 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
     nb_param = function() super$nb_param + self$p * self$d0 + self$q - 1, # adding kappa and alpha
     #' @field var_par a list with variational parameters
     var_par  = function() {list(M = private$M, S = private$S, tau = private$C)},
-    #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omegaq (blocks precision matrix), kappa (zero-inflation probabilities)
+    #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omega (blocks precision matrix), kappa (zero-inflation probabilities)
     model_par  = function() {
       par       <- super$model_par
       par$kappa <- private$kappa

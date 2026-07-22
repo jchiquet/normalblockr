@@ -13,15 +13,15 @@
 #' @param C fixed cluster-indicator matrix (p x q)
 #' @param B0 initial regression coefficients (d x p)
 #' @param dm1_0 initial inverse variance per variable (length p)
-#' @param Omegaq0 initial precision matrix of the blocks (q x q)
-#' @param sparsity sparsity penalty applied to Omegaq through the graphical
+#' @param Omega0 initial precision matrix of the blocks (q x q)
+#' @param sparsity sparsity penalty applied to Omega through the graphical
 #' lasso (glassoFast); 0 means an unpenalized inversion
 #' @param sparsity_weights q x q matrix of per-pair penalty weights (see
 #' R/NormalBlockVarBase.R, `sparsity_weights`); only used when sparsity > 0
 #' @param noise_covariance either "diagonal" or "spherical"
 #' @param niter maximum number of EM iterations
 #' @param threshold convergence threshold on the objective increment
-#' @return a list with the fitted parameters (B, dm1, Omegaq, gamma, mu), the
+#' @return a list with the fitted parameters (B, dm1, Omega, gamma, mu), the
 #' objective (log-likelihood) trace and the number of iterations performed
 #' @noRd
 NormalBlockVarKnownClusters_fit <- function(Y, X, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold) {
@@ -42,7 +42,7 @@ NormalBlockVarKnownClusters_fit <- function(Y, X, C, B0, dm1_0, Omegaq0, sparsit
 #' @param S0 initial variational variance of the cluster effects (length q)
 #' @param fixed_tau if TRUE, the variational membership probabilities are not
 #' re-estimated (useful for stability selection)
-#' @return a list with the fitted parameters (B, dm1, Omegaq, C, alpha, M, S),
+#' @return a list with the fitted parameters (B, dm1, Omega, C, alpha, M, S),
 #' the ELBO trace and the number of iterations performed
 #' @noRd
 NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {
@@ -66,14 +66,14 @@ NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omegaq0, C0, alph
 #' @param C fixed cluster-indicator matrix (p x q)
 #' @param B0 initial regression coefficients (d x p)
 #' @param dm1_0 initial inverse variance per variable (length p)
-#' @param Omegaq0 initial precision matrix of the blocks (q x q)
-#' @param sparsity sparsity penalty applied to Omegaq through the graphical
+#' @param Omega0 initial precision matrix of the blocks (q x q)
+#' @param sparsity sparsity penalty applied to Omega through the graphical
 #' lasso (glassoFast); 0 means an unpenalized inversion
 #' @param sparsity_weights q x q matrix of per-pair penalty weights
 #' @param noise_covariance either "diagonal" or "spherical"
 #' @param niter maximum number of EM iterations
 #' @param threshold convergence threshold on the objective increment
-#' @return a list with the fitted parameters (B, dm1, Omegaq, gamma, mu -- gamma
+#' @return a list with the fitted parameters (B, dm1, Omega, gamma, mu -- gamma
 #' is a q x q x n array, one posterior covariance matrix per row), the
 #' log-likelihood trace and the number of iterations performed
 #' @noRd
@@ -98,7 +98,7 @@ ZINormalBlockVarKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, 
 #' row-dependent because of the zero-inflation mask)
 #' @param fixed_tau if TRUE, the variational membership probabilities are not
 #' re-estimated (useful for stability selection)
-#' @return a list with the fitted parameters (B, dm1, Omegaq, C, alpha, M, S),
+#' @return a list with the fitted parameters (B, dm1, Omega, C, alpha, M, S),
 #' the ELBO trace and the number of iterations performed
 #' @noRd
 ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {

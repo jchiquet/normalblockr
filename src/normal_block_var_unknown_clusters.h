@@ -31,7 +31,7 @@ class NormalBlockVarUnknownClusters : public NormalBlockVarBase {
 
     arma::mat dm1C = C_;
     dm1C.each_col() %= dm1_;
-    Gamma_ = arma::inv_sympd(Omegaq_ + arma::diagmat(C_.t() * dm1_));
+    Gamma_ = arma::inv_sympd(Omega_ + arma::diagmat(C_.t() * dm1_));
     M_ = R_ * dm1C * Gamma_;
     S_ = Gamma_.diag();
 
@@ -60,7 +60,7 @@ class NormalBlockVarUnknownClusters : public NormalBlockVarBase {
 
     alpha_ = arma::vectorise(arma::mean(C_, 0));
     Sigma_hat_ = M_.t() * M_ / data_.n + arma::diagmat(S_);
-    Omegaq_ = estimate_omega(Sigma_hat_);
+    Omega_ = estimate_omega(Sigma_hat_);
   }
 
 public:
@@ -76,23 +76,23 @@ public:
   }
 
   // ELBO at the current parameter values, see "Criterion" in section 6.3 of
-  // normal_block_calculations_v2.pdf. When sparsity_ > 0, Omegaq_ is no
+  // normal_block_calculations_v2.pdf. When sparsity_ > 0, Omega_ is no
   // longer the exact inverse of Sigma_hat, so the trace/penalty correction
   // that otherwise cancels out must be added back (mirrors the `if
   // (private$sparsity_ > 0)` branch of compute_loglik in R/NormalBlockVarUnknownClusters.R).
   double objective() const override {
-    double log_det_Omegaq = arma::log_det_sympd(Omegaq_);
+    double log_det_Omega = arma::log_det_sympd(Omega_);
     double sum_log_dm1    = arma::sum(arma::log(dm1_));
     double sum_log_S      = arma::sum(arma::log(S_));
     double log2pie        = 1.0 + std::log(2.0 * arma::datum::pi);
 
     double J = -0.5 * data_.n * data_.p * log2pie + 0.5 * data_.n * sum_log_dm1;
-    J += 0.5 * data_.n * log_det_Omegaq + 0.5 * data_.n * sum_log_S;
+    J += 0.5 * data_.n * log_det_Omega + 0.5 * data_.n * sum_log_S;
     J += arma::accu(C_ * arma::log(alpha_)) - nb_utils::sum_xlogx(C_);
 
     if (sparsity_ > 0.0) {
-      J += 0.5 * data_.n * q_ - 0.5 * data_.n * arma::trace(Omegaq_ * Sigma_hat_);
-      J -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omegaq_));
+      J += 0.5 * data_.n * q_ - 0.5 * data_.n * arma::trace(Omega_ * Sigma_hat_);
+      J -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omega_));
     }
     return J;
   }

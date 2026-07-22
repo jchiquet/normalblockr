@@ -37,7 +37,7 @@ clip_probabilities <- function(x, zero = .Machine$double.eps) {
 # Used by split()/merge() (NormalBlockVarBase.R): their new_Omegaq is built by
 # hand-editing a handful of entries of an existing precision matrix (halving/
 # averaging diagonal entries, zero-filling the new row/column), which has no
-# general guarantee of staying PD -- and an indefinite Omegaq handed directly
+# general guarantee of staying PD -- and an indefinite Omega handed directly
 # to the (V)EM solver fails on log_det_sympd(). A plain numeric safeguard
 # rather than a principled re-derivation, since the entries being edited are
 # themselves already a crude split/merge heuristic, not an exact update.

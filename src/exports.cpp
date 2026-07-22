@@ -20,7 +20,7 @@ Rcpp::List known_clusters_result(const Model& model) {
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),
     Rcpp::Named("dm1")       = to_rvector(model.dm1()),
-    Rcpp::Named("Omegaq")    = model.Omegaq(),
+    Rcpp::Named("Omega")    = model.Omega(),
     Rcpp::Named("gamma")     = model.Gamma(),
     Rcpp::Named("mu")        = model.Mu(),
     Rcpp::Named("objective") = Rcpp::wrap(model.objective_trace()),
@@ -33,7 +33,7 @@ Rcpp::List unknown_clusters_result(const Model& model) {
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),
     Rcpp::Named("dm1")       = to_rvector(model.dm1()),
-    Rcpp::Named("Omegaq")    = model.Omegaq(),
+    Rcpp::Named("Omega")    = model.Omega(),
     Rcpp::Named("C")         = model.C(),
     Rcpp::Named("alpha")     = to_rvector(model.alpha()),
     Rcpp::Named("M")         = model.M(),
@@ -48,7 +48,7 @@ Rcpp::List ZINormalBlockVarKnownClusters_result(const Model& model) {
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),
     Rcpp::Named("dm1")       = to_rvector(model.dm1()),
-    Rcpp::Named("Omegaq")    = model.Omegaq(),
+    Rcpp::Named("Omega")    = model.Omega(),
     Rcpp::Named("gamma")     = model.Gamma(), // q x q x n array
     Rcpp::Named("mu")        = model.Mu(),
     Rcpp::Named("objective") = Rcpp::wrap(model.objective_trace()),
@@ -61,7 +61,7 @@ Rcpp::List ZINormalBlockVarUnknownClusters_result(const Model& model) {
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),
     Rcpp::Named("dm1")       = to_rvector(model.dm1()),
-    Rcpp::Named("Omegaq")    = model.Omegaq(),
+    Rcpp::Named("Omega")    = model.Omega(),
     Rcpp::Named("C")         = model.C(),
     Rcpp::Named("alpha")     = to_rvector(model.alpha()),
     Rcpp::Named("M")         = model.M(),
@@ -85,15 +85,15 @@ Rcpp::List ZINormalBlockVarUnknownClusters_result(const Model& model) {
 //' @param C fixed cluster-indicator matrix (p x q)
 //' @param B0 initial regression coefficients (d x p)
 //' @param dm1_0 initial inverse variance per variable (length p)
-//' @param Omegaq0 initial precision matrix of the blocks (q x q)
-//' @param sparsity sparsity penalty applied to Omegaq through the graphical
+//' @param Omega0 initial precision matrix of the blocks (q x q)
+//' @param sparsity sparsity penalty applied to Omega through the graphical
 //' lasso (glassoFast); 0 means an unpenalized inversion
 //' @param sparsity_weights q x q matrix of per-pair penalty weights (see
 //' R/NormalBlockVarBase.R, `sparsity_weights`); only used when sparsity > 0
 //' @param noise_covariance either "diagonal" or "spherical"
 //' @param niter maximum number of EM iterations
 //' @param threshold convergence threshold on the objective increment
-//' @return a list with the fitted parameters (B, dm1, Omegaq, gamma, mu), the
+//' @return a list with the fitted parameters (B, dm1, Omega, gamma, mu), the
 //' objective (log-likelihood) trace and the number of iterations performed
 //' @noRd
 // [[Rcpp::export]]
@@ -130,7 +130,7 @@ Rcpp::List NormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat& 
 //' @param S0 initial variational variance of the cluster effects (length q)
 //' @param fixed_tau if TRUE, the variational membership probabilities are not
 //' re-estimated (useful for stability selection)
-//' @return a list with the fitted parameters (B, dm1, Omegaq, C, alpha, M, S),
+//' @return a list with the fitted parameters (B, dm1, Omega, C, alpha, M, S),
 //' the ELBO trace and the number of iterations performed
 //' @noRd
 // [[Rcpp::export]]
@@ -173,21 +173,21 @@ Rcpp::List NormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat
 //' @param C fixed cluster-indicator matrix (p x q)
 //' @param B0 initial regression coefficients (d x p)
 //' @param dm1_0 initial inverse variance per variable (length p)
-//' @param Omegaq0 initial precision matrix of the blocks (q x q)
-//' @param sparsity sparsity penalty applied to Omegaq through the graphical
+//' @param Omega0 initial precision matrix of the blocks (q x q)
+//' @param sparsity sparsity penalty applied to Omega through the graphical
 //' lasso (glassoFast); 0 means an unpenalized inversion
 //' @param sparsity_weights q x q matrix of per-pair penalty weights
 //' @param noise_covariance either "diagonal" or "spherical"
 //' @param niter maximum number of EM iterations
 //' @param threshold convergence threshold on the objective increment
-//' @return a list with the fitted parameters (B, dm1, Omegaq, gamma, mu -- gamma
+//' @return a list with the fitted parameters (B, dm1, Omega, gamma, mu -- gamma
 //' is a q x q x n array, one posterior covariance matrix per row), the
 //' log-likelihood trace and the number of iterations performed
 //' @noRd
 // [[Rcpp::export]]
 Rcpp::List ZINormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat& X,
                                   const arma::mat& zeros_bar, double zi_cond_mean, const arma::mat& C,
-                                  arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0,
+                                  arma::mat B0, arma::vec dm1_0, arma::mat Omega0,
                                   double sparsity, arma::mat sparsity_weights,
                                   std::string noise_covariance,
                                   int niter, double threshold) {
@@ -222,13 +222,13 @@ Rcpp::List ZINormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat
 //' row-dependent because of the zero-inflation mask)
 //' @param fixed_tau if TRUE, the variational membership probabilities are not
 //' re-estimated (useful for stability selection)
-//' @return a list with the fitted parameters (B, dm1, Omegaq, C, alpha, M, S),
+//' @return a list with the fitted parameters (B, dm1, Omega, C, alpha, M, S),
 //' the ELBO trace and the number of iterations performed
 //' @noRd
 // [[Rcpp::export]]
 Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat& X,
                                     const arma::mat& zeros_bar, double zi_cond_mean,
-                                    arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0,
+                                    arma::mat B0, arma::vec dm1_0, arma::mat Omega0,
                                     arma::mat C0, arma::vec alpha0, arma::mat M0, arma::mat S0,
                                     double sparsity, arma::mat sparsity_weights,
                                     std::string noise_covariance, bool fixed_tau,

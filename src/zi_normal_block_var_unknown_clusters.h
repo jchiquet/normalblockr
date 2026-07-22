@@ -40,10 +40,10 @@ class ZINormalBlockVarUnknownClusters : public NormalBlockVarBase {
     R_ = zi_data_.Y - XB();
     DM1_ = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
 
-    M_ = nb_optim::solve_M_ridge(DM1_, R_, C_, Omegaq_);
+    M_ = nb_optim::solve_M_ridge(DM1_, R_, C_, Omega_);
 
     arma::mat DM1C = DM1_ * C_;                // n x q
-    DM1C.each_row() += Omegaq_.diag().t();
+    DM1C.each_row() += Omega_.diag().t();
     S_ = 1.0 / DM1C;
 
     if (q_ > 1 && !fixed_tau_) {
@@ -66,7 +66,7 @@ class ZINormalBlockVarUnknownClusters : public NormalBlockVarBase {
 
     alpha_ = arma::vectorise(arma::mean(C_, 0));
     Sigma_hat_ = M_.t() * M_ / zi_data_.n + arma::diagmat(arma::vectorise(arma::mean(S_, 0)));
-    Omegaq_ = estimate_omega(Sigma_hat_);
+    Omega_ = estimate_omega(Sigma_hat_);
   }
 
 public:
@@ -88,19 +88,19 @@ public:
   // (zi_cond_mean); sum(log(S)) ranges over all n*q entries since S is now
   // row-dependent.
   double objective() const override {
-    double log_det_Omegaq = arma::log_det_sympd(Omegaq_);
+    double log_det_Omega = arma::log_det_sympd(Omega_);
     double weighted_sum_log_dm1 = arma::accu(zi_data_.nY % arma::log(dm1_));
     double sum_log_S = arma::accu(arma::log(S_));
     double log2pie = 1.0 + std::log(2.0 * arma::datum::pi);
 
     double J = -0.5 * zi_data_.npY * log2pie + 0.5 * weighted_sum_log_dm1;
-    J += 0.5 * zi_data_.n * log_det_Omegaq + 0.5 * sum_log_S;
+    J += 0.5 * zi_data_.n * log_det_Omega + 0.5 * sum_log_S;
     J += arma::accu(C_ * arma::log(alpha_)) - nb_utils::sum_xlogx(C_);
     J += zi_data_.zi_cond_mean;
 
     if (sparsity_ > 0.0) {
-      J += 0.5 * zi_data_.n * q_ - 0.5 * zi_data_.n * arma::trace(Omegaq_ * Sigma_hat_);
-      J -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omegaq_));
+      J += 0.5 * zi_data_.n * q_ - 0.5 * zi_data_.n * arma::trace(Omega_ * Sigma_hat_);
+      J -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omega_));
     }
     return J;
   }

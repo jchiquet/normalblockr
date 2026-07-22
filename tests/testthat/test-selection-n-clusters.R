@@ -18,7 +18,7 @@ test_that("split() increases q by one and keeps every parameter conformable", {
   expect_equal(dim(split_model$memberships), c(model$p, split_model$q))
   expect_equal(dim(split_model$var_par$M), c(model$n, split_model$q))
   expect_length(split_model$var_par$S, split_model$q)
-  expect_equal(dim(split_model$model_par$Omegaq), c(split_model$q, split_model$q))
+  expect_equal(dim(split_model$model_par$Omega), c(split_model$q, split_model$q))
   expect_equal(dim(split_model$sparsity_weights), c(split_model$q, split_model$q))
 })
 
@@ -73,7 +73,7 @@ test_that("merge() decreases q by one and keeps every parameter conformable", {
   expect_equal(dim(merged_model$memberships), c(model$p, merged_model$q))
   expect_equal(dim(merged_model$var_par$M), c(model$n, merged_model$q))
   expect_length(merged_model$var_par$S, merged_model$q)
-  expect_equal(dim(merged_model$model_par$Omegaq), c(merged_model$q, merged_model$q))
+  expect_equal(dim(merged_model$model_par$Omega), c(merged_model$q, merged_model$q))
 })
 
 test_that("merge() from q = 2 down to q = 1 does not error (R's drop = TRUE default would collapse the relevant matrices to vectors/a scalar)", {
@@ -86,7 +86,7 @@ test_that("merge() from q = 2 down to q = 1 does not error (R's drop = TRUE defa
   expect_equal(dim(merged_model$memberships), c(model$p, 1))
   expect_equal(dim(merged_model$var_par$M), c(model$n, 1))
   expect_length(merged_model$var_par$S, 1)
-  expect_equal(dim(merged_model$model_par$Omegaq), c(1, 1))
+  expect_equal(dim(merged_model$model_par$Omega), c(1, 1))
   expect_no_error(merged_model$optimize(control = list(niter = 5, threshold = -1)))
 })
 
@@ -107,7 +107,7 @@ test_that("split()/merge() mark the result as warm-started, so EM_initialize() r
   expect_true(priv$warm_started)
   expect_equal(priv$alpha, colMeans(priv$C))
   init <- priv$EM_initialize()
-  expect_identical(init$Omegaq, priv$Omegaq)
+  expect_identical(init$Omega, priv$Omega)
   expect_identical(init$M, priv$M)
   expect_identical(init$S, priv$S)
 
@@ -118,7 +118,7 @@ test_that("split()/merge() mark the result as warm-started, so EM_initialize() r
   expect_true(priv2$warm_started)
   expect_equal(priv2$alpha, colMeans(priv2$C))
   init2 <- priv2$EM_initialize()
-  expect_identical(init2$Omegaq, priv2$Omegaq)
+  expect_identical(init2$Omega, priv2$Omega)
 })
 
 test_that("split(in_place = TRUE) mutates self instead of returning a clone", {

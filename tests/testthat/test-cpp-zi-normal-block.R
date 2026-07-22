@@ -40,7 +40,7 @@ test_that("ZINormalBlockVarKnownClusters_fit matches ZINormalBlockVarKnownCluste
 
       res <- ZINormalBlockVarKnownClusters_fit(Y = data$Y, X = data$X,
                                     zeros_bar = data$zeros_bar, zi_cond_mean = zi_cond_mean, C = C,
-                                    B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+                                    B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,
                                     sparsity = sparsity, sparsity_weights = model$sparsity_weights,
                                     noise_covariance = nc, niter = niter, threshold = threshold)
 
@@ -49,7 +49,7 @@ test_that("ZINormalBlockVarKnownClusters_fit matches ZINormalBlockVarKnownCluste
 
       expect_equal(res$B,      model$model_par$B,      tolerance = 1e-8)
       expect_equal(res$dm1,    model$model_par$dm1,    tolerance = 1e-8)
-      expect_equal(res$Omegaq, model$model_par$Omegaq, tolerance = 1e-8)
+      expect_equal(res$Omega, model$model_par$Omega, tolerance = 1e-8)
       expect_equal(res$mu,     model$posterior_par$mu, tolerance = 1e-8)
       expect_equal(gamma_cpp,  gamma_r,                tolerance = 1e-8)
       expect_equal(res$objective[-1], model$objective, tolerance = 1e-8)
@@ -71,7 +71,7 @@ test_that("ZINormalBlockVarUnknownClusters_fit matches ZINormalBlockVarUnknownCl
 
       res <- ZINormalBlockVarUnknownClusters_fit(Y = data$Y, X = data$X,
                                       zeros_bar = data$zeros_bar, zi_cond_mean = zi_cond_mean,
-                                      B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+                                      B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,
                                       C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,
                                       sparsity = sparsity, sparsity_weights = model$sparsity_weights,
                                       noise_covariance = nc, fixed_tau = FALSE,
@@ -79,7 +79,7 @@ test_that("ZINormalBlockVarUnknownClusters_fit matches ZINormalBlockVarUnknownCl
 
       expect_equal(res$B,      model$model_par$B,      tolerance = 1e-8)
       expect_equal(res$dm1,    model$model_par$dm1,    tolerance = 1e-8)
-      expect_equal(res$Omegaq, model$model_par$Omegaq, tolerance = 1e-8)
+      expect_equal(res$Omega, model$model_par$Omega, tolerance = 1e-8)
       expect_equal(res$C,      model$var_par$tau,      tolerance = 1e-8)
       expect_equal(res$alpha,  model$model_par$alpha,  tolerance = 1e-8)
       expect_equal(res$M,      model$var_par$M,        tolerance = 1e-8)

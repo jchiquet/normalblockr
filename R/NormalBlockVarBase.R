@@ -9,8 +9,6 @@ NormalBlockVarBase <- R6::R6Class(
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @field data object of NormalBlockData class, with responses and design matrix
-    data  = NULL,
 
     #' @description Create a new [`NormalBlockVarBase`] object.
     #' @param data object of NormalBlockData class, with responses and design matrix
@@ -23,58 +21,7 @@ NormalBlockVarBase <- R6::R6Class(
     #' is skipped entirely, since it would otherwise never be used downstream.
     #' @return A new [`NormalBlockVarBase`] object
     initialize = function(data, q, sparsity = 0, control = NB_control(), zero_inflation = FALSE) {
-      self$data <- data
-
-      stopifnot("There cannot be more blocks than there are entities to cluster" = q <= ncol(self$data$Y))
-
-      ## variant (either diagonal or spherical residuals covariance)
-      private$res_covariance <- control$noise_covariance
-
-      ## pointer to the chosen optimization function
-      private$optimizer <- ifelse(control$heuristic,
-                                  private$heuristic_optimize,
-                                  private$EM_optimize)
-      private$approx <- control$heuristic
-
-      ## penalty mask
-      private$sparsity_ <- sparsity
-      weights <- matrix(1, q, q)
-      diag(weights) <- 0
-      if (!is.null(control$sparsity_weights)) {
-        weights <- control$sparsity_weights
-      }
-      private$weights <- weights
-
-      ## control$clustering_init is either the name of a clustering heuristic
-      ## (a single string, deferred to heuristic_clustering(), looked up in
-      ## private$clustering_methods) or an actual clustering to use directly
-      ## (a vector of labels or a p x q indicator matrix).
-      cl0 <- control$clustering_init
-      if (is.character(cl0) && length(cl0) == 1) {
-        private$clustering_approx <- cl0
-        private$C <- matrix(NA, self$data$n, q)
-      } else if (!is.null(cl0)) {
-        if (!is.vector(cl0) & !is.matrix(cl0)) stop("Labels must be encoded in vector of labels or indicator matrix")
-        if (is.vector(cl0)) {
-          if (any(cl0 < 1 | cl0 > q))
-            stop("Cluster labels must be between 1 and q")
-          if (length(cl0) != self$p)
-            stop("Cluster labels must match the number of Y's columns")
-          if (length(unique(cl0)) != q)
-            stop("The number of clusters in the initial clustering must be equal to q.")
-          cl0 <- as_indicator(cl0)
-        } else {
-          if (nrow(cl0) != self$p)
-            stop("Cluster-indicating matrix must have as many rows as Y has columns")
-          if (ncol(cl0) != q)
-            stop("Cluster-indicating matrix must have q columns")
-          if (min(colSums(cl0)) < 1)
-            stop("There cannot be empty clusters in the initial clustering matrix.")
-        }
-        private$C <- cl0
-      } else {
-        private$C <- matrix(NA, self$data$n, q)
-      }
+      super$initialize(data, q, sparsity, control)
 
       ## Zero-inflation probabilities (kappa/B0) and the resulting fixed
       ## log-likelihood contribution (ZI_cond_mean) are only ever read by the
@@ -255,7 +202,7 @@ NormalBlockVarBase <- R6::R6Class(
     #' @return A new [`NormalBlockVarBase`] object
     split = function(index, in_place = FALSE) {
       ## update private fields related to group parameters
-      ## C, Omegaq, M, S, sparsity_weights
+      ## C, Omega, M, S, sparsity_weights
 
       ## indices of individuals split within the cluster
       cl  <- self$clustering == index
@@ -299,25 +246,25 @@ NormalBlockVarBase <- R6::R6Class(
       }
 
       ## Precision matrix: re-derived from new_M/new_S (already consistent
-      ## with the split), not hand-edited from the parent's Omegaq -- see
+      ## with the split), not hand-edited from the parent's Omega -- see
       ## omega_from_M_S().
-      new_Omegaq <- private$omega_from_M_S(new_M, new_S, new_weights)
+      new_Omega <- private$omega_from_M_S(new_M, new_S, new_weights)
 
-      ## Mark the result as already initialized (C/Omegaq/M/S/alpha freshly
+      ## Mark the result as already initialized (C/Omega/M/S/alpha freshly
       ## derived above, B/dm1 carried over unchanged from the parent -- valid
       ## since their dimension doesn't depend on q) so that EM_initialize()
       ## reuses this state instead of discarding it for a fresh heuristic
-      ## Sigmaq/Omegaq estimate, which is both wasted work and a numerical
+      ## Sigmaq/Omega estimate, which is both wasted work and a numerical
       ## stability risk (a candidate clustering from a split/merge is not
       ## constrained to be "nice" the way a clustering heuristic's output is).
       if (in_place) {
-        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+        self$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
                     alpha = colMeans(new_C), warm_started = TRUE)
         self$sparsity_weights <- new_weights
         return(invisible(self))
       } else {
         new_NB <- self$clone()
-        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+        new_NB$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
                       alpha = colMeans(new_C), warm_started = TRUE)
         new_NB$sparsity_weights <- new_weights
         return(invisible(new_NB))
@@ -353,7 +300,7 @@ NormalBlockVarBase <- R6::R6Class(
     #' by merging the clusters of the current model
     #' @param max_candidates merge candidates are, unlike split's, quadratic
     #' in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
-    #' the most promising ones (largest `|Omegaq[i, j]|`, i.e. the most
+    #' the most promising ones (largest `|Omega[i, j]|`, i.e. the most
     #' strongly related cluster pairs in the current fit) are actually built
     #' and trial-optimized, since merging two nearly independent blocks is
     #' rarely competitive anyway. Set to `Inf` to always try every pair.
@@ -362,7 +309,7 @@ NormalBlockVarBase <- R6::R6Class(
       stopifnot("need at least two clusters to merge them" = self$q > 1)
       pairs <- combn(self$q, 2, simplify = FALSE)
       if (length(pairs) > max_candidates) {
-        score <- map_dbl(pairs, function(ij) abs(private$Omegaq[ij[1], ij[2]]))
+        score <- map_dbl(pairs, function(ij) abs(private$Omega[ij[1], ij[2]]))
         pairs <- pairs[order(score, decreasing = TRUE)[1:max_candidates]]
       }
       candidates <- map(pairs, self$merge)
@@ -406,210 +353,24 @@ NormalBlockVarBase <- R6::R6Class(
       new_weights <-  private$weights[-indices[2], -indices[2], drop = FALSE]
 
       ## Precision matrix: re-derived from new_M/new_S (already consistent
-      ## with the merge), not hand-edited from the parent's Omegaq -- see
+      ## with the merge), not hand-edited from the parent's Omega -- see
       ## omega_from_M_S().
-      new_Omegaq <- private$omega_from_M_S(new_M, new_S, new_weights)
+      new_Omega <- private$omega_from_M_S(new_M, new_S, new_weights)
 
       ## See split()'s comment: mark as warm-started so EM_initialize()
-      ## reuses this state instead of a fresh heuristic Sigmaq/Omegaq.
+      ## reuses this state instead of a fresh heuristic Sigmaq/Omega.
       if (in_place) {
-        self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+        self$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
                     alpha = colMeans(new_C), warm_started = TRUE)
         self$sparsity_weights <- new_weights
         return(self)
       } else {
         new_NB <- self$clone()
-        new_NB$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
+        new_NB$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
                       alpha = colMeans(new_C), warm_started = TRUE)
         new_NB$sparsity_weights <- new_weights
         return(new_NB)
       }
-    },
-
-    #' @description Predicts observations Y for new covariates X.
-    #' @param new_X new set of covariates.
-    #' @return A n*p prediction matrix for new observations
-    predict = function(new_X){
-      return(new_X %*% private$B)
-    },
-
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## Extractors ------------------------
-    #' @description Extract interaction network in the latent space
-    #' @param type edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)
-    #' @return a square matrix of size `self$q`
-    latent_network = function(type = c("partial_cor", "support", "precision")) {
-      net <- switch(
-        match.arg(type),
-        "support"     = 1 * (private$Omegaq != 0 & !diag(TRUE, ncol(private$Omegaq))),
-        "precision"   = private$Omegaq,
-        "partial_cor" = {
-          tmp <- -private$Omegaq / tcrossprod(sqrt(diag(private$Omegaq))); diag(tmp) <- 1
-          tmp
-        }
-      )
-      ## Enforce sparse Matrix encoding to avoid downstream problems with igraph::graph_from_adjacency_matrix
-      ## as it fails when given dsyMatrix objects
-      Matrix::Matrix(net, sparse = TRUE)
-    },
-
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## Graphical methods------------------
-    #' @param show_increment whether to add, below the objective trace, a second
-    #' panel with the (log10) absolute increment between consecutive iterations
-    #' and the convergence `threshold` used to stop optimize() (dashed line).
-    #' That second panel is what actually tells convergence apart from merely
-    #' running out of iterations: the objective trace alone tends to look flat
-    #' well before the increment has actually crossed the threshold, especially
-    #' as the number of blocks grows (see inst/CSDA_analyses).
-    #' @description plots the evolution of the objective (log-likelihood or ELBO)
-    #' across the (V)EM iterations of the last call to `optimize()`.
-    #' @return a [`ggplot2::ggplot`] graph
-    plot_loglik = function(show_increment = TRUE) {
-      ll  <- private$ll_list
-      obj <- self$objective
-      if (length(obj) == 0 || all(is.na(obj))) {
-        message("No objective trace to plot (heuristic inference does not compute a log-likelihood/ELBO).")
-        return(invisible(NULL))
-      }
-
-      ## The objective (log-lik/ELBO) trace climbs fast then flattens out
-      ## visually on a linear scale, well before it has actually converged
-      ## (the same effect show_increment exists to catch). When every value
-      ## is negative -- always true in practice in this model, since the
-      ## leading -0.5*n*p*log(2*pi) term dominates -- plotting log10(-obj)
-      ## instead spreads out the near-convergence iterations (where -obj is
-      ## smallest) at the expense of the early, already-obvious big jumps,
-      ## the same log-scale trick already used for the increment panel
-      ## below. Left as the raw value in the (rare) edge case where that
-      ## doesn't hold, e.g. a tiny/degenerate fit where the objective is
-      ## not guaranteed negative.
-      obj_is_neg <- all(obj < 0)
-      obj_facet  <- if (obj_is_neg) "log10(-objective)" else "objective"
-      obj_value  <- if (obj_is_neg) log10(-obj) else obj
-
-      dplot <- tibble::tibble(iteration = seq_along(obj), value = obj_value, facet = obj_facet)
-      last_increment <- abs(diff(ll))[length(obj)]
-      converged <- !is.na(private$threshold) && last_increment < private$threshold
-      subtitle  <- if (is.na(private$niter_max)) {
-        sprintf("%d iterations", length(obj))
-      } else if (converged) {
-        sprintf("converged after %d iterations (threshold = %.1e)", length(obj), private$threshold)
-      } else {
-        sprintf("stopped at the %d-iteration cap -- last increment (%.3g) still above threshold (%.1e)",
-                private$niter_max, last_increment, private$threshold)
-      }
-
-      if (show_increment) {
-        dplot <- dplyr::bind_rows(
-          dplot,
-          tibble::tibble(iteration = seq_along(obj), value = log10(abs(diff(ll))), facet = "log10(|increment|)")
-        )
-      }
-      dplot$facet <- factor(dplot$facet, levels = c(obj_facet, "log10(|increment|)"))
-
-      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = iteration, y = value)) +
-        ggplot2::geom_line() + ggplot2::geom_point(size = .8) +
-        ggplot2::ggtitle(label = "(V)EM optimization", subtitle = subtitle) +
-        ggplot2::xlab("iteration") + ggplot2::ylab(NULL) +
-        ggplot2::theme_bw()
-
-      if (show_increment) {
-        p <- p + ggplot2::facet_wrap(~ facet, ncol = 1, scales = "free_y", strip.position = "left")
-        if (!is.na(private$threshold))
-          p <- p + ggplot2::geom_hline(
-            data = data.frame(facet = factor("log10(|increment|)", levels = levels(dplot$facet)),
-                               yintercept = log10(private$threshold)),
-            ggplot2::aes(yintercept = yintercept),
-            linetype = "dashed", colour = "red", alpha = .6
-          )
-      }
-      p
-    },
-
-    #' @description plot the latent network.
-    #' @param type edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).
-    #' @param output Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)
-    #' @param edge.color Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.
-    #' @param node.labels vector of character. The labels of the nodes. The default will use the column names ot the response matrix.
-    #' @param remove.isolated if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.
-    #' @param layout an optional igraph layout. Only relevant for igraph output.
-    #' @param plot logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.
-    plot_network = function(type            = c("partial_cor", "support"),
-                            output          = c("igraph", "corrplot"),
-                            edge.color      = c("#F8766D", "#00BFC4"),
-                            remove.isolated = FALSE,
-                            node.labels     = NULL,
-                            layout          = igraph::layout_in_circle,
-                            plot = TRUE) {
-      if(anyNA(private$Omegaq)) stop("NA in the precision matrix")
-
-      type   <- match.arg(type)
-      output <- match.arg(output)
-
-      net <- self$latent_network(type)
-
-      if (output == "igraph") {
-        G <-  igraph::graph_from_adjacency_matrix(net, mode = "undirected", weighted = TRUE, diag = FALSE)
-
-        if (!is.null(node.labels)) {
-          igraph::V(G)$label <- node.labels
-        } else {
-          igraph::V(G)$label <- unlist(lapply(1:ncol(net), f <- function(x) paste0("Cluster_", x)))
-        }
-        ## Nice nodes
-        V.deg <- igraph::degree(G)/sum(igraph::degree(G))
-        igraph::V(G)$label.cex <- V.deg / max(V.deg) + .5
-        igraph::V(G)$size <- tabulate(self$clustering, nbins = self$q) * 100 / self$p
-        igraph::V(G)$label.color <- rgb(0, 0, .2, .8)
-        igraph::V(G)$frame.color <- "transparent" # NA triggers an igraph plot() warning; same (invisible) rendering
-        ## Nice edges
-        igraph::E(G)$color <- ifelse(igraph::E(G)$weight > 0, edge.color[1], edge.color[2])
-        if (type == "support")
-          igraph::E(G)$width <- abs(igraph::E(G)$weight)
-        else
-          igraph::E(G)$width <- 15*abs(igraph::E(G)$weight)
-
-        if (remove.isolated) {
-          G <- igraph::delete.vertices(G, which(igraph::degree(G) == 0))
-        }
-        if (plot) plot(G, layout = layout)
-      }
-      if (output == "corrplot") {
-        if (plot) {
-          if (ncol(net) > 100)
-            colnames(net) <- rownames(net) <- rep(" ", ncol(net))
-          G <- net
-          diag(net) <- 0
-          corrplot::corrplot(as.matrix(net), method = "color", is.corr = FALSE, tl.pos = "td", cl.pos = "n", tl.cex = 0.5, type = "upper")
-        } else  {
-          G <- net
-        }
-      }
-      invisible(G)
-    },
-
-    #' @description plots the evolution of the objective during model optimization
-    #' (see `plot_loglik()`)
-    plot = function(){
-      self$plot_loglik()
-    },
-
-
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## S3 methods ----------------------------
-    #' @description User friendly print method
-    #' @param model First line of the print output
-    print = function(model = paste("A", self$who_am_I, ".\n")) {
-      cat(model)
-      cat("===========================================================================\n")
-      print(as.data.frame(round(self$criteria, digits = 3), row.names = ""))
-      cat("===========================================================================\n")
-      cat("* Useful fields\n")
-      cat("    $model_par, $posterior_par / $var_par, $clustering \n")
-      cat("    $loglik, $BIC, $ICL, $objective, $nb_param, $criteria\n")
-      cat("* Useful S3 methods\n")
-      cat("    print(), coef(), sigma(), fitted(), predict() \n")
     }
   ),
 
@@ -618,89 +379,27 @@ NormalBlockVarBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-    B                 = NA, # regression matrix
     dm1               = NA, # diagonal vector of inverse variance matrix (variables level)
-    C                 = NA, # the matrix of posterior probabilities (tau) or group affectation
-    Omegaq            = NA, # precision matrix for clusters
     kappa             = NA, # vector of zero-inflation probabilities
     B0                = NA, # vector of zero-inflation regression matrix
-    alpha             = NA, # vector of groups probabilities
     gamma             = NA, # variance of  posterior distribution of W
     mu                = NA, # mean for posterior distribution of W
     M                 = NA, # variational mean for posterior distribution of W
     S                 = NA, # variational diagonal of variances for posterior distribution of W
-    optimizer         = NA, # a link to the function that perform the optimization
-    ll_list           = NA, # list of log-likelihoods or ELBOs
-    sparsity_         = NA, # scalar controlling the overall sparsity
-    weights           = NA, # sparsity weights specific to each pairs of group
     res_covariance    = NA, # shape of the residuals covariance (diagonal or spherical)
-    approx            = NA, # use approximation/heuristic approach or not
-    clustering_approx = NA, # name of the clustering heuristic, key into clustering_methods
-    ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed)
-    niter             = NA, # number of EM iterations required by the inference, if applicable
-    niter_max         = NA, # niter cap passed to the last optimize() call (for plot_loglik()'s
-                             # and warn_if_not_converged()'s "did it actually converge or just
-                             # hit the cap?" diagnostic)
-    threshold         = NA, # convergence threshold passed to the last optimize() call (idem)
-    warm_started      = FALSE, # set by warm_start_from() and by split()/merge(): tells
-                                # EM_initialize() to reuse the current B/dm1/Omegaq (and
-                                # C/M/S/alpha or gamma/mu) instead of (re-)deriving them
-                                # from the heuristic clustering.
-                                # Deliberately NOT inferred from "are these fields non-NA",
-                                # which would also be true for split()/merge() clones (those
-                                # keep their own, different, already-tested initialization path).
-
-    ## Warns when the (V)EM stopped because it hit the niter cap rather than
-    ## because it actually converged below threshold -- silently otherwise
-    ## (heuristic fits have no ll_list/niter to check). This is increasingly
-    ## likely as the number of blocks q grows: more latent structure means a
-    ## higher fraction of missing information, hence a slower EM convergence
-    ## rate (see inst/CSDA_analyses) -- the fix for genuinely slow cases is to
-    ## raise `niter` in NB_control(), not to loosen `threshold`.
-    warn_if_not_converged = function() {
-      if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())
-      last_increment <- abs(diff(private$ll_list))[private$niter]
-      if (last_increment >= private$threshold)
-        warning(sprintf(
-          "%s: (V)EM stopped at the niter cap (%d) without reaching the convergence threshold (last increment = %.3g, threshold = %.1e). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.",
-          self$who_am_I, private$niter_max, last_increment, private$threshold), call. = FALSE)
-      invisible()
-    },
+    ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed),
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated (V)EM inference --------------
-    ## Each concrete subclass overrides EM_optimize() to call its
-    ## Rcpp/Armadillo core (see src/exports.cpp and
-    ## inst/normal_block_models.qmd); EM_initialize() (heuristic
-    ## initialization) stays in R and supplies the starting values.
-    EM_initialize = function() {},
 
-    get_Omegaq = function(Sigma) {
-      if (private$sparsity_ == 0) {
-        Omega <- solve(Sigma)
-      } else {
-        glasso_out <- glassoFast::glassoFast(Sigma, rho = private$sparsity_ * self$sparsity_weights)
-        if (anyNA(glasso_out$wi)) {
-          warning(
-            "GLasso fails, the penalty is probably too small and the system badly conditionned \n reciprocal condition number =",
-            rcond(Sigma), "\n We send back the original matrix and its inverse (unpenalized)."
-          )
-          Omega <- solve(Sigma)
-        } else {
-          Omega <- Matrix::symmpart(glasso_out$wi)
-        }
-      }
-      Omega
-    },
-
-    ## Closed-form M-step estimate of Omegaq directly from M/S (Sigma_hat =
+    ## Closed-form M-step estimate of Omega directly from M/S (Sigma_hat =
     ## M'M/n + diag(S)), the same formula the (V)EM's own M-step uses (see
     ## Sigma_hat_ in src/normal_block_unknown_clusters.h). Used by split()/
-    ## merge() to seed the new model's Omegaq from its freshly built M/S/C
+    ## merge() to seed the new model's Omega from its freshly built M/S/C
     ## (already consistent with the new clustering) instead of hand-editing
-    ## the parent's Omegaq, which reflects the *old* clustering. `weights`
+    ## the parent's Omega, which reflects the *old* clustering. `weights`
     ## is passed explicitly (rather than reading self$sparsity_weights, as
-    ## get_Omegaq() does) because split()/merge() call this before the new,
+    ## get_Omega() does) because split()/merge() call this before the new,
     ## resized sparsity_weights have been assigned anywhere.
     omega_from_M_S = function(M, S, weights) {
       s_vec <- if (is.matrix(S)) colMeans(S) else S
@@ -833,28 +532,11 @@ NormalBlockVarBase <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field inference_method inference procedure used (heuristic or integrated with EM)
-    inference_method = function() ifelse(private$approx, "heuristic", "integrated"),
-    #' @field n number of samples
-    n = function() self$data$n,
-    #' @field p number of responses per sample
-    p = function() self$data$p,
-    #' @field d number of variables (dimensions in X)
-    d = function() self$data$d,
     #' @field d0 number of zi variables (dimensions in X0)
     d0 = function() self$data$d0,
-    #' @field q number of blocks
-    q = function() as.integer(ncol(private$C)),
-    #' @field n_edges number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)
-    n_edges  = function() sum(private$Omegaq[upper.tri(private$Omegaq, diag = FALSE)] != 0),
-    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
+    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
     model_par = function() list(B = private$B, B0 = private$B0,
-                                     dm1 = private$dm1, Omegaq = private$Omegaq),
-    #' @field B_original regression coefficients (d x p), converted back to
-    #' Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
-    #' column-wise rescaling, if any). Use `model_par$B` instead for the
-    #' coefficients on the internal fitting scale.
-    B_original = function() private$rescale_to_original(private$B, power = 1),
+                                dm1 = private$dm1, Omega = private$Omega),
     #' @field dm1_original inverse residual variance per variable
     #' (1 / Var(Y_j)), converted back to Y's original units. Use
     #' `model_par$dm1` instead for the internal fitting scale. With
@@ -871,65 +553,7 @@ NormalBlockVarBase <- R6::R6Class(
       nb_param_D <- ifelse(private$res_covariance == "diagonal", self$p, 1)
       as.integer(self$p * self$d + self$q + self$n_edges + nb_param_D)
     },
-    #' @field objective evolution of the objective function during (V)EM algorithm
-    objective = function() private$ll_list[-1],
-    #' @field loglik (or its variational lower bound)
-    loglik = function() if (private$approx) NA else private$ll_list[[length(private$ll_list)]] + self$sparsity_term,
-    #' @field deviance (or its variational lower bound)
-    deviance = function() -2 * self$loglik,
-    #' @field BIC (or its variational lower bound)
-    #' @field entropy Entropy of the conditional distribution when applicable
-    entropy    = function() 0,
-    BIC = function() self$deviance + log(self$n) * self$nb_param,
-    #' @field ICL variational lower bound of the ICL
-    ICL        = function() self$BIC + 2 * self$entropy,
-    #' @field EBIC variational lower bound of the EBIC
-    EBIC   = function() self$BIC + 2 * ifelse(self$n_edges > 0, self$n_edges * log(self$q), 0),
-    #' @field criteria a vector with loglik, BIC and number of parameters
-    criteria   = function() {
-      data.frame(nb_param = self$nb_param, q = self$q, n_edges = self$n_edges, sparsity = self$sparsity,
-                 loglik = self$loglik, deviance = self$deviance, BIC = self$BIC, ICL = self$ICL, EBIC = self$EBIC,
-                 niter = private$niter )
-    },
-    #' @field sparsity (overall sparsity parameter)
-    sparsity = function(value) {
-      if (missing(value)) {
-        private$sparsity_
-      } else {
-        stopifnot("must be a positive scale" = value >= 0)
-        private$sparsity_ <- value
-      }
-    },
-    #' @field sparsity_weights (weights associated to each pair of groups)
-    sparsity_weights = function(value) {
-      if (missing(value)) {
-        private$weights
-      } else {
-        stopifnot("must be a q x q matrix" =
-                    all(is.matrix(value), nrow(value) == ncol(value), ncol(value) == self$q))
-        private$weights <- value
-      }
-    },
-    #' @field sparsity_term (sparsity_term term in log-likelihood due to sparsity)
-    sparsity_term = function() self$sparsity * sum(abs(self$sparsity_weights * private$Omegaq)),
     #' @field get_res_covariance whether the residual covariance is diagonal or spherical
-    get_res_covariance = function() private$res_covariance,
-    #' @field memberships cluster memberships
-    memberships = function() private$C,
-    #' @field clustering given as the list of elements contained in each cluster
-    clustering = function() {
-      cl <- get_clusters(private$C)
-      names(cl) <- colnames(self$data$Y)
-      cl
-    },
-    #' @field cluster_sizes given as a vector of cluster sizes
-    cluster_sizes = function() tabulate(self$clustering, nbins = self$q),
-    #' @field elements_per_cluster given as the list of elements contained in each cluster
-    elements_per_cluster = function() {
-      if (is.null(names(self$clustering)))
-        base::split(1:self$p, self$clustering)
-      else
-        base::split(names(self$clustering), self$clustering)
-    }
+    get_res_covariance = function() private$res_covariance
   )
 )

@@ -33,13 +33,13 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
     get_heuristic_parameters = function(){
       zi_diag <- private$zi_diag_normal_inference()
       Sigmaq  <- private$heuristic_Sigmaq_from_Sigma(cov(zi_diag$R))
-      Omegaq  <- private$get_Omegaq(Sigmaq)
-      list(B = zi_diag$B, dm1 = zi_diag$dm1, Omegaq = Omegaq, kappa = zi_diag$kappa)
+      Omega  <- private$get_Omega(Sigmaq)
+      list(B = zi_diag$B, dm1 = zi_diag$dm1, Omega = Omega, kappa = zi_diag$kappa)
     },
 
     EM_initialize = function() {
       if (private$warm_started) {
-        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq, kappa = private$kappa,
+        list(B = private$B, dm1 = private$dm1, Omega = private$Omega, kappa = private$kappa,
              gamma = private$gamma, mu = private$mu)
       } else c(private$get_heuristic_parameters(),  list(
         gamma = rep(list(diag(1, self$q, self$q)), self$n),
@@ -55,13 +55,13 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
       res  <- ZINormalBlockVarKnownClusters_fit(
         Y = self$data$Y, X = self$data$X,
         zeros_bar = self$data$zeros_bar, zi_cond_mean = private$ZI_cond_mean, C = private$C,
-        B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+        B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
         noise_covariance = private$res_covariance,
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter
-      list(B = res$B, dm1 = res$dm1, Omegaq = res$Omegaq,
+      list(B = res$B, dm1 = res$dm1, Omega = res$Omega,
            gamma = purrr::array_branch(res$gamma, 3), mu = res$mu, ll_list = res$objective)
     }
   ),
@@ -84,7 +84,7 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
     },
     #' @field nb_param number of parameters in the model
     nb_param = function() super$nb_param + self$p * self$d0, # adding kappa
-    #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix), kappa (zero-inflation probabilities)
+    #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix), kappa (zero-inflation probabilities)
     model_par  = function() {
       par       <- super$model_par
       par$kappa <- private$kappa

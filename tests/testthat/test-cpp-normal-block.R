@@ -38,7 +38,7 @@ test_that("NormalBlockVarKnownClusters_fit matches NormalBlockVarKnownClusters (
 
       expect_equal(res$B,      model$model_par$B,      tolerance = 1e-8)
       expect_equal(res$dm1,    model$model_par$dm1,    tolerance = 1e-8)
-      expect_equal(res$Omegaq, model$model_par$Omegaq, tolerance = 1e-8)
+      expect_equal(res$Omega, model$model_par$Omega, tolerance = 1e-8)
       expect_equal(res$gamma,  model$posterior_par$gamma, tolerance = 1e-8)
       expect_equal(res$mu,     model$posterior_par$mu,    tolerance = 1e-8)
       expect_equal(res$objective[-1], model$objective, tolerance = 1e-8)
@@ -65,7 +65,7 @@ test_that("NormalBlockVarUnknownClusters_fit matches NormalBlockVarUnknownCluste
 
       expect_equal(res$B,      model$model_par$B,      tolerance = 1e-8)
       expect_equal(res$dm1,    model$model_par$dm1,    tolerance = 1e-8)
-      expect_equal(res$Omegaq, model$model_par$Omegaq, tolerance = 1e-8)
+      expect_equal(res$Omega, model$model_par$Omega, tolerance = 1e-8)
       expect_equal(res$C,      model$var_par$tau,      tolerance = 1e-8)
       expect_equal(res$alpha,  model$model_par$alpha,  tolerance = 1e-8)
       expect_equal(res$M,      model$var_par$M,        tolerance = 1e-8)

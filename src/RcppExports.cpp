@@ -22,7 +22,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type C(CSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type dm1_0(dm1_0SEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Omegaq0(Omegaq0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
     Rcpp::traits::input_parameter< double >::type sparsity(sparsitySEXP);
     Rcpp::traits::input_parameter< arma::mat >::type sparsity_weights(sparsity_weightsSEXP);
     Rcpp::traits::input_parameter< std::string >::type noise_covariance(noise_covarianceSEXP);
@@ -42,7 +42,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type dm1_0(dm1_0SEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Omegaq0(Omegaq0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type C0(C0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type alpha0(alpha0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type M0(M0SEXP);
@@ -70,7 +70,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type C(CSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type dm1_0(dm1_0SEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Omegaq0(Omegaq0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
     Rcpp::traits::input_parameter< double >::type sparsity(sparsitySEXP);
     Rcpp::traits::input_parameter< arma::mat >::type sparsity_weights(sparsity_weightsSEXP);
     Rcpp::traits::input_parameter< std::string >::type noise_covariance(noise_covarianceSEXP);
@@ -92,7 +92,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type zi_cond_mean(zi_cond_meanSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type dm1_0(dm1_0SEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Omegaq0(Omegaq0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type C0(C0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type alpha0(alpha0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type M0(M0SEXP);

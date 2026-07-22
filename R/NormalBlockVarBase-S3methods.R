@@ -23,7 +23,7 @@ coef.NormalBlockVarBase <- function(object, ...){
 }
 
 #' @title Extracts the latent-block covariance matrix from objects returned by [NormalBlockBase()] and its variants
-#' @description Extract the covariance matrix between latent blocks (the inverse of `Omegaq`) from a NormalBlockBase object.
+#' @description Extract the covariance matrix between latent blocks (the inverse of `Omega`) from a NormalBlockBase object.
 #' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return The q x q covariance matrix between latent blocks.
@@ -31,7 +31,7 @@ coef.NormalBlockVarBase <- function(object, ...){
 #' @export
 sigma.NormalBlockVarBase <- function(object, ...){
   stopifnot(isNB(object))
-  solve(object$model_par$Omegaq)
+  solve(object$model_par$Omega)
 }
 
 #' @title Extracts fitted values from objects returned by [NormalBlockVarBase()] and its variants

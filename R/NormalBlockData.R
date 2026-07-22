@@ -18,7 +18,7 @@
 #' in block k); on the raw scale, that assumption is swamped whenever
 #' variables in the same true block have very different baseline variances
 #' (e.g. species with very different total abundance). The resulting `B`,
-#' `Omegaq` and clustering are therefore properties of the *scaled* data, not
+#' `Omega` and clustering are therefore properties of the *scaled* data, not
 #' directly convertible back to the original units (the per-column scaling
 #' factors are not the same within a block, so there is no single way to
 #' "unscale" a shared block covariance back to a p x p matrix).
