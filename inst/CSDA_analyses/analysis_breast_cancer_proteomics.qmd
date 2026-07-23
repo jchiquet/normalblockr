@@ -30,12 +30,12 @@ X_subtype <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
 data_subtype <- NormalBlockData$new(Y, X_subtype)
 ```
 
-## Applying Normal-Block with a fixed, data-driven grouping
+## Applying Normal-Block-Var with a fixed, data-driven grouping
 
-Before letting Normal-Block infer its own grouping of the proteins, we build a
+Before letting Normal-Block-Var infer its own grouping of the proteins, we build a
 simple, fully data-driven baseline: a hierarchical (Ward) clustering of the
 proteins from their expression profiles alone, with no reference to the
-Normal-Block model. By default `normalblockr` scales the data, so the a
+Normal-Block-Var model. By default `normalblockr` scales the data, so the a
 priori clustering is computed on the same (column-)scaled matrix for
 consistency. Six clusters is an arbitrary but visually natural cut of the
 dendrogram (highlighted below); the unsupervised exploration in the next
@@ -51,7 +51,7 @@ rect.hclust(hc_expr, k = 6, border = "red")
 group <- cutree(hc_expr, 6) |> normalblockr:::as_indicator()
 ```
 
-This fixed grouping is then handed to Normal-Block as known clusters -- the
+This fixed grouping is then handed to Normal-Block-Var as known clusters -- the
 model only estimates the association network between the 6 blocks, not the
 grouping itself.
 
@@ -60,7 +60,7 @@ NB_prot_group <- normal_block(data_subtype, blocks = group)
 plot(NB_prot_group)
 ```
 
-## Applying Normal-Block with an unknown, inferred grouping
+## Applying Normal-Block-Var with an unknown, inferred grouping
 
 ### Running the integrated inference procedure for 1 to 30 clusters.
 
@@ -118,7 +118,7 @@ dotplot(inter_kegg, font.size = 8)
 
 ## Comparison with the data-driven clustering
 
-How much does Normal-Block's own, unsupervised grouping of the proteins
+How much does Normal-Block-Var's own, unsupervised grouping of the proteins
 agree with the purely data-driven hierarchical clustering used as a fixed
 baseline above? For every q explored in `NB_prot_subtype`, we compute the
 Adjusted Rand Index (ARI) between its inferred clustering and the q = 6

@@ -12,7 +12,7 @@
 #' @return an R6 object with one of the model classes (or a collection of model objects).
 #' @examples
 #' ## Normal Data
-#' ex_data <- generate_normal_block_data(n=50, p=50, d=1, q=3)
+#' ex_data <- generate_normal_block_var_data(n=50, p=50, d=1, q=3)
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' my_normal_block <- normal_block(data, blocks = 1:6)
 #' \dontrun{
@@ -21,7 +21,7 @@
 #' plot(data$Y, Y_hat, log = "xy"); abline(0,1)
 #' }
 #' ## Normal Data with Zero Inflation
-#' ex_data_zi <- generate_normal_block_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
+#' ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
 #' zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)
 #' my_normal_block <- normal_block(zidata, blocks = 1:6, zero_inflation = TRUE)
 #'
@@ -80,7 +80,7 @@ normal_block <- function(data,
 #' "spectral"), an actual clustering (a vector of labels or a p x q indicator
 #' matrix, or a list of either per q for a collection), or "best_of_inits" to
 #' try several heuristics per model and keep the best-ELBO fit (see
-#' [NormalBlockBase]'s `best_of_inits()`; not supported with `sparsity =
+#' [NormalBlockVarBase]'s `best_of_inits()`; not supported with `sparsity =
 #' TRUE`). See `inst/methods_initialization_and_refine.md` for the
 #' heuristics' rationale, why no single one dominates, and how this interacts
 #' with `refine` (below).
@@ -90,7 +90,7 @@ normal_block <- function(data,
 #' recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no
 #' likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
 #' are all `NA` on the resulting model.
-#' @param refine for [NormalBlockCollectionClusters] only: whether
+#' @param refine for [NormalBlockVarCollectionClusters] only: whether
 #' `optimize()` should automatically call `refine()` afterwards. Default
 #' `FALSE` since it adds real cost; call `collection$refine()` directly at
 #' any point afterwards for the same effect without setting this.
@@ -153,14 +153,14 @@ get_model <- function(data,
 
   if (is_collection) {
     class_name <- if (changing_sparsity && unknown_q_list) {
-      "NormalBlockCollectionClustersSparsity"
+      "NormalBlockVarCollectionClustersSparsity"
     } else if (changing_sparsity) {
-      "NormalBlockCollectionSparsity"
+      "NormalBlockVarCollectionSparsity"
     } else {
-      "NormalBlockCollectionClusters"
+      "NormalBlockVarCollectionClusters"
     }
   } else {
-    class_name <- if (is.matrix(blocks)) "NormalBlockKnownClusters" else "NormalBlockUnknownClusters"
+    class_name <- if (is.matrix(blocks)) "NormalBlockVarKnownClusters" else "NormalBlockVarUnknownClusters"
     if (zero_inflation) class_name <- paste0("ZI", class_name)
   }
 

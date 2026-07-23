@@ -21,7 +21,6 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Jeanne Tous \email{jeanne.tous@inrae.fr}
   \item Julien Chiquet \email{julien.chiquet@inrae.fr} (\href{https://orcid.org/0000-0002-3629-3429}{ORCID})
 }
 

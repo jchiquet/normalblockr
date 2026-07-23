@@ -4,11 +4,11 @@
 ## design groups) data: an empty cluster in the inferred clustering, and a
 ## design group with zero non-zero-inflated observations for some variable.
 set.seed(7)
-ex <- generate_normal_block_data(n = 40, p = 8, d = 1, q = 3)
+ex <- generate_normal_block_var_data(n = 40, p = 8, d = 1, q = 3)
 
 test_that("plot_network() does not error when the inferred clustering has an empty cluster", {
   data  <- NormalBlockData$new(ex$Y, ex$X)
-  model <- NormalBlockUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 2, threshold = -1))
 
   ## Force an empty cluster: column 3 of the (soft) membership matrix never
@@ -35,7 +35,7 @@ test_that("ZI heuristic initialization tolerates a fully zero-inflated design gr
   Y[X[, "B"] == 1, 1] <- 0
 
   data  <- NormalBlockData$new(Y, X)
-  model <- ZINormalBlockKnownClusters$new(data, matrix(1, p, 1), control = NB_control(verbose = FALSE))
+  model <- ZINormalBlockVarKnownClusters$new(data, matrix(1, p, 1), control = NB_control(verbose = FALSE))
 
   expect_no_error(model$optimize(control = list(niter = 2, threshold = -1)))
   expect_false(anyNA(model$model_par$B))

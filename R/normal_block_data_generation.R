@@ -83,15 +83,15 @@ generate_precision_matrix <- function(q, graph_structure = "erdos-renyi", v = 0.
 
 # Generate normal block set of model parameters
 #
-generate_normal_block_param <- function(X = matrix(rnorm(100*p), 100, p),
-                                        p = 40,
-                                        q = 3,
-                                        kappa = 0,
-                                        omega_structure="erdos-renyi",
-                                        alpha = rep(1/q, q),
-                                        SNR = 0.75,
-                                        range_D = c(0.5, 1.5),
-                                        u_v = c(0.3, 0.1)) {
+generate_normal_block_var_param <- function(X = matrix(rnorm(100*p), 100, p),
+                                            p = 40,
+                                            q = 3,
+                                            kappa = 0,
+                                            omega_structure="erdos-renyi",
+                                            alpha = rep(1/q, q),
+                                            SNR = 0.75,
+                                            range_D = c(0.5, 1.5),
+                                            u_v = c(0.3, 0.1)) {
   Omega <- generate_precision_matrix(q, omega_structure, v = u_v[1], u = u_v[2])
   Sigma <- chol2inv(chol(Omega))
   list(
@@ -134,7 +134,7 @@ generate_normal_block_param <- function(X = matrix(rnorm(100*p), 100, p),
 #' @importFrom igraph sample_pa sample_sbm sample_gnp as_adjacency_matrix
 #' @importFrom stats rbinom rmultinom rnorm runif var
 #' @export
-generate_normal_block_data <-
+generate_normal_block_var_data <-
   function(n = 100,
            p = 40,
            d = 1,
@@ -148,7 +148,7 @@ generate_normal_block_data <-
            range_D = c(0.5, 1.5)) {
 
   X <- matrix(runif(n*d, min=range_X[1], max = range_X[2]), n, d)
-  param <- generate_normal_block_param(X, p, q, kappa, omega_structure, alpha, SNR, range_D, u_v)
+  param <- generate_normal_block_var_param(X, p, q, kappa, omega_structure, alpha, SNR, range_D, u_v)
 
   W <- MASS::mvrnorm(n, mu = matrix(rep(0, q), q, 1), Sigma = param$Sigma)
 

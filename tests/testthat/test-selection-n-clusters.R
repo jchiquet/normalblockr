@@ -1,15 +1,15 @@
 ###############################################################################
-## Tests for the split/merge cluster-search machinery (NormalBlockBase$split(),
+## Tests for the split/merge cluster-search machinery (NormalBlockVarBase$split(),
 ## $merge(), $candidates_split(), $candidates_merge()) and the SelectionNClusters
-## class that drives them. This machinery only applies to NormalBlockUnknownClusters
+## class that drives them. This machinery only applies to NormalBlockVarUnknownClusters
 ## (the clustering -- and hence M/S/C -- is variational, unlike the fixed-C
 ## known-clusters models), and previously had no test coverage at all.
 set.seed(42)
-ex   <- generate_normal_block_data(n = 40, p = 8, d = 1, q = 3)
+ex   <- generate_normal_block_var_data(n = 40, p = 8, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 
 test_that("split() increases q by one and keeps every parameter conformable", {
-  model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   split_model <- model$split(1)
@@ -32,9 +32,9 @@ test_that("split() does not error or scramble rows when p does not divide n even
   ## where S is also n x q; see test-zi-weighted-fit.R-adjacent coverage
   ## below for that variant).
   set.seed(43)
-  ex_uneven   <- generate_normal_block_data(n = 61, p = 17, d = 1, q = 3)
+  ex_uneven   <- generate_normal_block_var_data(n = 61, p = 17, d = 1, q = 3)
   data_uneven <- NormalBlockData$new(ex_uneven$Y, ex_uneven$X)
-  model <- NormalBlockUnknownClusters$new(data_uneven, 2, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data_uneven, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   expect_no_error(split_model <- model$split(1))
@@ -45,10 +45,10 @@ test_that("split() does not error or scramble rows when p does not divide n even
 
 test_that("split()/candidates_split()/refine() do not error on a zero-inflated model, where S is n x q rather than length q", {
   set.seed(44)
-  exzi   <- generate_normal_block_data(n = 60, p = 24, d = 1, q = 4, kappa = rep(0.3, 24))
+  exzi   <- generate_normal_block_var_data(n = 60, p = 24, d = 1, q = 4, kappa = rep(0.3, 24))
   datazi <- NormalBlockData$new(exzi$Y, exzi$X, X0 = matrix(1, nrow(exzi$Y), 1))
 
-  model <- ZINormalBlockUnknownClusters$new(datazi, 2, control = NB_control(verbose = FALSE))
+  model <- ZINormalBlockVarUnknownClusters$new(datazi, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   expect_no_error(split_model <- model$split(1))
@@ -58,13 +58,13 @@ test_that("split()/candidates_split()/refine() do not error on a zero-inflated m
 
   expect_no_error(model$candidates_split())
 
-  coll <- NormalBlockCollectionClusters$new(datazi, 2:6, zero_inflation = TRUE, control = NB_control(verbose = FALSE))
+  coll <- NormalBlockVarCollectionClusters$new(datazi, 2:6, zero_inflation = TRUE, control = NB_control(verbose = FALSE))
   coll$optimize(control = list(niter = 50, threshold = 1e-4, verbose = FALSE))
   expect_no_error(coll$refine())
 })
 
 test_that("merge() decreases q by one and keeps every parameter conformable", {
-  model <- NormalBlockUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   merged_model <- model$merge(c(1, 2))
@@ -77,7 +77,7 @@ test_that("merge() decreases q by one and keeps every parameter conformable", {
 })
 
 test_that("merge() from q = 2 down to q = 1 does not error (R's drop = TRUE default would collapse the relevant matrices to vectors/a scalar)", {
-  model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   merged_model <- model$merge(c(1, 2))
@@ -91,7 +91,7 @@ test_that("merge() from q = 2 down to q = 1 does not error (R's drop = TRUE defa
 })
 
 test_that("split() then merge() round-trips back to the original q", {
-  model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   back <- model$split(1)$merge(c(1, model$q + 1))
@@ -99,7 +99,7 @@ test_that("split() then merge() round-trips back to the original q", {
 })
 
 test_that("split()/merge() mark the result as warm-started, so EM_initialize() reuses their Omegaq/M/S/alpha instead of a fresh heuristic estimate", {
-  model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   split_model <- model$split(1)
@@ -111,7 +111,7 @@ test_that("split()/merge() mark the result as warm-started, so EM_initialize() r
   expect_identical(init$M, priv$M)
   expect_identical(init$S, priv$S)
 
-  model3 <- NormalBlockUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
+  model3 <- NormalBlockVarUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
   model3$optimize(control = list(niter = 5, threshold = -1))
   merged_model <- model3$merge(c(1, 2))
   priv2 <- merged_model$.__enclos_env__$private
@@ -122,7 +122,7 @@ test_that("split()/merge() mark the result as warm-started, so EM_initialize() r
 })
 
 test_that("split(in_place = TRUE) mutates self instead of returning a clone", {
-  model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   out <- model$split(1, in_place = TRUE)
@@ -131,7 +131,7 @@ test_that("split(in_place = TRUE) mutates self instead of returning a clone", {
 })
 
 test_that("candidates_split() returns optimized models with one extra cluster each", {
-  model <- NormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   candidates <- model$candidates_split()
@@ -143,7 +143,7 @@ test_that("candidates_split() returns optimized models with one extra cluster ea
 })
 
 test_that("candidates_merge() returns optimized models with one fewer cluster each", {
-  model <- NormalBlockUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
 
   candidates <- model$candidates_merge()
@@ -155,7 +155,7 @@ test_that("candidates_merge() returns optimized models with one fewer cluster ea
 })
 
 test_that("candidates_merge() requires at least two clusters", {
-  model <- NormalBlockUnknownClusters$new(data, 1, control = NB_control(verbose = FALSE))
+  model <- NormalBlockVarUnknownClusters$new(data, 1, control = NB_control(verbose = FALSE))
   model$optimize(control = list(niter = 5, threshold = -1))
   expect_error(model$candidates_merge(), "at least two clusters")
 })

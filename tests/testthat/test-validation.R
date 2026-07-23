@@ -5,7 +5,7 @@
 ## of them were previously broken (a `stopifnot(...) |> try()` that silently
 ## swallowed the error, and a dead `!q` condition) and went unnoticed.
 set.seed(7)
-ex <- generate_normal_block_data(n = 40, p = 8, d = 1, q = 2)
+ex <- generate_normal_block_var_data(n = 40, p = 8, d = 1, q = 2)
 
 test_that("NormalBlockData validates its inputs", {
   expect_error(NormalBlockData$new(as.data.frame(ex$Y), ex$X), "must be matrices")
@@ -13,37 +13,37 @@ test_that("NormalBlockData validates its inputs", {
   expect_error(NormalBlockData$new(ex$Y, ex$X, formula = "X1 + X2"), "should start with")
 })
 
-test_that("NormalBlockKnownClusters validates the clustering matrix C", {
+test_that("NormalBlockVarKnownClusters validates the clustering matrix C", {
   data <- NormalBlockData$new(ex$Y, ex$X)
-  expect_error(NormalBlockKnownClusters$new(data, C = as.data.frame(ex$parameters$C)), "must be a matrix")
+  expect_error(NormalBlockVarKnownClusters$new(data, C = as.data.frame(ex$parameters$C)), "must be a matrix")
   C_empty <- ex$parameters$C
   C_empty[, 2] <- 0
-  expect_error(NormalBlockKnownClusters$new(data, C = C_empty), "empty clusters")
+  expect_error(NormalBlockVarKnownClusters$new(data, C = C_empty), "empty clusters")
 })
 
 test_that("clustering_init proposals are validated for unknown-clusters models", {
   data <- NormalBlockData$new(ex$Y, ex$X)
   expect_error(
-    NormalBlockUnknownClusters$new(data, 2, control = NB_control(clustering_init = rep(1, 3))),
+    NormalBlockVarUnknownClusters$new(data, 2, control = NB_control(clustering_init = rep(1, 3))),
     "match the number of Y's columns"
   )
   expect_error(
-    NormalBlockUnknownClusters$new(data, 3, control = NB_control(clustering_init = rep(1:2, 4))),
+    NormalBlockVarUnknownClusters$new(data, 3, control = NB_control(clustering_init = rep(1:2, 4))),
     "number of clusters .* must be equal to q"
   )
 })
 
-test_that("NormalBlockCollectionClusters validates the list of candidate block counts", {
+test_that("NormalBlockVarCollectionClusters validates the list of candidate block counts", {
   data <- NormalBlockData$new(ex$Y, ex$X)
-  expect_error(NormalBlockCollectionClusters$new(data, c(2, 2, 3)), "only be present once")
-  expect_error(NormalBlockCollectionClusters$new(data, c(2, 3, 100)), "more blocks than there are entities")
+  expect_error(NormalBlockVarCollectionClusters$new(data, c(2, 2, 3)), "only be present once")
+  expect_error(NormalBlockVarCollectionClusters$new(data, c(2, 3, 100)), "more blocks than there are entities")
 })
 
-test_that("NormalBlockCollectionSparsity validates blocks and sparsity_penalties", {
+test_that("NormalBlockVarCollectionSparsity validates blocks and sparsity_penalties", {
   data <- NormalBlockData$new(ex$Y, ex$X)
-  expect_error(NormalBlockCollectionSparsity$new(data, blocks = c(2, 3)), "clustering matrix or a fixed number")
+  expect_error(NormalBlockVarCollectionSparsity$new(data, blocks = c(2, 3)), "clustering matrix or a fixed number")
   expect_error(
-    NormalBlockCollectionSparsity$new(data, blocks = 2, control = NB_control(sparsity_penalties = c(-1, 0.1))),
+    NormalBlockVarCollectionSparsity$new(data, blocks = 2, control = NB_control(sparsity_penalties = c(-1, 0.1))),
     "strictly positive"
   )
 })
