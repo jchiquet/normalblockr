@@ -19,8 +19,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
-    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
-    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
+    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block-Var model - First steps</a></li>
+    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block-Var models: a worked example with fish biomass data</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -102,7 +102,7 @@ unknown blocks: a heuristic name ("ward2", the default, "kmeans", "sbm" or
 "spectral"), an actual clustering (a vector of labels or a p x q indicator
 matrix, or a list of either per q for a collection), or "best_of_inits" to
 try several heuristics per model and keep the best-ELBO fit (see
-[NormalBlockBase]'s `best_of_inits()`; not supported with `sparsity =
+[NormalBlockVarBase]'s `best_of_inits()`; not supported with `sparsity =
 TRUE`). See `inst/methods_initialization_and_refine.md` for the
 heuristics' rationale, why no single one dominates, and how this interacts
 with `refine` (below).</p></dd>
@@ -124,7 +124,7 @@ are all `NA` on the resulting model.</p></dd>
 
 
 <dt id="arg-refine">refine<a class="anchor" aria-label="anchor" href="#arg-refine"></a></dt>
-<dd><p>for [NormalBlockCollectionClusters] only: whether
+<dd><p>for [NormalBlockVarCollectionClusters] only: whether
 `optimize()` should automatically call `refine()` afterwards. Default
 `FALSE` since it adds real cost; call `collection$refine()` directly at
 any point afterwards for the same effect without setting this.</p></dd>

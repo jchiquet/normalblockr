@@ -24,7 +24,5 @@ Useful links:
 
 Authors:
 
-- Jeanne Tous <jeanne.tous@inrae.fr>
-
 - Julien Chiquet <julien.chiquet@inrae.fr>
   ([ORCID](https://orcid.org/0000-0002-3629-3429))

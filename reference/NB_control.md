@@ -63,7 +63,7 @@ NB_control(
   an actual clustering (a vector of labels or a p x q indicator matrix,
   or a list of either per q for a collection), or "best_of_inits" to try
   several heuristics per model and keep the best-ELBO fit (see
-  \[NormalBlockBase\]'s \`best_of_inits()\`; not supported with
+  \[NormalBlockVarBase\]'s \`best_of_inits()\`; not supported with
   \`sparsity = TRUE\`). See
   \`inst/methods_initialization_and_refine.md\` for the heuristics'
   rationale, why no single one dominates, and how this interacts with
@@ -87,7 +87,7 @@ NB_control(
 
 - refine:
 
-  for \[NormalBlockCollectionClusters\] only: whether \`optimize()\`
+  for \[NormalBlockVarCollectionClusters\] only: whether \`optimize()\`
   should automatically call \`refine()\` afterwards. Default \`FALSE\`
   since it adds real cost; call \`collection\$refine()\` directly at any
   point afterwards for the same effect without setting this.

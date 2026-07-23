@@ -2,12 +2,12 @@
 
 ## Preliminaries
 
-This vignette walks through a real-data analysis with the Normal-Block
-model, using the `brca_rppa` dataset shipped with the package (see
-[`?brca_rppa`](../reference/brca_rppa.md)): reverse-phase protein array
-measurements of 163 proteins across 346 breast cancer tumor samples from
-The Cancer Genome Atlas, together with each sample’s PAM50 molecular
-subtype. See the `normal-block` vignette
+This vignette walks through a real-data analysis with the
+Normal-Block-Var model, using the `brca_rppa` dataset shipped with the
+package (see [`?brca_rppa`](../reference/brca_rppa.md)): reverse-phase
+protein array measurements of 163 proteins across 346 breast cancer
+tumor samples from The Cancer Genome Atlas, together with each sample’s
+PAM50 molecular subtype. See the `normal-block` vignette
 ([`vignette("normal-block")`](../articles/normal-block.md)) for a
 general introduction to the package on simulated data; this one focuses
 on a single real dataset, illustrated first with a known clustering of
@@ -31,10 +31,10 @@ library(normalblockr)
 
 ## Mathematical background
 
-The Normal-Block model is a Gaussian latent-variable model for a table
-of observations $`Y \in \mathbb{R}^{n \times p}`$ (here, $`n`$ tumor
-samples and $`p`$ proteins), possibly after correcting for covariates
-$`X \in \mathbb{R}^{n \times d}`$ (here, the PAM50 subtype).
+The Normal-Block-Var model is a Gaussian latent-variable model for a
+table of observations $`Y \in \mathbb{R}^{n \times p}`$ (here, $`n`$
+tumor samples and $`p`$ proteins), possibly after correcting for
+covariates $`X \in \mathbb{R}^{n \times d}`$ (here, the PAM50 subtype).
 Conditionally on $`q`$ latent factors $`W_i \in \mathbb{R}^q`$, one per
 cluster of variables:
 
@@ -95,10 +95,10 @@ data_subtype <- NormalBlockData$new(Y, X_subtype)
 
 ## A known clustering of the proteins
 
-Before letting the Normal-Block model infer its own grouping of the
+Before letting the Normal-Block-Var model infer its own grouping of the
 proteins, we build a simple, fully data-driven baseline: a hierarchical
 (Ward) clustering of the proteins from their expression profiles alone,
-with no reference to the Normal-Block model at all. By default
+with no reference to the Normal-Block-Var model at all. By default
 `normalblockr` scales the data, so this a priori clustering is computed
 on the same (column-)scaled matrix for consistency. Six clusters is an
 arbitrary but visually natural cut of the dendrogram.

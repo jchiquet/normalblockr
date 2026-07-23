@@ -1,4 +1,4 @@
-# Analyzing multivariate Gaussian data with the Normal-Block model - First steps
+# Analyzing multivariate Gaussian data with the Normal-Block-Var model - First steps
 
 ## Preliminaries
 
@@ -8,7 +8,7 @@ methods accompanying its R6 classes.
 
 From a statistical point of view, the
 [`normal_block()`](../reference/normal_block.md) function fits a
-multivariate Normal-Block model (a Gaussian graphical model with a
+multivariate Normal-Block-Var model (a Gaussian graphical model with a
 latent clustering structure) to a table of observations, possibly after
 correcting for the effect of covariates. Depending on the arguments
 given, the function uses a clustering supplied by the user or infers
@@ -41,8 +41,7 @@ Fix the seed to make the results reproducible.
 set.seed(1)
 ```
 
-Simulate data with
-[`generate_normal_block_data()`](../reference/generate_normal_block_data.md).
+Simulate data with `generate_normal_block_data()`.
 
 ### Fix simulation parameters
 
@@ -65,15 +64,15 @@ range_D = c(0.5, 1.5) # Min and max values for the individual entities variances
 
 ### Simulation 1 (no zero-inflation)
 
-[`generate_normal_block_data()`](../reference/generate_normal_block_data.md)
-generates data under the Normal-Block model. It returns a list
+[`generate_normal_block_var_data()`](../reference/generate_normal_block_var_data.md)
+generates data under the Normal-Block-Var model. It returns a list
 containing the simulated covariates $`X`$ and observations $`Y`$, and
 the simulation parameters (including the clustering $`C`$).
 
 ``` r
 
-my_nb_data <- generate_normal_block_data(n, p, d, q, kappa, omega_structure, u_v,
-                                        SNR, alpha, range_X, range_D)
+my_nb_data <- generate_normal_block_var_data(n, p, d, q, kappa, omega_structure, u_v,
+                                            SNR, alpha, range_X, range_D)
 ```
 
 ``` r
@@ -94,10 +93,10 @@ between 0 and 1.
 
 kappa_zi <- rnorm(p, mean = 0.7, sd = 0.05)
 kappa_zi <- unlist(lapply(kappa_zi, f <- function(x) return(max(0, min(x, 0.9)))))
-my_nb_data_zi <- generate_normal_block_data(n = n, p = p, d = d, q = 5, kappa = kappa_zi,
-                                            omega_structure = omega_structure, u_v = u_v,
-                                            SNR = SNR, alpha = alpha,
-                                            range_X = range_X, range_D = range_D)
+my_nb_data_zi <- generate_normal_block_var_data(n = n, p = p, d = d, q = 5, kappa = kappa_zi,
+                                                omega_structure = omega_structure, u_v = u_v,
+                                                SNR = SNR, alpha = alpha,
+                                                range_X = range_X, range_D = range_D)
 ```
 
 For a better visualization of the zero-inflated data, we set-up the 0 to
@@ -118,7 +117,7 @@ pheatmap::pheatmap(my_nb_data_zi$Y,
 
 ![](normal-block_files/figure-html/simulation2-visualization-1.png)
 
-## Prepare the data for a Normal-Block analysis
+## Prepare the data for a Normal-Block-Var analysis
 
 A specific data object of class `NormalBlockData` needs to be created to
 analyse the data with `normalblockr`.
@@ -141,9 +140,9 @@ colnames(my_data$X) <- c("X1", "X2")
 my_data_alt    <- NormalBlockData$new(my_data$Y, my_data$X, formula = ~ 0 + X1)
 ```
 
-## Run a Normal-Block analysis
+## Run a Normal-Block-Var analysis
 
-All Normal-Block analyses are run with the
+All Normal-Block-Var analyses are run with the
 [`normal_block()`](../reference/normal_block.md) function, called with
 different arguments depending on whether the clustering (or the number
 of clusters) is known, and on the requested level of sparsity, among
@@ -252,23 +251,23 @@ aricode::ARI(my_NB$clustering, apply(my_nb_data$parameters$C, 1, which.max))
 
 When the number of clusters is unknown,
 [`normal_block()`](../reference/normal_block.md) can be given a range of
-candidate values instead, returning a collection of Normal-Block models,
-one per number of clusters.
+candidate values instead, returning a collection of Normal-Block-Var
+models, one per number of clusters.
 
 ``` r
 
 my_NB_unknown <- normal_block(data = my_data,
-                      blocks = 2:5)
+                              blocks = 2:5)
 #> Fitting a diagonal normal-block model with unknown q 
 #>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5           
 #> DONE
 ```
 
-`my_NB_unknown` is a collection of Normal-Block models. A specific one
-can be selected either by its number of clusters or as the best model
-for a given criterion (BIC, deviance, EBIC or ICL). The value of each
-criterion, for every model in the collection, can be visualized with
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html).
+`my_NB_unknown` is a collection of Normal-Block-Var models. A specific
+one can be selected either by its number of clusters or as the best
+model for a given criterion (BIC, deviance, EBIC or ICL). The value of
+each criterion, for every model in the collection, can be visualized
+with [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
 ``` r
 
@@ -379,8 +378,8 @@ my_NB_sparse_unknown <-  normal_block(data = my_data,
 #> DONE
 ```
 
-The result is a collection of Normal-Block models with different numbers
-of clusters and different penalties.
+The result is a collection of Normal-Block-Var models with different
+numbers of clusters and different penalties.
 
 ``` r
 

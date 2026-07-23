@@ -1,13 +1,21 @@
 # R6 class for selecting the number of clusters (q) by forward/backward split-and-merge exploration, comparing models with the ICL
 
+R6 class for selecting the number of clusters (q) by forward/backward
+split-and-merge exploration, comparing models with the ICL
+
+R6 class for selecting the number of clusters (q) by forward/backward
+split-and-merge exploration, comparing models with the ICL
+
+## Details
+
 Kept internal/unexported for reference: empirically (see
-\[NormalBlockCollectionClusters\]'s \`refine()\` documentation) chaining
-every q from a single starting point this way is no longer recommended
-over \[NormalBlockCollectionClusters\]'s independent per-q cold starts
-followed by \`refine()\` – the latter matches or beats this class's
-quality at a fraction of the cost on every real dataset tested, and has
-no equivalent to this class's failure mode (an early bad split/merge
-propagating to every larger q it explores from there).
+\[NormalBlockVarCollectionClusters\]'s \`refine()\` documentation)
+chaining every q from a single starting point this way is no longer
+recommended over \[NormalBlockVarCollectionClusters\]'s independent
+per-q cold starts followed by \`refine()\` – the latter matches or beats
+this class's quality at a fraction of the cost on every real dataset
+tested, and has no equivalent to this class's failure mode (an early bad
+split/merge propagating to every larger q it explores from there).
 
 ## Public fields
 
@@ -38,7 +46,7 @@ propagating to every larger q it explores from there).
 
 ### Public methods
 
-- [`SelectionNClusters$new()`](#method-SelectionNClusters-initialize)
+- [`SelectionNClusters$new()`](#method-SelectionNClusters-new)
 
 - [`SelectionNClusters$fit()`](#method-SelectionNClusters-fit)
 
@@ -54,7 +62,7 @@ propagating to every larger q it explores from there).
 
 ------------------------------------------------------------------------
 
-### `SelectionNClusters$new()`
+### Method `new()`
 
 Explores and selects the optimal number of classes
 
@@ -97,7 +105,7 @@ The best model in the ICL sense
 
 ------------------------------------------------------------------------
 
-### `SelectionNClusters$fit()`
+### Method `fit()`
 
 perform model selection with forward/backward exploration with split and
 merge strategy
@@ -108,7 +116,7 @@ merge strategy
 
 ------------------------------------------------------------------------
 
-### `SelectionNClusters$train_best_candidates()`
+### Method `train_best_candidates()`
 
 perform model selection with forward/backward exploration with split and
 merge strategy
@@ -133,7 +141,7 @@ merge strategy
 
 ------------------------------------------------------------------------
 
-### `SelectionNClusters$explore_forward()`
+### Method `explore_forward()`
 
 perform forward exploration with a split strategy
 
@@ -143,7 +151,7 @@ perform forward exploration with a split strategy
 
 ------------------------------------------------------------------------
 
-### `SelectionNClusters$explore_backward()`
+### Method `explore_backward()`
 
 perform backward exploration with a merge strategy
 
@@ -153,7 +161,7 @@ perform backward exploration with a merge strategy
 
 ------------------------------------------------------------------------
 
-### `SelectionNClusters$plot()`
+### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
 
 Display the ICL for all the best models explored per number of cluster,
 and the winner
@@ -168,7 +176,7 @@ a \[\`ggplot2::ggplot\`\] graph
 
 ------------------------------------------------------------------------
 
-### `SelectionNClusters$clone()`
+### Method `clone()`
 
 The objects of this class are cloneable with this method.
 

@@ -34,8 +34,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
-    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
-    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
+    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block-Var model - First steps</a></li>
+    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block-Var models: a worked example with fish biomass data</a></li>
   </ul>
 </li>
       </ul>
@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Julien Chiquet
 &amp; Jeanne Tous</h4>
             
-            <h4 data-toc-skip class="date">2026-07-21</h4>
+            <h4 data-toc-skip class="date">2026-07-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jeannetous/normalblockr/blob/master/vignettes/breast-cancer-proteomics.Rmd" class="external-link"><code>vignettes/breast-cancer-proteomics.Rmd</code></a></small>
       <div class="d-none name"><code>breast-cancer-proteomics.Rmd</code></div>
@@ -73,7 +73,7 @@
 <h2 id="preliminaries">Preliminaries<a class="anchor" aria-label="anchor" href="#preliminaries"></a>
 </h2>
 <p>This vignette walks through a real-data analysis with the
-Normal-Block model, using the <code>brca_rppa</code> dataset shipped
+Normal-Block-Var model, using the <code>brca_rppa</code> dataset shipped
 with the package (see <code><a href="../reference/brca_rppa.html">?brca_rppa</a></code>): reverse-phase protein
 array measurements of 163 proteins across 346 breast cancer tumor
 samples from The Cancer Genome Atlas, together with each sample’s PAM50
@@ -100,7 +100,7 @@ the package sources for the full analysis, enrichment included.</p>
 <div class="section level2">
 <h2 id="mathematical-background">Mathematical background<a class="anchor" aria-label="anchor" href="#mathematical-background"></a>
 </h2>
-<p>The Normal-Block model is a Gaussian latent-variable model for a
+<p>The Normal-Block-Var model is a Gaussian latent-variable model for a
 table of observations
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>∈</mo><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><mi>p</mi></mrow></msup></mrow><annotation encoding="application/x-tex">Y \in \mathbb{R}^{n \times p}</annotation></semantics></math>
 (here,
@@ -174,13 +174,14 @@ expression level before looking for structure in what’s left.</p>
 <div class="section level2">
 <h2 id="a-known-clustering-of-the-proteins">A known clustering of the proteins<a class="anchor" aria-label="anchor" href="#a-known-clustering-of-the-proteins"></a>
 </h2>
-<p>Before letting the Normal-Block model infer its own grouping of the
-proteins, we build a simple, fully data-driven baseline: a hierarchical
-(Ward) clustering of the proteins from their expression profiles alone,
-with no reference to the Normal-Block model at all. By default
-<code>normalblockr</code> scales the data, so this a priori clustering
-is computed on the same (column-)scaled matrix for consistency. Six
-clusters is an arbitrary but visually natural cut of the dendrogram.</p>
+<p>Before letting the Normal-Block-Var model infer its own grouping of
+the proteins, we build a simple, fully data-driven baseline: a
+hierarchical (Ward) clustering of the proteins from their expression
+profiles alone, with no reference to the Normal-Block-Var model at all.
+By default <code>normalblockr</code> scales the data, so this a priori
+clustering is computed on the same (column-)scaled matrix for
+consistency. Six clusters is an arbitrary but visually natural cut of
+the dendrogram.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hc_expr</span> <span class="op">&lt;-</span> <span class="va">brca_rppa</span><span class="op">$</span><span class="va">expr</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/dist.html" class="external-link">dist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">hclust</a></span><span class="op">(</span><span class="st">"ward.D2"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hc_expr</span>, labels <span class="op">=</span> <span class="cn">FALSE</span>, hang <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>

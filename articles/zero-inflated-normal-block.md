@@ -1,15 +1,16 @@
-# Zero-inflated Normal-Block models: a worked example with fish biomass data
+# Zero-inflated Normal-Block-Var models: a worked example with fish biomass data
 
 ## Preliminaries
 
 This vignette walks through a real-data analysis with the zero-inflated
-extension of the Normal-Block model, using the `onema` dataset shipped
-with the package (see [`?onema`](../reference/onema.md)): fish biomass
-per species, summed per sampling station, together with environmental
-covariates. See the `normal-block` vignette
+extension of the Normal-Block-Var model, using the `onema` dataset
+shipped with the package (see [`?onema`](../reference/onema.md)): fish
+biomass per species, summed per sampling station, together with
+environmental covariates. See the `normal-block` vignette
 ([`vignette("normal-block")`](../articles/normal-block.md)) for a
-general introduction to the Normal-Block model on simulated data; this
-one focuses on what changes when the observations are zero-inflated.
+general introduction to the Normal-Block-Var model on simulated data;
+this one focuses on what changes when the observations are
+zero-inflated.
 
 Many entries of `onema$biomass` are exactly zero: a species simply
 absent from a given station, not a small positive biomass rounded down.
@@ -17,17 +18,17 @@ A plain (log-)Normal model cannot represent an excess of exact zeros
 beyond what its own variance would produce, which biases both the
 variable-level noise estimates and the inferred clustering. The next
 section spells out precisely how the zero-inflation extension addresses
-this; see Tous and Chiquet (2026) for the Normal-Block model itself, and
-`inst/normal_block_models.qmd` (the package’s reference card) for the
-full estimation details.
+this; see Tous and Chiquet (2026) for the Normal-Block-Var model itself,
+and `inst/normal_block_models.qmd` (the package’s reference card) for
+the full estimation details.
 
 ## Mathematical background
 
-### The Normal-Block model
+### The Normal-Block-Var model
 
-The Normal-Block model is a Gaussian latent-variable model for a table
-of observations $`Y \in \mathbb{R}^{n \times p}`$ (here, $`n`$ stations
-and $`p`$ species), possibly after correcting for covariates
+The Normal-Block-Var model is a Gaussian latent-variable model for a
+table of observations $`Y \in \mathbb{R}^{n \times p}`$ (here, $`n`$
+stations and $`p`$ species), possibly after correcting for covariates
 $`X \in \mathbb{R}^{n \times d}`$ (here, water temperature).
 Conditionally on $`q`$ latent factors $`W_i \in \mathbb{R}^q`$, one per
 cluster of variables:
@@ -57,7 +58,7 @@ clusters*, not between individual species.
 
 The zero-inflation extension adds an excess-of-zero layer on top of this
 model. Each observation $`Y_{ij}`$ is, independently of $`W_i`$, either
-a structural zero or a draw from the Normal-Block model above:
+a structural zero or a draw from the Normal-Block-Var model above:
 
 ``` math
 \begin{aligned}
@@ -67,8 +68,8 @@ a structural zero or a draw from the Normal-Block model above:
 ```
 
 so that $`\mathbb P(Y_{ij} = 0) \geq \kappa_{ij}`$: an excess of zeros
-beyond what the Normal-Block layer alone would produce, attributed to
-$`Z_{ij} = 1`$ (a structural zero) rather than to the (log-)Normal
+beyond what the Normal-Block-Var layer alone would produce, attributed
+to $`Z_{ij} = 1`$ (a structural zero) rather than to the (log-)Normal
 noise.
 
 ### The zero-inflation probabilities $`\kappa`$
@@ -150,7 +151,8 @@ A plain Normal model would have to stretch its variance to accommodate
 the zero spike as part of the same single Gaussian shape, degrading the
 fit of the (more informative) positive part. The zero-inflation layer
 instead lets the spike be absorbed by $`\kappa_j`$, freeing the
-Normal-Block model to focus on describing the positive biomasses only.
+Normal-Block-Var model to focus on describing the positive biomasses
+only.
 
 ## Preparing the data
 
@@ -173,7 +175,7 @@ independently of the covariates (see
 [`?NormalBlockData`](../reference/NormalBlockData.md) to instead let
 $`\kappa`$ depend on covariates through `X0`).
 
-## Fitting a zero-inflated Normal-Block model
+## Fitting a zero-inflated Normal-Block-Var model
 
 Everything else works exactly as in the non-zero-inflated case (see the
 general vignette): the only difference is `zero_inflation = TRUE`. The
@@ -205,7 +207,7 @@ can occasionally settle into a milder local optimum than a neighboring
 number of clusters’ solution would. `refine()` tries a short split/merge
 trial from each model’s already-fitted neighbors and keeps it only if it
 strictly improves – see
-[`?NormalBlockCollectionClusters`](../reference/NormalBlockCollectionClusters.md)
+[`?NormalBlockVarCollectionClusters`](../reference/NormalBlockVarCollectionClusters.md)
 for the full rationale. It is not run by default (it adds real cost), so
 it is called explicitly here:
 
