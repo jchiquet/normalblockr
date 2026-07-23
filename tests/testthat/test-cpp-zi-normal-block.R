@@ -12,9 +12,9 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ###############################################################################
 ###############################################################################
 ## These tests check that calling the Rcpp/RcppArmadillo zero-inflated (V)EM
-## core directly (ZINormalBlockKnownClusters_fit / ZINormalBlockUnknownClusters_fit,
+## core directly (ZINormalBlockVarKnownClusters_fit / ZINormalBlockVarUnknownClusters_fit,
 ## src/exports.cpp) reproduces *closely* (up to numerical precision) what the
-## R6 wrapper (ZINormalBlockKnownClusters / ZINormalBlockUnknownClusters) gets by calling the very
+## R6 wrapper (ZINormalBlockVarKnownClusters / ZINormalBlockVarUnknownClusters) gets by calling the very
 ## same functions through EM_optimize(), starting from the same initial
 ## parameters, both unpenalized (sparsity = 0) and penalized (sparsity > 0,
 ## graphical lasso via glassoFast). The B-update (and, for unknown clusters,
@@ -26,19 +26,19 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ## `.__enclos_env__` so that both implementations start from the very same
 ## point.
 
-test_that("ZINormalBlockKnownClusters_fit matches ZINormalBlockKnownClusters (diagonal/spherical, unpenalized/sparse)", {
+test_that("ZINormalBlockVarKnownClusters_fit matches ZINormalBlockVarKnownClusters (diagonal/spherical, unpenalized/sparse)", {
   data <- NormalBlockData$new(Y, X)
 
   for (nc in c("diagonal", "spherical")) {
     for (sparsity in c(0, 0.05)) {
-      model <- ZINormalBlockKnownClusters$new(data, C, sparsity = sparsity,
+      model <- ZINormalBlockVarKnownClusters$new(data, C, sparsity = sparsity,
                                       control = NB_control(noise_covariance = nc, verbose = FALSE))
       init <- model$.__enclos_env__$private$EM_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       zi_cond_mean <- model$.__enclos_env__$private$ZI_cond_mean
 
-      res <- ZINormalBlockKnownClusters_fit(Y = data$Y, X = data$X,
+      res <- ZINormalBlockVarKnownClusters_fit(Y = data$Y, X = data$X,
                                     zeros_bar = data$zeros_bar, zi_cond_mean = zi_cond_mean, C = C,
                                     B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
                                     sparsity = sparsity, sparsity_weights = model$sparsity_weights,
@@ -57,19 +57,19 @@ test_that("ZINormalBlockKnownClusters_fit matches ZINormalBlockKnownClusters (di
   }
 })
 
-test_that("ZINormalBlockUnknownClusters_fit matches ZINormalBlockUnknownClusters (diagonal/spherical, unpenalized/sparse)", {
+test_that("ZINormalBlockVarUnknownClusters_fit matches ZINormalBlockVarUnknownClusters (diagonal/spherical, unpenalized/sparse)", {
   data <- NormalBlockData$new(Y, X)
 
   for (nc in c("diagonal", "spherical")) {
     for (sparsity in c(0, 0.05)) {
-      model <- ZINormalBlockUnknownClusters$new(data, q, sparsity = sparsity,
+      model <- ZINormalBlockVarUnknownClusters$new(data, q, sparsity = sparsity,
                                  control = NB_control(noise_covariance = nc, verbose = FALSE))
       init <- model$.__enclos_env__$private$EM_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       zi_cond_mean <- model$.__enclos_env__$private$ZI_cond_mean
 
-      res <- ZINormalBlockUnknownClusters_fit(Y = data$Y, X = data$X,
+      res <- ZINormalBlockVarUnknownClusters_fit(Y = data$Y, X = data$X,
                                       zeros_bar = data$zeros_bar, zi_cond_mean = zi_cond_mean,
                                       B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
                                       C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,

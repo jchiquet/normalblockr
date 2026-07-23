@@ -9,7 +9,7 @@ output:
 bibliography: references.bib
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Normal-Block models: a worked example with breast cancer proteomics data}
+  %\VignetteIndexEntry{Normal-Block-Var models: a worked example with breast cancer proteomics data}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 # Preliminaries
 
-This vignette walks through a real-data analysis with the Normal-Block model, using the `brca_rppa` dataset shipped with the package (see `?brca_rppa`): reverse-phase protein array measurements of 163 proteins across 346 breast cancer tumor samples from The Cancer Genome Atlas, together with each sample's PAM50 molecular subtype. See the `normal-block` vignette (`vignette("normal-block")`) for a general introduction to the package on simulated data; this one focuses on a single real dataset, illustrated first with a known clustering of the proteins, then with the clustering left for the model to infer, and finally with the post-hoc `refine()` step.
+This vignette walks through a real-data analysis with the Normal-Block-Var model, using the `brca_rppa` dataset shipped with the package (see `?brca_rppa`): reverse-phase protein array measurements of 163 proteins across 346 breast cancer tumor samples from The Cancer Genome Atlas, together with each sample's PAM50 molecular subtype. See the `normal-block` vignette (`vignette("normal-block")`) for a general introduction to the package on simulated data; this one focuses on a single real dataset, illustrated first with a known clustering of the proteins, then with the clustering left for the model to infer, and finally with the post-hoc `refine()` step.
 
 This dataset is also the running example of @tous2026, which includes a biological-enrichment analysis of the inferred clusters (`enrichKEGG`/`compareCluster`, via `clusterProfiler`) -- not reproduced here, since it pulls in several heavy Bioconductor dependencies and network queries; see `inst/CSDA_analyses/analysis_breast_cancer_proteomics.qmd` in the package sources for the full analysis, enrichment included.
 
@@ -34,7 +34,7 @@ library(normalblockr)
 
 # Mathematical background
 
-The Normal-Block model is a Gaussian latent-variable model for a table of observations $Y \in \mathbb{R}^{n \times p}$ (here, $n$ tumor samples and $p$ proteins), possibly after correcting for covariates $X \in \mathbb{R}^{n \times d}$ (here, the PAM50 subtype). Conditionally on $q$ latent factors $W_i \in \mathbb{R}^q$, one per cluster of variables:
+The Normal-Block-Var model is a Gaussian latent-variable model for a table of observations $Y \in \mathbb{R}^{n \times p}$ (here, $n$ tumor samples and $p$ proteins), possibly after correcting for covariates $X \in \mathbb{R}^{n \times d}$ (here, the PAM50 subtype). Conditionally on $q$ latent factors $W_i \in \mathbb{R}^q$, one per cluster of variables:
 
 $$\begin{aligned}
 \text{latent space:} \quad & W_i \sim \mathcal{N}(0, \Omega^{-1}) \\
@@ -63,7 +63,7 @@ data_subtype <- NormalBlockData$new(Y, X_subtype)
 
 # A known clustering of the proteins
 
-Before letting the Normal-Block model infer its own grouping of the proteins, we build a simple, fully data-driven baseline: a hierarchical (Ward) clustering of the proteins from their expression profiles alone, with no reference to the Normal-Block model at all. By default `normalblockr` scales the data, so this a priori clustering is computed on the same (column-)scaled matrix for consistency. Six clusters is an arbitrary but visually natural cut of the dendrogram.
+Before letting the Normal-Block-Var model infer its own grouping of the proteins, we build a simple, fully data-driven baseline: a hierarchical (Ward) clustering of the proteins from their expression profiles alone, with no reference to the Normal-Block-Var model at all. By default `normalblockr` scales the data, so this a priori clustering is computed on the same (column-)scaled matrix for consistency. Six clusters is an arbitrary but visually natural cut of the dendrogram.
 
 ```{r, hclust-based-group, fig.width=7, fig.height=5}
 hc_expr <- brca_rppa$expr |> scale() |> t() |> dist() |> hclust("ward.D2")

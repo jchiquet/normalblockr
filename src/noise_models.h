@@ -10,16 +10,16 @@
 //
 // This is the only place where the diagonal/spherical models differ: the
 // (V)EM criterion is written generically in terms of the vector dm1 in both
-// cases (see normal_block_known_clusters.h / normal_block_unknown_clusters.h).
+// cases (see normal_block_var_known_clusters.h / normal_block_var_unknown_clusters.h).
 
-// D diagonal, variable-specific variance: dm1_j = 1 / ddiag_j (R/NormalBlockKnownClusters.R, "diagonal" branch)
+// D diagonal, variable-specific variance: dm1_j = 1 / ddiag_j (R/NormalBlockVarKnownClusters.R, "diagonal" branch)
 struct DiagonalNoise {
   static arma::vec update_dm1(const arma::vec& ddiag) {
     return 1.0 / ddiag;
   }
 };
 
-// D = xi * I_p, common variance across variables (R/NormalBlockKnownClusters.R, "spherical" branch)
+// D = xi * I_p, common variance across variables (R/NormalBlockVarKnownClusters.R, "spherical" branch)
 struct SphericalNoise {
   static arma::vec update_dm1(const arma::vec& ddiag) {
     double dm1_common = 1.0 / arma::mean(ddiag);

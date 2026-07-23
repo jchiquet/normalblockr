@@ -5,92 +5,94 @@
 \title{R6 class for a generic normal model}
 \description{
 R6 class for a generic normal model
+
+R6 class for a generic normal model
 }
 \section{Public fields}{
-  \if{html}{\out{<div class="r6-fields">}}
-  \describe{
-    \item{\code{Y}}{the matrix of responses (rescaled column-wise if `scale = TRUE`)}
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{Y}}{the matrix of responses (rescaled column-wise if `scale = TRUE`)}
 
-    \item{\code{Y_scale}}{the per-column standard deviation Y was divided by (all
+\item{\code{Y_scale}}{the per-column standard deviation Y was divided by (all
 1's if `scale = FALSE`)}
 
-    \item{\code{X}}{the matrix of covariates}
+\item{\code{X}}{the matrix of covariates}
 
-    \item{\code{X0}}{the matrix of zero-inflation covariates, if applicable}
+\item{\code{X0}}{the matrix of zero-inflation covariates, if applicable}
 
-    \item{\code{formula}}{describes the relationship between Y and X, and X0 if applicable, useful if not all of X's or X0's covariates should be used, should be formatted ~ X1 + X2... | Z1 + Z2... with the Normal formula before the | and the ZI formula after the |}
+\item{\code{formula}}{describes the relationship between Y and X, and X0 if applicable, useful if not all of X's or X0's covariates should be used, should be formatted ~ X1 + X2... | Z1 + Z2... with the Normal formula before the | and the ZI formula after the |}
 
-    \item{\code{n}}{sample size}
+\item{\code{n}}{sample size}
 
-    \item{\code{d}}{number of covariates}
+\item{\code{d}}{number of covariates}
 
-    \item{\code{d0}}{number of zero-inflation covariates, if applicable}
+\item{\code{d0}}{number of zero-inflation covariates, if applicable}
 
-    \item{\code{p}}{number of variables}
+\item{\code{p}}{number of variables}
 
-    \item{\code{XtXm1}}{inverse of XtX, useful for inference}
+\item{\code{XtXm1}}{inverse of XtX, useful for inference}
 
-    \item{\code{XtY}}{useful for inference}
+\item{\code{XtY}}{useful for inference}
 
-    \item{\code{npY}}{total number of non zeros in Y}
+\item{\code{npY}}{total number of non zeros in Y}
 
-    \item{\code{nY}}{total number of non zeros for each column/variable in Y}
+\item{\code{nY}}{total number of non zeros for each column/variable in Y}
 
-    \item{\code{zeros}}{where are the zero in Y}
+\item{\code{zeros}}{where are the zero in Y}
 
-    \item{\code{zeros_bar}}{where are the non-zeros in Y}
-  }
-  \if{html}{\out{</div>}}
+\item{\code{zeros_bar}}{where are the non-zeros in Y}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-  \itemize{
-    \item \href{#method-NormalBlockData-initialize}{\code{NormalBlockData$new()}}
-    \item \href{#method-NormalBlockData-clone}{\code{NormalBlockData$clone()}}
-  }
+\itemize{
+\item \href{#method-NormalBlockData-new}{\code{NormalBlockData$new()}}
+\item \href{#method-NormalBlockData-clone}{\code{NormalBlockData$clone()}}
+}
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockData-initialize"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockData-initialize}{}}}
-\subsection{\code{NormalBlockData$new()}}{
-  Create a new [`NormalBlockData`] object.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockData$new(Y, X, X0 = NULL, formula = NULL, scale = TRUE)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{Y}}{the matrix of responses (called Y in the model).}
-      \item{\code{X}}{design matrix (called X in the model).}
-      \item{\code{X0}}{zero-inflation design matrix, if applicable.}
-      \item{\code{formula}}{describes the relationship between Y and X, useful if not all of X's covariates should be used.}
-      \item{\code{scale}}{whether to rescale each column of Y by its own standard
-deviation (no centering). Default TRUE -- see the class-level
-documentation for the rationale and its limits.}
-    }
-    \if{html}{\out{</div>}}
-  }
+\if{html}{\out{<a id="method-NormalBlockData-new"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockData-new}{}}}
+\subsection{Method \code{new()}}{
+Create a new [`NormalBlockData`] object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{NormalBlockData$new(Y, X, X0 = NULL, formula = NULL, scale = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{Y}}{the matrix of responses (called Y in the model).}
+
+\item{\code{X}}{design matrix (called X in the model).}
+
+\item{\code{X0}}{zero-inflation design matrix, if applicable.}
+
+\item{\code{formula}}{describes the relationship between Y and X, useful if not all of X's covariates should be used.}
+
+\item{\code{scale}}{whether to rescale each column of Y by its own standard
+deviation (no centering). Default TRUE -- see the class-level
+documentation for the rationale and its limits.}
+}
+\if{html}{\out{</div>}}
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockData-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockData-clone}{}}}
-\subsection{\code{NormalBlockData$clone()}}{
-  The objects of this class are cloneable with this method.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockData$clone(deep = FALSE)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{deep}}{Whether to make a deep clone.}
-    }
-    \if{html}{\out{</div>}}
-  }
+\subsection{Method \code{clone()}}{
+The objects of this class are cloneable with this method.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{NormalBlockData$clone(deep = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{deep}}{Whether to make a deep clone.}
+}
+\if{html}{\out{</div>}}
+}
+}
 }

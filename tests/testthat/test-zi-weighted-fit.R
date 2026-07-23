@@ -20,6 +20,6 @@ test_that("zi_weighted_fit() never produces non-finite dm1/B, even for a variabl
 })
 
 test_that("a ZI model with such a variable optimizes without erroring", {
-  model <- ZINormalBlockUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model <- ZINormalBlockVarUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
   expect_no_error(model$optimize(control = NB_control(verbose = FALSE, niter = 5)))
 })

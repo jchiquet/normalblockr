@@ -6,7 +6,7 @@ editor: visual
 
 ## Motivation
 
-`NormalBlockUnknownClusters` (and the collections built on it) need a starting clustering of the `p` variables before the (V)EM recursion can run. This starting point comes from `private$clustering_methods` in `R/NormalBlockBase.R`, selectable via `NB_control(clustering_init = ...)`.
+`NormalBlockVarUnknownClusters` (and the collections built on it) need a starting clustering of the `p` variables before the (V)EM recursion can run. This starting point comes from `private$clustering_methods` in `R/NormalBlockVarBase.R`, selectable via `NB_control(clustering_init = ...)`.
 
 The question behind this whole notebook: **the normal-block model's clustering target is the *covariance* structure of the residuals, not their *values*** -- for two variables $j, j'$ in the same cluster $k$, $\mathrm{Cov}(Y_j, Y_{j'}) = \mathrm{Var}(W_k)$, a constant shared by every pair in the cluster, regardless of each variable's own idiosyncratic noise $D_j$. A heuristic that clusters on raw residual proximity (plain `kmeans`) is targeting something else entirely. So: does a heuristic that is more faithful to this covariance structure actually initialize better, and is there a single best choice?
 
@@ -38,13 +38,13 @@ data_onema <- NormalBlockData$new(
 )
 ```
 
-`onema`'s biomass matrix is genuinely zero-inflated (most species are absent from most stations), so unlike the other two datasets it is benchmarked with `zero_inflation = TRUE` (`ZINormalBlockUnknownClusters`, clustering on `zi_residuals()` rather than `ols_residuals()`) -- the way `inst/study_onema.R` actually uses it, not an artificial non-ZI fit just for protocol uniformity.
+`onema`'s biomass matrix is genuinely zero-inflated (most species are absent from most stations), so unlike the other two datasets it is benchmarked with `zero_inflation = TRUE` (`ZINormalBlockVarUnknownClusters`, clustering on `zi_residuals()` rather than `ols_residuals()`) -- the way `inst/study_onema.R` actually uses it, not an artificial non-ZI fit just for protocol uniformity.
 
 `{data(university)} Y_web    <- log(1 + university$frequencies[, university$terms]) data_web <- NormalBlockData$new(Y_web, X = matrix(1, nrow(Y_web), 1))`
 
 ## The menu tested here (5 methods; since reduced to 4)
 
-The benchmark below was run against this 5-method registry. As detailed in "Results", combining each method's BIC rank with how reliably its deviance path respects the model's theoretical monotonicity (see that section) showed `kmeansvar` to be both the worst-ranked and the least reliable method on every one of the 3 datasets -- it was dropped from `private$clustering_methods` as a consequence, which also removes the package's dependency on `ClustOfVar`. The registry shown here is therefore historical (what was actually run to reach that decision); the current registry in `R/NormalBlockBase.R` has 4 entries, not 5.
+The benchmark below was run against this 5-method registry. As detailed in "Results", combining each method's BIC rank with how reliably its deviance path respects the model's theoretical monotonicity (see that section) showed `kmeansvar` to be both the worst-ranked and the least reliable method on every one of the 3 datasets -- it was dropped from `private$clustering_methods` as a consequence, which also removes the package's dependency on `ClustOfVar`. The registry shown here is therefore historical (what was actually run to reach that decision); the current registry in `R/NormalBlockVarBase.R` has 4 entries, not 5.
 
 ```{r show-registry, eval=FALSE}
 ## R/NormalBlockBase.R, private$clustering_methods, AS BENCHMARKED (5
@@ -77,7 +77,7 @@ list(
 
 ## Benchmark protocol
 
-The `q` range is adapted to each dataset's size and the range a user would actually scan in practice: `brca` (p = 163) from 2 to 30, `onema` (p = 46, already filtered to the 46 most-observed species, see `R/data.R`) from 2 to 8, `web` (p = 100) from 2 to 15. For each $(q, \text{method})$: get the heuristic clustering on the residuals (`ols_residuals()`, or `zi_residuals()` for `onema`; `R/utils.R`), seed `NormalBlockUnknownClusters$new(data, q, control = NB_control(clustering_init = cl))` (`ZINormalBlockUnknownClusters` for `onema`), run `$optimize()`, and record three criteria to minimize: `deviance`, `BIC` and `ICL` (`R/NormalBlockBase.R`: `BIC = deviance + log(n) * nb_param`, `ICL = BIC + 2 * entropy`). The `sbm` heuristic uses one shared exploration over the whole `q_values` range per dataset (`sbm_clustering_path()`) instead of one independent (and increasingly costly) call per q. **Strictly sequential** -- a single R process, no `parallel`/`mclapply`/`foreach` (the BLAS backend here is already multithreaded across all cores; comparisons must not also be parallelized on top of that, or timings become meaningless).
+The `q` range is adapted to each dataset's size and the range a user would actually scan in practice: `brca` (p = 163) from 2 to 30, `onema` (p = 46, already filtered to the 46 most-observed species, see `R/data.R`) from 2 to 8, `web` (p = 100) from 2 to 15. For each $(q, \text{method})$: get the heuristic clustering on the residuals (`ols_residuals()`, or `zi_residuals()` for `onema`; `R/utils.R`), seed `NormalBlockVarUnknownClusters$new(data, q, control = NB_control(clustering_init = cl))` (`ZINormalBlockVarUnknownClusters` for `onema`), run `$optimize()`, and record three criteria to minimize: `deviance`, `BIC` and `ICL` (`R/NormalBlockVarBase.R`: `BIC = deviance + log(n) * nb_param`, `ICL = BIC + 2 * entropy`). The `sbm` heuristic uses one shared exploration over the whole `q_values` range per dataset (`sbm_clustering_path()`) instead of one independent (and increasingly costly) call per q. **Strictly sequential** -- a single R process, no `parallel`/`mclapply`/`foreach` (the BLAS backend here is already multithreaded across all cores; comparisons must not also be parallelized on top of that, or timings become meaningless).
 
 ```{r benchmark-loop, eval=FALSE}
 q_lists  <- list(brca = 2:30, onema = 2:8, web = 2:15)
@@ -89,11 +89,11 @@ run_one <- function(data, q, method, zero_inflation, R, sbm_path) {
   cl <- if (method == "sbm") {
     sbm_path[[as.character(q)]] # one shared exploration, reused for every q
   } else {
-    ModelClass0 <- if (zero_inflation) ZINormalBlockUnknownClusters else NormalBlockUnknownClusters
+    ModelClass0 <- if (zero_inflation) ZINormalBlockVarUnknownClusters else NormalBlockVarUnknownClusters
     dummy <- ModelClass0$new(data, q, control = NB_control(verbose = FALSE))
     dummy$.__enclos_env__$private$clustering_methods[[method]](R, q)
   }
-  ModelClass <- if (zero_inflation) ZINormalBlockUnknownClusters else NormalBlockUnknownClusters
+  ModelClass <- if (zero_inflation) ZINormalBlockVarUnknownClusters else NormalBlockVarUnknownClusters
   model <- ModelClass$new(data, q, control = NB_control(verbose = FALSE, clustering_init = cl))
   model$optimize(control = NB_control(verbose = FALSE))
   data.frame(q = q, method = method, niter = length(model$objective),
@@ -206,7 +206,7 @@ menu %>%
 
 ## Does `best_of_inits()` still help once `refine()` is in the picture?
 
-`best_of_inits()` (`R/NormalBlockBase.R`) tries several heuristics per model and keeps the best-ELBO fit; `refine()` (`NormalBlockCollectionClusters`) instead seeds split/merge candidates from a $q$'s already-fitted neighbor. Both were motivated by the same problem (a single cold-started fit can settle into a mediocre local optimum) but act on it differently, so it's worth checking whether combining them over a *whole, contiguous* $q$ range -- the way a user actually calls `normal_block(blocks = q_min:q_max)` -- still pays off, at the extra cost of both.
+`best_of_inits()` (`R/NormalBlockVarBase.R`) tries several heuristics per model and keeps the best-ELBO fit; `refine()` (`NormalBlockVarCollectionClusters`) instead seeds split/merge candidates from a $q$'s already-fitted neighbor. Both were motivated by the same problem (a single cold-started fit can settle into a mediocre local optimum) but act on it differently, so it's worth checking whether combining them over a *whole, contiguous* $q$ range -- the way a user actually calls `normal_block(blocks = q_min:q_max)` -- still pays off, at the extra cost of both.
 
 ```{r best-of-inits-refine-protocol, eval=FALSE}
 ## Unlike the per-(q, method) protocol above, refine() only applies to a
@@ -271,8 +271,8 @@ ka %>%
 
 Findings:
 
-- **Speed**: no systematic win -- faster on one dataset, slower on the other.
-- **Quality (WCSS)**: plain Lloyd's is *consistently worse* than Hartigan-Wong (28/32 configurations), by \~2.6% on average, and this gap does **not** close with more restarts: `kmeans_arma` at `nstart=300` still doesn't beat `stats::kmeans` at `nstart=10` in most cases. The gap is the local-search algorithm itself, not an insufficient number of restarts.
+-   **Speed**: no systematic win -- faster on one dataset, slower on the other.
+-   **Quality (WCSS)**: plain Lloyd's is *consistently worse* than Hartigan-Wong (28/32 configurations), by \~2.6% on average, and this gap does **not** close with more restarts: `kmeans_arma` at `nstart=300` still doesn't beat `stats::kmeans` at `nstart=10` in most cases. The gap is the local-search algorithm itself, not an insufficient number of restarts.
 
 ```{r kmeanspp-results}
 kapp <- readRDS("results/kmeans_arma_pp_benchmark.rds")
@@ -315,6 +315,6 @@ Row-normalization (`*_rownorm`) dominates the other 4 variants on both datasets;
 
 ## Open threads for later
 
-- The diagonal-deletion idea was validated synthetically but not on real data here -- worth retesting on a dataset with more extreme, cluster-misaligned noise heterogeneity than these three happen to have (the side investigations below are still 2-dataset, not yet rerun with `onema`, and predate `NormalBlockData`'s default column-rescaling and the `kmeansvar` removal -- the registry shown in "Side investigation 2" is stale in the same way as the one in "The menu tested here").
-- Resolved: `kmeans`'s "never worst" property was a two-dataset coincidence, not a general one -- confirmed on `onema` even after standardizing it. Combined with the deviance-monotonicity analysis in "Decision: default and menu size", this motivated switching `NB_control()`'s default to `ward2` and dropping `kmeansvar` (and the `ClustOfVar` dependency) entirely.
-- `spectral` is no longer `onema`'s single worst method now that `onema` is standardized like the other two -- `kmeans` is, on both `BIC` and `ICL`. Worth re-running the by-dataset breakdown again if anything else about the default data handling changes, since this ranking has already flipped twice across this notebook's revisions.
+-   The diagonal-deletion idea was validated synthetically but not on real data here -- worth retesting on a dataset with more extreme, cluster-misaligned noise heterogeneity than these three happen to have (the side investigations below are still 2-dataset, not yet rerun with `onema`, and predate `NormalBlockData`'s default column-rescaling and the `kmeansvar` removal -- the registry shown in "Side investigation 2" is stale in the same way as the one in "The menu tested here").
+-   Resolved: `kmeans`'s "never worst" property was a two-dataset coincidence, not a general one -- confirmed on `onema` even after standardizing it. Combined with the deviance-monotonicity analysis in "Decision: default and menu size", this motivated switching `NB_control()`'s default to `ward2` and dropping `kmeansvar` (and the `ClustOfVar` dependency) entirely.
+-   `spectral` is no longer `onema`'s single worst method now that `onema` is standardized like the other two -- `kmeans` is, on both `BIC` and `ICL`. Worth re-running the by-dataset breakdown again if anything else about the default data handling changes, since this ranking has already flipped twice across this notebook's revisions.

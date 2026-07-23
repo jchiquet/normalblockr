@@ -5,8 +5,8 @@
 
 // Zero-inflated counterparts of DiagonalNoise/SphericalNoise (noise_models.h).
 // `weighted_ssq` is the per-variable sum of squared, zero-inflation-masked
-// residuals (`colSums(zeros_bar * A)` in R/ZINormalBlockKnownClusters.R /
-// R/ZINormalBlockUnknownClusters.R); the denominator is the per-variable (resp. total)
+// residuals (`colSums(zeros_bar * A)` in R/ZINormalBlockVarKnownClusters.R /
+// R/ZINormalBlockVarUnknownClusters.R); the denominator is the per-variable (resp. total)
 // count of non-zero observations (nY/npY) rather than the sample size n,
 // since dm1 is estimated only from the non-zero-inflated residuals. Both
 // arguments are passed to both policies so that call sites can stay

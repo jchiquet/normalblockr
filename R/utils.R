@@ -27,14 +27,14 @@ check_zero_boundary <- function(x, zero = .Machine$double.eps) {
 # equivalent of check_zero_boundary(check_one_boundary(x)), used to keep
 # variational probabilities (tau) away from the {0, 1} boundaries (mirrors
 # clip_probabilities() in src/utils_arma.h). Previously spelled out at both
-# call sites (NormalBlockUnknownClusters.R/ZINormalBlockUnknownClusters.R).
+# call sites (NormalBlockVarUnknownClusters.R/ZINormalBlockVarUnknownClusters.R).
 clip_probabilities <- function(x, zero = .Machine$double.eps) {
   check_zero_boundary(check_one_boundary(x, zero), zero)
 }
 
 # Projects a symmetric matrix onto the positive-definite cone by flooring its
 # eigenvalues, leaving an already-PD matrix unchanged (up to symmetrization).
-# Used by split()/merge() (NormalBlockBase.R): their new_Omegaq is built by
+# Used by split()/merge() (NormalBlockVarBase.R): their new_Omegaq is built by
 # hand-editing a handful of entries of an existing precision matrix (halving/
 # averaging diagonal entries, zero-filling the new row/column), which has no
 # general guarantee of staying PD -- and an indefinite Omegaq handed directly
@@ -80,8 +80,8 @@ sigmoid <- function(x){
 }
 
 # OLS residuals of Y on X (used to seed the clustering heuristics). Factored
-# out of NormalBlockBase$multivariate_normal_inference() so that collections
-# fitting several q values (NormalBlockCollectionClusters, NormalBlockCollectionClustersSparsity)
+# out of NormalBlockVarBase$multivariate_normal_inference() so that collections
+# fitting several q values (NormalBlockVarCollectionClusters, NormalBlockVarCollectionClustersSparsity)
 # can get the same residual once, instead of recomputing it once per model
 # (see sbm_clustering_path()).
 ols_residuals <- function(data) {
@@ -92,7 +92,7 @@ ols_residuals <- function(data) {
 # Iteratively reweighted least squares fit of B under a zero-inflation mask
 # (weights = zeros_bar, dm1 re-estimated between iterates), operating on
 # `data` alone. Shared by zi_residuals() (collection-level, no model instance
-# available yet) and NormalBlockBase$private$zi_diag_normal_inference()
+# available yet) and NormalBlockVarBase$private$zi_diag_normal_inference()
 # (per-model, additionally carries along the already-computed kappa) -- same
 # math, two different call sites, so the fit itself lives here once.
 # The zero-inflation mask makes the weight matrix vary by both row and
@@ -141,7 +141,7 @@ zi_residuals <- function(data) zi_weighted_fit(data)$R
 
 # Hierarchical (Ward.D2) clustering tree of the p columns of R by their
 # pairwise correlation distance (1 - cor). Shared by
-# NormalBlockBase$private$clustering_methods$ward2 (the "ward2"
+# NormalBlockVarBase$private$clustering_methods$ward2 (the "ward2"
 # clustering_init heuristic, and the fallback whenever any chosen heuristic
 # collapses to fewer than q clusters) and sbm_clustering_path()'s own
 # fallback below -- same computation, two call sites.
@@ -197,7 +197,7 @@ sbm_clustering_path <- function(R, q_list) {
 }
 
 # Builds the shared sbm_clustering_path() for a collection over q_list
-# (NormalBlockCollectionClusters/NormalBlockCollectionClustersSparsity), or returns NULL
+# (NormalBlockVarCollectionClusters/NormalBlockVarCollectionClustersSparsity), or returns NULL
 # when the optimization doesn't apply: clustering_init isn't the heuristic
 # name "sbm" applied uniformly (it names a different heuristic, or is already
 # an explicit clustering/list of clusterings -- in which case every model
@@ -213,7 +213,7 @@ sbm_path_for_collection <- function(mydata, q_list, zero_inflation, control) {
 }
 
 # Whether NB_control(clustering_init = "best_of_inits") was requested (see
-# best_of_inits() in NormalBlockBase.R). identical() keeps this safe when
+# best_of_inits() in NormalBlockVarBase.R). identical() keeps this safe when
 # clustering_init is a list or an explicit clustering.
 uses_best_of_inits <- function(control) identical(control$clustering_init, "best_of_inits")
 
