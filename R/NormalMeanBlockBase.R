@@ -35,7 +35,6 @@ NormalMeanBlockBase <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalMeanBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
-    model_par = function() list(B = private$B, B0 = private$B0,
-                                dm1 = private$dm1, Omega = private$Omega)
+    model_par = function() list(B = private$B, Omega = private$Omega)
 )
 )

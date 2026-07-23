@@ -112,7 +112,8 @@ NormalBase <- R6::R6Class(
                       S = NA,
                       Phi = NA,
                       ll_list = NA,
-                      warm_started = NA) {
+                      warm_started = NA,
+                      clustering_init = NA) {
       if (!anyNA(B))       private$B       <- B
       if (!anyNA(dm1))     private$dm1     <- dm1
       if (!anyNA(C))       private$C       <- C
@@ -126,6 +127,13 @@ NormalBase <- R6::R6Class(
       if (!anyNA(Phi))     private$Phi     <- Phi
       if (!anyNA(ll_list)) private$ll_list <- ll_list
       if (!anyNA(warm_started)) private$warm_started <- warm_started
+      if (!anyNA(clustering_init)) {
+        stopifnot("clustering_init must be a single heuristic name" =
+                    is.character(clustering_init) && length(clustering_init) == 1)
+        private$clustering_approx <- clustering_init
+        private$C <- matrix(NA, self$p, self$q)
+        private$warm_started <- FALSE
+      }
     },
 
     #' @description calls optimization (EM or heuristic) and updates relevant fields

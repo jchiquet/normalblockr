@@ -51,7 +51,7 @@ NormalBlockVarBase <- R6::R6Class(
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Setters    ------------------------
     #' @description
-    #' Update a [`NormalBlockVarBase`] object
+    #' Update a [`NormalBlockBase`] object
     #'
     #' All possible parameters of the child classes
     #' @param B regression matrix
@@ -151,7 +151,7 @@ NormalBlockVarBase <- R6::R6Class(
     #' without reaching `threshold` (see `private$warn_if_not_converged()`).
     #' Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
     #' scoring in `candidates_split()`/`candidates_merge()`, the sparsity-path
-    #' warm-start probe in [NormalBlockVarCollectionSparsity]) where stopping at
+    #' warm-start probe in [NormalBlockCollectionSparsity]) where stopping at
     #' the cap is expected and not a sign of trouble.
     #' @return optimizes the model and updates its parameters
     optimize = function(control = list(niter = 500, threshold = 1e-4), warn = TRUE) {
