@@ -9,24 +9,24 @@ reference:
   contents:
     - '`normal_block`'
     - '`NB_control`'
-    - '`generate_normal_block_data`'
+    - '`generate_normal_block_var_data`'
 
 - title: 'Model and data classes'
   desc: >
     R6 classes returned by normal_block(). NormalBlockData wraps the
-    responses and design matrix; NormalBlock*Clusters (optionally
+    responses and design matrix; NormalBlockVar*Clusters (optionally
     ZI-prefixed) are single fitted models, known- or unknown-clustering;
-    NormalBlockCollection* are collections of models explored over a range
-    of q and/or sparsity penalties.
+    NormalBlockVarCollection* are collections of models explored over a
+    range of q and/or sparsity penalties.
   contents:
     - '`NormalBlockData`'
-    - '`NormalBlockKnownClusters`'
-    - '`NormalBlockUnknownClusters`'
-    - '`ZINormalBlockKnownClusters`'
-    - '`ZINormalBlockUnknownClusters`'
-    - '`NormalBlockCollectionClusters`'
-    - '`NormalBlockCollectionSparsity`'
-    - '`NormalBlockCollectionClustersSparsity`'
+    - '`NormalBlockVarKnownClusters`'
+    - '`NormalBlockVarUnknownClusters`'
+    - '`ZINormalBlockVarKnownClusters`'
+    - '`ZINormalBlockVarUnknownClusters`'
+    - '`NormalBlockVarCollectionClusters`'
+    - '`NormalBlockVarCollectionSparsity`'
+    - '`NormalBlockVarCollectionClustersSparsity`'
 
 - title: 'Data sets'
   desc: ~
@@ -39,18 +39,18 @@ reference:
   desc: >
     Standard extractors, common to every fitted model class
   contents:
-    - '`coef.NormalBlockBase`'
-    - '`fitted.NormalBlockBase`'
-    - '`predict.NormalBlockBase`'
-    - '`sigma.NormalBlockBase`'
+    - '`coef.NormalBlockVarBase`'
+    - '`fitted.NormalBlockVarBase`'
+    - '`predict.NormalBlockVarBase`'
+    - '`sigma.NormalBlockVarBase`'
 
 - title: 'Internal'
   desc: >
     Abstract base classes, low-level helpers and exploratory code kept for
     reference; not part of the user-facing API
   contents:
-    - '`NormalBlockBase`'
-    - '`NormalBlockCollection`'
+    - '`NormalBlockVarBase`'
+    - '`NormalBlockVarCollection`'
     - '`SelectionNClusters`'
     - '`get_model`'
     - '`isNB`'
