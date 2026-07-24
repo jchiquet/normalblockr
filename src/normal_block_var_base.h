@@ -92,7 +92,7 @@ protected:
 
 public:
   NormalBlockVarBase(const NormalBlockData& data, int q,
-                  const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omegaq0,
+                  const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omega0,
                   double sparsity, const arma::mat& sparsity_weights) :
     data_(data), q_(q), B_(B0), dm1_(dm1_0), Omega_(Omega0),
     sparsity_(sparsity), sparsity_weights_(sparsity_weights) {}
@@ -113,7 +113,7 @@ public:
   // cannot likewise use the compiler-generated copy *assignment* operator --
   // `data_` is a reference member, so that operator is implicitly deleted --
   // hence the explicit field-by-field copy via `copy_tracked_state_from()`
-  // (this class's own B_/dm1_/Omegaq_) plus each subclass's own extra fields.
+  // (this class's own B_/dm1_/Omega_) plus each subclass's own extra fields.
   virtual std::unique_ptr<NormalBlockVarBase> clone() const = 0;
   virtual void restore_from(const NormalBlockVarBase& other) = 0;
 

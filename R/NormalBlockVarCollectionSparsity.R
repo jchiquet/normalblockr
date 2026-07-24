@@ -236,7 +236,7 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
     who_am_I  = function(){
       paste0("Collection of ",
              ifelse(self$control$zero_inflation, " zero-inflated ", ""),
-                    self$control$noise_covariance, " normal-block models with ",
+                    self$control$noise_covariance, " normal-block-var models with ",
              ifelse(is.matrix(private$blocks_), "fixed blocks", "fixed q"),
         ", with different sparsity penalties.")}
   )

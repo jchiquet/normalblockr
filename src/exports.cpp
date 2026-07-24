@@ -98,18 +98,18 @@ Rcpp::List ZINormalBlockVarUnknownClusters_result(const Model& model) {
 //' @noRd
 // [[Rcpp::export]]
 Rcpp::List NormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& C,
-                                  arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0,
+                                  arma::mat B0, arma::vec dm1_0, arma::mat Omega0,
                                   double sparsity, arma::mat sparsity_weights,
                                   std::string noise_covariance,
                                   int niter, double threshold) {
   NormalBlockData data(Y, X);
 
   if (noise_covariance == "diagonal") {
-    norm_block_var_cov_diag_noise_known_clusters model(data, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights);
+    norm_block_var_cov_diag_noise_known_clusters model(data, C, B0, dm1_0, Omega0, sparsity, sparsity_weights);
     model.run_em(niter, threshold);
     return known_clusters_result(model);
   } else if (noise_covariance == "spherical") {
-    norm_block_var_cov_spherical_noise_known_clusters model(data, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights);
+    norm_block_var_cov_spherical_noise_known_clusters model(data, C, B0, dm1_0, Omega0, sparsity, sparsity_weights);
     model.run_em(niter, threshold);
     return known_clusters_result(model);
   }
@@ -135,7 +135,7 @@ Rcpp::List NormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat& 
 //' @noRd
 // [[Rcpp::export]]
 Rcpp::List NormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat& X,
-                                    arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0,
+                                    arma::mat B0, arma::vec dm1_0, arma::mat Omega0,
                                     arma::mat C0, arma::vec alpha0, arma::mat M0, arma::vec S0,
                                     double sparsity, arma::mat sparsity_weights,
                                     std::string noise_covariance, bool fixed_tau,
@@ -143,12 +143,12 @@ Rcpp::List NormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat
   NormalBlockData data(Y, X);
 
   if (noise_covariance == "diagonal") {
-    norm_block_var_cov_diag_noise_unknown_clusters model(data, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0,
+    norm_block_var_cov_diag_noise_unknown_clusters model(data, B0, dm1_0, Omega0, C0, alpha0, M0, S0,
                                                       sparsity, sparsity_weights, fixed_tau);
     model.run_em(niter, threshold);
     return unknown_clusters_result(model);
   } else if (noise_covariance == "spherical") {
-    norm_block_var_cov_spherical_noise_unknown_clusters model(data, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0,
+    norm_block_var_cov_spherical_noise_unknown_clusters model(data, B0, dm1_0, Omega0, C0, alpha0, M0, S0,
                                                           sparsity, sparsity_weights, fixed_tau);
     model.run_em(niter, threshold);
     return unknown_clusters_result(model);
@@ -194,11 +194,11 @@ Rcpp::List ZINormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat
   ZINormalBlockData data(Y, X, zeros_bar, zi_cond_mean);
 
   if (noise_covariance == "diagonal") {
-    zi_norm_block_var_cov_diag_noise_known_clusters model(data, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights);
+    zi_norm_block_var_cov_diag_noise_known_clusters model(data, C, B0, dm1_0, Omega0, sparsity, sparsity_weights);
     model.run_em(niter, threshold);
     return ZINormalBlockVarKnownClusters_result(model);
   } else if (noise_covariance == "spherical") {
-    zi_norm_block_var_cov_spherical_noise_known_clusters model(data, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights);
+    zi_norm_block_var_cov_spherical_noise_known_clusters model(data, C, B0, dm1_0, Omega0, sparsity, sparsity_weights);
     model.run_em(niter, threshold);
     return ZINormalBlockVarKnownClusters_result(model);
   }
@@ -236,12 +236,12 @@ Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::m
   ZINormalBlockData data(Y, X, zeros_bar, zi_cond_mean);
 
   if (noise_covariance == "diagonal") {
-    zi_norm_block_var_cov_diag_noise_unknown_clusters model(data, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0,
+    zi_norm_block_var_cov_diag_noise_unknown_clusters model(data, B0, dm1_0, Omega0, C0, alpha0, M0, S0,
                                                          sparsity, sparsity_weights, fixed_tau);
     model.run_em(niter, threshold);
     return ZINormalBlockVarUnknownClusters_result(model);
   } else if (noise_covariance == "spherical") {
-    zi_norm_block_var_cov_spherical_noise_unknown_clusters model(data, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0,
+    zi_norm_block_var_cov_spherical_noise_unknown_clusters model(data, B0, dm1_0, Omega0, C0, alpha0, M0, S0,
                                                               sparsity, sparsity_weights, fixed_tau);
     model.run_em(niter, threshold);
     return ZINormalBlockVarUnknownClusters_result(model);

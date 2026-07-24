@@ -1,10 +1,10 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NormalBase ############################
+##  CLASS NormalBlockBase ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #' R6 abstract class for a generic sparse Normal Block model or Normal Mean Block model
-NormalBase <- R6::R6Class(
-  classname = "NormalBase",
+NormalBlockBase <- R6::R6Class(
+  classname = "NormalBlockBase",
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,7 +12,7 @@ NormalBase <- R6::R6Class(
     #' @field data object of NormalBlockData class, with responses and design matrix
     data  = NULL,
 
-    #' @description Create a new [`NormalBase`] object.
+    #' @description Create a new [`NormalBlockBase`] object.
     #' @param data object of NormalBlockData class, with responses and design matrix
     #' @param q number of block/cluster
     #' @param sparsity sparsity penalty on the network density
@@ -20,14 +20,10 @@ NormalBase <- R6::R6Class(
     #' The ZI parameters are not handled in this class for now because the ZI has
     #' yet to be implemented in the NormalMeanBlock models. We will also need to create
     #' a Normal-Mean-Block equivalent to the NB_control function
-    #' @return A new [`NormalBase`] object
+    #' @return A new [`NormalBlockBase`] object
     initialize = function(data, q, sparsity = 0, control) {
       self$data <- data
-
       stopifnot("There cannot be more blocks than there are entities to cluster" = q <= ncol(self$data$Y))
-
-      ## variant (either diagonal or spherical residuals covariance)
-      private$res_covariance <- control$noise_covariance
 
       ## pointer to the chosen optimization function
       private$optimizer <- ifelse(control$heuristic,
@@ -35,14 +31,6 @@ NormalBase <- R6::R6Class(
                                   private$EM_optimize)
       private$approx <- control$heuristic
 
-      ## penalty mask
-      private$sparsity_ <- sparsity
-      weights <- matrix(1, q, q)
-      diag(weights) <- 0
-      if (!is.null(control$sparsity_weights)) {
-        weights <- control$sparsity_weights
-      }
-      private$weights <- weights
 
       ## control$clustering_init is either the name of a clustering heuristic
       ## (a single string, deferred to heuristic_clustering(), looked up in
@@ -79,7 +67,7 @@ NormalBase <- R6::R6Class(
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Setters    ------------------------
     #' @description
-    #' Update a [`NormalBase`] object
+    #' Update a [`NormalBlockBase`] object
     #'
     #' All possible parameters of the child classes
     #' @param B regression matrix [all]
@@ -117,7 +105,7 @@ NormalBase <- R6::R6Class(
       if (!anyNA(B))       private$B       <- B
       if (!anyNA(dm1))     private$dm1     <- dm1
       if (!anyNA(C))       private$C       <- C
-      if (!anyNA(Omega))  private$Omega  <- Omega
+      if (!anyNA(Omega))   private$Omega  <- Omega
       if (!anyNA(gamma))   private$gamma   <- gamma
       if (!anyNA(kappa))   private$kappa   <- kappa
       if (!anyNA(mu))      private$mu      <- mu
@@ -485,7 +473,6 @@ NormalBase <- R6::R6Class(
 
       type   <- match.arg(type)
       output <- match.arg(output)
-
       net <- self$latent_network(type)
 
       if (output == "igraph") {
@@ -499,7 +486,7 @@ NormalBase <- R6::R6Class(
         ## Nice nodes
         V.deg <- igraph::degree(G)/sum(igraph::degree(G))
         igraph::V(G)$label.cex <- V.deg / max(V.deg) + .5
-        igraph::V(G)$size <- tabulate(self$clustering, nbins = self$q) * 100 / self$p
+        igraph::V(G)$size <- tabulate(self$clustering, nbins = nrow(self$model_par$Omega)) * 100 / self$p
         igraph::V(G)$label.color <- rgb(0, 0, .2, .8)
         igraph::V(G)$frame.color <- "transparent" # NA triggers an igraph plot() warning; same (invisible) rendering
         ## Nice edges
@@ -603,6 +590,14 @@ NormalBase <- R6::R6Class(
     ## Rcpp/Armadillo core (see src/exports.cpp and
     ## inst/normal_block_models.qmd); EM_initialize() (heuristic
     ## initialization) stays in R and supplies the starting values.
+    ## MLE of MV Normal distribution
+    multivariate_normal_inference = function(){
+      B     <- self$data$XtXm1 %*% self$data$XtY
+      R     <- ols_residuals(self$data)
+      Sigma <- cov(R)
+      list(B = B, R = R, Sigma = Sigma)
+    },
+
     EM_initialize = function() {},
 
     get_Omega = function(Sigma) {
@@ -697,16 +692,6 @@ NormalBase <- R6::R6Class(
     q = function() as.integer(ncol(private$C)),
     #' @field n_edges number of edges of the network (non null coefficient of the sparse precision matrix Omega)
     n_edges  = function() sum(private$Omega[upper.tri(private$Omega, diag = FALSE)] != 0),
-    #' @field B_original regression coefficients (d x p), converted back to
-    #' Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
-    #' column-wise rescaling, if any). Use `model_par$B` instead for the
-    #' coefficients on the internal fitting scale.
-    B_original = function() private$rescale_to_original(private$B, power = 1),
-    #' @field nb_param number of parameters in the model
-    nb_param = function() {
-      nb_param_D <- ifelse(private$res_covariance == "diagonal", self$p, 1)
-      as.integer(self$p * self$d + self$q + self$n_edges + nb_param_D)
-    },
     #' @field objective evolution of the objective function during (V)EM algorithm
     objective = function() private$ll_list[-1],
     #' @field loglik (or its variational lower bound)
@@ -734,16 +719,6 @@ NormalBase <- R6::R6Class(
       } else {
         stopifnot("must be a positive scale" = value >= 0)
         private$sparsity_ <- value
-      }
-    },
-    #' @field sparsity_weights (weights associated to each pair of groups)
-    sparsity_weights = function(value) {
-      if (missing(value)) {
-        private$weights
-      } else {
-        stopifnot("must be a q x q matrix" =
-                    all(is.matrix(value), nrow(value) == ncol(value), ncol(value) == self$q))
-        private$weights <- value
       }
     },
     #' @field sparsity_term (sparsity_term term in log-likelihood due to sparsity)

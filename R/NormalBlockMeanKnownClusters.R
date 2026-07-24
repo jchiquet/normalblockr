@@ -1,0 +1,104 @@
+## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+##  CLASS NormalBlockMeanKnownClusters #################
+## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#' R6 class for a normal-block model with known clustering.
+#' @export
+NormalBlockMeanKnownClusters <- R6::R6Class(
+  classname = "NormalBlockMeanKnownClusters",
+  inherit   = NormalBlockMeanBase,
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ## PUBLIC MEMBERS ----
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  public = list(
+    #' @description Create a new [`NormalBlockMeanKnownClusters`] object.
+    #' @param data object of NormalMeanBlockData class, with responses and design matrix
+    #' @param C clustering matrix C_jk = 1 if species j belongs to cluster k
+    #' @param sparsity to apply on variance matrix when calling GLASSO
+    #' @param control structured list of more specific parameters, to generate with NB_control
+    #' @return A new [`NormalBlockMeanKnownClusters`] object
+    initialize = function(data, C, sparsity = 0, control = NB_control()) {
+      stopifnot("C must be a matrix" = is.matrix(C))
+      stopifnot("There cannot be empty clusters" = min(colSums(C)) > 0)
+      super$initialize(data, ncol(C), sparsity, control)
+      private$C <- C
+    }
+  ),
+
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ## PRIVATE MEMBERS ----
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  private = list(
+    optim_initialize = function() {
+      # warm restart to integrate later
+      return(private$get_heuristic_parameters())
+    },
+
+    get_heuristic_parameters = function(){
+      reg_res   <- private$multivariate_normal_inference()
+      Omega     <- private$get_Omega(reg_res$Sigma)
+      B         <- private$heuristic_cluster_B_from_variable_B(reg_res$B,
+                                                               private$C)
+      list(B = B, Omega = Omega)
+    },
+
+
+    B_estimator = function(Omega = private$Omega){
+      return(self$data$XtXm1 %*% self$data$XtY %*% Omega %*% private$C %*% solve(t(private$C) %*% Omega %*% private$C))
+    },
+
+    Sigma_estimator = function(B = private$B){
+      R     <- self$data$Y - self$data$X %*% B %*% t(private$C)
+      Sigma <- crossprod(R) / self$n
+      return(Sigma)
+    },
+
+    compute_loglik = function(B = private$B, Omega = private$Omega){
+      log_det_omega <- - as.numeric(determinant(Omega, logarithm = TRUE)$modulus)
+      R <- self$data$Y - self$data$X %*% B %*% t(private$C)
+      l <- - self$n * self$p * log(2 * pi) / 2 + self$n * log_det_omega / 2 - sum((R %*% Omega) * R) / 2
+      return(as.numeric(l))
+    },
+
+    EM_optimize = function(control){
+      init_params <- private$optim_initialize()
+      B           <- init_params$B
+      Omega       <- init_params$Omega
+      ll_prev     <- private$compute_loglik(B, Omega)
+      ll_list     <- c(ll_prev)
+      for(i in 1:control$niter){
+        B     <- private$B_estimator(Omega)
+        Sigma <- private$Sigma_estimator(B)
+        Omega <- private$get_Omega(Sigma)
+
+        ll_current <- private$compute_loglik(B, Omega)
+        ll_list     <- c(ll_list, ll_current)
+        if(abs(ll_current - ll_prev) < control$threshold){
+          break
+        }else{ll_prev <- ll_current}
+      }
+      private$niter <- i
+      list(B = B, Omega = Omega, ll_list = ll_list)
+    }
+
+  ),
+
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##  ACTIVE BINDINGS ----
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  active = list(
+    #' @field fitted Y values predicted by the model, in Y's original units
+    fitted = function(){
+      res <- if (private$approx) {
+        self$data$X %*% private$B
+      } else {
+        self$data$X %*% private$B + private$mu %*% t(private$C)
+      }
+      private$rescale_to_original(res)
+    },
+    #' @field who_am_I a method to print what model is being fitted
+    who_am_I = function()
+    {paste("normal-block-mean model with fixed blocks")}
+  )
+)
+

@@ -8,36 +8,24 @@ R6 abstract class for a generic sparse Normal Block model
 
 R6 abstract class for a generic sparse Normal Block model
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{data}}{object of NormalBlockData class, with responses and design matrix}
-}
-\if{html}{\out{</div>}}
+\section{Super class}{
+\code{normalblockr::NormalBlockBase} -> \code{NormalBlockVarBase}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{inference_method}}{inference procedure used (heuristic or integrated with EM)}
-
-\item{\code{n}}{number of samples}
-
-\item{\code{p}}{number of responses per sample}
-
-\item{\code{d}}{number of variables (dimensions in X)}
-
-\item{\code{d0}}{number of zi variables (dimensions in X0)}
-
-\item{\code{q}}{number of blocks}
-
-\item{\code{n_edges}}{number of edges of the network (non null coefficient of the sparse precision matrix Omegaq)}
-
-\item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
-
 \item{\code{B_original}}{regression coefficients (d x p), converted back to
 Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
 column-wise rescaling, if any). Use `model_par$B` instead for the
 coefficients on the internal fitting scale.}
+
+\item{\code{d0}}{number of zi variables (dimensions in X0)}
+
+\item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
+
+\item{\code{nb_param}}{number of parameters in the model}
+
+\item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
 
 \item{\code{dm1_original}}{inverse residual variance per variable
 (1 / Var(Y_j)), converted back to Y's original units. Use
@@ -50,39 +38,7 @@ different factors -- correctly so, since a single shared *scaled*
 variance does not correspond to a single shared variance in the
 original, heterogeneous-scale units.}
 
-\item{\code{nb_param}}{number of parameters in the model}
-
-\item{\code{objective}}{evolution of the objective function during (V)EM algorithm}
-
-\item{\code{loglik}}{(or its variational lower bound)}
-
-\item{\code{deviance}}{(or its variational lower bound)}
-
-\item{\code{BIC}}{(or its variational lower bound)}
-
-\item{\code{entropy}}{Entropy of the conditional distribution when applicable}
-
-\item{\code{ICL}}{variational lower bound of the ICL}
-
-\item{\code{EBIC}}{variational lower bound of the EBIC}
-
-\item{\code{criteria}}{a vector with loglik, BIC and number of parameters}
-
-\item{\code{sparsity}}{(overall sparsity parameter)}
-
-\item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
-
-\item{\code{sparsity_term}}{(sparsity_term term in log-likelihood due to sparsity)}
-
 \item{\code{get_res_covariance}}{whether the residual covariance is diagonal or spherical}
-
-\item{\code{memberships}}{cluster memberships}
-
-\item{\code{clustering}}{given as the list of elements contained in each cluster}
-
-\item{\code{cluster_sizes}}{given as a vector of cluster sizes}
-
-\item{\code{elements_per_cluster}}{given as the list of elements contained in each cluster}
 }
 \if{html}{\out{</div>}}
 }
@@ -98,15 +54,21 @@ original, heterogeneous-scale units.}
 \item \href{#method-NormalBlockVarBase-candidates_split}{\code{NormalBlockVarBase$candidates_split()}}
 \item \href{#method-NormalBlockVarBase-candidates_merge}{\code{NormalBlockVarBase$candidates_merge()}}
 \item \href{#method-NormalBlockVarBase-merge}{\code{NormalBlockVarBase$merge()}}
-\item \href{#method-NormalBlockVarBase-predict}{\code{NormalBlockVarBase$predict()}}
-\item \href{#method-NormalBlockVarBase-latent_network}{\code{NormalBlockVarBase$latent_network()}}
-\item \href{#method-NormalBlockVarBase-plot_loglik}{\code{NormalBlockVarBase$plot_loglik()}}
-\item \href{#method-NormalBlockVarBase-plot_network}{\code{NormalBlockVarBase$plot_network()}}
-\item \href{#method-NormalBlockVarBase-plot}{\code{NormalBlockVarBase$plot()}}
-\item \href{#method-NormalBlockVarBase-print}{\code{NormalBlockVarBase$print()}}
 \item \href{#method-NormalBlockVarBase-clone}{\code{NormalBlockVarBase$clone()}}
 }
 }
+\if{html}{\out{
+<details><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>normalblockr::NormalBlockBase$latent_network()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>normalblockr::NormalBlockBase$plot()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>normalblockr::NormalBlockBase$plot_loglik()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>normalblockr::NormalBlockBase$plot_network()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>normalblockr::NormalBlockBase$predict()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>normalblockr::NormalBlockBase$print()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-new"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-new}{}}}
@@ -148,7 +110,7 @@ A new [`NormalBlockVarBase`] object
 \if{html}{\out{<a id="method-NormalBlockVarBase-update"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-update}{}}}
 \subsection{Method \code{update()}}{
-Update a [`NormalBlockVarBase`] object
+Update a [`NormalBlockBase`] object
 
 All possible parameters of the child classes
 \subsection{Usage}{
@@ -156,7 +118,7 @@ All possible parameters of the child classes
   B = NA,
   dm1 = NA,
   C = NA,
-  Omegaq = NA,
+  Omega = NA,
   gamma = NA,
   mu = NA,
   kappa = NA,
@@ -178,7 +140,7 @@ All possible parameters of the child classes
 
 \item{\code{C}}{the matrix of groups memberships (posterior probabilities)}
 
-\item{\code{Omegaq}}{groups inverse variance matrix}
+\item{\code{Omega}}{groups inverse variance matrix}
 
 \item{\code{gamma}}{variance of posterior distribution of W}
 
@@ -195,7 +157,7 @@ All possible parameters of the child classes
 \item{\code{ll_list}}{list of log-lik (elbo) values}
 
 \item{\code{warm_started}}{whether `EM_initialize()` should treat the model as
-already initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand)
+already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
 rather than recomputing a fresh heuristic initialization -- set by
 [warm_start_from()] and by [split()]/[merge()].}
 
@@ -272,7 +234,7 @@ calls optimization (EM or heuristic) and updates relevant fields
 without reaching `threshold` (see `private$warn_if_not_converged()`).
 Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
 scoring in `candidates_split()`/`candidates_merge()`, the sparsity-path
-warm-start probe in [NormalBlockVarCollectionSparsity]) where stopping at
+warm-start probe in [NormalBlockCollectionSparsity]) where stopping at
 the cap is expected and not a sign of trouble.}
 }
 \if{html}{\out{</div>}}
@@ -370,7 +332,7 @@ by merging the clusters of the current model
 \describe{
 \item{\code{max_candidates}}{merge candidates are, unlike split's, quadratic
 in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
-the most promising ones (largest `|Omegaq[i, j]|`, i.e. the most
+the most promising ones (largest `|Omega[i, j]|`, i.e. the most
 strongly related cluster pairs in the current fit) are actually built
 and trial-optimized, since merging two nearly independent blocks is
 rarely competitive anyway. Set to `Inf` to always try every pair.}
@@ -401,140 +363,6 @@ default FALSE (send a copy)}
 }
 \subsection{Returns}{
 A new [`NormalBlockVarBase`] object
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarBase-predict"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-predict}{}}}
-\subsection{Method \code{predict()}}{
-Predicts observations Y for new covariates X.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$predict(new_X)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{new_X}}{new set of covariates.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A n*p prediction matrix for new observations
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarBase-latent_network"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-latent_network}{}}}
-\subsection{Method \code{latent_network()}}{
-Extract interaction network in the latent space
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$latent_network(
-  type = c("partial_cor", "support", "precision")
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{type}}{edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-a square matrix of size `self$q`
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarBase-plot_loglik"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-plot_loglik}{}}}
-\subsection{Method \code{plot_loglik()}}{
-plots the evolution of the objective (log-likelihood or ELBO)
-across the (V)EM iterations of the last call to `optimize()`.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$plot_loglik(show_increment = TRUE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{show_increment}}{whether to add, below the objective trace, a second
-panel with the (log10) absolute increment between consecutive iterations
-and the convergence `threshold` used to stop optimize() (dashed line).
-That second panel is what actually tells convergence apart from merely
-running out of iterations: the objective trace alone tends to look flat
-well before the increment has actually crossed the threshold, especially
-as the number of blocks grows (see inst/CSDA_analyses).}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-a [`ggplot2::ggplot`] graph
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarBase-plot_network"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-plot_network}{}}}
-\subsection{Method \code{plot_network()}}{
-plot the latent network.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$plot_network(
-  type = c("partial_cor", "support"),
-  output = c("igraph", "corrplot"),
-  edge.color = c("#F8766D", "#00BFC4"),
-  remove.isolated = FALSE,
-  node.labels = NULL,
-  layout = igraph::layout_in_circle,
-  plot = TRUE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{type}}{edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).}
-
-\item{\code{output}}{Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)}
-
-\item{\code{edge.color}}{Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.}
-
-\item{\code{remove.isolated}}{if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.}
-
-\item{\code{node.labels}}{vector of character. The labels of the nodes. The default will use the column names ot the response matrix.}
-
-\item{\code{layout}}{an optional igraph layout. Only relevant for igraph output.}
-
-\item{\code{plot}}{logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarBase-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-plot}{}}}
-\subsection{Method \code{plot()}}{
-plots the evolution of the objective during model optimization
-(see `plot_loglik()`)
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$plot()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarBase-print"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-print}{}}}
-\subsection{Method \code{print()}}{
-User friendly print method
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$print(model = paste("A", self$who_am_I, ".\\n"))}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{model}}{First line of the print output}
-}
-\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

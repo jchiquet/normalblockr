@@ -67,15 +67,15 @@ class ZINormalBlockVarKnownClusters : public NormalBlockVarBase {
 
 public:
   ZINormalBlockVarKnownClusters(const ZINormalBlockData& data, const arma::mat& C,
-                              const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omegaq0,
+                              const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omega0,
                               double sparsity, const arma::mat& sparsity_weights) :
-    NormalBlockVarBase(data, C.n_cols, B0, dm1_0, Omegaq0, sparsity, sparsity_weights),
+    NormalBlockVarBase(data, C.n_cols, B0, dm1_0, Omega0, sparsity, sparsity_weights),
     zi_data_(data), C_(C), Gamma_(C.n_cols, C.n_cols, data.n), Mu_(arma::zeros(data.n, C.n_cols)) {
     for (arma::uword i = 0; i < data.n; ++i) Gamma_.slice(i) = arma::eye(C.n_cols, C.n_cols);
   }
 
   // General (non-profiled) marginal log-likelihood of Y given the fixed
-  // zero-inflation mask, valid at *any* (B_, dm1_, Omegaq_) -- see
+  // zero-inflation mask, valid at *any* (B_, dm1_, Omega_) -- see
   // NormalBlockVarKnownClusters::objective() for the non-ZI derivation this
   // mirrors. Because the zero-inflation mask varies row by row, each row i
   // has its own marginal: Y_i,obs ~ N(B^T X_i,obs, Sigma_Y,i), restricted to

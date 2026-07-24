@@ -32,7 +32,7 @@ test_that("NormalBlockVarKnownClusters_fit matches NormalBlockVarKnownClusters (
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       res <- NormalBlockVarKnownClusters_fit(Y = data$Y, X = data$X, C = C,
-                                    B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+                                    B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,
                                     sparsity = sparsity, sparsity_weights = model$sparsity_weights,
                                     noise_covariance = nc, niter = niter, threshold = threshold)
 
@@ -57,7 +57,7 @@ test_that("NormalBlockVarUnknownClusters_fit matches NormalBlockVarUnknownCluste
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       res <- NormalBlockVarUnknownClusters_fit(Y = data$Y, X = data$X,
-                                      B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+                                      B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,
                                       C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,
                                       sparsity = sparsity, sparsity_weights = model$sparsity_weights,
                                       noise_covariance = nc, fixed_tau = FALSE,

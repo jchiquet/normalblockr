@@ -15,5 +15,5 @@
 The q x q covariance matrix between latent blocks.
 }
 \description{
-Extract the covariance matrix between latent blocks (the inverse of `Omegaq`) from a NormalBlockBase object.
+Extract the covariance matrix between latent blocks (the inverse of `Omega`) from a NormalBlockBase object.
 }

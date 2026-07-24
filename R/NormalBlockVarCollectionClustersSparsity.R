@@ -119,7 +119,7 @@ NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
       paste("Collection of ",
             ifelse(self$control$zero_inflation, " zero-inflated", ""),
             self$control$noise_covariance,
-            "normal-block models with different values of q and different penalties.")
+            "normal-block-var models with different values of q and different penalties.")
     }
 
   )

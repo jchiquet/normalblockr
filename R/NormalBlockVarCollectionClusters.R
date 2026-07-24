@@ -164,6 +164,6 @@ NormalBlockVarCollectionClusters <- R6::R6Class(
     #' @field q_list number of blocks
     q_list = function() map_dbl(self$models, "q"),
     #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(){paste0(self$control$noise_covariance, " normal-block model with unknown q")}
+    who_am_I  = function(){paste0(self$control$noise_covariance, " normal-block-var model with unknown q")}
   )
 )

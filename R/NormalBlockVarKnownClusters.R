@@ -92,7 +92,7 @@ NormalBlockVarKnownClusters <- R6::R6Class(
     },
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
-      {paste(private$res_covariance, "normal-block model with fixed blocks")}
+      {paste(private$res_covariance, "normal-block-var model with fixed blocks")}
   )
 )
 

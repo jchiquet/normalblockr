@@ -5,6 +5,7 @@
 #' R6 abstract class for a generic sparse Normal Block model
 NormalBlockVarBase <- R6::R6Class(
   classname = "NormalBlockVarBase",
+  inherit   =  NormalBlockBase,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -22,7 +23,16 @@ NormalBlockVarBase <- R6::R6Class(
     #' @return A new [`NormalBlockVarBase`] object
     initialize = function(data, q, sparsity = 0, control = NB_control(), zero_inflation = FALSE) {
       super$initialize(data, q, sparsity, control)
-
+      ## penalty mask
+      private$sparsity_ <- sparsity
+      weights <- matrix(1, q, q)
+      diag(weights) <- 0
+      if (!is.null(control$sparsity_weights)) {
+        weights <- control$sparsity_weights
+      }
+      private$weights <- weights
+      ## variant (either diagonal or spherical residuals covariance)
+      private$res_covariance <- control$noise_covariance
       ## Zero-inflation probabilities (kappa/B0) and the resulting fixed
       ## log-likelihood contribution (ZI_cond_mean) are only ever read by the
       ## ZI subclasses (see zi_diag_normal_inference(), and the ZI EM_optimize()/
@@ -57,7 +67,7 @@ NormalBlockVarBase <- R6::R6Class(
     #' @param B regression matrix
     #' @param dm1 diagonal vector of inverse variance matrix (variables level)
     #' @param C the matrix of groups memberships (posterior probabilities)
-    #' @param Omegaq groups inverse variance matrix
+    #' @param Omega groups inverse variance matrix
     #' @param gamma  variance of posterior distribution of W
     #' @param mu mean for posterior distribution of W
     #' @param kappa vector of zero-inflation probabilities
@@ -66,7 +76,7 @@ NormalBlockVarBase <- R6::R6Class(
     #' @param S variational diagonal of variances for posterior distribution of W
     #' @param ll_list  list of log-lik (elbo) values
     #' @param warm_started whether `EM_initialize()` should treat the model as
-    #' already initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand)
+    #' already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
     #' rather than recomputing a fresh heuristic initialization -- set by
     #' [warm_start_from()] and by [split()]/[merge()].
     #' @param clustering_init name of a clustering heuristic to switch to,
@@ -77,7 +87,7 @@ NormalBlockVarBase <- R6::R6Class(
     update = function(B = NA,
                       dm1 = NA,
                       C = NA,
-                      Omegaq = NA,
+                      Omega = NA,
                       gamma = NA,
                       mu = NA,
                       kappa = NA,
@@ -90,7 +100,7 @@ NormalBlockVarBase <- R6::R6Class(
       if (!anyNA(B))       private$B       <- B
       if (!anyNA(dm1))     private$dm1     <- dm1
       if (!anyNA(C))       private$C       <- C
-      if (!anyNA(Omegaq))  private$Omegaq  <- Omegaq
+      if (!anyNA(Omega))  private$Omega  <- Omega
       if (!anyNA(gamma))   private$gamma   <- gamma
       if (!anyNA(kappa))   private$kappa   <- kappa
       if (!anyNA(mu))      private$mu      <- mu
@@ -434,13 +444,6 @@ NormalBlockVarBase <- R6::R6Class(
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## MLE of MV Normal distribution
-    multivariate_normal_inference = function(){
-      B     <- self$data$XtXm1 %*% self$data$XtY
-      R     <- ols_residuals(self$data)
-      Sigma <- cov(R)
-      list(B = B, R = R, Sigma = Sigma)
-    },
 
     ## Per-variable inverse variance from a residual matrix, respecting
     ## res_covariance ("diagonal": one dm1 per variable; "spherical": a
@@ -532,11 +535,31 @@ NormalBlockVarBase <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
+    #' @field B_original regression coefficients (d x p), converted back to
+    #' Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
+    #' column-wise rescaling, if any). Use `model_par$B` instead for the
+    #' coefficients on the internal fitting scale.
+    B_original = function() private$rescale_to_original(private$B, power = 1),
     #' @field d0 number of zi variables (dimensions in X0)
     d0 = function() self$data$d0,
     #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
     model_par = function() list(B = private$B, B0 = private$B0,
                                 dm1 = private$dm1, Omega = private$Omega),
+    #' @field nb_param number of parameters in the model
+    nb_param = function() {
+      nb_param_D <- ifelse(private$res_covariance == "diagonal", self$p, 1)
+      as.integer(self$p * self$d + self$q + self$n_edges + nb_param_D)
+    },
+    #' @field sparsity_weights (weights associated to each pair of groups)
+    sparsity_weights = function(value) {
+      if (missing(value)) {
+        private$weights
+      } else {
+        stopifnot("must be a q x q matrix" =
+                    all(is.matrix(value), nrow(value) == ncol(value), ncol(value) == self$q))
+        private$weights <- value
+      }
+    },
     #' @field dm1_original inverse residual variance per variable
     #' (1 / Var(Y_j)), converted back to Y's original units. Use
     #' `model_par$dm1` instead for the internal fitting scale. With
@@ -548,11 +571,6 @@ NormalBlockVarBase <- R6::R6Class(
     #' variance does not correspond to a single shared variance in the
     #' original, heterogeneous-scale units.
     dm1_original = function() private$rescale_to_original(private$dm1, power = -2),
-    #' @field nb_param number of parameters in the model
-    nb_param = function() {
-      nb_param_D <- ifelse(private$res_covariance == "diagonal", self$p, 1)
-      as.integer(self$p * self$d + self$q + self$n_edges + nb_param_D)
-    },
     #' @field get_res_covariance whether the residual covariance is diagonal or spherical
     get_res_covariance = function() private$res_covariance
   )

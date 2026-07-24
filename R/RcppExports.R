@@ -24,8 +24,8 @@
 #' @return a list with the fitted parameters (B, dm1, Omega, gamma, mu), the
 #' objective (log-likelihood) trace and the number of iterations performed
 #' @noRd
-NormalBlockVarKnownClusters_fit <- function(Y, X, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold) {
-    .Call(`_normalblockr_NormalBlockVarKnownClusters_fit`, Y, X, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold)
+NormalBlockVarKnownClusters_fit <- function(Y, X, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold) {
+    .Call(`_normalblockr_NormalBlockVarKnownClusters_fit`, Y, X, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold)
 }
 
 #' Fit a normal-block model with unknown clusters (Rcpp/Armadillo core, VEM)
@@ -45,8 +45,8 @@ NormalBlockVarKnownClusters_fit <- function(Y, X, C, B0, dm1_0, Omegaq0, sparsit
 #' @return a list with the fitted parameters (B, dm1, Omega, C, alpha, M, S),
 #' the ELBO trace and the number of iterations performed
 #' @noRd
-NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {
-    .Call(`_normalblockr_NormalBlockVarUnknownClusters_fit`, Y, X, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold)
+NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {
+    .Call(`_normalblockr_NormalBlockVarUnknownClusters_fit`, Y, X, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold)
 }
 
 #' Fit a zero-inflated normal-block model with known clusters (Rcpp/Armadillo core)
@@ -77,8 +77,8 @@ NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omegaq0, C0, alph
 #' is a q x q x n array, one posterior covariance matrix per row), the
 #' log-likelihood trace and the number of iterations performed
 #' @noRd
-ZINormalBlockVarKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold) {
-    .Call(`_normalblockr_ZINormalBlockVarKnownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold)
+ZINormalBlockVarKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold) {
+    .Call(`_normalblockr_ZINormalBlockVarKnownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold)
 }
 
 #' Fit a zero-inflated normal-block model with unknown clusters (Rcpp/Armadillo core, VEM)
@@ -101,7 +101,7 @@ ZINormalBlockVarKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, 
 #' @return a list with the fitted parameters (B, dm1, Omega, C, alpha, M, S),
 #' the ELBO trace and the number of iterations performed
 #' @noRd
-ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {
-    .Call(`_normalblockr_ZINormalBlockVarUnknownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold)
+ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {
+    .Call(`_normalblockr_ZINormalBlockVarUnknownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold)
 }
 

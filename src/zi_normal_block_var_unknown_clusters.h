@@ -71,12 +71,12 @@ class ZINormalBlockVarUnknownClusters : public NormalBlockVarBase {
 
 public:
   ZINormalBlockVarUnknownClusters(const ZINormalBlockData& data,
-                                const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omegaq0,
+                                const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omega0,
                                 const arma::mat& C0, const arma::vec& alpha0,
                                 const arma::mat& M0, const arma::mat& S0,
                                 double sparsity, const arma::mat& sparsity_weights,
                                 bool fixed_tau = false) :
-    NormalBlockVarBase(data, C0.n_cols, B0, dm1_0, Omegaq0, sparsity, sparsity_weights),
+    NormalBlockVarBase(data, C0.n_cols, B0, dm1_0, Omega0, sparsity, sparsity_weights),
     zi_data_(data), C_(C0), alpha_(alpha0), M_(M0), S_(S0), fixed_tau_(fixed_tau) {
     Sigma_hat_ = M_.t() * M_ / data.n + arma::diagmat(arma::vectorise(arma::mean(S_, 0))); // matches the very first objective() call in run_em()
   }
