@@ -8,8 +8,8 @@
 status](https://codecov.io/gh/jeannetous/normalblockr/branch/master/graph/badge.svg)](https://app.codecov.io/github/jeannetous/normalblockr?branch=master)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![License: CC BY
-4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![License: GPL
+v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![](https://img.shields.io/github/last-commit/jeannetous/normalblockr.svg)](https://github.com/jeannetous/normalblockr/commits/master)
 <!-- badges: end -->
 
