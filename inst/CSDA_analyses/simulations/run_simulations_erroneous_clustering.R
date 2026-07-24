@@ -130,7 +130,7 @@ one_simu_erroneous_clustering <- function(simu, n, p, q, d, kappa,
 multiple_simulations_erroneous_clustering <-
   function(n_simu, n, p, q, d, kappa, error_rate,
            omega_structure = c("erdos_renyi", "preferential_attachment","community"),
-           saving_file_prefix = NULL, mc.cores = max(1, detectCores() - 2)){
+           saving_file_prefix = NULL, mc.cores = 1){
 
     cat("Settings: (n, p, q, d, kappa) = (",n, p, q, d, mean(kappa), ")\n")
     omega_structure <- match.arg(omega_structure)
@@ -161,7 +161,7 @@ grid_simulations_erroneous_clustering <- function(n_simu, n_list, p_list, q_list
                                               d_list, kappa_list, omega_structure_list,
                                               error_rate_list,
                                               saving_folder = NULL,
-                                              mc.cores = max(1, detectCores() - 2)){
+                                              mc.cores = 1){
 
   settings <- expand.grid(n = n_list,
                           p = p_list,
@@ -194,5 +194,5 @@ omega_structure_list = c("erdos_renyi")
 res <- grid_simulations_erroneous_clustering(n_simu, n_list, p_list, q_list,
                                          d_list, kappa_list, omega_structure_list,
                                          error_rate_list, saving_folder = NULL,
-                                         mc.cores = max(1, detectCores() - 2))
+                                         mc.cores = 1)
 
