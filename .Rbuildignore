@@ -13,3 +13,6 @@
 snowflake.log
 Rplots.pdf
 ^\.claude$
+^README_cache$
+^README\.qmd$
+\.DS_Store$

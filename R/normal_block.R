@@ -94,6 +94,8 @@ normal_block <- function(data,
 #' `optimize()` should automatically call `refine()` afterwards. Default
 #' `FALSE` since it adds real cost; call `collection$refine()` directly at
 #' any point afterwards for the same effect without setting this.
+#' @return A named list of parameters to pass to [normal_block()]'s `control`
+#' argument.
 #' @export
 NB_control <- function(
     niter                = 500,

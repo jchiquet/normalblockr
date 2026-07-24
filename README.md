@@ -5,7 +5,7 @@
 
 [![R-CMD-check](https://github.com/jeannetous/normalblockr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jeannetous/normalblockr/actions/workflows/R-CMD-check.yaml)
 [![Coverage
-status](https://codecov.io/gh/jeannetous/normalblockr/branch/master/graph/badge.svg)](https://codecov.io/github/jeannetous/normalblockr?branch=master)
+status](https://codecov.io/gh/jeannetous/normalblockr/branch/master/graph/badge.svg)](https://app.codecov.io/github/jeannetous/normalblockr?branch=master)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![License: CC BY

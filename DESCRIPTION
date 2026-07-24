@@ -1,6 +1,6 @@
 Package: normalblockr
 Type: Package
-Title: Implementation of the Normal-block model, Gaussian graphical model with latent clustering structure
+Title: Gaussian Graphical Models with Latent Clustering Structure
 Version: 0.2.0
 Authors@R: c(
   person("Jeanne", "Tous", role = c("aut", "cre"), email = "jeanne.tous@inrae.fr"),
@@ -17,8 +17,8 @@ Description: Implements the Normal-Block model, a Gaussian graphical model
              zeros. See Tous & Chiquet (2026)
              <doi:10.1016/j.csda.2026.108347> for the model itself and its
              variational EM estimation procedure.
-License: CC BY 4.0
-URL: http://github.com/jeannetous/normalblockr
+License: GPL (>= 3)
+URL: https://github.com/jeannetous/normalblockr
 BugReports: https://github.com/jeannetous/normalblockr/issues
 Encoding: UTF-8
 LazyData: true

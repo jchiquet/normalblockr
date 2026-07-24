@@ -54,6 +54,8 @@ information for clustering anyway).
 Y <- log(1 + onema$biomass)
 X <- model.matrix(~ 1, data = onema$covariates)
 nb_data <- NormalBlockData$new(Y, X)
+\donttest{
 out <- normal_block(nb_data, 2:15, control = NB_control(clustering_init = "ward2"))
+}
 }
 \keyword{datasets}

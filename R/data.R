@@ -94,7 +94,9 @@
 #' Y <- log(1 + onema$biomass)
 #' X <- model.matrix(~ 1, data = onema$covariates)
 #' nb_data <- NormalBlockData$new(Y, X)
+#' \donttest{
 #' out <- normal_block(nb_data, 2:15, control = NB_control(clustering_init = "ward2"))
+#' }
 "onema"
 
 #' University webpages text data (CMU "4 Universities" / WebKB)
@@ -137,5 +139,7 @@
 #' @examples
 #' Y <- log(1 + university$frequencies[, university$terms])
 #' nb_data <- NormalBlockData$new(Y, X = matrix(1, nrow(Y), 1))
+#' \donttest{
 #' out <- normal_block(nb_data, 2:15)
+#' }
 "university"

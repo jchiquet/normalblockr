@@ -62,6 +62,10 @@ are all `NA` on the resulting model.}
 `FALSE` since it adds real cost; call `collection$refine()` directly at
 any point afterwards for the same effect without setting this.}
 }
+\value{
+A named list of parameters to pass to [normal_block()]'s `control`
+argument.
+}
 \description{
 Control the model settings and various optimization parameters
 }
