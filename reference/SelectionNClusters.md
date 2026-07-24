@@ -1,13 +1,5 @@
 # R6 class for selecting the number of clusters (q) by forward/backward split-and-merge exploration, comparing models with the ICL
 
-R6 class for selecting the number of clusters (q) by forward/backward
-split-and-merge exploration, comparing models with the ICL
-
-R6 class for selecting the number of clusters (q) by forward/backward
-split-and-merge exploration, comparing models with the ICL
-
-## Details
-
 Kept internal/unexported for reference: empirically (see
 \[NormalBlockVarCollectionClusters\]'s \`refine()\` documentation)
 chaining every q from a single starting point this way is no longer
@@ -46,7 +38,7 @@ split/merge propagating to every larger q it explores from there).
 
 ### Public methods
 
-- [`SelectionNClusters$new()`](#method-SelectionNClusters-new)
+- [`SelectionNClusters$new()`](#method-SelectionNClusters-initialize)
 
 - [`SelectionNClusters$fit()`](#method-SelectionNClusters-fit)
 
@@ -62,7 +54,7 @@ split/merge propagating to every larger q it explores from there).
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `SelectionNClusters$new()`
 
 Explores and selects the optimal number of classes
 
@@ -105,7 +97,7 @@ The best model in the ICL sense
 
 ------------------------------------------------------------------------
 
-### Method `fit()`
+### `SelectionNClusters$fit()`
 
 perform model selection with forward/backward exploration with split and
 merge strategy
@@ -116,7 +108,7 @@ merge strategy
 
 ------------------------------------------------------------------------
 
-### Method `train_best_candidates()`
+### `SelectionNClusters$train_best_candidates()`
 
 perform model selection with forward/backward exploration with split and
 merge strategy
@@ -141,7 +133,7 @@ merge strategy
 
 ------------------------------------------------------------------------
 
-### Method `explore_forward()`
+### `SelectionNClusters$explore_forward()`
 
 perform forward exploration with a split strategy
 
@@ -151,7 +143,7 @@ perform forward exploration with a split strategy
 
 ------------------------------------------------------------------------
 
-### Method `explore_backward()`
+### `SelectionNClusters$explore_backward()`
 
 perform backward exploration with a merge strategy
 
@@ -161,7 +153,7 @@ perform backward exploration with a merge strategy
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+### `SelectionNClusters$plot()`
 
 Display the ICL for all the best models explored per number of cluster,
 and the winner
@@ -176,7 +168,7 @@ a \[\`ggplot2::ggplot\`\] graph
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `SelectionNClusters$clone()`
 
 The objects of this class are cloneable with this method.
 

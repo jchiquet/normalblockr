@@ -3,13 +3,10 @@
 R6 class for a collection of normal-block models with different number
 of clusters (q) and a fixed sparsity level.
 
-R6 class for a collection of normal-block models with different number
-of clusters (q) and a fixed sparsity level.
-
 ## Super class
 
-[`normalblockr::NormalBlockVarCollection`](NormalBlockVarCollection.md)
--\> `NormalBlockVarCollectionClusters`
+[`NormalBlockVarCollection`](NormalBlockVarCollection.md) -\>
+`NormalBlockVarCollectionClusters`
 
 ## Active bindings
 
@@ -25,7 +22,7 @@ of clusters (q) and a fixed sparsity level.
 
 ### Public methods
 
-- [`NormalBlockVarCollectionClusters$new()`](#method-NormalBlockVarCollectionClusters-new)
+- [`NormalBlockVarCollectionClusters$new()`](#method-NormalBlockVarCollectionClusters-initialize)
 
 - [`NormalBlockVarCollectionClusters$get_model()`](#method-NormalBlockVarCollectionClusters-get_model)
 
@@ -41,7 +38,7 @@ of clusters (q) and a fixed sparsity level.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `NormalBlockVarCollectionClusters$new()`
 
 Create a new \[\`NormalBlockVarCollectionClusters\`\] object.
 
@@ -84,7 +81,7 @@ A new \[\`NormalBlockVarCollectionClusters\`\] object
 
 ------------------------------------------------------------------------
 
-### Method [`get_model()`](get_model.md)
+### `NormalBlockVarCollectionClusters$get_model()`
 
 returns the NormalBlockVarUnknownClusters model corresponding to given q
 
@@ -104,7 +101,7 @@ A NormalBlockVarUnknownClusters object with given value q
 
 ------------------------------------------------------------------------
 
-### Method `get_best_model()`
+### `NormalBlockVarCollectionClusters$get_best_model()`
 
 Extract best model in the collection
 
@@ -127,7 +124,7 @@ a \[\`NormalBlockVarUnknownClusters\`\] object
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+### `NormalBlockVarCollectionClusters$plot()`
 
 Display various outputs (goodness-of-fit criteria, robustness,
 diagnostic) associated with a collection of network fits (a
@@ -152,7 +149,7 @@ a \[\`ggplot2::ggplot\`\] graph
 
 ------------------------------------------------------------------------
 
-### Method [`optimize()`](https://rdrr.io/r/stats/optimize.html)
+### `NormalBlockVarCollectionClusters$optimize()`
 
 optimizes every model in the collection, then – if \`control\$refine\`
 is \`TRUE\` (see \[NB_control()\], default \`FALSE\`) – calls
@@ -172,7 +169,7 @@ is \`TRUE\` (see \[NB_control()\], default \`FALSE\`) – calls
 
 ------------------------------------------------------------------------
 
-### Method `refine()`
+### `NormalBlockVarCollectionClusters$refine()`
 
 Tries to improve every model in the collection with a short
 split-and-reoptimize trial seeded from its smaller-q neighbor
@@ -226,7 +223,7 @@ invisibly returns \`self\`; improved models replace the originals in
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `NormalBlockVarCollectionClusters$clone()`
 
 The objects of this class are cloneable with this method.
 

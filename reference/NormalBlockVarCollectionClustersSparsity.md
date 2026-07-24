@@ -3,13 +3,10 @@
 R6 class for a collection of normal-block models with different number
 of clusters (q) and different sparsity levels.
 
-R6 class for a collection of normal-block models with different number
-of clusters (q) and different sparsity levels.
-
 ## Super class
 
-[`normalblockr::NormalBlockVarCollection`](NormalBlockVarCollection.md)
--\> `NormalBlockVarCollectionClustersSparsity`
+[`NormalBlockVarCollection`](NormalBlockVarCollection.md) -\>
+`NormalBlockVarCollectionClustersSparsity`
 
 ## Active bindings
 
@@ -29,7 +26,7 @@ of clusters (q) and different sparsity levels.
 
 ### Public methods
 
-- [`NormalBlockVarCollectionClustersSparsity$new()`](#method-NormalBlockVarCollectionClustersSparsity-new)
+- [`NormalBlockVarCollectionClustersSparsity$new()`](#method-NormalBlockVarCollectionClustersSparsity-initialize)
 
 - [`NormalBlockVarCollectionClustersSparsity$get_model()`](#method-NormalBlockVarCollectionClustersSparsity-get_model)
 
@@ -41,11 +38,11 @@ of clusters (q) and different sparsity levels.
 
 Inherited methods
 
-- [`normalblockr::NormalBlockVarCollection$optimize()`](NormalBlockVarCollection.html#method-optimize)
+- [`NormalBlockVarCollection$optimize()`](NormalBlockVarCollection.html#method-optimize)
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `NormalBlockVarCollectionClustersSparsity$new()`
 
 Create a new \[\`NormalBlockVarCollectionClustersSparsity\`\] object.
 
@@ -82,7 +79,7 @@ A new \[\`NormalBlockVarCollectionClustersSparsity\`\] object
 
 ------------------------------------------------------------------------
 
-### Method [`get_model()`](get_model.md)
+### `NormalBlockVarCollectionClustersSparsity$get_model()`
 
 returns a collection of models corresponding to given q or one single
 model if penalty is also given
@@ -108,7 +105,7 @@ NormalBlockVarUnknownClusters object
 
 ------------------------------------------------------------------------
 
-### Method `get_best_model()`
+### `NormalBlockVarCollectionClustersSparsity$get_best_model()`
 
 Extract best model in the collection
 
@@ -131,7 +128,7 @@ a \[\`NormalBlockVarUnknownClusters\`\] object
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+### `NormalBlockVarCollectionClustersSparsity$plot()`
 
 Display various outputs (goodness-of-fit criteria, robustness,
 diagnostic) associated with a collection of network fits (a
@@ -161,7 +158,7 @@ a \[\`ggplot\`\] heatmap
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `NormalBlockVarCollectionClustersSparsity$clone()`
 
 The objects of this class are cloneable with this method.
 

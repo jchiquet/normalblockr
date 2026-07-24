@@ -2,8 +2,6 @@
 
 R6 abstract class for a generic sparse Normal Block model
 
-R6 abstract class for a generic sparse Normal Block model
-
 ## Public fields
 
 - `data`:
@@ -141,7 +139,7 @@ R6 abstract class for a generic sparse Normal Block model
 
 ### Public methods
 
-- [`NormalBlockVarBase$new()`](#method-NormalBlockVarBase-new)
+- [`NormalBlockVarBase$new()`](#method-NormalBlockVarBase-initialize)
 
 - [`NormalBlockVarBase$update()`](#method-NormalBlockVarBase-update)
 
@@ -175,7 +173,7 @@ R6 abstract class for a generic sparse Normal Block model
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `NormalBlockVarBase$new()`
 
 Create a new \[\`NormalBlockVarBase\`\] object.
 
@@ -222,7 +220,7 @@ A new \[\`NormalBlockVarBase\`\] object
 
 ------------------------------------------------------------------------
 
-### Method [`update()`](https://rdrr.io/r/stats/update.html)
+### `NormalBlockVarBase$update()`
 
 Update a \[\`NormalBlockVarBase\`\] object
 
@@ -311,7 +309,7 @@ Update the current \[\`normal\`\] object
 
 ------------------------------------------------------------------------
 
-### Method `best_of_inits()`
+### `NormalBlockVarBase$best_of_inits()`
 
 Try several clustering-initialization heuristics and keep the best-ELBO
 converged fit (see \`NB_control(clustering_init = )\` and
@@ -359,7 +357,7 @@ model\$best_of_inits()\`).
 
 ------------------------------------------------------------------------
 
-### Method [`optimize()`](https://rdrr.io/r/stats/optimize.html)
+### `NormalBlockVarBase$optimize()`
 
 calls optimization (EM or heuristic) and updates relevant fields
 
@@ -392,7 +390,7 @@ optimizes the model and updates its parameters
 
 ------------------------------------------------------------------------
 
-### Method `warm_start_from()`
+### `NormalBlockVarBase$warm_start_from()`
 
 Seed this model's starting parameters from another, already-optimized
 model with the same q, instead of the heuristic clustering-derived
@@ -423,7 +421,7 @@ Update the current object in place with \`other\`'s parameters
 
 ------------------------------------------------------------------------
 
-### Method [`split()`](https://rdrr.io/r/base/split.html)
+### `NormalBlockVarBase$split()`
 
 Create a clone of the current \[\`NormalBlockVarBase\`\] object after
 splitting cluster \`cl\` We split the cluster according to the species
@@ -450,7 +448,7 @@ A new \[\`NormalBlockVarBase\`\] object
 
 ------------------------------------------------------------------------
 
-### Method `candidates_split()`
+### `NormalBlockVarBase$candidates_split()`
 
 generate and select a set of candidate models by splitting the clusters
 of the current model
@@ -470,7 +468,7 @@ of the current model
 
 ------------------------------------------------------------------------
 
-### Method `candidates_merge()`
+### `NormalBlockVarBase$candidates_merge()`
 
 generate and select a set of candidate models by merging the clusters of
 the current model
@@ -496,7 +494,7 @@ the current model
 
 ------------------------------------------------------------------------
 
-### Method [`merge()`](https://rdrr.io/r/base/merge.html)
+### `NormalBlockVarBase$merge()`
 
 Create a clone of the current \[\`NormalBlockVarBase\`\] object after
 merging clusters \`cl1\` and \`cl2\`
@@ -522,7 +520,7 @@ A new \[\`NormalBlockVarBase\`\] object
 
 ------------------------------------------------------------------------
 
-### Method [`predict()`](https://rdrr.io/r/stats/predict.html)
+### `NormalBlockVarBase$predict()`
 
 Predicts observations Y for new covariates X.
 
@@ -542,7 +540,7 @@ A n\*p prediction matrix for new observations
 
 ------------------------------------------------------------------------
 
-### Method `latent_network()`
+### `NormalBlockVarBase$latent_network()`
 
 Extract interaction network in the latent space
 
@@ -566,7 +564,7 @@ a square matrix of size \`self\$q\`
 
 ------------------------------------------------------------------------
 
-### Method `plot_loglik()`
+### `NormalBlockVarBase$plot_loglik()`
 
 plots the evolution of the objective (log-likelihood or ELBO) across the
 (V)EM iterations of the last call to \`optimize()\`.
@@ -593,7 +591,7 @@ a \[\`ggplot2::ggplot\`\] graph
 
 ------------------------------------------------------------------------
 
-### Method `plot_network()`
+### `NormalBlockVarBase$plot_network()`
 
 plot the latent network.
 
@@ -648,7 +646,7 @@ plot the latent network.
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+### `NormalBlockVarBase$plot()`
 
 plots the evolution of the objective during model optimization (see
 \`plot_loglik()\`)
@@ -659,7 +657,7 @@ plots the evolution of the objective during model optimization (see
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://rdrr.io/r/base/print.html)
+### `NormalBlockVarBase$print()`
 
 User friendly print method
 
@@ -675,7 +673,7 @@ User friendly print method
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `NormalBlockVarBase$clone()`
 
 The objects of this class are cloneable with this method.
 

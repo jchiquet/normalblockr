@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Zero-inflated Normal-Block-Var models: a worked example with fish biomass data • normalblockr</title>
+<title>Zero-inflated Normal-Block models: a worked example with fish biomass data • normalblockr</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Zero-inflated Normal-Block-Var models: a worked example with fish biomass data">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Zero-inflated Normal-Block models: a worked example with fish biomass data">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -34,8 +34,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
-    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block-Var model - First steps</a></li>
-    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block-Var models: a worked example with fish biomass data</a></li>
+    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul>
 </li>
       </ul>
@@ -57,7 +57,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Zero-inflated Normal-Block-Var models: a worked example with fish biomass data</h1>
+      <h1>Zero-inflated Normal-Block models: a worked example with fish biomass data</h1>
                         <h4 data-toc-skip class="author">Julien Chiquet
 &amp; Jeanne Tous</h4>
             
@@ -73,13 +73,13 @@
 <h2 id="preliminaries">Preliminaries<a class="anchor" aria-label="anchor" href="#preliminaries"></a>
 </h2>
 <p>This vignette walks through a real-data analysis with the
-zero-inflated extension of the Normal-Block-Var model, using the
+zero-inflated extension of the Normal-Block model, using the
 <code>onema</code> dataset shipped with the package (see
 <code><a href="../reference/onema.html">?onema</a></code>): fish biomass per species, summed per sampling
 station, together with environmental covariates. See the
 <code>normal-block</code> vignette
 (<code><a href="../articles/normal-block.html">vignette("normal-block")</a></code>) for a general introduction to
-the Normal-Block-Var model on simulated data; this one focuses on what
+the Normal-Block model on simulated data; this one focuses on what
 changes when the observations are zero-inflated.</p>
 <p>Many entries of <code>onema$biomass</code> are exactly zero: a
 species simply absent from a given station, not a small positive biomass
@@ -88,7 +88,7 @@ exact zeros beyond what its own variance would produce, which biases
 both the variable-level noise estimates and the inferred clustering. The
 next section spells out precisely how the zero-inflation extension
 addresses this; see <span class="citation">Tous and Chiquet
-(2026)</span> for the Normal-Block-Var model itself, and
+(2026)</span> for the Normal-Block model itself, and
 <code>inst/normal_block_models.qmd</code> (the package’s reference card)
 for the full estimation details.</p>
 </div>
@@ -96,9 +96,9 @@ for the full estimation details.</p>
 <h2 id="mathematical-background">Mathematical background<a class="anchor" aria-label="anchor" href="#mathematical-background"></a>
 </h2>
 <div class="section level3">
-<h3 id="the-normal-block-var-model">The Normal-Block-Var model<a class="anchor" aria-label="anchor" href="#the-normal-block-var-model"></a>
+<h3 id="the-normal-block-model">The Normal-Block model<a class="anchor" aria-label="anchor" href="#the-normal-block-model"></a>
 </h3>
-<p>The Normal-Block-Var model is a Gaussian latent-variable model for a
+<p>The Normal-Block model is a Gaussian latent-variable model for a
 table of observations
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>∈</mo><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><mi>p</mi></mrow></msup></mrow><annotation encoding="application/x-tex">Y \in \mathbb{R}^{n \times p}</annotation></semantics></math>
 (here,
@@ -147,7 +147,7 @@ this model. Each observation
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">Y_{ij}</annotation></semantics></math>
 is, independently of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mi>i</mi></msub><annotation encoding="application/x-tex">W_i</annotation></semantics></math>,
-either a structural zero or a draw from the Normal-Block-Var model
+either a structural zero or a draw from the Normal-Block model
 above:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mtext mathvariant="normal">excess-of-zero layer:</mtext><mspace width="1.0em"></mspace></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>Z</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>∼</mo><mi>ℬ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>κ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mtext mathvariant="normal">observation space:</mtext><mspace width="1.0em"></mspace></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>Y</mi><mi>i</mi></msub><mo>∣</mo><msub><mi>Z</mi><mi>i</mi></msub><mo>,</mo><msub><mi>W</mi><mi>i</mi></msub><mo>=</mo><msub><mi>Z</mi><mi>i</mi></msub><mo>⊙</mo><mn>𝟎</mn><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>Z</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>⊙</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><mi>C</mi><msub><mi>W</mi><mi>i</mi></msub><mo>+</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>B</mi><mi>⊤</mi></msup><msub><mi>X</mi><mi>i</mi></msub><mo>,</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
@@ -157,7 +157,7 @@ above:</p>
 </annotation></semantics></math></p>
 <p>so that
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℙ</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>≥</mo><msub><mi>κ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mathbb P(Y_{ij} = 0) \geq \kappa_{ij}</annotation></semantics></math>:
-an excess of zeros beyond what the Normal-Block-Var layer alone would
+an excess of zeros beyond what the Normal-Block layer alone would
 produce, attributed to
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">Z_{ij} = 1</annotation></semantics></math>
 (a structural zero) rather than to the (log-)Normal noise.</p>
@@ -208,7 +208,7 @@ convergence plots.</p>
 <h4 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
 </h4>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://github.com/jeannetous/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jeannetous/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -251,7 +251,7 @@ accommodate the zero spike as part of the same single Gaussian shape,
 degrading the fit of the (more informative) positive part. The
 zero-inflation layer instead lets the spike be absorbed by
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>κ</mi><mi>j</mi></msub><annotation encoding="application/x-tex">\kappa_j</annotation></semantics></math>,
-freeing the Normal-Block-Var model to focus on describing the positive
+freeing the Normal-Block model to focus on describing the positive
 biomasses only.</p>
 </div>
 <div class="section level2">
@@ -276,7 +276,7 @@ estimated independently of the covariates (see
 depend on covariates through <code>X0</code>).</p>
 </div>
 <div class="section level2">
-<h2 id="fitting-a-zero-inflated-normal-block-var-model">Fitting a zero-inflated Normal-Block-Var model<a class="anchor" aria-label="anchor" href="#fitting-a-zero-inflated-normal-block-var-model"></a>
+<h2 id="fitting-a-zero-inflated-normal-block-model">Fitting a zero-inflated Normal-Block model<a class="anchor" aria-label="anchor" href="#fitting-a-zero-inflated-normal-block-model"></a>
 </h2>
 <p>Everything else works exactly as in the non-zero-inflated case (see
 the general vignette): the only difference is

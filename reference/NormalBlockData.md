@@ -2,8 +2,6 @@
 
 R6 class for a generic normal model
 
-R6 class for a generic normal model
-
 ## Public fields
 
 - `Y`:
@@ -74,13 +72,13 @@ R6 class for a generic normal model
 
 ### Public methods
 
-- [`NormalBlockData$new()`](#method-NormalBlockData-new)
+- [`NormalBlockData$new()`](#method-NormalBlockData-initialize)
 
 - [`NormalBlockData$clone()`](#method-NormalBlockData-clone)
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `NormalBlockData$new()`
 
 Create a new \[\`NormalBlockData\`\] object.
 
@@ -115,7 +113,7 @@ Create a new \[\`NormalBlockData\`\] object.
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `NormalBlockData$clone()`
 
 The objects of this class are cloneable with this method.
 

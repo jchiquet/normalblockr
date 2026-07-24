@@ -3,12 +3,9 @@
 R6 class for a normal-block model with fixed number of clusters (but
 unknown clustering).
 
-R6 class for a normal-block model with fixed number of clusters (but
-unknown clustering).
-
 ## Super class
 
-[`normalblockr::NormalBlockVarBase`](NormalBlockVarBase.md) -\>
+[`NormalBlockVarBase`](NormalBlockVarBase.md) -\>
 `NormalBlockVarUnknownClusters`
 
 ## Public fields
@@ -50,30 +47,30 @@ unknown clustering).
 
 ### Public methods
 
-- [`NormalBlockVarUnknownClusters$new()`](#method-NormalBlockVarUnknownClusters-new)
+- [`NormalBlockVarUnknownClusters$new()`](#method-NormalBlockVarUnknownClusters-initialize)
 
 - [`NormalBlockVarUnknownClusters$clone()`](#method-NormalBlockVarUnknownClusters-clone)
 
 Inherited methods
 
-- [`normalblockr::NormalBlockVarBase$best_of_inits()`](NormalBlockVarBase.html#method-best_of_inits)
-- [`normalblockr::NormalBlockVarBase$candidates_merge()`](NormalBlockVarBase.html#method-candidates_merge)
-- [`normalblockr::NormalBlockVarBase$candidates_split()`](NormalBlockVarBase.html#method-candidates_split)
-- [`normalblockr::NormalBlockVarBase$latent_network()`](NormalBlockVarBase.html#method-latent_network)
-- [`normalblockr::NormalBlockVarBase$merge()`](NormalBlockVarBase.html#method-merge)
-- [`normalblockr::NormalBlockVarBase$optimize()`](NormalBlockVarBase.html#method-optimize)
-- [`normalblockr::NormalBlockVarBase$plot()`](NormalBlockVarBase.html#method-plot)
-- [`normalblockr::NormalBlockVarBase$plot_loglik()`](NormalBlockVarBase.html#method-plot_loglik)
-- [`normalblockr::NormalBlockVarBase$plot_network()`](NormalBlockVarBase.html#method-plot_network)
-- [`normalblockr::NormalBlockVarBase$predict()`](NormalBlockVarBase.html#method-predict)
-- [`normalblockr::NormalBlockVarBase$print()`](NormalBlockVarBase.html#method-print)
-- [`normalblockr::NormalBlockVarBase$split()`](NormalBlockVarBase.html#method-split)
-- [`normalblockr::NormalBlockVarBase$update()`](NormalBlockVarBase.html#method-update)
-- [`normalblockr::NormalBlockVarBase$warm_start_from()`](NormalBlockVarBase.html#method-warm_start_from)
+- [`NormalBlockVarBase$best_of_inits()`](NormalBlockVarBase.html#method-best_of_inits)
+- [`NormalBlockVarBase$candidates_merge()`](NormalBlockVarBase.html#method-candidates_merge)
+- [`NormalBlockVarBase$candidates_split()`](NormalBlockVarBase.html#method-candidates_split)
+- [`NormalBlockVarBase$latent_network()`](NormalBlockVarBase.html#method-latent_network)
+- [`NormalBlockVarBase$merge()`](NormalBlockVarBase.html#method-merge)
+- [`NormalBlockVarBase$optimize()`](NormalBlockVarBase.html#method-optimize)
+- [`NormalBlockVarBase$plot()`](NormalBlockVarBase.html#method-plot)
+- [`NormalBlockVarBase$plot_loglik()`](NormalBlockVarBase.html#method-plot_loglik)
+- [`NormalBlockVarBase$plot_network()`](NormalBlockVarBase.html#method-plot_network)
+- [`NormalBlockVarBase$predict()`](NormalBlockVarBase.html#method-predict)
+- [`NormalBlockVarBase$print()`](NormalBlockVarBase.html#method-print)
+- [`NormalBlockVarBase$split()`](NormalBlockVarBase.html#method-split)
+- [`NormalBlockVarBase$update()`](NormalBlockVarBase.html#method-update)
+- [`NormalBlockVarBase$warm_start_from()`](NormalBlockVarBase.html#method-warm_start_from)
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `NormalBlockVarUnknownClusters$new()`
 
 Create a new \[\`NormalBlockVarUnknownClusters\`\] object.
 
@@ -110,7 +107,7 @@ A new \[\`NormalBlockVarUnknownClusters\`\] object
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `NormalBlockVarUnknownClusters$clone()`
 
 The objects of this class are cloneable with this method.
 

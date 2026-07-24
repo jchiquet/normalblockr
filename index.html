@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Implementation of the Normal-block model, Gaussian graphical model with latent clustering structure • normalblockr</title>
+<title>Gaussian Graphical Models with Latent Clustering Structure • normalblockr</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Implementation of the Normal-block model, Gaussian graphical model with latent clustering structure">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Gaussian Graphical Models with Latent Clustering Structure">
 <meta name="description" content="Implements the Normal-Block model, a Gaussian graphical model with a latent clustering structure for the multivariate analysis of continuous data. The model clusters variables and, building on the graphical lasso, infers a network of statistical dependencies between clusters rather than between individual variables, for known or unknown clusterings, with an optional zero-inflation extension for data with an excess of exact zeros. See Tous &amp; Chiquet (2026) &lt;doi:10.1016/j.csda.2026.108347&gt; for the model itself and its variational EM estimation procedure.">
 <meta property="og:description" content="Implements the Normal-Block model, a Gaussian graphical model with a latent clustering structure for the multivariate analysis of continuous data. The model clusters variables and, building on the graphical lasso, infers a network of statistical dependencies between clusters rather than between individual variables, for known or unknown clusterings, with an optional zero-inflation extension for data with an excess of exact zeros. See Tous &amp; Chiquet (2026) &lt;doi:10.1016/j.csda.2026.108347&gt; for the model itself and its variational EM estimation procedure.">
 </head>
@@ -36,8 +36,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
-    <li><a class="dropdown-item" href="articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block-Var model - First steps</a></li>
-    <li><a class="dropdown-item" href="articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block-Var models: a worked example with fish biomass data</a></li>
+    <li><a class="dropdown-item" href="articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+    <li><a class="dropdown-item" href="articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul>
 </li>
       </ul>
@@ -90,7 +90,7 @@
 </h2>
 <p>We illustrate the known-/unknown-clusters and sparse variants on <code>brca_rppa</code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Cancer Genome Atlas Network. Comprehensive molecular portraits of human breast tumours. Nature, 490, 2012, 61-70. &lt;a href="https://doi.org/10.1038/nature11412" class="external-link"&gt;doi:10.1038/nature11412&lt;/a&gt;&lt;/p&gt;'><sup>3</sup></a>: reverse-phase protein array measurements of 163 proteins across 346 breast cancer tumor samples from The Cancer Genome Atlas, together with each sample’s PAM50 molecular subtype.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://github.com/jeannetous/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jeannetous/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">brca_rppa</span><span class="op">)</span></span>
 <span><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">brca_rppa</span><span class="op">$</span><span class="va">expr</span><span class="op">)</span></span>
 <span><span class="va">X</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">PAM50_SUBTYPE</span>, data <span class="op">=</span> <span class="va">brca_rppa</span><span class="op">$</span><span class="va">covariates</span><span class="op">)</span></span>
@@ -265,7 +265,7 @@
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
-<li><small><a href="https://creativecommons.org/licenses/by/4.0" class="external-link">CC BY 4.0</a></small></li>
+<li><small>GPL (&gt;= 3)</small></li>
 </ul>
 </div>
 
@@ -289,7 +289,7 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://github.com/jeannetous/normalblockr/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/jeannetous/normalblockr/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://codecov.io/github/jeannetous/normalblockr?branch=master" class="external-link"><img src="https://codecov.io/gh/jeannetous/normalblockr/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
+<li><a href="https://app.codecov.io/github/jeannetous/normalblockr?branch=master" class="external-link"><img src="https://codecov.io/gh/jeannetous/normalblockr/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://creativecommons.org/licenses/by/4.0/" class="external-link"><img src="https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg" alt="License: CC BY 4.0"></a></li>
 <li><a href="https://github.com/jeannetous/normalblockr/commits/master" class="external-link"><img src="https://img.shields.io/github/last-commit/jeannetous/normalblockr.svg"></a></li>

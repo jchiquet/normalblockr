@@ -91,3 +91,8 @@ NB_control(
   should automatically call \`refine()\` afterwards. Default \`FALSE\`
   since it adds real cost; call \`collection\$refine()\` directly at any
   point afterwards for the same effect without setting this.
+
+## Value
+
+A named list of parameters to pass to \[normal_block()\]'s \`control\`
+argument.

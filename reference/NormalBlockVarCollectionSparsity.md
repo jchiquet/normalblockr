@@ -3,13 +3,10 @@
 R6 class for a collection of normal-block models with a fixed clustering
 (blocks) and different sparsity levels.
 
-R6 class for a collection of normal-block models with a fixed clustering
-(blocks) and different sparsity levels.
-
 ## Super class
 
-[`normalblockr::NormalBlockVarCollection`](NormalBlockVarCollection.md)
--\> `NormalBlockVarCollectionSparsity`
+[`NormalBlockVarCollection`](NormalBlockVarCollection.md) -\>
+`NormalBlockVarCollectionSparsity`
 
 ## Public fields
 
@@ -56,7 +53,7 @@ R6 class for a collection of normal-block models with a fixed clustering
 
 ### Public methods
 
-- [`NormalBlockVarCollectionSparsity$new()`](#method-NormalBlockVarCollectionSparsity-new)
+- [`NormalBlockVarCollectionSparsity$new()`](#method-NormalBlockVarCollectionSparsity-initialize)
 
 - [`NormalBlockVarCollectionSparsity$optimize()`](#method-NormalBlockVarCollectionSparsity-optimize)
 
@@ -72,7 +69,7 @@ R6 class for a collection of normal-block models with a fixed clustering
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `NormalBlockVarCollectionSparsity$new()`
 
 Create a new \[\`NormalBlockVarCollectionSparsity\`\] object.
 
@@ -110,7 +107,7 @@ A new \[\`NormalBlockVarCollectionSparsity\`\] object
 
 ------------------------------------------------------------------------
 
-### Method [`optimize()`](https://rdrr.io/r/stats/optimize.html)
+### `NormalBlockVarCollectionSparsity$optimize()`
 
 optimizes every model in the sparsity path, warm-starting each one
 (after the first) from the previous, adjacent penalty's converged
@@ -134,7 +131,7 @@ changes, so the warm start is always between models of matching shape.
 
 ------------------------------------------------------------------------
 
-### Method [`get_model()`](get_model.md)
+### `NormalBlockVarCollectionSparsity$get_model()`
 
 returns the NormalBlockVarKnownClusters model corresponding to given
 penalty
@@ -155,7 +152,7 @@ A NormalBlockVarKnownClusters (sparse) object with given value penalty
 
 ------------------------------------------------------------------------
 
-### Method `get_best_model()`
+### `NormalBlockVarCollectionSparsity$get_best_model()`
 
 Extract best model in the collection
 
@@ -183,7 +180,7 @@ a \[\`NormalBlockVarUnknownClusters\`\] object
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+### `NormalBlockVarCollectionSparsity$plot()`
 
 Display various outputs (goodness-of-fit criteria, robustness,
 diagnostic) associated with a collection of network fits (a
@@ -214,7 +211,7 @@ a \[\`ggplot\`\] graph
 
 ------------------------------------------------------------------------
 
-### Method `stability_selection()`
+### `NormalBlockVarCollectionSparsity$stability_selection()`
 
 Compute the stability path by stability selection
 
@@ -241,7 +238,7 @@ Compute the stability path by stability selection
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `NormalBlockVarCollectionSparsity$clone()`
 
 The objects of this class are cloneable with this method.
 

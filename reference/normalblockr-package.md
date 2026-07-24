@@ -1,4 +1,4 @@
-# normalblockr: Implementation of the Normal-block model, Gaussian graphical model with latent clustering structure
+# normalblockr: Gaussian Graphical Models with Latent Clustering Structure
 
 Implements the Normal-Block model, a Gaussian graphical model with a
 latent clustering structure for the multivariate analysis of continuous
@@ -14,7 +14,7 @@ for the model itself and its variational EM estimation procedure.
 
 Useful links:
 
-- <http://github.com/jeannetous/normalblockr>
+- <https://github.com/jeannetous/normalblockr>
 
 - Report bugs at <https://github.com/jeannetous/normalblockr/issues>
 
@@ -23,6 +23,8 @@ Useful links:
 **Maintainer**: Jeanne Tous <jeanne.tous@inrae.fr>
 
 Authors:
+
+- Jeanne Tous <jeanne.tous@inrae.fr>
 
 - Julien Chiquet <julien.chiquet@inrae.fr>
   ([ORCID](https://orcid.org/0000-0002-3629-3429))

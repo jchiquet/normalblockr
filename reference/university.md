@@ -60,8 +60,10 @@ vocabulary – the transformation used by Tan et al. (2015).
 ``` r
 Y <- log(1 + university$frequencies[, university$terms])
 nb_data <- NormalBlockData$new(Y, X = matrix(1, nrow(Y), 1))
+# \donttest{
 out <- normal_block(nb_data, 2:15)
 #> Fitting a diagonal normal-block model with unknown q 
 #>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8                number of blocks = 9                number of blocks = 10               number of blocks = 11               number of blocks = 12               number of blocks = 13               number of blocks = 14               number of blocks = 15           
 #> DONE
+# }
 ```

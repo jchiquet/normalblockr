@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Analyzing multivariate Gaussian data with the Normal-Block-Var model - First steps • normalblockr</title>
+<title>Analyzing multivariate Gaussian data with the Normal-Block model - First steps • normalblockr</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Analyzing multivariate Gaussian data with the Normal-Block-Var model - First steps">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Analyzing multivariate Gaussian data with the Normal-Block model - First steps">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -34,8 +34,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
-    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block-Var model - First steps</a></li>
-    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block-Var models: a worked example with fish biomass data</a></li>
+    <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
+    <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul>
 </li>
       </ul>
@@ -57,7 +57,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Analyzing multivariate Gaussian data with the Normal-Block-Var model - First steps</h1>
+      <h1>Analyzing multivariate Gaussian data with the Normal-Block model - First steps</h1>
                         <h4 data-toc-skip class="author">Jeanne Tous,
 Julien Chiquet</h4>
             
@@ -75,14 +75,14 @@ Julien Chiquet</h4>
 <p>This vignette illustrates the use of the <code><a href="../reference/normal_block.html">normal_block()</a></code>
 function and the methods accompanying its R6 classes.</p>
 <p>From a statistical point of view, the <code><a href="../reference/normal_block.html">normal_block()</a></code>
-function fits a multivariate Normal-Block-Var model (a Gaussian
-graphical model with a latent clustering structure) to a table of
-observations, possibly after correcting for the effect of covariates.
-Depending on the arguments given, the function uses a clustering
-supplied by the user or infers one, includes zero-inflation or not,
-infers a sparse network or not, and so on. Parameter inference can
-either be done with an integrated variational Expectation-Maximization
-approach (recommended) or with a faster heuristic approach.</p>
+function fits a multivariate Normal-Block model (a Gaussian graphical
+model with a latent clustering structure) to a table of observations,
+possibly after correcting for the effect of covariates. Depending on the
+arguments given, the function uses a clustering supplied by the user or
+infers one, includes zero-inflation or not, infers a sparse network or
+not, and so on. Parameter inference can either be done with an
+integrated variational Expectation-Maximization approach (recommended)
+or with a faster heuristic approach.</p>
 <p>Theoretical explanations for this model can be found in <span class="citation">Tous and Chiquet (2026)</span>. See
 <code>inst/normal_block_models.qmd</code> in the package sources for the
 full estimation details (criteria, E/M updates).</p>
@@ -90,7 +90,7 @@ full estimation details (criteria, E/M updates).</p>
 <h4 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
 </h4>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://github.com/jeannetous/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jeannetous/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emilhvitfeldt.github.io/paletteer/" class="external-link">paletteer</a></span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -124,7 +124,7 @@ full estimation details (criteria, E/M updates).</p>
 <h3 id="simulation-1-no-zero-inflation">Simulation 1 (no zero-inflation)<a class="anchor" aria-label="anchor" href="#simulation-1-no-zero-inflation"></a>
 </h3>
 <p><code><a href="../reference/generate_normal_block_var_data.html">generate_normal_block_var_data()</a></code> generates data under
-the Normal-Block-Var model. It returns a list containing the simulated
+the Normal-Block model. It returns a list containing the simulated
 covariates
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
 and observations
@@ -168,7 +168,7 @@ to be shown in white.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="prepare-the-data-for-a-normal-block-var-analysis">Prepare the data for a Normal-Block-Var analysis<a class="anchor" aria-label="anchor" href="#prepare-the-data-for-a-normal-block-var-analysis"></a>
+<h2 id="prepare-the-data-for-a-normal-block-analysis">Prepare the data for a Normal-Block analysis<a class="anchor" aria-label="anchor" href="#prepare-the-data-for-a-normal-block-analysis"></a>
 </h2>
 <p>A specific data object of class <code>NormalBlockData</code> needs to
 be created to analyse the data with <code>normalblockr</code>.</p>
@@ -189,9 +189,9 @@ a formula can be used to specify which one:</p>
 <span><span class="va">my_data_alt</span>    <span class="op">&lt;-</span> <span class="va"><a href="../reference/NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">my_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">my_data</span><span class="op">$</span><span class="va">X</span>, formula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">X1</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="run-a-normal-block-var-analysis">Run a Normal-Block-Var analysis<a class="anchor" aria-label="anchor" href="#run-a-normal-block-var-analysis"></a>
+<h2 id="run-a-normal-block-analysis">Run a Normal-Block analysis<a class="anchor" aria-label="anchor" href="#run-a-normal-block-analysis"></a>
 </h2>
-<p>All Normal-Block-Var analyses are run with the
+<p>All Normal-Block analyses are run with the
 <code><a href="../reference/normal_block.html">normal_block()</a></code> function, called with different arguments
 depending on whether the clustering (or the number of clusters) is
 known, and on the requested level of sparsity, among other factors. See
@@ -275,18 +275,18 @@ with the true clustering, when it is known:</p>
 </h4>
 <p>When the number of clusters is unknown, <code><a href="../reference/normal_block.html">normal_block()</a></code>
 can be given a range of candidate values instead, returning a collection
-of Normal-Block-Var models, one per number of clusters.</p>
+of Normal-Block models, one per number of clusters.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_NB_unknown</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">my_data</span>,</span>
 <span>                              blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a diagonal normal-block model with unknown q </span></span>
 <span><span class="co">#&gt;   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
-<p><code>my_NB_unknown</code> is a collection of Normal-Block-Var
-models. A specific one can be selected either by its number of clusters
-or as the best model for a given criterion (BIC, deviance, EBIC or ICL).
-The value of each criterion, for every model in the collection, can be
-visualized with <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
+<p><code>my_NB_unknown</code> is a collection of Normal-Block models. A
+specific one can be selected either by its number of clusters or as the
+best model for a given criterion (BIC, deviance, EBIC or ICL). The value
+of each criterion, for every model in the collection, can be visualized
+with <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">my_NB_unknown</span><span class="op">)</span></span></code></pre></div>
 <p><img src="normal-block_files/figure-html/simulation1-NB3-plot-1.png" class="r-plt" alt="" width="700"></p>
@@ -362,7 +362,7 @@ to vary jointly.</p>
 <span><span class="co">#&gt; Fitting a Collection of   diagonal normal-block models with different values of q and different penalties. </span></span>
 <span><span class="co">#&gt;   number of blocks = 2                penalty = 0.300901              penalty = 0.256719              penalty = 0.2190244             penalty = 0.1868646             penalty = 0.1594269             penalty = 0.1360179             penalty = 0.1160461             penalty = 0.09900679                penalty = 0.08446941                penalty = 0.07206659                penalty = 0.0614849             penalty = 0.05245694                penalty = 0.04475457                penalty = 0.03818316                penalty = 0.03257665                penalty = 0.02779335                penalty = 0.02371239                penalty = 0.02023065                penalty = 0.01726014                penalty = 0.0147258             penalty = 0.01256358                penalty = 0.01071884                penalty = 0.009144969               penalty = 0.007802193               penalty = 0.006656581               penalty = 0.005679181               penalty = 0.004845294               penalty = 0.004133849               penalty = 0.003526867               penalty = 0.00300901                number of blocks = 3                penalty = 0.3002468             penalty = 0.2561609             penalty = 0.2185482             penalty = 0.1864583             penalty = 0.1590802             penalty = 0.1357222             penalty = 0.1157938             penalty = 0.09879153                penalty = 0.08428576                penalty = 0.0719099             penalty = 0.06135121                penalty = 0.05234288                penalty = 0.04465727                penalty = 0.03810014                penalty = 0.03250582                penalty = 0.02773292                penalty = 0.02366083                penalty = 0.02018666                penalty = 0.01722261                penalty = 0.01469378                penalty = 0.01253626                penalty = 0.01069553                penalty = 0.009125086               penalty = 0.00778523                penalty = 0.006642108               penalty = 0.005666833               penalty = 0.00483476                penalty = 0.004124861               penalty = 0.003519199               penalty = 0.003002468               number of blocks = 4                penalty = 0.4133606             penalty = 0.3526659             penalty = 0.3008832             penalty = 0.2567039             penalty = 0.2190115             penalty = 0.1868536             penalty = 0.1594175             penalty = 0.1360099             penalty = 0.1160392             penalty = 0.09900095                penalty = 0.08446443                penalty = 0.07206234                penalty = 0.06148127                penalty = 0.05245384                penalty = 0.04475193                penalty = 0.03818091                penalty = 0.03257472                penalty = 0.02779171                penalty = 0.02371099                penalty = 0.02022946                penalty = 0.01725912                penalty = 0.01472493                penalty = 0.01256283                penalty = 0.01071821                penalty = 0.009144429               penalty = 0.007801733               penalty = 0.006656188               penalty = 0.005678846               penalty = 0.004845009               penalty = 0.004133606               number of blocks = 5                penalty = 0.4229238             penalty = 0.360825              penalty = 0.3078443             penalty = 0.2626428             penalty = 0.2240784             penalty = 0.1911765             penalty = 0.1631056             penalty = 0.1391565             penalty = 0.1187238             penalty = 0.1012914             penalty = 0.08641854                penalty = 0.07372952                penalty = 0.06290366                penalty = 0.05366738                penalty = 0.04578728                penalty = 0.03906424                penalty = 0.03332835                penalty = 0.02843468                penalty = 0.02425955                penalty = 0.02069747                penalty = 0.01765842                penalty = 0.01506559                penalty = 0.01285348                penalty = 0.01096618                penalty = 0.009355989               penalty = 0.007982229               penalty = 0.006810181               penalty = 0.005810227               penalty = 0.004957099               penalty = 0.004229238               number of blocks = 6                penalty = 0.42662               penalty = 0.3639785             penalty = 0.3105348             penalty = 0.2649383             penalty = 0.2260368             penalty = 0.1928473             penalty = 0.1645312             penalty = 0.1403727             penalty = 0.1197615             penalty = 0.1021766             penalty = 0.08717382                penalty = 0.0743739             penalty = 0.06345342                penalty = 0.05413642                penalty = 0.04618745                penalty = 0.03940565                penalty = 0.03361963                penalty = 0.02868319                penalty = 0.02447158                penalty = 0.02087836                penalty = 0.01781275                penalty = 0.01519726                penalty = 0.01296582                penalty = 0.01106202                penalty = 0.009437758               penalty = 0.008051992               penalty = 0.0068697             penalty = 0.005861007               penalty = 0.005000423               penalty = 0.0042662           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
-<p>The result is a collection of Normal-Block-Var models with different
+<p>The result is a collection of Normal-Block models with different
 numbers of clusters and different penalties.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_NB_sparse_unknown</span><span class="op">$</span><span class="va">who_am_I</span></span>

@@ -1,11 +1,5 @@
 # R6 abstract class for a collection of normal-block models
 
-R6 abstract class for a collection of normal-block models
-
-R6 abstract class for a collection of normal-block models
-
-## Details
-
 Shared scaffolding for the collections explored by \[get_model()\]/
 \[normal_block()\]: a sweep over sparsity penalties
 (\[\`NormalBlockVarCollectionSparsity\`\]), over the number of clusters
@@ -44,7 +38,7 @@ the (row of \`self\$criteria\` minimizing a criterion) lookup to
 
 ------------------------------------------------------------------------
 
-### Method [`optimize()`](https://rdrr.io/r/stats/optimize.html)
+### `NormalBlockVarCollection$optimize()`
 
 optimizes every model (or sub-collection) in the collection
 
@@ -65,7 +59,7 @@ optimizes every model (or sub-collection) in the collection
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `NormalBlockVarCollection$clone()`
 
 The objects of this class are cloneable with this method.
 
