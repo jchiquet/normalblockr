@@ -37,9 +37,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="user-facing-functions">User-facing functions<a class="anchor" aria-label="anchor" href="#user-facing-functions"></a></h2>
 
-
+      <div class="section-desc"><p>Main entry points for fitting a Normal-Block model and simulating data</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -48,6 +48,13 @@
 
       <dl><dt>
 
+          <code><a href="normal_block.html">normal_block()</a></code>
+
+        </dt>
+        <dd>Normal-block model</dd>
+
+        <dt>
+
           <code><a href="NB_control.html">NB_control()</a></code>
 
         </dt>
@@ -55,45 +62,26 @@
 
         <dt>
 
+          <code><a href="generate_normal_block_var_data.html">generate_normal_block_var_data()</a></code>
+
+        </dt>
+        <dd>Generate Normal Block Data</dd>
+      </dl></div><div class="section level2">
+      <h2 id="model-and-data-classes">Model and data classes<a class="anchor" aria-label="anchor" href="#model-and-data-classes"></a></h2>
+
+      <div class="section-desc"><p>R6 classes returned by normal_block(). NormalBlockData wraps the responses and design matrix; NormalBlockVar<em>Clusters (optionally ZI-prefixed) are single fitted models, known- or unknown-clustering; NormalBlockVarCollection</em> are collections of models explored over a range of q and/or sparsity penalties.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
           <code><a href="NormalBlockData.html">NormalBlockData</a></code>
 
         </dt>
         <dd>R6 class for a generic normal model</dd>
-
-        <dt>
-
-          <code><a href="NormalBlockVarBase.html">NormalBlockVarBase</a></code>
-
-        </dt>
-        <dd>R6 abstract class for a generic sparse Normal Block model</dd>
-
-        <dt>
-
-          <code><a href="NormalBlockVarCollection.html">NormalBlockVarCollection</a></code>
-
-        </dt>
-        <dd>R6 abstract class for a collection of normal-block models</dd>
-
-        <dt>
-
-          <code><a href="NormalBlockVarCollectionClusters.html">NormalBlockVarCollectionClusters</a></code>
-
-        </dt>
-        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.</dd>
-
-        <dt>
-
-          <code><a href="NormalBlockVarCollectionClustersSparsity.html">NormalBlockVarCollectionClustersSparsity</a></code>
-
-        </dt>
-        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.</dd>
-
-        <dt>
-
-          <code><a href="NormalBlockVarCollectionSparsity.html">NormalBlockVarCollectionSparsity</a></code>
-
-        </dt>
-        <dd>R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.</dd>
 
         <dt>
 
@@ -125,12 +113,65 @@
 
         <dt>
 
+          <code><a href="NormalBlockVarCollectionClusters.html">NormalBlockVarCollectionClusters</a></code>
+
+        </dt>
+        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockVarCollectionSparsity.html">NormalBlockVarCollectionSparsity</a></code>
+
+        </dt>
+        <dd>R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockVarCollectionClustersSparsity.html">NormalBlockVarCollectionClustersSparsity</a></code>
+
+        </dt>
+        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data-sets">Data sets<a class="anchor" aria-label="anchor" href="#data-sets"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
           <code><a href="brca_rppa.html">brca_rppa</a></code>
 
         </dt>
         <dd>Breast cancer proteomics data (TCGA, RPPA)</dd>
 
         <dt>
+
+          <code><a href="onema.html">onema</a></code>
+
+        </dt>
+        <dd>French stream fish community data (ONEMA / OFB electrofishing surveys)</dd>
+
+        <dt>
+
+          <code><a href="university.html">university</a></code>
+
+        </dt>
+        <dd>University webpages text data (CMU "4 Universities" / WebKB)</dd>
+      </dl></div><div class="section level2">
+      <h2 id="s-methods">S3 methods<a class="anchor" aria-label="anchor" href="#s-methods"></a></h2>
+
+      <div class="section-desc"><p>Standard extractors, common to every fitted model class</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
 
           <code><a href="coef.NormalBlockVarBase.html">coef(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
 
@@ -146,10 +187,47 @@
 
         <dt>
 
-          <code><a href="generate_normal_block_var_data.html">generate_normal_block_var_data()</a></code>
+          <code><a href="predict.NormalBlockVarBase.html">predict(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
 
         </dt>
-        <dd>Generate Normal Block Data</dd>
+        <dd>Predicts observations Y for new covariates X.</dd>
+
+        <dt>
+
+          <code><a href="sigma.NormalBlockVarBase.html">sigma(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extracts the latent-block covariance matrix from objects returned by [NormalBlockBase()] and its variants</dd>
+      </dl></div><div class="section level2">
+      <h2 id="internal">Internal<a class="anchor" aria-label="anchor" href="#internal"></a></h2>
+
+      <div class="section-desc"><p>Abstract base classes, low-level helpers and exploratory code kept for reference; not part of the user-facing API</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="NormalBlockVarBase.html">NormalBlockVarBase</a></code>
+
+        </dt>
+        <dd>R6 abstract class for a generic sparse Normal Block model</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockVarCollection.html">NormalBlockVarCollection</a></code>
+
+        </dt>
+        <dd>R6 abstract class for a collection of normal-block models</dd>
+
+        <dt>
+
+          <code><a href="SelectionNClusters.html">SelectionNClusters</a></code>
+
+        </dt>
+        <dd>R6 class for selecting the number of clusters (q) by forward/backward split-and-merge exploration, comparing models with the ICL</dd>
 
         <dt>
 
@@ -164,43 +242,9 @@
 
         </dt>
         <dd>Checks if a model is of class [NormalBlockVarBase()]</dd>
-
-        <dt>
-
-          <code><a href="normal_block.html">normal_block()</a></code>
-
-        </dt>
-        <dd>Normal-block model</dd>
-
-        <dt>
-
-          <code><a href="onema.html">onema</a></code>
-
-        </dt>
-        <dd>French stream fish community data (ONEMA / OFB electrofishing surveys)</dd>
-
-        <dt>
-
-          <code><a href="predict.NormalBlockVarBase.html">predict(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Predicts observations Y for new covariates X.</dd>
-
-        <dt>
-
-          <code><a href="sigma.NormalBlockVarBase.html">sigma(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Extracts the latent-block covariance matrix from objects returned by [NormalBlockBase()] and its variants</dd>
-
-        <dt>
-
-          <code><a href="university.html">university</a></code>
-
-        </dt>
-        <dd>University webpages text data (CMU "4 Universities" / WebKB)</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
