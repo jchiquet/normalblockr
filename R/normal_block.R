@@ -65,6 +65,7 @@ normal_block <- function(data,
 #' Control the model settings and various optimization parameters
 #'
 #' @param niter number of iterations in model optimization
+#' @param fixed_point_niter number of fixed-point iterations in tau estimation for Normal-Block-Mean with unknown clusters
 #' @param threshold loglikelihood / elbo threshold under which optimization stops
 #' @param sparsity_weights weights with which the penalty should be applied in case
 #' sparsity is required, non-0 values on the diagonal mean diagonal shall be

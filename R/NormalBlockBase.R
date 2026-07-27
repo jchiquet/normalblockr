@@ -98,21 +98,25 @@ NormalBlockBase <- R6::R6Class(
                       alpha = NA,
                       M = NA,
                       S = NA,
+                      Psi = NA,
                       Phi = NA,
+                      Lambda = NA,
                       ll_list = NA,
                       warm_started = NA,
                       clustering_init = NA) {
       if (!anyNA(B))       private$B       <- B
       if (!anyNA(dm1))     private$dm1     <- dm1
       if (!anyNA(C))       private$C       <- C
-      if (!anyNA(Omega))   private$Omega  <- Omega
+      if (!anyNA(Omega))   private$Omega   <- Omega
       if (!anyNA(gamma))   private$gamma   <- gamma
       if (!anyNA(kappa))   private$kappa   <- kappa
       if (!anyNA(mu))      private$mu      <- mu
       if (!anyNA(alpha))   private$alpha   <- alpha
       if (!anyNA(M))       private$M       <- M
       if (!anyNA(S))       private$S       <- S
+      if (!anyNA(Psi))     private$Psi     <- Psi
       if (!anyNA(Phi))     private$Phi     <- Phi
+      if (!anyNA(Lambda))  private$Lambda     <- Lambda
       if (!anyNA(ll_list)) private$ll_list <- ll_list
       if (!anyNA(warm_started)) private$warm_started <- warm_started
       if (!anyNA(clustering_init)) {
@@ -133,7 +137,8 @@ NormalBlockBase <- R6::R6Class(
     #' warm-start probe in [NormalBlockCollectionSparsity]) where stopping at
     #' the cap is expected and not a sign of trouble.
     #' @return optimizes the model and updates its parameters
-    optimize = function(control = list(niter = 500, threshold = 1e-4), warn = TRUE) {
+    optimize = function(control = list(niter = 500, threshold = 1e-4,
+                                       fixed_point_niter = 5), warn = TRUE) {
       private$niter_max  <- control$niter
       private$threshold  <- control$threshold
       optim_out <- private$optimizer(control)
@@ -617,6 +622,7 @@ NormalBlockBase <- R6::R6Class(
       }
       Omega
     },
+
 
     ## Registry of clustering heuristics used to turn the OLS/ZI residuals R
     ## (n x p) into an initial clustering of the p variables into self$q

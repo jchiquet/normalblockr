@@ -48,6 +48,8 @@ NormalBlockData <- R6::R6Class(
     d0 = NULL,
     #' @field p number of variables
     p = NULL,
+    #' @field XtX useful for inference in some cases
+    XtX = NULL,
     #' @field XtXm1 inverse of XtX, useful for inference
     XtXm1 = NULL,
     #' @field XtY useful for inference
@@ -96,14 +98,15 @@ NormalBlockData <- R6::R6Class(
         self$X0 <- model.matrix(fm_zi, as.data.frame(X0))
         stopifnot("Zero-inflation covariates given in the formula must be present in X0" = (length(setdiff(all.vars(terms(fm_zi)), colnames(X0))) ==0))
       }
-      self$d0 <- ncol(self$X0)
-      self$d <- ncol(self$X)
-      self$XtXm1 <- solve(crossprod(self$X))
-      self$XtY   <- crossprod(self$X, self$Y)
+      self$d0        <- ncol(self$X0)
+      self$d         <- ncol(self$X)
+      self$XtX       <- crossprod(self$X)
+      self$XtXm1     <- solve(self$XtX)
+      self$XtY       <- crossprod(self$X, self$Y)
       self$zeros     <- 1 * (self$Y == 0)
       self$zeros_bar <- 1 * (self$Y != 0)
-      self$npY <- sum(self$zeros_bar)
-      self$nY  <- colSums(self$zeros_bar)
+      self$npY       <- sum(self$zeros_bar)
+      self$nY        <- colSums(self$zeros_bar)
     }
   )
 )

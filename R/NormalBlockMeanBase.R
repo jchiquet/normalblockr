@@ -35,7 +35,9 @@ NormalBlockMeanBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    Psi               = NA,
     Phi               = NA,
+    Lambda            = NA,
 
     heuristic_cluster_B_from_variable_B = function(B_variable, C){
       B <- B_variable %*% C / rep(colSums(C), each = nrow(B_variable))
