@@ -9,7 +9,7 @@ R6 class for a normal-block model with known clustering.
 R6 class for a normal-block model with known clustering.
 }
 \section{Super classes}{
-\code{normalblockr::NormalBlockBase} -> \code{\link[normalblockr:NormalBlockVarBase]{normalblockr::NormalBlockVarBase}} -> \code{NormalBlockVarKnownClusters}
+\code{\link[normalblockr:NormalBlockBase]{normalblockr::NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockVarBase]{normalblockr::NormalBlockVarBase}} -> \code{NormalBlockVarKnownClusters}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}

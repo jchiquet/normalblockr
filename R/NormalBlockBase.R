@@ -71,22 +71,25 @@ NormalBlockBase <- R6::R6Class(
     #'
     #' All possible parameters of the child classes
     #' @param B regression matrix [all]
-    #' @param dm1 diagonal vector of inverse variance matrix (variables level) [NB]
+    #' @param dm1 diagonal vector of inverse variance matrix (variables level) [NBVar]
     #' @param C the matrix of groups memberships (posterior probabilities) [all]
     #' @param Omega inverse variance matrix (cluster-level for Normal Block
     #' models, variable-level for Normal Mean Block models) [all]
-    #' @param gamma  variance of posterior distribution of W [NB - known]
-    #' @param mu mean for posterior distribution of W [NB - known]
-    #' @param kappa vector of zero-inflation probabilities [ZINB]
-    #' @param alpha vector of groups probabilities [NB]
-    #' @param M variational mean for posterior distribution of W [NB - unknown]
-    #' @param S variational diagonal of variances for posterior distribution of W [NB - unknown]
-    #' @param Phi Diag(Tau' diag(Omega)) - tau' Diag(diag(Omega)) tau, intermediary term in calculations [NMB]
+    #' @param gamma  variance of posterior distribution of W [NBVar - known]
+    #' @param mu mean for posterior distribution of W [NBVar - known]
+    #' @param kappa vector of zero-inflation probabilities [ZINBVar]
+    #' @param alpha vector of groups probabilities [NBVar]
+    #' @param M variational mean for posterior distribution of W [NBVar - unknown]
+    #' @param S variational diagonal of variances for posterior distribution of W [NBVar - unknown]
+    #' @param Psi crossprod(tau, Omega) %% tau + diag(as.vector(crossprod(tau, diag_Sigma_inv))) - crossprod(tau, diag(diag_Sigma_inv, p)) %*% tau, intermediary term in calculations [NBMean - unknown]
+    #' @param Phi Diag(Tau' diag(Omega)) - tau' Diag(diag(Omega)) tau, intermediary term in calculations [NBMean - unknown]
+    #' @param Lambda (diag(as.vector(tau % diag_M)) - diag(diag(tau % M % t(tau)))) / n, intermediary term in calculations [NBMean - unknown]
     #' @param ll_list  list of log-lik (elbo) values
     #' @param warm_started whether `EM_initialize()` should treat the model as
     #' already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
     #' rather than recomputing a fresh heuristic initialization -- set by
     #' [warm_start_from()] and by [split()]/[merge()].
+    #' @param clustering_init initial clustering
     #' @return Update the current [`normal`] object
     update = function(B = NA,
                       dm1 = NA,

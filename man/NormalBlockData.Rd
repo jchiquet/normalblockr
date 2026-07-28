@@ -30,6 +30,8 @@ R6 class for a generic normal model
 
 \item{\code{p}}{number of variables}
 
+\item{\code{XtX}}{useful for inference in some cases}
+
 \item{\code{XtXm1}}{inverse of XtX, useful for inference}
 
 \item{\code{XtY}}{useful for inference}

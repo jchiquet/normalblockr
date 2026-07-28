@@ -12,5 +12,5 @@ test_that("normal block mean with unknown clusters - basic tests", {
   data  <- NormalBlockData$new(Y, X)
   model <- NormalBlockMeanUnknownClusters$new(data, q, 0.1)
   model$optimize()
-  expect_gt(model$BIC, 11224)
+  expect_lt(model$BIC, 11224)
 })

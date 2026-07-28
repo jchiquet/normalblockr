@@ -61,6 +61,8 @@ are all `NA` on the resulting model.}
 `optimize()` should automatically call `refine()` afterwards. Default
 `FALSE` since it adds real cost; call `collection$refine()` directly at
 any point afterwards for the same effect without setting this.}
+
+\item{fixed_point_niter}{number of fixed-point iterations in tau estimation for Normal-Block-Mean with unknown clusters}
 }
 \description{
 Control the model settings and various optimization parameters

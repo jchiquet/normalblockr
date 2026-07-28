@@ -9,7 +9,7 @@ R6 abstract class for a generic sparse Normal Block model
 R6 abstract class for a generic sparse Normal Block model
 }
 \section{Super class}{
-\code{normalblockr::NormalBlockBase} -> \code{NormalBlockMeanBase}
+\code{\link[normalblockr:NormalBlockBase]{normalblockr::NormalBlockBase}} -> \code{NormalBlockMeanBase}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}

@@ -242,7 +242,7 @@ generate_normal_block_mean_data <-
            kappa = 0,
            omega_structure="erdos-renyi",
            u_v = c(0.3, 0.1),
-           SNR = 0.75,
+           SNR = 5,
            alpha = rep(1/q, q),
            range_X = c(0, 10)) {
 

@@ -123,7 +123,9 @@ All possible parameters of the child classes
   alpha = NA,
   M = NA,
   S = NA,
+  Psi = NA,
   Phi = NA,
+  Lambda = NA,
   ll_list = NA,
   warm_started = NA,
   clustering_init = NA
@@ -135,26 +137,30 @@ All possible parameters of the child classes
 \describe{
 \item{\code{B}}{regression matrix [all]}
 
-\item{\code{dm1}}{diagonal vector of inverse variance matrix (variables level) [NB]}
+\item{\code{dm1}}{diagonal vector of inverse variance matrix (variables level) [NBVar]}
 
 \item{\code{C}}{the matrix of groups memberships (posterior probabilities) [all]}
 
 \item{\code{Omega}}{inverse variance matrix (cluster-level for Normal Block
 models, variable-level for Normal Mean Block models) [all]}
 
-\item{\code{gamma}}{variance of posterior distribution of W [NB - known]}
+\item{\code{gamma}}{variance of posterior distribution of W [NBVar - known]}
 
-\item{\code{mu}}{mean for posterior distribution of W [NB - known]}
+\item{\code{mu}}{mean for posterior distribution of W [NBVar - known]}
 
-\item{\code{kappa}}{vector of zero-inflation probabilities [ZINB]}
+\item{\code{kappa}}{vector of zero-inflation probabilities [ZINBVar]}
 
-\item{\code{alpha}}{vector of groups probabilities [NB]}
+\item{\code{alpha}}{vector of groups probabilities [NBVar]}
 
-\item{\code{M}}{variational mean for posterior distribution of W [NB - unknown]}
+\item{\code{M}}{variational mean for posterior distribution of W [NBVar - unknown]}
 
-\item{\code{S}}{variational diagonal of variances for posterior distribution of W [NB - unknown]}
+\item{\code{S}}{variational diagonal of variances for posterior distribution of W [NBVar - unknown]}
 
-\item{\code{Phi}}{Diag(Tau' diag(Omega)) - tau' Diag(diag(Omega)) tau, intermediary term in calculations [NMB]}
+\item{\code{Psi}}{crossprod(tau, Omega) %% tau + diag(as.vector(crossprod(tau, diag_Sigma_inv))) - crossprod(tau, diag(diag_Sigma_inv, p)) %*% tau, intermediary term in calculations [NBMean - unknown]}
+
+\item{\code{Phi}}{Diag(Tau' diag(Omega)) - tau' Diag(diag(Omega)) tau, intermediary term in calculations [NBMean - unknown]}
+
+\item{\code{Lambda}}{(diag(as.vector(tau % diag_M)) - diag(diag(tau % M % t(tau)))) / n, intermediary term in calculations [NBMean - unknown]}
 
 \item{\code{ll_list}}{list of log-lik (elbo) values}
 
@@ -162,6 +168,8 @@ models, variable-level for Normal Mean Block models) [all]}
 already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
 rather than recomputing a fresh heuristic initialization -- set by
 [warm_start_from()] and by [split()]/[merge()].}
+
+\item{\code{clustering_init}}{initial clustering}
 }
 \if{html}{\out{</div>}}
 }
@@ -176,7 +184,7 @@ Update the current [`normal`] object
 calls optimization (EM or heuristic) and updates relevant fields
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{NormalBlockBase$optimize(
-  control = list(niter = 500, threshold = 1e-04),
+  control = list(niter = 500, threshold = 1e-04, fixed_point_niter = 5),
   warn = TRUE
 )}\if{html}{\out{</div>}}
 }

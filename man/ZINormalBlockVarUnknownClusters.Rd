@@ -9,7 +9,7 @@ R6 class for zero-inflated normal-block model with a fixed number of clusters (b
 R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).
 }
 \section{Super classes}{
-\code{normalblockr::NormalBlockBase} -> \code{\link[normalblockr:NormalBlockVarBase]{normalblockr::NormalBlockVarBase}} -> \code{ZINormalBlockVarUnknownClusters}
+\code{\link[normalblockr:NormalBlockBase]{normalblockr::NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockVarBase]{normalblockr::NormalBlockVarBase}} -> \code{ZINormalBlockVarUnknownClusters}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}

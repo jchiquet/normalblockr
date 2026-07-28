@@ -34,8 +34,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
     get_heuristic_parameters = function(){
       reg_res   <- private$multivariate_normal_inference()
       Omega     <- private$get_Omega(reg_res$Sigma)
-
-      kmeans_init <- kmeans(t(reg_res$R), centers = self$q, nstart = 20)
+      kmeans_init <- kmeans(t(reg_res$B), centers = self$q, nstart = 20)
       tau         <- as_indicator(kmeans_init$cluster)
       tau         <- check_one_boundary(check_zero_boundary(tau))
       tau         <- tau / rowSums(tau)

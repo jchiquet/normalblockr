@@ -9,7 +9,7 @@ R6 class for a normal-block model with fixed number of clusters (but unknown clu
 R6 class for a normal-block model with fixed number of clusters (but unknown clustering).
 }
 \section{Super classes}{
-\code{normalblockr::NormalBlockBase} -> \code{\link[normalblockr:NormalBlockVarBase]{normalblockr::NormalBlockVarBase}} -> \code{NormalBlockVarUnknownClusters}
+\code{\link[normalblockr:NormalBlockBase]{normalblockr::NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockVarBase]{normalblockr::NormalBlockVarBase}} -> \code{NormalBlockVarUnknownClusters}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}

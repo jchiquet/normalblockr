@@ -9,7 +9,7 @@ R6 class for a Zero-Inflated normal-block model with a known clustering.
 R6 class for a Zero-Inflated normal-block model with a known clustering.
 }
 \section{Super classes}{
-\code{normalblockr::NormalBlockBase} -> \code{\link[normalblockr:NormalBlockVarBase]{normalblockr::NormalBlockVarBase}} -> \code{ZINormalBlockVarKnownClusters}
+\code{\link[normalblockr:NormalBlockBase]{normalblockr::NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockVarBase]{normalblockr::NormalBlockVarBase}} -> \code{ZINormalBlockVarKnownClusters}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
