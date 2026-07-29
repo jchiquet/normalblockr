@@ -51,14 +51,8 @@ NormalBlockVarCollection <- R6::R6Class(
     progress_field = NA_character_, # name of the field reported by optimize()'s progress message
     progress_label = NA_character_, # human-readable label for that field
 
-    ## Row of crit_df minimizing `crit`, after checking that the criterion is
-    ## well-defined for the whole collection. Centralizes the `length(...) >
-    ## 1` guard so that the id is always defined, even for a collection
-    ## reduced to a single model. `crit_df` defaults to (a fresh) self$criteria
-    ## but can be passed in explicitly to reuse one already computed by the
-    ## caller (see plot_criteria_path() below) instead of rebuilding it --
-    ## self$criteria rebuilds the whole collection's criteria data frame from
-    ## every model's own `criteria` field on every access, not a free lookup.
+    ## Row of crit_df minimizing `crit`. `crit_df` can be passed in to reuse
+    ## one already computed by the caller instead of rebuilding self$criteria.
     best_id = function(crit, check_inference = TRUE, crit_df = self$criteria) {
       if (check_inference)
         stopifnot("Log-likelihood based criteria do not apply to the heuristic method" =
@@ -69,23 +63,10 @@ NormalBlockVarCollection <- R6::R6Class(
       id
     },
 
-    ## Shared chart for plot() in NormalBlockVarCollectionClusters (x_var = "q") and
-    ## NormalBlockVarCollectionSparsity (x_var = "sparsity"): one line per
-    ## criterion against x_var, with a dashed vline at each criterion's own
-    ## best model, colour-matched to that criterion's line (so which vline
-    ## belongs to which criterion is unambiguous without a second legend --
-    ## a single grey vline used to mark only one hardcoded criterion's best
-    ## model regardless of how many were actually plotted, which made it
-    ## impossible to tell, e.g., the BIC-best from the ICL-best at a glance).
-    ## "deviance" is excluded by default: it is monotonic along x_var (more
-    ## blocks/less penalty always fits at least as well), so it has no
+    ## Shared chart for plot(): one line per criterion against x_var, with a
+    ## dashed, colour-matched vline at each criterion's own best model.
+    ## "deviance" is excluded by default: monotonic along x_var, so it has no
     ## interior best model the way a penalized criterion does.
-    ##
-    ## self$criteria is computed once, locally (crit_df), and reused for both
-    ## the line plot and every vline's position: vline x-positions are read
-    ## directly off crit_df via best_id(), not via get_best_model(), which
-    ## would (a) rebuild self$criteria all over again and (b) clone() a whole
-    ## fitted model just to read a single scalar (q or sparsity) off it.
     plot_criteria_path = function(x_var, criteria, vline_crit = setdiff(criteria, "deviance")) {
       vline_crit <- intersect(criteria, vline_crit)
       crit_df <- self$criteria

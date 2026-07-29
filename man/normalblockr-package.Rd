@@ -11,18 +11,18 @@ Implements the Normal-Block model, a Gaussian graphical model with a latent clus
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/jeannetous/normalblockr}
-  \item Report bugs at \url{https://github.com/jeannetous/normalblockr/issues}
+  \item \url{https://github.com/jchiquet/normalblockr}
+  \item Report bugs at \url{https://github.com/jchiquet/normalblockr/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Jeanne Tous \email{jeanne.tous@inrae.fr}
+\strong{Maintainer}: Julien Chiquet \email{julien.chiquet@inrae.fr} (\href{https://orcid.org/0000-0002-3629-3429}{ORCID})
 
 Authors:
 \itemize{
-  \item Jeanne Tous \email{jeanne.tous@inrae.fr}
   \item Julien Chiquet \email{julien.chiquet@inrae.fr} (\href{https://orcid.org/0000-0002-3629-3429}{ORCID})
+  \item Jeanne Tous \email{jeanne.tous@inrae.fr}
 }
 
 }

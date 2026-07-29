@@ -76,12 +76,8 @@ NormalBlockVarBase <- R6::R6Class(
         private$C <- matrix(NA, self$data$n, q)
       }
 
-      ## Zero-inflation probabilities (kappa/B0) and the resulting fixed
-      ## log-likelihood contribution (ZI_cond_mean) are only ever read by the
-      ## ZI subclasses (see zi_diag_normal_inference(), and the ZI EM_optimize()/
-      ## fitted/model_par methods) -- skip the p logistic regressions entirely
-      ## for plain (non zero-inflated) models, where they would just be wasted
-      ## work (private$kappa/B0/ZI_cond_mean stay at their NA default).
+      ## kappa/B0/ZI_cond_mean are only used by the ZI subclasses; skip the
+      ## p logistic regressions entirely for plain models.
       if (zero_inflation) {
         if(self$data$npY < self$n * self$p){
           B0_list <- lapply(1:self$data$p,
@@ -199,7 +195,7 @@ NormalBlockVarBase <- R6::R6Class(
     },
 
     #' @description calls optimization (EM or heuristic) and updates relevant fields
-    #' @param control a list for controlling the optimization proces
+    #' @param control a list for controlling the optimization process
     #' @param warn whether to warn when the (V)EM stops at the `niter` cap
     #' without reaching `threshold` (see `private$warn_if_not_converged()`).
     #' Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
@@ -217,16 +213,11 @@ NormalBlockVarBase <- R6::R6Class(
     },
 
     #' @description Seed this model's starting parameters from another,
-    #' already-optimized model with the same q, instead of the heuristic
-    #' clustering-derived values set at construction time. Used by
-    #' [NormalBlockVarCollectionSparsity] to warm-start each penalty in a sparsity
-    #' path from the previous (adjacent) one's converged solution -- adjacent
-    #' penalties along a sorted path usually have similar optima, so this
-    #' typically needs far fewer EM iterations than starting cold each time
-    #' (the same rationale as warm-starting in glmnet/glassoFast's own
-    #' regularization paths). `B0`/`kappa` (zero-inflation) are deliberately
-    #' left untouched: they depend only on the data, not on sparsity/blocks,
-    #' so they are already set correctly and independently on every model.
+    #' already-optimized model with the same q, instead of a fresh heuristic
+    #' clustering. Used by [NormalBlockVarCollectionSparsity] to warm-start
+    #' each penalty in a sparsity path from the previous one's solution.
+    #' `B0`/`kappa` (zero-inflation) are left untouched: they depend only on
+    #' the data, already set correctly and independently on every model.
     #' @param other a [NormalBlockVarBase] object, already optimized
     #' @return Update the current object in place with `other`'s parameters
     warm_start_from = function(other) {
@@ -269,16 +260,9 @@ NormalBlockVarBase <- R6::R6Class(
       new_C[split2, index] <- .Machine$double.eps
       new_C <- new_C / rowSums(new_C)
 
-      ## Variational means: the new block starts as a copy of its parent's
-      ## column. split1/split2 (above) are computed over *variables*
-      ## (length p, from self$clustering) and must not be reused to index
-      ## M/S, which are indexed by *individuals* (length n): doing so used
-      ## to silently scramble rows via recycling whenever p happened to
-      ## divide n evenly, and errors outright otherwise -- e.g. the
-      ## zero-inflated case, where S is also n x q rather than length q.
-      ## EM_initialize()'s first E-step differentiates the duplicated
-      ## columns immediately afterwards anyway, since it is driven by C/tau,
-      ## which already differs between the two new blocks.
+      ## New block starts as a copy of its parent's M/S column; split1/split2
+      ## index *variables* (length p) and must not be reused on M/S, which
+      ## are indexed by *individuals* (length n).
       new_M <- cbind(private$M, private$M[, index])
 
       ## Variational variances
@@ -303,13 +287,8 @@ NormalBlockVarBase <- R6::R6Class(
       ## omega_from_M_S().
       new_Omegaq <- private$omega_from_M_S(new_M, new_S, new_weights)
 
-      ## Mark the result as already initialized (C/Omegaq/M/S/alpha freshly
-      ## derived above, B/dm1 carried over unchanged from the parent -- valid
-      ## since their dimension doesn't depend on q) so that EM_initialize()
-      ## reuses this state instead of discarding it for a fresh heuristic
-      ## Sigmaq/Omegaq estimate, which is both wasted work and a numerical
-      ## stability risk (a candidate clustering from a split/merge is not
-      ## constrained to be "nice" the way a clustering heuristic's output is).
+      ## Mark as already initialized so EM_initialize() reuses this state
+      ## instead of a fresh heuristic clustering.
       if (in_place) {
         self$update(C = new_C, Omegaq = new_Omegaq, M = new_M, S = new_S,
                     alpha = colMeans(new_C), warm_started = TRUE)
@@ -381,11 +360,8 @@ NormalBlockVarBase <- R6::R6Class(
       ## sorting by increasing group label
       indices <- sort(indices)
 
-      ## Cluster merge. drop = FALSE throughout: merging from q = 2 down to
-      ## q = 1 would otherwise silently drop these to plain vectors/a scalar
-      ## (R's default behavior when only one row/column remains), breaking
-      ## the matrix-indexed assignments right below and omega_from_M_S()'s
-      ## ncol() call further down.
+      ## drop = FALSE: merging q = 2 down to q = 1 would otherwise silently
+      ## drop these to a plain vector/scalar.
       new_C <- private$C[, -indices[2], drop = FALSE]
       new_C[, indices[1]] <- private$C[, indices[1]] + private$C[, indices[2]]
 
@@ -448,20 +424,15 @@ NormalBlockVarBase <- R6::R6Class(
           tmp
         }
       )
-      ## Enforce sparse Matrix encoding to avoid downstream problems with igraph::graph_from_adjacency_matrix
-      ## as it fails when given dsyMatrix objects
+      ## Sparse encoding: igraph::graph_from_adjacency_matrix() fails on dsyMatrix
       Matrix::Matrix(net, sparse = TRUE)
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Graphical methods------------------
-    #' @param show_increment whether to add, below the objective trace, a second
-    #' panel with the (log10) absolute increment between consecutive iterations
-    #' and the convergence `threshold` used to stop optimize() (dashed line).
-    #' That second panel is what actually tells convergence apart from merely
-    #' running out of iterations: the objective trace alone tends to look flat
-    #' well before the increment has actually crossed the threshold, especially
-    #' as the number of blocks grows (see inst/CSDA_analyses).
+    #' @param show_increment whether to add a second panel with the (log10)
+    #' absolute increment between iterations and the convergence `threshold`
+    #' -- distinguishes true convergence from a flat-looking objective trace.
     #' @description plots the evolution of the objective (log-likelihood or ELBO)
     #' across the (V)EM iterations of the last call to `optimize()`.
     #' @return a [`ggplot2::ggplot`] graph
@@ -473,17 +444,8 @@ NormalBlockVarBase <- R6::R6Class(
         return(invisible(NULL))
       }
 
-      ## The objective (log-lik/ELBO) trace climbs fast then flattens out
-      ## visually on a linear scale, well before it has actually converged
-      ## (the same effect show_increment exists to catch). When every value
-      ## is negative -- always true in practice in this model, since the
-      ## leading -0.5*n*p*log(2*pi) term dominates -- plotting log10(-obj)
-      ## instead spreads out the near-convergence iterations (where -obj is
-      ## smallest) at the expense of the early, already-obvious big jumps,
-      ## the same log-scale trick already used for the increment panel
-      ## below. Left as the raw value in the (rare) edge case where that
-      ## doesn't hold, e.g. a tiny/degenerate fit where the objective is
-      ## not guaranteed negative.
+      ## log10(-obj) spreads out near-convergence iterations on the plot,
+      ## same trick as the increment panel below; raw value if not all-negative.
       obj_is_neg <- all(obj < 0)
       obj_facet  <- if (obj_is_neg) "log10(-objective)" else "objective"
       obj_value  <- if (obj_is_neg) log10(-obj) else obj
@@ -650,13 +612,8 @@ NormalBlockVarBase <- R6::R6Class(
                                 # which would also be true for split()/merge() clones (those
                                 # keep their own, different, already-tested initialization path).
 
-    ## Warns when the (V)EM stopped because it hit the niter cap rather than
-    ## because it actually converged below threshold -- silently otherwise
-    ## (heuristic fits have no ll_list/niter to check). This is increasingly
-    ## likely as the number of blocks q grows: more latent structure means a
-    ## higher fraction of missing information, hence a slower EM convergence
-    ## rate (see inst/CSDA_analyses) -- the fix for genuinely slow cases is to
-    ## raise `niter` in NB_control(), not to loosen `threshold`.
+    ## Warns when the (V)EM hit the niter cap without reaching threshold
+    ## (heuristic fits have no ll_list/niter to check, so stay silent).
     warn_if_not_converged = function() {
       if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())
       last_increment <- abs(diff(private$ll_list))[private$niter]
@@ -693,15 +650,9 @@ NormalBlockVarBase <- R6::R6Class(
       Omega
     },
 
-    ## Closed-form M-step estimate of Omegaq directly from M/S (Sigma_hat =
-    ## M'M/n + diag(S)), the same formula the (V)EM's own M-step uses (see
-    ## Sigma_hat_ in src/normal_block_unknown_clusters.h). Used by split()/
-    ## merge() to seed the new model's Omegaq from its freshly built M/S/C
-    ## (already consistent with the new clustering) instead of hand-editing
-    ## the parent's Omegaq, which reflects the *old* clustering. `weights`
-    ## is passed explicitly (rather than reading self$sparsity_weights, as
-    ## get_Omegaq() does) because split()/merge() call this before the new,
-    ## resized sparsity_weights have been assigned anywhere.
+    ## Closed-form M-step estimate of Omegaq from M/S (Sigma_hat = M'M/n +
+    ## diag(S)); used by split()/merge() to reseed Omegaq from the new
+    ## clustering's own M/S/C rather than the parent's stale Omegaq.
     omega_from_M_S = function(M, S, weights) {
       s_vec <- if (is.matrix(S)) colMeans(S) else S
       Sigma_hat <- crossprod(M) / self$n + diag(s_vec, ncol(M))
@@ -718,17 +669,9 @@ NormalBlockVarBase <- R6::R6Class(
     ## Methods for heuristic inference----------------------
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    ## Converts a per-variable quantity from the internal fitting scale
-    ## (data$Y, rescaled column-wise by NormalBlockData(scale = TRUE)) back to
-    ## Y's original units. Y_scaled = Y_original / Y_scale, so an additive
-    ## quantity like B or a fitted value picks up one factor of Y_scale
-    ## (power = 1: X_original = Y_scale * X_scaled), while dm1 = 1/variance
-    ## picks up Y_scale^-2 (Var(Y_original) = Y_scale^2 * Var(Y_scaled), so
-    ## dm1_original = dm1_scaled / Y_scale^2, power = -2). Used by the public
-    ## B_original/dm1_original bindings and by fitted() in the 4 leaf classes
-    ## -- model_par$B/model_par$dm1 stay on the internal scale unchanged, since
-    ## warm_start_from() copies them directly into another model's private
-    ## state and must not have them silently rescaled.
+    ## Converts a per-variable quantity from the internal (rescaled) fitting
+    ## scale back to Y's original units: power = 1 for additive quantities
+    ## (B, fitted values), power = -2 for inverse-variance quantities (dm1).
     rescale_to_original = function(M, power = 1) {
       factor <- self$data$Y_scale^power
       if (is.matrix(M)) M * matrix(factor, nrow(M), ncol(M), byrow = TRUE) else M * factor
@@ -743,16 +686,9 @@ NormalBlockVarBase <- R6::R6Class(
       list(B = B, R = R, Sigma = Sigma)
     },
 
-    ## Per-variable inverse variance from a residual matrix, respecting
-    ## res_covariance ("diagonal": one dm1 per variable; "spherical": a
-    ## single shared value repeated p times). Shared by
-    ## NormalBlockVarKnownClusters/NormalBlockVarUnknownClusters's
-    ## get_heuristic_parameters() (previously duplicated verbatim in both).
-    ## ddiag is floored away from exact zero: a variable with an
-    ## (near-)constant residual otherwise produces dm1 = Inf (e.g. a
-    ## variable observed at very few points relative to X's degrees of
-    ## freedom -- see zi_weighted_fit() in R/utils.R for the same guard on
-    ## the zero-inflation side).
+    ## Per-variable inverse variance from a residual matrix ("diagonal": one
+    ## dm1 per variable; "spherical": one shared value). ddiag is floored
+    ## away from 0 to avoid dm1 = Inf on a near-constant residual.
     dm1_from_residuals = function(R) {
       ddiag <- pmax(colMeans(R^2), .Machine$double.eps)
       switch(private$res_covariance,
@@ -776,12 +712,7 @@ NormalBlockVarBase <- R6::R6Class(
 
     heuristic_Sigmaq_from_Sigma = function(Sigma){
       Sigma_q <- (t(private$C) %*% Sigma %*% private$C) / outer(colSums(private$C), colSums(private$C))
-      ## NA happens when a cluster ends up empty (colSums(C) == 0 for that
-      ## column): every entry of outer(colSums(C), colSums(C)) involving it
-      ## is then a division by 0 (see the "Initialization failed to place
-      ## elements in each cluster" warning a few lines below this method's
-      ## caller -- the heuristic clustering this feeds from does not reject
-      ## empty clusters outright, unlike the known-clusters constructors).
+      ## NA when a cluster is empty (colSums(C) == 0 there -> division by 0)
       if (anyNA(Sigma_q)) {
         diag(Sigma_q)[is.na(diag(Sigma_q))] <- mean(diag(Sigma_q)[!is.na(diag(Sigma_q))])
         Sigma_q[is.na(Sigma_q)] <- 0

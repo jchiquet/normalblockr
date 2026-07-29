@@ -252,7 +252,7 @@ mutate the current object; reassign the result
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{control}}{a list for controlling the optimization proces}
+      \item{\code{control}}{a list for controlling the optimization process}
       \item{\code{warn}}{whether to warn when the (V)EM stops at the `niter` cap
 without reaching `threshold` (see `private$warn_if_not_converged()`).
 Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
@@ -272,16 +272,11 @@ the cap is expected and not a sign of trouble.}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-warm_start_from}{}}}
 \subsection{\code{NormalBlockVarBase$warm_start_from()}}{
   Seed this model's starting parameters from another,
-already-optimized model with the same q, instead of the heuristic
-clustering-derived values set at construction time. Used by
-[NormalBlockVarCollectionSparsity] to warm-start each penalty in a sparsity
-path from the previous (adjacent) one's converged solution -- adjacent
-penalties along a sorted path usually have similar optima, so this
-typically needs far fewer EM iterations than starting cold each time
-(the same rationale as warm-starting in glmnet/glassoFast's own
-regularization paths). `B0`/`kappa` (zero-inflation) are deliberately
-left untouched: they depend only on the data, not on sparsity/blocks,
-so they are already set correctly and independently on every model.
+already-optimized model with the same q, instead of a fresh heuristic
+clustering. Used by [NormalBlockVarCollectionSparsity] to warm-start
+each penalty in a sparsity path from the previous one's solution.
+`B0`/`kappa` (zero-inflation) are left untouched: they depend only on
+the data, already set correctly and independently on every model.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarBase$warm_start_from(other)}
@@ -456,13 +451,9 @@ across the (V)EM iterations of the last call to `optimize()`.
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{show_increment}}{whether to add, below the objective trace, a second
-panel with the (log10) absolute increment between consecutive iterations
-and the convergence `threshold` used to stop optimize() (dashed line).
-That second panel is what actually tells convergence apart from merely
-running out of iterations: the objective trace alone tends to look flat
-well before the increment has actually crossed the threshold, especially
-as the number of blocks grows (see inst/CSDA_analyses).}
+      \item{\code{show_increment}}{whether to add a second panel with the (log10)
+absolute increment between iterations and the convergence `threshold`
+-- distinguishes true convergence from a flat-looking objective trace.}
     }
     \if{html}{\out{</div>}}
   }

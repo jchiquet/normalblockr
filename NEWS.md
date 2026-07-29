@@ -1,5 +1,7 @@
 # normalblockr 0.2.0
 
+First CRAN submission
+
 ## New features
 
 * Zero-inflation extension (`ZINormalBlockVarKnownClusters`/`ZINormalBlockVarUnknownClusters`) for data with an excess of exact zeros.
