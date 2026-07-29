@@ -38,12 +38,13 @@
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jeannetous/normalblockr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jchiquet/normalblockr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -61,9 +62,9 @@
                         <h4 data-toc-skip class="author">Jeanne Tous,
 Julien Chiquet</h4>
             
-            <h4 data-toc-skip class="date">2026-07-24</h4>
+            <h4 data-toc-skip class="date">2026-07-29</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/jeannetous/normalblockr/blob/master/vignettes/normal-block.Rmd" class="external-link"><code>vignettes/normal-block.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/vignettes/normal-block.Rmd" class="external-link"><code>vignettes/normal-block.Rmd</code></a></small>
       <div class="d-none name"><code>normal-block.Rmd</code></div>
     </div>
 
@@ -90,7 +91,7 @@ full estimation details (criteria, E/M updates).</p>
 <h4 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
 </h4>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jeannetous/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jchiquet/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emilhvitfeldt.github.io/paletteer/" class="external-link">paletteer</a></span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -351,7 +352,7 @@ Penalty selection can be done similarly to the selection of the number
 of clusters.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">myNB_sparse_0.1</span>   <span class="op">&lt;-</span> <span class="va">my_NB_sparse</span><span class="op">$</span><span class="fu">get_model</span><span class="op">(</span><span class="fl">0.1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658166 Collection penalty values can be found via $sparsity</span></span>
+<span><span class="co">#&gt; No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658165 Collection penalty values can be found via $sparsity</span></span>
 <span><span class="va">myNB_sparse_BIC</span>   <span class="op">&lt;-</span> <span class="va">my_NB_sparse</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"BIC"</span><span class="op">)</span></span></code></pre></div>
 <p>Both the sparsity penalty and the number of clusters can also be left
 to vary jointly.</p>
@@ -383,7 +384,7 @@ the sparsity level.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_NB_sparse_3</span>     <span class="op">&lt;-</span> <span class="va">my_NB_sparse_unknown</span><span class="op">$</span><span class="fu">get_model</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">my_NB_sparse_3_0.1</span> <span class="op">&lt;-</span> <span class="va">my_NB_sparse_unknown</span><span class="op">$</span><span class="fu">get_model</span><span class="op">(</span><span class="fl">3</span>, <span class="fl">0.1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; No model with this penalty in the collection. Returning model with closest penalty: 0.0987915298048484 Collection penalty values can be found via $sparsity</span></span></code></pre></div>
+<span><span class="co">#&gt; No model with this penalty in the collection. Returning model with closest penalty: 0.0987915298048486 Collection penalty values can be found via $sparsity</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">

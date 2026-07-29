@@ -372,7 +372,7 @@ calls optimization (EM or heuristic) and updates relevant fields
 
 - `control`:
 
-  a list for controlling the optimization proces
+  a list for controlling the optimization process
 
 - `warn`:
 
@@ -393,17 +393,11 @@ optimizes the model and updates its parameters
 ### `NormalBlockVarBase$warm_start_from()`
 
 Seed this model's starting parameters from another, already-optimized
-model with the same q, instead of the heuristic clustering-derived
-values set at construction time. Used by
+model with the same q, instead of a fresh heuristic clustering. Used by
 \[NormalBlockVarCollectionSparsity\] to warm-start each penalty in a
-sparsity path from the previous (adjacent) one's converged solution –
-adjacent penalties along a sorted path usually have similar optima, so
-this typically needs far fewer EM iterations than starting cold each
-time (the same rationale as warm-starting in glmnet/glassoFast's own
-regularization paths). \`B0\`/\`kappa\` (zero-inflation) are
-deliberately left untouched: they depend only on the data, not on
-sparsity/blocks, so they are already set correctly and independently on
-every model.
+sparsity path from the previous one's solution. \`B0\`/\`kappa\`
+(zero-inflation) are left untouched: they depend only on the data,
+already set correctly and independently on every model.
 
 #### Usage
 
@@ -577,13 +571,9 @@ plots the evolution of the objective (log-likelihood or ELBO) across the
 
 - `show_increment`:
 
-  whether to add, below the objective trace, a second panel with the
-  (log10) absolute increment between consecutive iterations and the
-  convergence \`threshold\` used to stop optimize() (dashed line). That
-  second panel is what actually tells convergence apart from merely
-  running out of iterations: the objective trace alone tends to look
-  flat well before the increment has actually crossed the threshold,
-  especially as the number of blocks grows (see inst/CSDA_analyses).
+  whether to add a second panel with the (log10) absolute increment
+  between iterations and the convergence \`threshold\` – distinguishes
+  true convergence from a flat-looking objective trace.
 
 #### Returns
 

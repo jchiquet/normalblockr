@@ -10,7 +10,7 @@
 > efficient (variational) EM algorithm to fit it, accompanied by a set
 > of functions for model selection, visualization and diagnostic. See
 > [all the dedicated
-> vignettes](https://jeannetous.github.io/normalblockr/articles/) for a
+> vignettes](https://jchiquet.github.io/normalblockr/articles/) for a
 > comprehensive introduction.
 
 **normalblockr** covers the following model variants, all built around
@@ -39,12 +39,12 @@ choices, not separate model classes to learn.
 ## Installation
 
 **normalblockr** is not (yet) on CRAN; install the development version
-from [GitHub](https://github.com/jeannetous/normalblockr):
+from [GitHub](https://github.com/jchiquet/normalblockr):
 
 ``` r
 
 # install.packages("pak")
-pak::pak("jeannetous/normalblockr")
+pak::pak("jchiquet/normalblockr")
 ```
 
 ## Illustration
@@ -258,15 +258,15 @@ A zero-inflated diagonal normal-block model with 6 unknown blocks .
 
 ## Learning more
 
-- [`normal-block`](https://jeannetous.github.io/normalblockr/articles/normal-block.html)
+- [`normal-block`](https://jchiquet.github.io/normalblockr/articles/normal-block.html)
   ([`vignette("normal-block")`](articles/normal-block.md)): a general
   introduction on simulated data – known/unknown clusters, sparsity,
   zero-inflation.
-- [`zero-inflated-normal-block`](https://jeannetous.github.io/normalblockr/articles/zero-inflated-normal-block.html)
+- [`zero-inflated-normal-block`](https://jchiquet.github.io/normalblockr/articles/zero-inflated-normal-block.html)
   ([`vignette("zero-inflated-normal-block")`](articles/zero-inflated-normal-block.md)):
   a full worked example on `onema`, with the math behind the
   zero-inflation extension.
-- [`breast-cancer-proteomics`](https://jeannetous.github.io/normalblockr/articles/breast-cancer-proteomics.html)
+- [`breast-cancer-proteomics`](https://jchiquet.github.io/normalblockr/articles/breast-cancer-proteomics.html)
   ([`vignette("breast-cancer-proteomics")`](articles/breast-cancer-proteomics.md)):
   a full worked example on `brca_rppa` – known vs. inferred clustering,
   model selection, the post-hoc `refine()` step, sparsifying the

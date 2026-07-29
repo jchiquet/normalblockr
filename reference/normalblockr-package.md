@@ -14,17 +14,18 @@ for the model itself and its variational EM estimation procedure.
 
 Useful links:
 
-- <https://github.com/jeannetous/normalblockr>
+- <https://github.com/jchiquet/normalblockr>
 
-- Report bugs at <https://github.com/jeannetous/normalblockr/issues>
+- Report bugs at <https://github.com/jchiquet/normalblockr/issues>
 
 ## Author
 
-**Maintainer**: Jeanne Tous <jeanne.tous@inrae.fr>
+**Maintainer**: Julien Chiquet <julien.chiquet@inrae.fr>
+([ORCID](https://orcid.org/0000-0002-3629-3429))
 
 Authors:
 
-- Jeanne Tous <jeanne.tous@inrae.fr>
-
 - Julien Chiquet <julien.chiquet@inrae.fr>
   ([ORCID](https://orcid.org/0000-0002-3629-3429))
+
+- Jeanne Tous <jeanne.tous@inrae.fr>

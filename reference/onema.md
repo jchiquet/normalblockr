@@ -67,9 +67,7 @@ nb_data <- NormalBlockData$new(Y, X)
 # \donttest{
 out <- normal_block(nb_data, 2:15, control = NB_control(clustering_init = "ward2"))
 #> Fitting a diagonal normal-block model with unknown q 
-#>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8                number of blocks = 9                number of blocks = 10               number of blocks = 11               number of blocks = 12               number of blocks = 13               number of blocks = 14           
-#> Warning: diagonal normal-block model with 14 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.00182, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
-#>   number of blocks = 15           
+#>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8                number of blocks = 9                number of blocks = 10               number of blocks = 11               number of blocks = 12               number of blocks = 13               number of blocks = 14               number of blocks = 15           
 #> DONE
 # }
 ```

@@ -150,7 +150,7 @@ diagnostic) associated with a collection of network fits (a
 
 - `n_intervals`:
 
-  number of intervals into which the penalties range should be splitted
+  number of intervals into which the penalties range should be split
 
 #### Returns
 

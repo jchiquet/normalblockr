@@ -40,12 +40,13 @@
     <li><a class="dropdown-item" href="articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jeannetous/normalblockr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jchiquet/normalblockr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -62,7 +63,7 @@
 <h2 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
 </h2>
 <blockquote>
-<p>The Normal-Block model<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Tous, J., &amp;amp; Chiquet, J. (2026). An integrated method for clustering and association network inference. Computational Statistics &amp;amp; Data Analysis, 219, 108347. &lt;a href="https://doi.org/10.1016/j.csda.2026.108347" class="external-link"&gt;doi:10.1016/j.csda.2026.108347&lt;/a&gt;&lt;/p&gt;'><sup>1</sup></a> is a Gaussian graphical model with a latent clustering structure, designed for the multivariate analysis of continuous data: it clusters variables and, building on the graphical lasso, infers a network of statistical dependencies <em>between clusters</em> rather than between individual variables. This package implements an efficient (variational) EM algorithm to fit it, accompanied by a set of functions for model selection, visualization and diagnostic. See <a href="https://jeannetous.github.io/normalblockr/articles/" class="external-link">all the dedicated vignettes</a> for a comprehensive introduction.</p>
+<p>The Normal-Block model<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Tous, J., &amp;amp; Chiquet, J. (2026). An integrated method for clustering and association network inference. Computational Statistics &amp;amp; Data Analysis, 219, 108347. &lt;a href="https://doi.org/10.1016/j.csda.2026.108347" class="external-link"&gt;doi:10.1016/j.csda.2026.108347&lt;/a&gt;&lt;/p&gt;'><sup>1</sup></a> is a Gaussian graphical model with a latent clustering structure, designed for the multivariate analysis of continuous data: it clusters variables and, building on the graphical lasso, infers a network of statistical dependencies <em>between clusters</em> rather than between individual variables. This package implements an efficient (variational) EM algorithm to fit it, accompanied by a set of functions for model selection, visualization and diagnostic. See <a href="https://jchiquet.github.io/normalblockr/articles/" class="external-link">all the dedicated vignettes</a> for a comprehensive introduction.</p>
 </blockquote>
 <p><strong>normalblockr</strong> covers the following model variants, all built around the same <code><a href="reference/normal_block.html">normal_block()</a></code>/<code>NormalBlockData</code> interface:</p>
 <ul>
@@ -80,17 +81,17 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p><strong>normalblockr</strong> is not (yet) on CRAN; install the development version from <a href="https://github.com/jeannetous/normalblockr" class="external-link">GitHub</a>:</p>
+<p><strong>normalblockr</strong> is not (yet) on CRAN; install the development version from <a href="https://github.com/jchiquet/normalblockr" class="external-link">GitHub</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"jeannetous/normalblockr"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"jchiquet/normalblockr"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="illustration">Illustration<a class="anchor" aria-label="anchor" href="#illustration"></a>
 </h2>
 <p>We illustrate the known-/unknown-clusters and sparse variants on <code>brca_rppa</code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Cancer Genome Atlas Network. Comprehensive molecular portraits of human breast tumours. Nature, 490, 2012, 61-70. &lt;a href="https://doi.org/10.1038/nature11412" class="external-link"&gt;doi:10.1038/nature11412&lt;/a&gt;&lt;/p&gt;'><sup>3</sup></a>: reverse-phase protein array measurements of 163 proteins across 346 breast cancer tumor samples from The Cancer Genome Atlas, together with each sample’s PAM50 molecular subtype.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jeannetous/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jchiquet/normalblockr" class="external-link">normalblockr</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">brca_rppa</span><span class="op">)</span></span>
 <span><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">brca_rppa</span><span class="op">$</span><span class="va">expr</span><span class="op">)</span></span>
 <span><span class="va">X</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">PAM50_SUBTYPE</span>, data <span class="op">=</span> <span class="va">brca_rppa</span><span class="op">$</span><span class="va">covariates</span><span class="op">)</span></span>
@@ -237,11 +238,11 @@
 </h2>
 <ul>
 <li>
-<a href="https://jeannetous.github.io/normalblockr/articles/normal-block.html" class="external-link"><code>normal-block</code></a> (<code><a href="articles/normal-block.html">vignette("normal-block")</a></code>): a general introduction on simulated data – known/unknown clusters, sparsity, zero-inflation.</li>
+<a href="https://jchiquet.github.io/normalblockr/articles/normal-block.html" class="external-link"><code>normal-block</code></a> (<code><a href="articles/normal-block.html">vignette("normal-block")</a></code>): a general introduction on simulated data – known/unknown clusters, sparsity, zero-inflation.</li>
 <li>
-<a href="https://jeannetous.github.io/normalblockr/articles/zero-inflated-normal-block.html" class="external-link"><code>zero-inflated-normal-block</code></a> (<code><a href="articles/zero-inflated-normal-block.html">vignette("zero-inflated-normal-block")</a></code>): a full worked example on <code>onema</code>, with the math behind the zero-inflation extension.</li>
+<a href="https://jchiquet.github.io/normalblockr/articles/zero-inflated-normal-block.html" class="external-link"><code>zero-inflated-normal-block</code></a> (<code><a href="articles/zero-inflated-normal-block.html">vignette("zero-inflated-normal-block")</a></code>): a full worked example on <code>onema</code>, with the math behind the zero-inflation extension.</li>
 <li>
-<a href="https://jeannetous.github.io/normalblockr/articles/breast-cancer-proteomics.html" class="external-link"><code>breast-cancer-proteomics</code></a> (<code><a href="articles/breast-cancer-proteomics.html">vignette("breast-cancer-proteomics")</a></code>): a full worked example on <code>brca_rppa</code> – known vs. inferred clustering, model selection, the post-hoc <code>refine()</code> step, sparsifying the selected network.</li>
+<a href="https://jchiquet.github.io/normalblockr/articles/breast-cancer-proteomics.html" class="external-link"><code>breast-cancer-proteomics</code></a> (<code><a href="articles/breast-cancer-proteomics.html">vignette("breast-cancer-proteomics")</a></code>): a full worked example on <code>brca_rppa</code> – known vs. inferred clustering, model selection, the post-hoc <code>refine()</code> step, sparsifying the selected network.</li>
 <li>
 <code>inst/normal_block_models.qmd</code> in the package sources: a reference card with every model variant’s exact criterion and E/M (or VE/M) updates, as implemented in <code>src/</code>.</li>
 </ul>
@@ -256,8 +257,8 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/jeannetous/normalblockr/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/jeannetous/normalblockr/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/jchiquet/normalblockr/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/jchiquet/normalblockr/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
@@ -280,19 +281,19 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Jeanne Tous <br><small class="roles"> Author, maintainer </small>   </li>
-<li>Julien Chiquet <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-3629-3429" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Jeanne Tous <br><small class="roles"> Author </small>   </li>
+<li>Julien Chiquet <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-3629-3429" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/jeannetous/normalblockr/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/jeannetous/normalblockr/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://app.codecov.io/github/jeannetous/normalblockr?branch=master" class="external-link"><img src="https://codecov.io/gh/jeannetous/normalblockr/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
+<li><a href="https://github.com/jchiquet/normalblockr/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/jchiquet/normalblockr/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://app.codecov.io/github/jchiquet/normalblockr?branch=master" class="external-link"><img src="https://codecov.io/gh/jchiquet/normalblockr/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://www.gnu.org/licenses/gpl-3.0" class="external-link"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a></li>
-<li><a href="https://github.com/jeannetous/normalblockr/commits/master" class="external-link"><img src="https://img.shields.io/github/last-commit/jeannetous/normalblockr.svg"></a></li>
+<li><a href="https://github.com/jchiquet/normalblockr/commits/master" class="external-link"><img src="https://img.shields.io/github/last-commit/jchiquet/normalblockr.svg"></a></li>
 </ul>
 </div>
 
