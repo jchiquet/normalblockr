@@ -23,7 +23,7 @@ v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/li
 > efficient (variational) EM algorithm to fit it, accompanied by a set
 > of functions for model selection, visualization and diagnostic. See
 > [all the dedicated
-> vignettes](https://jeannetous.github.io/normalblockr/articles/) for a
+> vignettes](https://jchiquet.github.io/normalblockr/articles/) for a
 > comprehensive introduction.
 
 **normalblockr** covers the following model variants, all built around
@@ -50,11 +50,11 @@ not are independent choices, not separate model classes to learn.
 ## Installation
 
 **normalblockr** is not (yet) on CRAN; install the development version
-from [GitHub](https://github.com/jeannetous/normalblockr):
+from [GitHub](https://github.com/jchiquet/normalblockr):
 
 ``` r
 # install.packages("pak")
-pak::pak("jeannetous/normalblockr")
+pak::pak("jchiquet/normalblockr")
 ```
 
 ## Illustration
@@ -244,13 +244,13 @@ m_zi$get_best_model("ICL")
 
 ## Learning more
 
-- [`normal-block`](https://jeannetous.github.io/normalblockr/articles/normal-block.html)
+- [`normal-block`](https://jchiquet.github.io/normalblockr/articles/normal-block.html)
   (`vignette("normal-block")`): a general introduction on simulated data
   – known/unknown clusters, sparsity, zero-inflation.
-- [`zero-inflated-normal-block`](https://jeannetous.github.io/normalblockr/articles/zero-inflated-normal-block.html)
+- [`zero-inflated-normal-block`](https://jchiquet.github.io/normalblockr/articles/zero-inflated-normal-block.html)
   (`vignette("zero-inflated-normal-block")`): a full worked example on
   `onema`, with the math behind the zero-inflation extension.
-- [`breast-cancer-proteomics`](https://jeannetous.github.io/normalblockr/articles/breast-cancer-proteomics.html)
+- [`breast-cancer-proteomics`](https://jchiquet.github.io/normalblockr/articles/breast-cancer-proteomics.html)
   (`vignette("breast-cancer-proteomics")`): a full worked example on
   `brca_rppa` – known vs. inferred clustering, model selection, the
   post-hoc `refine()` step, sparsifying the selected network.

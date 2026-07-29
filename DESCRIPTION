@@ -18,8 +18,8 @@ Description: Implements the Normal-Block model, a Gaussian graphical model
              <doi:10.1016/j.csda.2026.108347> for the model itself and its
              variational EM estimation procedure.
 License: GPL (>= 3)
-URL: https://github.com/jeannetous/normalblockr
-BugReports: https://github.com/jeannetous/normalblockr/issues
+URL: https://github.com/jchiquet/normalblockr
+BugReports: https://github.com/jchiquet/normalblockr/issues
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 4.1.0)

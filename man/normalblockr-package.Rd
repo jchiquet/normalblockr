@@ -11,8 +11,8 @@ Implements the Normal-Block model, a Gaussian graphical model with a latent clus
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/jeannetous/normalblockr}
-  \item Report bugs at \url{https://github.com/jeannetous/normalblockr/issues}
+  \item \url{https://github.com/jchiquet/normalblockr}
+  \item Report bugs at \url{https://github.com/jchiquet/normalblockr/issues}
 }
 
 }
