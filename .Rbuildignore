@@ -5,6 +5,7 @@
 ^\.github$
 ^inst/CSDA_analyses
 ^inst/normal_block_models.*
+^inst/clustering_initialization_benchmark
 
 ^_pkgdown\.yml$
 ^docs$
