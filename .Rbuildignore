@@ -17,3 +17,4 @@ Rplots.pdf
 ^README_cache$
 ^README\.qmd$
 \.DS_Store$
+^cran-comments\.md$

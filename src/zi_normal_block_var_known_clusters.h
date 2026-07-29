@@ -8,17 +8,12 @@
 #include "utils_arma.h"
 
 // Zero-inflated normal-block-var model with known clusters (fixed indicator
-// matrix C), templated on the residual-noise policy (ZIDiagonalNoise /
-// ZISphericalNoise, see zi_noise_models.h). Equivalent of the R6 class
-// ZINormalBlockVarKnownClusters (R/ZINormalBlockVarKnownClusters.R).
-//
-// Unlike the non zero-inflated counterpart (NormalBlockVarKnownClusters), the
-// posterior covariance of W | Y is *row-dependent* (the zero-inflation mask
-// varies row by row), hence Gamma_ is a cube (q x q x n) of n distinct q x q
-// matrices rather than a single shared matrix. B's normal equations no
-// longer share a common cross-product across columns (the zero-inflation
-// mask reweights each column independently), so it is solved one column at
-// a time (see zi_closed_form_solvers.h).
+// matrix C), templated on the residual-noise policy (see zi_noise_models.h).
+// Equivalent of the R6 class ZINormalBlockVarKnownClusters
+// (R/ZINormalBlockVarKnownClusters.R). Unlike the non-ZI counterpart, the
+// posterior covariance of W | Y is row-dependent (the ZI mask varies row by
+// row), so Gamma_ is a cube (q x q x n) rather than a single matrix, and B's
+// normal equations are solved one column at a time (zi_closed_form_solvers.h).
 template <typename NoisePolicy>
 class ZINormalBlockVarKnownClusters : public NormalBlockVarBase {
   const ZINormalBlockData& zi_data_;
@@ -74,25 +69,11 @@ public:
     for (arma::uword i = 0; i < data.n; ++i) Gamma_.slice(i) = arma::eye(C.n_cols, C.n_cols);
   }
 
-  // General (non-profiled) marginal log-likelihood of Y given the fixed
-  // zero-inflation mask, valid at *any* (B_, dm1_, Omegaq_) -- see
-  // NormalBlockVarKnownClusters::objective() for the non-ZI derivation this
-  // mirrors. Because the zero-inflation mask varies row by row, each row i
-  // has its own marginal: Y_i,obs ~ N(B^T X_i,obs, Sigma_Y,i), restricted to
-  // i's *observed* (non-zero-inflated) columns, with Sigma_Y,i = D_i,obs +
-  // C_obs Omegaq^{-1} C_obs^T. The same Woodbury/determinant-lemma trick
-  // applies per row, through the row's own posterior precision
-  // Gamma^{(i),-1} = Omegaq + diag((W C)_{i.}) (the matrix E_step() already
-  // inverts to get Gamma_.slice(i)/Mu_.row(i) -- recomputed fresh here, see
-  // the non-ZI objective() for why):
-  //
-  //   log|Sigma_Y,i|                 = -sum_{j obs} log(dm1_j) - log|Omegaq| - log|Gamma^{(i)}|
-  //   (R_i,obs)^T Sigma_Y,i^{-1} R_i,obs = sum_{j obs} dm1_j R_ij^2 - mu_i^T Gamma^{(i),-1} mu_i
-  //
-  // summed over rows (the per-row log(dm1) sum becomes the usual nY-weighted
-  // sum once accumulated across all n rows). This replaces the same kind of
-  // profiled shortcut (and the same sign bug, +log|Gamma^{(i),-1}| instead
-  // of +log|Gamma^{(i)}|) described in NormalBlockVarKnownClusters::objective().
+  // General (non-profiled) marginal log-likelihood given the fixed ZI mask,
+  // valid at any (B_, dm1_, Omegaq_); same Woodbury/determinant-lemma trick
+  // as NormalBlockVarKnownClusters::objective(), applied per row since the
+  // ZI mask makes each row's marginal (and posterior precision Gamma^{(i)})
+  // distinct. See inst/normal_block_models.qmd §6/§7.
   double objective() const override {
     arma::mat R = zi_data_.Y - XB();
     arma::mat dm1_mat = arma::repmat(dm1_.t(), zi_data_.n, 1) % zi_data_.zeros_bar;
@@ -136,17 +117,8 @@ public:
     R_ = o.R_;
     dm1_mat_ = o.dm1_mat_;
   }
-  // Same general/always-valid objective() as NormalBlockVarKnownClusters (see
-  // its supports_acceleration()), so the same objective-comparison-gated
-  // SQUAREM applies here too: the per-row precision matrices
-  // Omegaq + diag(dm1C.row(i)) add a *non-negative* diagonal to Omegaq (dm1
-  // > 0, C is 0/1), which by Weyl's inequality can only raise -- never
-  // lower -- the smallest eigenvalue relative to Omegaq's own. So whenever
-  // the extrapolated Omegaq candidate itself passes state_is_feasible(),
-  // every row's matrix is at least as well-conditioned; there is no
-  // separate per-row numerical risk left for state_is_feasible() to miss,
-  // unlike under the earlier conditioning-only safety net this gate used to
-  // rely on.
+  // Same general/always-valid objective() as NormalBlockVarKnownClusters, so
+  // the same SQUAREM gate applies; see its supports_acceleration().
   bool supports_acceleration() const override { return sparsity_ <= 0.0; }
 };
 

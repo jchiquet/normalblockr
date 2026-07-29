@@ -7,11 +7,9 @@
 #include "utils_arma.h"
 
 // Normal-block model with known clusters (fixed indicator matrix C), templated
-// on the residual-noise policy (DiagonalNoise / SphericalNoise, see
-// noise_models.h). Equivalent of the R6 class NormalBlockVarKnownClusters
-// (R/NormalBlockVarKnownClusters.R), implementing the EM recursion of section 2
-// (diagonal D) / section 3 (spherical D) of normal_block_calculations_v2.pdf,
-// summarized in 6.1/6.2.
+// on the residual-noise policy (see noise_models.h). Equivalent of the R6
+// class NormalBlockVarKnownClusters (R/NormalBlockVarKnownClusters.R); see
+// inst/normal_block_models.qmd §1/§2 for the EM recursion.
 template <typename NoisePolicy>
 class NormalBlockVarKnownClusters : public NormalBlockVarBase {
   arma::mat C_;      // p x q, fixed cluster-indicator matrix
@@ -45,40 +43,11 @@ public:
     NormalBlockVarBase(data, C.n_cols, B0, dm1_0, Omegaq0, sparsity, sparsity_weights),
     C_(C), Gamma_(arma::eye(C.n_cols, C.n_cols)), Mu_(arma::zeros(data.n, C.n_cols)) {}
 
-  // General (non-profiled) marginal log-likelihood of Y, valid at *any*
-  // (B_, dm1_, Omegaq_), not just at an M-step optimum -- see "Criterion"
-  // in section 6.1/6.2 of normal_block_calculations_v2.pdf for the
-  // derivation. The model's exact marginal is Y_i ~ N(B^T X_i, Sigma_Y),
-  // Sigma_Y = D + C Omegaq^{-1} C^T (D = diag(1/dm1_), p x p); rather than
-  // forming that p x p matrix directly (expensive, and ill-conditioned
-  // whenever q << p), |Sigma_Y| and Sigma_Y^{-1} are obtained from the
-  // matrix determinant lemma and the Woodbury identity, both expressed
-  // through the q x q posterior precision Gamma^{-1} = Omegaq + C^T
-  // diag(dm1) C (the same matrix E_step() inverts to get Gamma/Mu --
-  // recomputed fresh here rather than read from the cached Gamma_/Mu_,
-  // which lag one E_step() behind whenever objective() is called right
-  // after M_step(), as it always is in run_em()):
-  //
-  //   log|Sigma_Y|                = -sum(log(dm1)) - log|Omegaq| - log|Gamma|
-  //   trace(Sigma_Y^{-1} R^T R)   = sum(dm1 % colSums(R^2)) - trace(Gamma^{-1} Mu^T Mu)
-  //
-  // where R = Y - XB and Mu = R diag(dm1) C Gamma is the exact posterior
-  // mean *for this same theta* -- an identity that holds for any theta, not
-  // just an M-step optimum (E_step()'s formula is ordinary Gaussian
-  // conditioning, not an approximation, for this known-clusters model).
-  //
-  // This replaces an earlier "profiled" shortcut (valid only when dm1_ was
-  // exactly the M-step's own argmax for the *cached* Mu_/Gamma_, collapsing
-  // the quadratic residual term to a constant) that carried a sign bug --
-  // it added log|Gamma^{-1}| where the algebra needs log|Gamma| -- silently
-  // masked at every M-step-consistent point by a cancelling error in the
-  // omitted quadratic term, and therefore wrong everywhere else (verified
-  // against a brute-force multivariate-normal evaluation: the shortcut
-  // could be off by thousands of log-lik units even at full convergence on
-  // real data). The general formula here has no such restriction, and needs
-  // no special-casing for sparsity > 0 either: it never assumes Omegaq is
-  // Sigma_hat's exact inverse, so it stays exactly log p(Y; theta) however
-  // Omegaq was obtained (plain inversion or graphical lasso).
+  // General (non-profiled) marginal log-likelihood of Y, valid at any
+  // (B_, dm1_, Omegaq_), not just an M-step optimum -- via the matrix
+  // determinant lemma and Woodbury identity on the q x q posterior
+  // precision Gamma^{-1}. See inst/normal_block_models.qmd ("Criterion",
+  // §1/§2) for the derivation and the sign-bug fix this replaced.
   double objective() const override {
     arma::mat R = data_.Y - XB();
     arma::mat Gamma_inv = Omegaq_ + arma::diagmat(C_.t() * dm1_);
@@ -112,23 +81,10 @@ public:
     Gamma_ = o.Gamma_;
     Mu_ = o.Mu_;
   }
-  // Validated on real data (see git history) for sparsity_ <= 0. Excluding
-  // sparsity_ > 0 is no longer about objective() validity (it is the
-  // general marginal log-likelihood for *any* PD Omegaq, sparse or not, so
-  // the objective-comparison gate in try_squarem_step() is just as sound
-  // here in principle) -- it was re-tested directly and rejected on cost/
-  // benefit: estimate_omega() calls glassoFast, an *approximate* iterative
-  // solver, so even *plain* EM's M-step isn't a guaranteed ascent step when
-  // sparsity_ > 0 (a separate, pre-existing issue -- plain EM alone already
-  // shows tiny non-monotonicity here, see git history). Letting SQUAREM
-  // jump into a region of parameter space plain EM would never have
-  // visited amplifies that pre-existing instability (observed: real
-  // increment violations up to a few units, ~2x worse than plain EM's own,
-  // on `brca_rppa`), while the achieved speedup is much more modest than
-  // the unpenalized case (the regularization already smooths out most of
-  // the slow-linear-EM regime this acceleration targets -- observed ~1.1x-
-  // 1.8x here vs 5x-10x+ for sparsity_ <= 0). Not worth the added risk for
-  // the gain; kept disabled.
+  // Excludes sparsity_ > 0: glassoFast is an approximate iterative solver,
+  // so even plain EM's M-step isn't a guaranteed ascent step there, and
+  // SQUAREM's larger jumps amplify that instability for a smaller speedup
+  // than the unpenalized case. See inst/normal_block_models.qmd ("SQUAREM").
   bool supports_acceleration() const override { return sparsity_ <= 0.0; }
 };
 

@@ -131,7 +131,7 @@ Either "BIC", "EBIC" or "ICL". "ICL" is the default criterion}
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{criterion}}{The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults deviance.}
-      \item{\code{n_intervals}}{number of intervals into which the penalties range should be splitted}
+      \item{\code{n_intervals}}{number of intervals into which the penalties range should be split}
     }
     \if{html}{\out{</div>}}
   }

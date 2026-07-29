@@ -26,12 +26,8 @@ NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
       self$control$zero_inflation <- zero_inflation
       control_ <- control
 
-      ## See NormalBlockVarCollectionClusters$initialize() for the rationale: one wide SBM
-      ## exploration over the whole q_list range replaces one independent
-      ## exploration per q. control_$clustering_init is then read by every
-      ## get_model() call inside NormalBlockVarCollectionSparsity$initialize()
-      ## (including across its own sparsity sweep), so setting it once here
-      ## per q is enough.
+      ## One wide SBM exploration over q_list replaces one independent
+      ## exploration per q (see sbm_clustering_path()).
       sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
 
       self$models <- purrr::map(seq_along(q_list), function(rank) {
@@ -80,7 +76,7 @@ NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
 
     #' @description Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
     #' @param criterion The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults deviance.
-    #' @param n_intervals number of intervals into which the penalties range should be splitted
+    #' @param n_intervals number of intervals into which the penalties range should be split
     #' @return a [`ggplot`] heatmap
     plot = function(criterion = c("deviance", "ICL", "BIC", "EBIC"),
                     n_intervals = NULL) {

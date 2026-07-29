@@ -17,12 +17,12 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Jeanne Tous \email{jeanne.tous@inrae.fr}
+\strong{Maintainer}: Julien Chiquet \email{julien.chiquet@inrae.fr} (\href{https://orcid.org/0000-0002-3629-3429}{ORCID})
 
 Authors:
 \itemize{
-  \item Jeanne Tous \email{jeanne.tous@inrae.fr}
   \item Julien Chiquet \email{julien.chiquet@inrae.fr} (\href{https://orcid.org/0000-0002-3629-3429}{ORCID})
+  \item Jeanne Tous \email{jeanne.tous@inrae.fr}
 }
 
 }
