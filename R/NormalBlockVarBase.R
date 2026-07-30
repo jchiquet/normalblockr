@@ -419,7 +419,8 @@ NormalBlockVarBase <- R6::R6Class(
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Extractors ------------------------
-    #' @description Extract interaction network in the latent space
+    #' @description Extract interaction network in the latent space, as a
+    #' matrix rather than a plot -- see `$plot_network()` to plot it instead.
     #' @param type edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)
     #' @return a square matrix of size `self$q`
     latent_network = function(type = c("partial_cor", "support", "precision")) {
@@ -497,7 +498,8 @@ NormalBlockVarBase <- R6::R6Class(
       p
     },
 
-    #' @description plot the latent network.
+    #' @description plot the latent network. To extract the network as a
+    #' matrix instead of plotting it, use `$latent_network()`.
     #' @param type edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).
     #' @param output Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)
     #' @param edge.color Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.

@@ -32,6 +32,11 @@ and provide their own `get_best_model()`, delegating the (row of
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
     \item{\code{criteria}}{a data frame with the values of some criteria for the collection of models}
+
+    \item{\code{loglik}}{not defined for a collection (which of its models?) --
+accessing it raises an informative error instead of silently
+returning `NULL`. Use `logLik()` for every model's log-likelihood, or
+`$get_best_model()$loglik` for a single one.}
   }
   \if{html}{\out{</div>}}
 }
@@ -39,6 +44,8 @@ and provide their own `get_best_model()`, delegating the (row of
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockVarCollection-optimize}{\code{NormalBlockVarCollection$optimize()}}
+    \item \href{#method-NormalBlockVarCollection-print}{\code{NormalBlockVarCollection$print()}}
+    \item \href{#method-NormalBlockVarCollection-summary}{\code{NormalBlockVarCollection$summary()}}
     \item \href{#method-NormalBlockVarCollection-clone}{\code{NormalBlockVarCollection$clone()}}
   }
 }
@@ -62,6 +69,37 @@ and provide their own `get_best_model()`, delegating the (row of
 via its own `best_of_inits()` instead of a plain `optimize()`.}
     }
     \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockVarCollection-print"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockVarCollection-print}{}}}
+\subsection{\code{NormalBlockVarCollection$print()}}{
+  User-friendly print method: model type and the range of
+q/sparsity explored. See `summary()` for the full criteria table.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollection$print()}
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockVarCollection-summary"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockVarCollection-summary}{}}}
+\subsection{\code{NormalBlockVarCollection$summary()}}{
+  Summarize the collection: model type, full criteria
+table, and the range of q/sparsity explored.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollection$summary()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    An object of class `summary.NormalBlockVarCollection`,
+printed with a dedicated [print.summary.NormalBlockVarCollection()]
+method.
   }
 }
 

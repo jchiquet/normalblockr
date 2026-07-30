@@ -424,7 +424,8 @@ default FALSE (send a copy)}
 \if{html}{\out{<a id="method-NormalBlockVarBase-latent_network"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-latent_network}{}}}
 \subsection{\code{NormalBlockVarBase$latent_network()}}{
-  Extract interaction network in the latent space
+  Extract interaction network in the latent space, as a
+matrix rather than a plot -- see `$plot_network()` to plot it instead.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarBase$latent_network(
@@ -473,7 +474,8 @@ absolute increment between iterations and the convergence `threshold`
 \if{html}{\out{<a id="method-NormalBlockVarBase-plot_network"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-plot_network}{}}}
 \subsection{\code{NormalBlockVarBase$plot_network()}}{
-  plot the latent network.
+  plot the latent network. To extract the network as a
+matrix instead of plotting it, use `$latent_network()`.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarBase$plot_network(

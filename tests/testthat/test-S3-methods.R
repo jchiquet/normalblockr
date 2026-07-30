@@ -1,6 +1,7 @@
 ###############################################################################
 ## Exercises the S3 methods defined on NormalBlockVarBase (print, summary,
-## plot, logLik, BIC) and on NormalBlockVarCollection (logLik, BIC).
+## plot, logLik, BIC) and on NormalBlockVarCollection (print, summary,
+## logLik, BIC).
 testdata <- readRDS("testdata/testdata_normal.RDS")
 Y <- testdata$Y
 X <- testdata$X
@@ -60,4 +61,31 @@ test_that("logLik.NormalBlockVarCollection() and BIC.NormalBlockVarCollection() 
   expect_length(bic, length(collection$models))
   expect_equal(ll, collection$criteria$loglik)
   expect_equal(bic, collection$criteria$BIC)
+})
+
+test_that("collection$loglik raises an informative error instead of silently returning NULL", {
+  expect_error(collection$loglik, "not defined for a collection")
+  expect_error(collection$loglik, "logLik", fixed = TRUE)
+})
+
+test_that("print.NormalBlockVarCollection() reports the model type and the q range explored", {
+  expect_output(print(collection), collection$who_am_I, fixed = TRUE)
+  expect_output(print(collection), "model(s) explored", fixed = TRUE)
+  expect_output(print(collection), "q ranging from 2 to 4")
+  expect_invisible(print(collection))
+})
+
+test_that("summary.NormalBlockVarCollection() returns the full criteria table and q range", {
+  s <- summary(collection)
+  expect_s3_class(s, "summary.NormalBlockVarCollection")
+  expect_equal(s$who_am_I, collection$who_am_I)
+  expect_equal(s$criteria, collection$criteria)
+  expect_equal(s$q_range, range(collection$criteria$q))
+  expect_output(print(s), "q ranging from 2 to 4")
+  expect_output(print(s), "loglik")
+})
+
+test_that("latent_network() extracts the network without plotting it", {
+  net <- model$latent_network()
+  expect_equal(dim(net), c(model$q, model$q))
 })

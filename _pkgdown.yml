@@ -37,12 +37,24 @@ reference:
 
 - title: 'S3 methods'
   desc: >
-    Standard extractors, common to every fitted model class
+    Standard extractors and methods for a fitted model (any NormalBlockVarBase
+    subclass) and for a collection of models (any NormalBlockVarCollection subclass)
   contents:
     - '`coef.NormalBlockVarBase`'
     - '`fitted.NormalBlockVarBase`'
     - '`predict.NormalBlockVarBase`'
     - '`sigma.NormalBlockVarBase`'
+    - '`print.NormalBlockVarBase`'
+    - '`summary.NormalBlockVarBase`'
+    - '`print.summary.NormalBlockVarBase`'
+    - '`plot.NormalBlockVarBase`'
+    - '`logLik.NormalBlockVarBase`'
+    - '`BIC.NormalBlockVarBase`'
+    - '`print.NormalBlockVarCollection`'
+    - '`summary.NormalBlockVarCollection`'
+    - '`print.summary.NormalBlockVarCollection`'
+    - '`logLik.NormalBlockVarCollection`'
+    - '`BIC.NormalBlockVarCollection`'
 
 - title: 'Internal'
   desc: >
