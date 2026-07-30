@@ -58,6 +58,45 @@ predict.NormalBlockVarBase <- function(object, new_X, ...){
   object$predict(new_X)
 }
 
+#' @title Extract Log-Likelihood of a Normal-Block Model
+#' @description Returns the (variational) log-likelihood of a fitted
+#' normal-block model as a `"logLik"` object, compatible with [stats::AIC()]
+#' and [stats::BIC()].
+#' @param object An object of class NormalBlockVarBase.
+#' @param ... not used, only here for S3 compatibility
+#' @return An object of class `"logLik"`. The numeric value is the
+#' log-likelihood or its variational lower bound (ELBO). Attributes `df` and
+#' `nobs` hold the number of parameters and observations.
+#' @importFrom stats logLik
+#' @export
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+#' logLik(model)
+logLik.NormalBlockVarBase <- function(object, ...) {
+  stopifnot(isNB(object))
+  structure(object$loglik, class = "logLik", df = object$nb_param, nobs = object$n)
+}
+
+#' @title Bayesian Information Criterion for a Normal-Block Model
+#' @description Extracts the (variational) BIC of a fitted normal-block
+#' model, computed as `deviance + log(n) * nb_param` (lower is better).
+#' @param object An object of class NormalBlockVarBase.
+#' @param ... not used, only here for S3 compatibility
+#' @return A scalar: the (variational) BIC.
+#' @importFrom stats BIC
+#' @export
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+#' BIC(model)
+BIC.NormalBlockVarBase <- function(object, ...) {
+  stopifnot(isNB(object))
+  object$BIC
+}
+
 #' @title Print a Normal-Block Model
 #' @description Print a short summary of a fitted normal-block model: model
 #' type, goodness-of-fit criteria, and the useful fields/methods to explore

@@ -6,7 +6,6 @@ Bonnaffé
 CMD
 CMU
 CN
-CSDA
 DBO
 Danet
 EBIC
@@ -25,7 +24,6 @@ METHYLATION
 Milieux
 Mouchet
 Networkfamily
-NormalBlockBase
 NormalBlockData
 NormalBlockVarBase
 NormalBlockVarCollection
@@ -78,6 +76,7 @@ cv
 dataset's
 de
 des
+df
 dm
 doi
 eg
@@ -90,8 +89,6 @@ et
 expr
 geq
 ggplot
-glassoFast's
-glmnet
 hugoGeneSymbol
 igraph
 ij
@@ -100,16 +97,19 @@ kk
 kmeans
 l'Eau
 lik
+logLik
 loglik
 mathbb
 mathbf
 mathcal
 mathrm
 md
+nb
 odot
 onema
 opcod
 ot
+param
 phosphoprotein
 proteomics
 renyi
