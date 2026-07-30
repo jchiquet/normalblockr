@@ -1,6 +1,6 @@
-# Checks if a model is of class \[NormalBlockVarBase()\]
+# Check if an Object is a Normal-Block Model
 
-Checks if a model is of class \[NormalBlockVarBase()\]
+Checks if a model is of class \[NormalBlockVarBase()\].
 
 ## Usage
 

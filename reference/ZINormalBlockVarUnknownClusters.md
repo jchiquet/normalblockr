@@ -1,6 +1,6 @@
-# R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).
+# Zero-Inflated Normal-Block Model with Unknown Clustering
 
-R6 class for zero-inflated normal-block model with a fixed number of
+R6 class for a zero-inflated normal-block model with a fixed number of
 clusters (but unknown clustering).
 
 ## Super class

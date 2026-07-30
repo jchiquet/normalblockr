@@ -1,4 +1,4 @@
-# R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.
+# Collection of Normal-Block Models over a Sparsity Path
 
 R6 class for a collection of normal-block models with a fixed clustering
 (blocks) and different sparsity levels.
@@ -66,6 +66,11 @@ R6 class for a collection of normal-block models with a fixed clustering
 - [`NormalBlockVarCollectionSparsity$stability_selection()`](#method-NormalBlockVarCollectionSparsity-stability_selection)
 
 - [`NormalBlockVarCollectionSparsity$clone()`](#method-NormalBlockVarCollectionSparsity-clone)
+
+Inherited methods
+
+- [`NormalBlockVarCollection$print()`](NormalBlockVarCollection.html#method-print)
+- [`NormalBlockVarCollection$summary()`](NormalBlockVarCollection.html#method-summary)
 
 ------------------------------------------------------------------------
 

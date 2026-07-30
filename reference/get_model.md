@@ -1,7 +1,7 @@
-# Creates appropriate new normal block model depending on the parametrization
+# Create a Normal-Block Model Object
 
-Creates appropriate new normal block model depending on the
-parametrization
+Creates the appropriate normal-block model (or collection of models)
+depending on the parametrization.
 
 ## Usage
 

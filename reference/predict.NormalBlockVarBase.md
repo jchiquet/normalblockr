@@ -1,4 +1,4 @@
-# Predicts observations Y for new covariates X.
+# Predict Method for Normal-Block Models
 
 Predicts observations Y for new covariates X.
 

@@ -1,4 +1,4 @@
-# R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.
+# Collection of Normal-Block Models over Cluster Counts and Sparsity Levels
 
 R6 class for a collection of normal-block models with different number
 of clusters (q) and different sparsity levels.
@@ -39,6 +39,8 @@ of clusters (q) and different sparsity levels.
 Inherited methods
 
 - [`NormalBlockVarCollection$optimize()`](NormalBlockVarCollection.html#method-optimize)
+- [`NormalBlockVarCollection$print()`](NormalBlockVarCollection.html#method-print)
+- [`NormalBlockVarCollection$summary()`](NormalBlockVarCollection.html#method-summary)
 
 ------------------------------------------------------------------------
 

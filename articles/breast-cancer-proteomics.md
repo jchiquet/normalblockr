@@ -147,7 +147,7 @@ print(NB_prot_group)
 #>     $model_par, $posterior_par / $var_par, $clustering 
 #>     $loglik, $BIC, $ICL, $objective, $nb_param, $criteria
 #> * Useful S3 methods
-#>     print(), coef(), sigma(), fitted(), predict()
+#>     print(), summary(), plot(), coef(), sigma(), fitted(), predict()
 ```
 
 ## Letting the model infer its own clustering

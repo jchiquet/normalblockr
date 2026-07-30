@@ -27,13 +27,13 @@ association network inference. Computational Statistics & Data Analysis,
     }
 
 Tous, J., & Chiquet, J. (2026). normalblockr: Implementation of the
-Normal-Block Model. R package version 0.2.0.
+Normal-Block Model. R package version 0.2.1.
 https://github.com/jchiquet/normalblockr
 
     @Manual{,
       title = {{normalblockr}: Implementation of the Normal-Block Model},
       author = {Jeanne Tous and Julien Chiquet},
       year = {2026},
-      note = {R package version 0.2.0},
+      note = {R package version 0.2.1},
       url = {https://github.com/jchiquet/normalblockr},
     }

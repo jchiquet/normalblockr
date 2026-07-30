@@ -1,7 +1,7 @@
-# Extracts the latent-block covariance matrix from objects returned by \[NormalBlockBase()\] and its variants
+# Extract the Latent-Block Covariance Matrix
 
 Extract the covariance matrix between latent blocks (the inverse of
-\`Omegaq\`) from a NormalBlockBase object.
+\`Omegaq\`) from a \[NormalBlockVarBase()\] object.
 
 ## Usage
 
@@ -14,7 +14,7 @@ sigma(object, ...)
 
 - object:
 
-  An object of class NormalBlockBase.
+  An object of class NormalBlockVarBase.
 
 - ...:
 

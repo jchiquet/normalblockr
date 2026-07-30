@@ -1,6 +1,7 @@
-# R6 class for a generic normal model
+# Data Container for Normal-Block Models
 
-R6 class for a generic normal model
+R6 class holding the responses and design matrix used to fit a
+normal-block model.
 
 ## Public fields
 

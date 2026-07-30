@@ -196,7 +196,7 @@ print(my_NB)
 #>     $model_par, $posterior_par / $var_par, $clustering 
 #>     $loglik, $BIC, $ICL, $objective, $nb_param, $criteria
 #> * Useful S3 methods
-#>     print(), coef(), sigma(), fitted(), predict()
+#>     print(), summary(), plot(), coef(), sigma(), fitted(), predict()
 ```
 
 The inter-cluster association network can be visualized with the
@@ -233,7 +233,7 @@ print(my_NB)
 #>     $model_par, $posterior_par / $var_par, $clustering 
 #>     $loglik, $BIC, $ICL, $objective, $nb_param, $criteria
 #> * Useful S3 methods
-#>     print(), coef(), sigma(), fitted(), predict()
+#>     print(), summary(), plot(), coef(), sigma(), fitted(), predict()
 plot(my_NB)
 ```
 
@@ -361,7 +361,7 @@ of clusters.
 ``` r
 
 myNB_sparse_0.1   <- my_NB_sparse$get_model(0.1)
-#> No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658166 Collection penalty values can be found via $sparsity
+#> No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658165 Collection penalty values can be found via $sparsity
 myNB_sparse_BIC   <- my_NB_sparse$get_best_model("BIC")
 ```
 
@@ -411,7 +411,7 @@ levels, or fix both the number of clusters and the sparsity level.
 
 my_NB_sparse_3     <- my_NB_sparse_unknown$get_model(3)
 my_NB_sparse_3_0.1 <- my_NB_sparse_unknown$get_model(3, 0.1)
-#> No model with this penalty in the collection. Returning model with closest penalty: 0.0987915298048484 Collection penalty values can be found via $sparsity
+#> No model with this penalty in the collection. Returning model with closest penalty: 0.0987915298048486 Collection penalty values can be found via $sparsity
 ```
 
 ### With zero-inflated data

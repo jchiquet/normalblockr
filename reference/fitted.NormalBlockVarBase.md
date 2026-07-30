@@ -1,6 +1,6 @@
-# Extracts fitted values from objects returned by \[NormalBlockVarBase()\] and its variants
+# Extract Fitted Values
 
-Extract fitted values from an NormalBlockVarBase object.
+Extract fitted values from a NormalBlockVarBase object.
 
 ## Usage
 

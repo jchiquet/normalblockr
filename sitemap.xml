@@ -8,6 +8,8 @@
 <url><loc>/authors.html</loc></url>
 <url><loc>/index.html</loc></url>
 <url><loc>/news/index.html</loc></url>
+<url><loc>/reference/BIC.NormalBlockVarBase.html</loc></url>
+<url><loc>/reference/BIC.NormalBlockVarCollection.html</loc></url>
 <url><loc>/reference/NB_control.html</loc></url>
 <url><loc>/reference/NormalBlockData.html</loc></url>
 <url><loc>/reference/NormalBlockVarBase.html</loc></url>
@@ -27,11 +29,20 @@
 <url><loc>/reference/get_model.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/isNB.html</loc></url>
+<url><loc>/reference/logLik.NormalBlockVarBase.html</loc></url>
+<url><loc>/reference/logLik.NormalBlockVarCollection.html</loc></url>
 <url><loc>/reference/normal_block.html</loc></url>
 <url><loc>/reference/normalblockr-package.html</loc></url>
 <url><loc>/reference/onema.html</loc></url>
+<url><loc>/reference/plot.NormalBlockVarBase.html</loc></url>
 <url><loc>/reference/predict.NormalBlockVarBase.html</loc></url>
+<url><loc>/reference/print.NormalBlockVarBase.html</loc></url>
+<url><loc>/reference/print.NormalBlockVarCollection.html</loc></url>
+<url><loc>/reference/print.summary.NormalBlockVarBase.html</loc></url>
+<url><loc>/reference/print.summary.NormalBlockVarCollection.html</loc></url>
 <url><loc>/reference/sigma.NormalBlockVarBase.html</loc></url>
+<url><loc>/reference/summary.NormalBlockVarBase.html</loc></url>
+<url><loc>/reference/summary.NormalBlockVarCollection.html</loc></url>
 <url><loc>/reference/university.html</loc></url>
 </urlset>
 

@@ -1,4 +1,4 @@
-# R6 class for a normal-block model with known clustering.
+# Normal-Block Model with Known Clustering
 
 R6 class for a normal-block model with known clustering.
 

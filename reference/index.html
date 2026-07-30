@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,56 +82,56 @@
           <code><a href="NormalBlockData.html">NormalBlockData</a></code>
 
         </dt>
-        <dd>R6 class for a generic normal model</dd>
+        <dd>Data Container for Normal-Block Models</dd>
 
         <dt>
 
           <code><a href="NormalBlockVarKnownClusters.html">NormalBlockVarKnownClusters</a></code>
 
         </dt>
-        <dd>R6 class for a normal-block model with known clustering.</dd>
+        <dd>Normal-Block Model with Known Clustering</dd>
 
         <dt>
 
           <code><a href="NormalBlockVarUnknownClusters.html">NormalBlockVarUnknownClusters</a></code>
 
         </dt>
-        <dd>R6 class for a normal-block model with fixed number of clusters (but unknown clustering).</dd>
+        <dd>Normal-Block Model with Unknown Clustering</dd>
 
         <dt>
 
           <code><a href="ZINormalBlockVarKnownClusters.html">ZINormalBlockVarKnownClusters</a></code>
 
         </dt>
-        <dd>R6 class for a Zero-Inflated normal-block model with a known clustering.</dd>
+        <dd>Zero-Inflated Normal-Block Model with Known Clustering</dd>
 
         <dt>
 
           <code><a href="ZINormalBlockVarUnknownClusters.html">ZINormalBlockVarUnknownClusters</a></code>
 
         </dt>
-        <dd>R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).</dd>
+        <dd>Zero-Inflated Normal-Block Model with Unknown Clustering</dd>
 
         <dt>
 
           <code><a href="NormalBlockVarCollectionClusters.html">NormalBlockVarCollectionClusters</a></code>
 
         </dt>
-        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.</dd>
+        <dd>Collection of Normal-Block Models over a Range of Cluster Counts</dd>
 
         <dt>
 
           <code><a href="NormalBlockVarCollectionSparsity.html">NormalBlockVarCollectionSparsity</a></code>
 
         </dt>
-        <dd>R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.</dd>
+        <dd>Collection of Normal-Block Models over a Sparsity Path</dd>
 
         <dt>
 
           <code><a href="NormalBlockVarCollectionClustersSparsity.html">NormalBlockVarCollectionClustersSparsity</a></code>
 
         </dt>
-        <dd>R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.</dd>
+        <dd>Collection of Normal-Block Models over Cluster Counts and Sparsity Levels</dd>
       </dl></div><div class="section level2">
       <h2 id="data-sets">Data sets<a class="anchor" aria-label="anchor" href="#data-sets"></a></h2>
 
@@ -165,7 +165,7 @@
       </dl></div><div class="section level2">
       <h2 id="s-methods">S3 methods<a class="anchor" aria-label="anchor" href="#s-methods"></a></h2>
 
-      <div class="section-desc"><p>Standard extractors, common to every fitted model class</p></div>
+      <div class="section-desc"><p>Standard extractors and methods for a fitted model (any NormalBlockVarBase subclass) and for a collection of models (any NormalBlockVarCollection subclass)</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -177,28 +177,105 @@
           <code><a href="coef.NormalBlockVarBase.html">coef(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
 
         </dt>
-        <dd>Extracts model coefficients from objects returned by [NormalBlockVarBase()] and its variants</dd>
+        <dd>Extract Model Coefficients</dd>
 
         <dt>
 
           <code><a href="fitted.NormalBlockVarBase.html">fitted(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
 
         </dt>
-        <dd>Extracts fitted values from objects returned by [NormalBlockVarBase()] and its variants</dd>
+        <dd>Extract Fitted Values</dd>
 
         <dt>
 
           <code><a href="predict.NormalBlockVarBase.html">predict(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
 
         </dt>
-        <dd>Predicts observations Y for new covariates X.</dd>
+        <dd>Predict Method for Normal-Block Models</dd>
 
         <dt>
 
           <code><a href="sigma.NormalBlockVarBase.html">sigma(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
 
         </dt>
-        <dd>Extracts the latent-block covariance matrix from objects returned by [NormalBlockBase()] and its variants</dd>
+        <dd>Extract the Latent-Block Covariance Matrix</dd>
+
+        <dt>
+
+          <code><a href="print.NormalBlockVarBase.html">print(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print a Normal-Block Model</dd>
+
+        <dt>
+
+          <code><a href="summary.NormalBlockVarBase.html">summary(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summarize a Normal-Block Model</dd>
+
+        <dt>
+
+          <code><a href="print.summary.NormalBlockVarBase.html">print(<i>&lt;summary.NormalBlockVarBase&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print a Normal-Block Model Summary</dd>
+
+        <dt>
+
+          <code><a href="plot.NormalBlockVarBase.html">plot(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot a Normal-Block Model</dd>
+
+        <dt>
+
+          <code><a href="logLik.NormalBlockVarBase.html">logLik(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extract Log-Likelihood of a Normal-Block Model</dd>
+
+        <dt>
+
+          <code><a href="BIC.NormalBlockVarBase.html">BIC(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Bayesian Information Criterion for a Normal-Block Model</dd>
+
+        <dt>
+
+          <code><a href="print.NormalBlockVarCollection.html">print(<i>&lt;NormalBlockVarCollection&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print a Collection of Normal-Block Models</dd>
+
+        <dt>
+
+          <code><a href="summary.NormalBlockVarCollection.html">summary(<i>&lt;NormalBlockVarCollection&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summarize a Collection of Normal-Block Models</dd>
+
+        <dt>
+
+          <code><a href="print.summary.NormalBlockVarCollection.html">print(<i>&lt;summary.NormalBlockVarCollection&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print a Collection Summary</dd>
+
+        <dt>
+
+          <code><a href="logLik.NormalBlockVarCollection.html">logLik(<i>&lt;NormalBlockVarCollection&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extract Log-Likelihood of a Collection of Normal-Block Models</dd>
+
+        <dt>
+
+          <code><a href="BIC.NormalBlockVarCollection.html">BIC(<i>&lt;NormalBlockVarCollection&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Bayesian Information Criterion for a Collection of Normal-Block Models</dd>
       </dl></div><div class="section level2">
       <h2 id="internal">Internal<a class="anchor" aria-label="anchor" href="#internal"></a></h2>
 
@@ -214,35 +291,35 @@
           <code><a href="NormalBlockVarBase.html">NormalBlockVarBase</a></code>
 
         </dt>
-        <dd>R6 abstract class for a generic sparse Normal Block model</dd>
+        <dd>Base Class for Normal-Block Models</dd>
 
         <dt>
 
           <code><a href="NormalBlockVarCollection.html">NormalBlockVarCollection</a></code>
 
         </dt>
-        <dd>R6 abstract class for a collection of normal-block models</dd>
+        <dd>Base Class for a Collection of Normal-Block Models</dd>
 
         <dt>
 
           <code><a href="SelectionNClusters.html">SelectionNClusters</a></code>
 
         </dt>
-        <dd>R6 class for selecting the number of clusters (q) by forward/backward split-and-merge exploration, comparing models with the ICL</dd>
+        <dd>Select the Number of Clusters by Split/Merge Search</dd>
 
         <dt>
 
           <code><a href="get_model.html">get_model()</a></code>
 
         </dt>
-        <dd>Creates appropriate new normal block model depending on the parametrization</dd>
+        <dd>Create a Normal-Block Model Object</dd>
 
         <dt>
 
           <code><a href="isNB.html">isNB()</a></code>
 
         </dt>
-        <dd>Checks if a model is of class [NormalBlockVarBase()]</dd>
+        <dd>Check if an Object is a Normal-Block Model</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

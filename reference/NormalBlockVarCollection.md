@@ -1,4 +1,4 @@
-# R6 abstract class for a collection of normal-block models
+# Base Class for a Collection of Normal-Block Models
 
 Shared scaffolding for the collections explored by \[get_model()\]/
 \[normal_block()\]: a sweep over sparsity penalties
@@ -28,11 +28,22 @@ the (row of \`self\$criteria\` minimizing a criterion) lookup to
   a data frame with the values of some criteria for the collection of
   models
 
+- `loglik`:
+
+  not defined for a collection (which of its models?) – accessing it
+  raises an informative error instead of silently returning \`NULL\`.
+  Use \`logLik()\` for every model's log-likelihood, or
+  \`\$get_best_model()\$loglik\` for a single one.
+
 ## Methods
 
 ### Public methods
 
 - [`NormalBlockVarCollection$optimize()`](#method-NormalBlockVarCollection-optimize)
+
+- [`NormalBlockVarCollection$print()`](#method-NormalBlockVarCollection-print)
+
+- [`NormalBlockVarCollection$summary()`](#method-NormalBlockVarCollection-summary)
 
 - [`NormalBlockVarCollection$clone()`](#method-NormalBlockVarCollection-clone)
 
@@ -59,6 +70,33 @@ optimizes every model (or sub-collection) in the collection
 
 ------------------------------------------------------------------------
 
+### `NormalBlockVarCollection$print()`
+
+User-friendly print method: model type and the range of q/sparsity
+explored. See \`summary()\` for the full criteria table.
+
+#### Usage
+
+    NormalBlockVarCollection$print()
+
+------------------------------------------------------------------------
+
+### `NormalBlockVarCollection$summary()`
+
+Summarize the collection: model type, full criteria table, and the range
+of q/sparsity explored.
+
+#### Usage
+
+    NormalBlockVarCollection$summary()
+
+#### Returns
+
+An object of class \`summary.NormalBlockVarCollection\`, printed with a
+dedicated \[print.summary.NormalBlockVarCollection()\] method.
+
+------------------------------------------------------------------------
+
 ### `NormalBlockVarCollection$clone()`
 
 The objects of this class are cloneable with this method.
@@ -72,3 +110,12 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+# An internal abstract base class, never instantiated directly -- see
+# normal_block() for how collections (NormalBlockVarCollectionClusters,
+# NormalBlockVarCollectionSparsity, NormalBlockVarCollectionClustersSparsity)
+# are actually created and fitted.
+```

@@ -1,6 +1,6 @@
-# R6 abstract class for a generic sparse Normal Block model
+# Base Class for Normal-Block Models
 
-R6 abstract class for a generic sparse Normal Block model
+R6 abstract class for a generic sparse Normal-Block model.
 
 ## Public fields
 
@@ -536,7 +536,8 @@ A n\*p prediction matrix for new observations
 
 ### `NormalBlockVarBase$latent_network()`
 
-Extract interaction network in the latent space
+Extract interaction network in the latent space, as a matrix rather than
+a plot – see \`\$plot_network()\` to plot it instead.
 
 #### Usage
 
@@ -583,7 +584,8 @@ a \[\`ggplot2::ggplot\`\] graph
 
 ### `NormalBlockVarBase$plot_network()`
 
-plot the latent network.
+plot the latent network. To extract the network as a matrix instead of
+plotting it, use \`\$latent_network()\`.
 
 #### Usage
 
@@ -676,3 +678,12 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+# An internal abstract base class, never instantiated directly -- see
+# normal_block() for how concrete models (NormalBlockVarKnownClusters,
+# NormalBlockVarUnknownClusters, and their zero-inflated variants) are
+# actually created and fitted.
+```
