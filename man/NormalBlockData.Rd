@@ -2,9 +2,10 @@
 % Please edit documentation in R/NormalBlockData.R
 \name{NormalBlockData}
 \alias{NormalBlockData}
-\title{R6 class for a generic normal model}
+\title{Data Container for Normal-Block Models}
 \description{
-R6 class for a generic normal model
+R6 class holding the responses and design matrix used to fit a
+normal-block model.
 }
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}

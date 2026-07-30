@@ -2,9 +2,10 @@
 % Please edit documentation in R/ZINormalBlockVarUnknownClusters.R
 \name{ZINormalBlockVarUnknownClusters}
 \alias{ZINormalBlockVarUnknownClusters}
-\title{R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).}
+\title{Zero-Inflated Normal-Block Model with Unknown Clustering}
 \description{
-R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).
+R6 class for a zero-inflated normal-block model with a fixed number of
+clusters (but unknown clustering).
 }
 \section{Super class}{
 \code{\link[normalblockr:NormalBlockVarBase]{NormalBlockVarBase}} -> \code{ZINormalBlockVarUnknownClusters}

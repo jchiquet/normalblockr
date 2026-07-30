@@ -12,22 +12,13 @@ This is a new package.
 - Windows Server 2022, R-release, 64 bit (github-action)
 - macOS latest, R-release (github-action)
 
-* tested remotely with win-builder (R-oldrelease, R-release, R-devel) -- submitted, results pending
+* tested remotely with win-builder (R-oldrelease, R-release, R-devel)
+  1 NOTE for new submission
+  + False positive for mispelled words in DESCRIPTION (authors' names)
 
 ## Local R CMD check results
 
-0 errors | 0 warnings | 3 notes
+0 errors | 0 warnings | 1 note
 
 * checking CRAN incoming feasibility ... NOTE
   New submission -- expected for a first release.
-
-* checking compilation flags used ... NOTE
-  Compilation used the non-portable flag '-mno-omit-leaf-frame-pointer'.
-  This flag comes from the local toolchain's default R Makeconf, not from
-  this package's own src/Makevars (which sets none of the compilation
-  flags), so it is not under this package's control.
-
-* checking HTML version of manual ... NOTE
-  Skipping checking HTML validation: no command 'tidy' found.
-  Local environment limitation (HTML Tidy not installed); not expected on
-  CRAN's own check machines.

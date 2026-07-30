@@ -2,8 +2,10 @@
 ##  CLASS SelectionNClusters ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+#' Select the Number of Clusters by Split/Merge Search
+#'
 #' R6 class for selecting the number of clusters (q) by forward/backward
-#' split-and-merge exploration, comparing models with the ICL
+#' split-and-merge exploration, comparing models with the ICL.
 #'
 #' Kept internal/unexported for reference: empirically (see
 #' [NormalBlockVarCollectionClusters]'s `refine()` documentation) chaining every

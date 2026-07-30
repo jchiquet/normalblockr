@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockVarBase-S3methods.R
 \name{fitted.NormalBlockVarBase}
 \alias{fitted.NormalBlockVarBase}
-\title{Extracts fitted values from objects returned by [NormalBlockVarBase()] and its variants}
+\title{Extract Fitted Values}
 \usage{
 \method{fitted}{NormalBlockVarBase}(object, ...)
 }
@@ -15,5 +15,5 @@
 A matrix of fitted values extracted from the object.
 }
 \description{
-Extract fitted values from an NormalBlockVarBase object.
+Extract fitted values from a NormalBlockVarBase object.
 }

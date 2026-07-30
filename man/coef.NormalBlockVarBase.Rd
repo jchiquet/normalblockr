@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockVarBase-S3methods.R
 \name{coef.NormalBlockVarBase}
 \alias{coef.NormalBlockVarBase}
-\title{Extracts model coefficients from objects returned by [NormalBlockVarBase()] and its variants}
+\title{Extract Model Coefficients}
 \usage{
 \method{coef}{NormalBlockVarBase}(object, ...)
 }
@@ -15,5 +15,5 @@
 A matrix of coefficients extracted from the NormalBlockVarBase model.
 }
 \description{
-Extract coefficients from an NormalBlockVarBase object.
+Extract coefficients from a NormalBlockVarBase object.
 }

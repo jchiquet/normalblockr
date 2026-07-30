@@ -133,7 +133,10 @@ NB_control <- function(
 }
 
 
-#' Creates appropriate new normal block model depending on the parametrization
+#' Create a Normal-Block Model Object
+#'
+#' Creates the appropriate normal-block model (or collection of models)
+#' depending on the parametrization.
 #' @param blocks either an integer (number of blocks), a vector of integer (list of possible number of block)
 #'  or a p * q matrix (for indicating block membership when its known)
 #' @param sparsity boolean to say whether the model should have a changing penalty

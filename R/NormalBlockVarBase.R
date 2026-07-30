@@ -2,7 +2,15 @@
 ##  CLASS NormalBlockVarBase ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 abstract class for a generic sparse Normal Block model
+#' Base Class for Normal-Block Models
+#'
+#' R6 abstract class for a generic sparse Normal-Block model.
+#' @examples
+#' # An internal abstract base class, never instantiated directly -- see
+#' # normal_block() for how concrete models (NormalBlockVarKnownClusters,
+#' # NormalBlockVarUnknownClusters, and their zero-inflated variants) are
+#' # actually created and fitted.
+#' @keywords internal
 NormalBlockVarBase <- R6::R6Class(
   classname = "NormalBlockVarBase",
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -571,7 +579,7 @@ NormalBlockVarBase <- R6::R6Class(
       cat("    $model_par, $posterior_par / $var_par, $clustering \n")
       cat("    $loglik, $BIC, $ICL, $objective, $nb_param, $criteria\n")
       cat("* Useful S3 methods\n")
-      cat("    print(), coef(), sigma(), fitted(), predict() \n")
+      cat("    print(), summary(), plot(), coef(), sigma(), fitted(), predict() \n")
     }
   ),
 
@@ -634,7 +642,7 @@ NormalBlockVarBase <- R6::R6Class(
 
     get_Omegaq = function(Sigma) {
       if (private$sparsity_ == 0) {
-        Omega <- solve(Sigma)
+        Omega <- chol2inv(chol(Sigma))
       } else {
         glasso_out <- glassoFast::glassoFast(Sigma, rho = private$sparsity_ * self$sparsity_weights)
         if (anyNA(glasso_out$wi)) {
@@ -642,7 +650,7 @@ NormalBlockVarBase <- R6::R6Class(
             "GLasso fails, the penalty is probably too small and the system badly conditionned \n reciprocal condition number =",
             rcond(Sigma), "\n We send back the original matrix and its inverse (unpenalized)."
           )
-          Omega <- solve(Sigma)
+          Omega <- chol2inv(chol(Sigma))
         } else {
           Omega <- Matrix::symmpart(glasso_out$wi)
         }
@@ -657,10 +665,10 @@ NormalBlockVarBase <- R6::R6Class(
       s_vec <- if (is.matrix(S)) colMeans(S) else S
       Sigma_hat <- crossprod(M) / self$n + diag(s_vec, ncol(M))
       Omega <- if (private$sparsity_ == 0) {
-        solve(Sigma_hat)
+        chol2inv(chol(Sigma_hat))
       } else {
         glasso_out <- glassoFast::glassoFast(Sigma_hat, rho = private$sparsity_ * weights)
-        if (anyNA(glasso_out$wi)) solve(Sigma_hat) else Matrix::symmpart(glasso_out$wi)
+        if (anyNA(glasso_out$wi)) chol2inv(chol(Sigma_hat)) else Matrix::symmpart(glasso_out$wi)
       }
       ensure_pd(Omega)
     },

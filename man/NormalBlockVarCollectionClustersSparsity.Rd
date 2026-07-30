@@ -2,9 +2,10 @@
 % Please edit documentation in R/NormalBlockVarCollectionClustersSparsity.R
 \name{NormalBlockVarCollectionClustersSparsity}
 \alias{NormalBlockVarCollectionClustersSparsity}
-\title{R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.}
+\title{Collection of Normal-Block Models over Cluster Counts and Sparsity Levels}
 \description{
-R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.
+R6 class for a collection of normal-block models with different number of
+clusters (q) and different sparsity levels.
 }
 \section{Super class}{
 \code{\link[normalblockr:NormalBlockVarCollection]{NormalBlockVarCollection}} -> \code{NormalBlockVarCollectionClustersSparsity}

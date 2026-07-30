@@ -2,7 +2,9 @@
 ##  CLASS ZINormalBlockVarKnownClusters #############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 class for a Zero-Inflated normal-block model with a known clustering.
+#' Zero-Inflated Normal-Block Model with Known Clustering
+#'
+#' R6 class for a zero-inflated normal-block model with a known clustering.
 #' @export
 ZINormalBlockVarKnownClusters <- R6::R6Class(
   classname = "ZINormalBlockVarKnownClusters",
@@ -95,7 +97,7 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
       if (private$approx) {
         res <- self$data$X %*% private$B
       } else {
-        res <- self$data$X %*% private$B + private$mu %*% t(private$C)
+        res <- self$data$X %*% private$B + tcrossprod(private$mu, private$C)
       }
       res <- res * self$data$zeros_bar
       private$rescale_to_original(res)

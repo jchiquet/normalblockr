@@ -2,7 +2,10 @@
 ##  CLASS NormalBlockData ##################################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 class for a generic normal model
+#' Data Container for Normal-Block Models
+#'
+#' R6 class holding the responses and design matrix used to fit a
+#' normal-block model.
 #' @param Y the matrix of responses.
 #' @param X design matrix.
 #' @param X0 zero-inflation design matrix, if applicable.
@@ -98,7 +101,7 @@ NormalBlockData <- R6::R6Class(
       }
       self$d0 <- ncol(self$X0)
       self$d <- ncol(self$X)
-      self$XtXm1 <- solve(crossprod(self$X))
+      self$XtXm1 <- chol2inv(chol(crossprod(self$X)))
       self$XtY   <- crossprod(self$X, self$Y)
       self$zeros     <- 1 * (self$Y == 0)
       self$zeros_bar <- 1 * (self$Y != 0)

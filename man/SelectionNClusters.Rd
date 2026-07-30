@@ -2,9 +2,11 @@
 % Please edit documentation in R/SelectionNClusters.R
 \name{SelectionNClusters}
 \alias{SelectionNClusters}
-\title{R6 class for selecting the number of clusters (q) by forward/backward
-split-and-merge exploration, comparing models with the ICL}
+\title{Select the Number of Clusters by Split/Merge Search}
 \description{
+R6 class for selecting the number of clusters (q) by forward/backward
+split-and-merge exploration, comparing models with the ICL.
+
 Kept internal/unexported for reference: empirically (see
 [NormalBlockVarCollectionClusters]'s `refine()` documentation) chaining every
 q from a single starting point this way is no longer recommended over

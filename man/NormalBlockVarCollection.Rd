@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockVarCollection.R
 \name{NormalBlockVarCollection}
 \alias{NormalBlockVarCollection}
-\title{R6 abstract class for a collection of normal-block models}
+\title{Base Class for a Collection of Normal-Block Models}
 \description{
 Shared scaffolding for the collections explored by [get_model()]/
 [normal_block()]: a sweep over sparsity penalties ([`NormalBlockVarCollectionSparsity`]),
@@ -12,6 +12,13 @@ over the number of clusters ([`NormalBlockVarCollectionClusters`]), or over both
 and provide their own `get_best_model()`, delegating the (row of
 `self$criteria` minimizing a criterion) lookup to `private$best_id()`.
 }
+\examples{
+# An internal abstract base class, never instantiated directly -- see
+# normal_block() for how collections (NormalBlockVarCollectionClusters,
+# NormalBlockVarCollectionSparsity, NormalBlockVarCollectionClustersSparsity)
+# are actually created and fitted.
+}
+\keyword{internal}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

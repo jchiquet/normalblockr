@@ -2,8 +2,12 @@
 
 S3method(coef,NormalBlockVarBase)
 S3method(fitted,NormalBlockVarBase)
+S3method(plot,NormalBlockVarBase)
 S3method(predict,NormalBlockVarBase)
+S3method(print,NormalBlockVarBase)
+S3method(print,summary.NormalBlockVarBase)
 S3method(sigma,NormalBlockVarBase)
+S3method(summary,NormalBlockVarBase)
 export(NB_control)
 export(NormalBlockData)
 export(NormalBlockVarCollectionClusters)

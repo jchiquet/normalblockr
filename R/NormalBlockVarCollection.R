@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockVarCollection #################################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 abstract class for a collection of normal-block models
+#' Base Class for a Collection of Normal-Block Models
 #'
 #' Shared scaffolding for the collections explored by [get_model()]/
 #' [normal_block()]: a sweep over sparsity penalties ([`NormalBlockVarCollectionSparsity`]),
@@ -11,6 +11,12 @@
 #' `private$progress_field`/`private$progress_label` in their `initialize()`
 #' and provide their own `get_best_model()`, delegating the (row of
 #' `self$criteria` minimizing a criterion) lookup to `private$best_id()`.
+#' @examples
+#' # An internal abstract base class, never instantiated directly -- see
+#' # normal_block() for how collections (NormalBlockVarCollectionClusters,
+#' # NormalBlockVarCollectionSparsity, NormalBlockVarCollectionClustersSparsity)
+#' # are actually created and fitted.
+#' @keywords internal
 NormalBlockVarCollection <- R6::R6Class(
   classname = "NormalBlockVarCollection",
 

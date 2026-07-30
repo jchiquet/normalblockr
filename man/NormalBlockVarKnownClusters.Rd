@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockVarKnownClusters.R
 \name{NormalBlockVarKnownClusters}
 \alias{NormalBlockVarKnownClusters}
-\title{R6 class for a normal-block model with known clustering.}
+\title{Normal-Block Model with Known Clustering}
 \description{
 R6 class for a normal-block model with known clustering.
 }

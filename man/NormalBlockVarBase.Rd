@@ -2,10 +2,17 @@
 % Please edit documentation in R/NormalBlockVarBase.R
 \name{NormalBlockVarBase}
 \alias{NormalBlockVarBase}
-\title{R6 abstract class for a generic sparse Normal Block model}
+\title{Base Class for Normal-Block Models}
 \description{
-R6 abstract class for a generic sparse Normal Block model
+R6 abstract class for a generic sparse Normal-Block model.
 }
+\examples{
+# An internal abstract base class, never instantiated directly -- see
+# normal_block() for how concrete models (NormalBlockVarKnownClusters,
+# NormalBlockVarUnknownClusters, and their zero-inflated variants) are
+# actually created and fitted.
+}
+\keyword{internal}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

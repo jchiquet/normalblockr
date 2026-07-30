@@ -3,7 +3,10 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#' R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.
+#' Collection of Normal-Block Models over a Sparsity Path
+#'
+#' R6 class for a collection of normal-block models with a fixed clustering
+#' (blocks) and different sparsity levels.
 #' @export
 NormalBlockVarCollectionSparsity <- R6::R6Class(
   classname = "NormalBlockVarCollectionSparsity",
@@ -42,7 +45,7 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
       } else {
         init_model <- get_model(mydata, blocks, 0, zero_inflation, control)
         init_model$optimize(control = list(niter=5, threshold=1e-4, verbose=FALSE), warn = FALSE)
-        Sigmaq   <- solve(init_model$model_par$Omegaq)
+        Sigmaq   <- chol2inv(chol(init_model$model_par$Omegaq))
         diag_pen <- max(diag(init_model$sparsity_weights)) > 0
         weights  <- init_model$sparsity_weights
         weights  <- abs((Sigmaq / weights)[upper.tri(Sigmaq, diag = diag_pen)])

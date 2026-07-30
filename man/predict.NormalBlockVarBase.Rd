@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockVarBase-S3methods.R
 \name{predict.NormalBlockVarBase}
 \alias{predict.NormalBlockVarBase}
-\title{Predicts observations Y for new covariates X.}
+\title{Predict Method for Normal-Block Models}
 \usage{
 \method{predict}{NormalBlockVarBase}(object, new_X, ...)
 }
