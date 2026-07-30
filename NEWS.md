@@ -1,3 +1,8 @@
+# normalblockr 0.2.1
+
+* S3 methods `print()`, `summary()`, `plot()`, `logLik()` and `BIC()` for fitted models (any `NormalBlockVarBase` subclass), and `print()`/`summary()`/`logLik()`/`BIC()` for collections of models; accessing `$loglik` on a collection now raises an informative error instead of silently returning `NULL`.
+* Addressed reviewer feedback ahead of CRAN submission: shortened/title-cased man page titles, added missing `@examples`, cross-referenced `$plot_network()`/`$latent_network()` in each other's documentation, and replaced a few inefficient matrix operations (`solve()` on symmetric positive-definite matrices, `M %*% t(C)`) with `chol2inv(chol())`/`tcrossprod()`.
+
 # normalblockr 0.2.0
 
 First CRAN submission
@@ -10,7 +15,6 @@ First CRAN submission
 * Several clustering-initialization heuristics (`ward2`, `kmeans`, `spectral`, `sbm`, selectable via `NB_control(clustering_init = )`), and `best_of_inits()` to try several and keep the best-ELBO fit.
 * `refine()` on `NormalBlockVarCollectionClusters`: post-hoc split/merge search seeded from neighboring cluster counts, to escape mediocre local optima left by independent per-q cold starts.
 * New real datasets: `brca_rppa` (breast cancer proteomics), `onema` (French stream fish biomass, zero-inflated), `university` (WebKB text data), each with a dedicated vignette.
-* S3 methods `print()`, `summary()`, `plot()`, `logLik()` and `BIC()` for fitted models (any `NormalBlockVarBase` subclass), and `logLik()`/`BIC()` for collections of models.
 
 ## Other changes
 
