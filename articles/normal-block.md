@@ -411,7 +411,7 @@ levels, or fix both the number of clusters and the sparsity level.
 
 my_NB_sparse_3     <- my_NB_sparse_unknown$get_model(3)
 my_NB_sparse_3_0.1 <- my_NB_sparse_unknown$get_model(3, 0.1)
-#> No model with this penalty in the collection. Returning model with closest penalty: 0.0987915298048486 Collection penalty values can be found via $sparsity
+#> No model with this penalty in the collection. Returning model with closest penalty: 0.0987915298048484 Collection penalty values can be found via $sparsity
 ```
 
 ### With zero-inflated data

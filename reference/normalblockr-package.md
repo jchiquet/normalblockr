@@ -8,7 +8,8 @@ than between individual variables, for known or unknown clusterings,
 with an optional zero-inflation extension for data with an excess of
 exact zeros. See Tous & Chiquet (2026)
 [doi:10.1016/j.csda.2026.108347](https://doi.org/10.1016/j.csda.2026.108347)
-for the model itself and its variational EM estimation procedure.
+for the model itself and its variational Expectation-Maximization
+estimation procedure.
 
 ## See also
 

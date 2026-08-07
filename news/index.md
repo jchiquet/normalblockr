@@ -13,8 +13,7 @@ First CRAN submission
   [`print()`](https://rdrr.io/r/base/print.html)/[`summary()`](https://rdrr.io/r/base/summary.html)/[`logLik()`](https://rdrr.io/r/stats/logLik.html)/[`BIC()`](https://rdrr.io/r/stats/AIC.html)
   for collections of models; accessing `$loglik` on a collection now
   raises an informative error instead of silently returning `NULL`.
-- Addressed reviewer feedback ahead of CRAN submission:
-  shortened/title-cased man page titles, added missing `@examples`,
+- Shortened/title-cased man page titles, added missing `@examples`,
   cross-referenced `$plot_network()`/`$latent_network()` in each other’s
   documentation, and replaced a few inefficient matrix operations
   ([`solve()`](https://rdrr.io/r/base/solve.html) on symmetric
