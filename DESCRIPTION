@@ -16,7 +16,7 @@ Description: Implements the Normal-Block model, a Gaussian graphical model
              zero-inflation extension for data with an excess of exact
              zeros. See Tous & Chiquet (2026)
              <doi:10.1016/j.csda.2026.108347> for the model itself and its
-             variational EM estimation procedure.
+             variational expectation-maximization estimation procedure.
 License: GPL (>= 3)
 URL: https://github.com/jchiquet/normalblockr
 BugReports: https://github.com/jchiquet/normalblockr/issues

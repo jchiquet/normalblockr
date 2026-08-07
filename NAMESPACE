@@ -32,24 +32,30 @@ import(dplyr)
 import(ggplot2)
 import(purrr)
 import(tibble)
-importFrom(Matrix,Matrix)
-importFrom(Matrix,symmpart)
+importFrom(Matrix,
+  Matrix,
+  symmpart
+)
 importFrom(R6,R6Class)
 importFrom(Rcpp,sourceCpp)
 importFrom(corrplot,corrplot)
 importFrom(glassoFast,glassoFast)
-importFrom(igraph,as_adjacency_matrix)
-importFrom(igraph,sample_gnp)
-importFrom(igraph,sample_pa)
-importFrom(igraph,sample_sbm)
+importFrom(igraph,
+  as_adjacency_matrix,
+  sample_gnp,
+  sample_pa,
+  sample_sbm
+)
 importFrom(scales,pretty_breaks)
-importFrom(stats,BIC)
-importFrom(stats,logLik)
-importFrom(stats,rbinom)
-importFrom(stats,rmultinom)
-importFrom(stats,rnorm)
-importFrom(stats,runif)
-importFrom(stats,sigma)
-importFrom(stats,var)
+importFrom(stats,
+  BIC,
+  logLik,
+  rbinom,
+  rmultinom,
+  rnorm,
+  runif,
+  sigma,
+  var
+)
 importFrom(tidyr,gather)
 useDynLib(normalblockr, .registration = TRUE)

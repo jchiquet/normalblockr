@@ -1,4 +1,14 @@
-This is a new package.
+This is a resubmission. It addresses the feedback from the previous round:
+
+* Explained the "EM" acronym in the DESCRIPTION text.
+* Replaced `\dontrun{}` with runnable example code (the wrapped example ran
+  in well under 5s, so it was unwrapped entirely rather than switched to
+  `\donttest{}`).
+* Replaced a few `cat()`/`print()` calls that could not be suppressed with
+  `message()`, or gated them behind `verbose` (in
+  `NormalBlockVarCollectionSparsity`, `NormalBlockVarCollectionClustersSparsity`
+  and `SelectionNClusters`); calls inside `print`/`summary` methods were left
+  as is.
 
 ## Tested environments
 

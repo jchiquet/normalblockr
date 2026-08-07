@@ -115,7 +115,7 @@ SelectionNClusters <- R6::R6Class(
         candidates <- self$train_best_candidates(current, "split")
         if (length(candidates) == 0) break
 
-        cat("Explore by spliting a model with", current$q, "clusters \r")
+        if (self$control$verbose) cat("Explore by spliting a model with", current$q, "clusters \r")
         candidates_ICL <- map_dbl(candidates, "ICL")
         best_model <- candidates[[which.min(candidates_ICL)]]
 
@@ -152,7 +152,7 @@ SelectionNClusters <- R6::R6Class(
         if (length(icurrent) == 0) break
         current <- self$best_models$model[[icurrent[1]]]
         self$best_models$merge_explored[icurrent[1]] <- TRUE
-        cat("Explore by merging a model with", current$q, "clusters \r")
+        if (self$control$verbose) cat("Explore by merging a model with", current$q, "clusters \r")
 
         ## Exit if the minimum nb of clusters is reached
         if (current$q <= 2) break

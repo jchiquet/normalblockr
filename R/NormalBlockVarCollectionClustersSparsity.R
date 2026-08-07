@@ -57,8 +57,8 @@ NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
       if (!is.na(sparsity)) {
         if (!(sparsity %in% model$sparsity)) {
           sparsity <-  model$sparsity[[which.min(abs(model$sparsity - sparsity))]]
-          cat(paste0("No model with this penalty in the collection. Returning model with closest penalty: ",
-                     sparsity,  " Collection penalty values can be found via $sparsity \n"))
+          message("No model with this penalty in the collection. Returning model with closest penalty: ",
+                  sparsity,  " Collection penalty values can be found via $sparsity")
         }
         model <- model$models[[which(model$sparsity == sparsity)]]
       }

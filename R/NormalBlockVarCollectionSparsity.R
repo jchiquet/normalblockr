@@ -94,8 +94,8 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
     get_model = function(sparsity) {
       if (!(sparsity %in% private$sparsity_)) {
         sparsity <-  private$sparsity_[[which.min(abs(private$sparsity_ - sparsity))]]
-        cat(paste0("No model with this penalty in the collection. Returning model with closest penalty: ",
-                   sparsity,  " Collection penalty values can be found via $sparsity \n"))
+        message("No model with this penalty in the collection. Returning model with closest penalty: ",
+                sparsity,  " Collection penalty values can be found via $sparsity")
       }
       self$models[[which(private$sparsity_ == sparsity)]]
     },
@@ -112,7 +112,7 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
         if (is.null(private$stab_path)) self$stability_selection()
         max_stab <- max(self$criteria$stability)
         if (max_stab < stability) {
-          cat(paste0("No model reaches the required stability ", stability, ", returning model with highest stability: ", max_stab))
+          message("No model reaches the required stability ", stability, ", returning model with highest stability: ", max_stab)
           stability <- max_stab
         }
         id_stars <- self$criteria %>%
