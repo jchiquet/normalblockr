@@ -66,121 +66,6 @@ NormalBlockVarBase <- R6::R6Class(
       }
     },
 
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## Setters    ------------------------
-    #' @description
-    #' Update a [`NormalBlockBase`] object
-    #'
-    #' All possible parameters of the child classes
-    #' @param B regression matrix
-    #' @param dm1 diagonal vector of inverse variance matrix (variables level)
-    #' @param C the matrix of groups memberships (posterior probabilities)
-    #' @param Omega groups inverse variance matrix
-    #' @param gamma  variance of posterior distribution of W
-    #' @param mu mean for posterior distribution of W
-    #' @param kappa vector of zero-inflation probabilities
-    #' @param alpha vector of groups probabilities
-    #' @param M variational mean for posterior distribution of W
-    #' @param S variational diagonal of variances for posterior distribution of W
-    #' @param ll_list  list of log-lik (elbo) values
-    #' @param warm_started whether `EM_initialize()` should treat the model as
-    #' already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
-    #' rather than recomputing a fresh heuristic initialization -- set by
-    #' [warm_start_from()] and by [split()]/[merge()].
-    #' @param clustering_init name of a clustering heuristic to switch to,
-    #' re-derived at the next `optimize()` call instead of reusing the
-    #' current state (see `NB_control(clustering_init = )`). Used by
-    #' [best_of_inits()].
-    #' @return Update the current [`normal`] object
-    update = function(B = NA,
-                      dm1 = NA,
-                      C = NA,
-                      Omega = NA,
-                      gamma = NA,
-                      mu = NA,
-                      kappa = NA,
-                      alpha = NA,
-                      M = NA,
-                      S = NA,
-                      ll_list = NA,
-                      warm_started = NA,
-                      clustering_init = NA) {
-      if (!anyNA(B))       private$B       <- B
-      if (!anyNA(dm1))     private$dm1     <- dm1
-      if (!anyNA(C))       private$C       <- C
-      if (!anyNA(Omega))  private$Omega  <- Omega
-      if (!anyNA(gamma))   private$gamma   <- gamma
-      if (!anyNA(kappa))   private$kappa   <- kappa
-      if (!anyNA(mu))      private$mu      <- mu
-      if (!anyNA(alpha))   private$alpha   <- alpha
-      if (!anyNA(M))       private$M       <- M
-      if (!anyNA(S))       private$S       <- S
-      if (!anyNA(ll_list)) private$ll_list <- ll_list
-      if (!anyNA(warm_started)) private$warm_started <- warm_started
-      if (!anyNA(clustering_init)) {
-        stopifnot("clustering_init must be a single heuristic name" =
-                    is.character(clustering_init) && length(clustering_init) == 1)
-        private$clustering_approx <- clustering_init
-        private$C <- matrix(NA, self$p, self$q)
-        private$warm_started <- FALSE
-      }
-    },
-
-    #' @description Try several clustering-initialization heuristics and keep
-    #' the best-ELBO converged fit (see `NB_control(clustering_init = )` and
-    #' `inst/methods_initialization_and_refine.md` for the rationale). Every
-    #' candidate is first screened with a short `trial_niter` run (same idea
-    #' as `candidates_split()`/`candidates_merge()`), and only the
-    #' `max_training` best-screened ones are fully retrained with `control`.
-    #' @param inits vector of clustering-heuristic names to try
-    #' @param trial_niter number of (V)EM iterations used to cheaply screen
-    #' every candidate in `inits` before fully retraining the best few
-    #' @param max_training how many of the screened candidates (best `loglik`
-    #' after `trial_niter` iterations) get fully retrained with `control`
-    #' @param control `optimize()` control list (`niter`/`threshold`) used
-    #' for the final full retraining of the `max_training` best candidates
-    #' @return a new, already-optimized [`NormalBlockVarBase`] object. Does not
-    #' mutate the current object; reassign the result
-    #' (`model <- model$best_of_inits()`).
-    best_of_inits = function(inits = c("ward2", "kmeans", "spectral"),
-                             trial_niter = 10, max_training = 2,
-                             control = list(niter = 500, threshold = 1e-4)) {
-      stopifnot(
-        "best_of_inits() requires (V)EM inference (not the heuristic-only mode, see NB_control(heuristic = ))" =
-          !private$approx,
-        "best_of_inits() only applies when the initial clustering is inferred by a heuristic (see NB_control(clustering_init = ))" =
-          !is.na(private$clustering_approx)
-      )
-      candidates <- map(inits, function(init) {
-        cand <- self$clone()
-        cand$update(clustering_init = init)
-        cand$optimize(list(niter = trial_niter, threshold = 1e-4), warn = FALSE)
-        cand
-      })
-      ibest <- order(map_dbl(candidates, "loglik"), decreasing = TRUE)[1:min(max_training, length(candidates))]
-      best_candidates <- candidates[ibest]
-      map(best_candidates, function(cand) cand$optimize(control, warn = FALSE))
-      best_candidates[[which.max(map_dbl(best_candidates, "loglik"))]]
-    },
-
-    #' @description calls optimization (EM or heuristic) and updates relevant fields
-    #' @param control a list for controlling the optimization process
-    #' @param warn whether to warn when the (V)EM stops at the `niter` cap
-    #' without reaching `threshold` (see `private$warn_if_not_converged()`).
-    #' Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
-    #' scoring in `candidates_split()`/`candidates_merge()`, the sparsity-path
-    #' warm-start probe in [NormalBlockCollectionSparsity]) where stopping at
-    #' the cap is expected and not a sign of trouble.
-    #' @return optimizes the model and updates its parameters
-    optimize = function(control = list(niter = 500, threshold = 1e-4), warn = TRUE) {
-      private$niter_max  <- control$niter
-      private$threshold  <- control$threshold
-      optim_out <- private$optimizer(control)
-      do.call(self$update, optim_out)
-      if (warn) private$warn_if_not_converged()
-      invisible(self)
-    },
-
     #' @description Seed this model's starting parameters from another,
     #' already-optimized model with the same q, instead of a fresh heuristic
     #' clustering. Used by [NormalBlockVarCollectionSparsity] to warm-start
@@ -272,53 +157,6 @@ NormalBlockVarBase <- R6::R6Class(
       }
     },
 
-    #' @description generate and select a set of candidate models
-    #' by splitting the clusters of the current model
-    #' @param trial_niter number of EM iterations used to cheaply score each
-    #' candidate before [SelectionNClusters] fully re-optimizes the best few
-    #' (`train_best_candidates()`'s `max_training`) -- kept short on purpose.
-    candidates_split = function(trial_niter = 5) {
-      # do not split groups with less than 2 guys
-      candidates <- map((1:self$q)[self$cluster_sizes > 1], self$split)
-      # keep candidates with at least 2 guys per cluster and non empty split.
-      # Compared against the number of currently *live* (non-empty) clusters
-      # rather than self$q: the (V)EM can converge to an empty cluster (a
-      # known general failure mode, e.g. plot_network()'s cluster_sizes fix),
-      # in which case self$q overcounts and every split would otherwise look
-      # invalid, silently stalling explore_forward() before n_clusters_range[2].
-      clustering_sizes <- map(candidates, "clustering") %>% map(table)
-      min_sizes  <- clustering_sizes %>% map_dbl(min)
-      n_clusters <- clustering_sizes %>% map_dbl(length)
-      n_live <- length(unique(self$clustering))
-      candidates <- candidates[min_sizes > 1 & n_clusters == n_live + 1]
-
-      for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4), warn = FALSE)
-      candidates
-    },
-
-    #' @description generate and select a set of candidate models
-    #' by merging the clusters of the current model
-    #' @param max_candidates merge candidates are, unlike split's, quadratic
-    #' in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
-    #' the most promising ones (largest `|Omega[i, j]|`, i.e. the most
-    #' strongly related cluster pairs in the current fit) are actually built
-    #' and trial-optimized, since merging two nearly independent blocks is
-    #' rarely competitive anyway. Set to `Inf` to always try every pair.
-    #' @param trial_niter see [candidates_split()]
-    candidates_merge = function(max_candidates = 30, trial_niter = 2) {
-      stopifnot("need at least two clusters to merge them" = self$q > 1)
-      pairs <- combn(self$q, 2, simplify = FALSE)
-      if (length(pairs) > max_candidates) {
-        score <- map_dbl(pairs, function(ij) abs(private$Omega[ij[1], ij[2]]))
-        pairs <- pairs[order(score, decreasing = TRUE)[1:max_candidates]]
-      }
-      candidates <- map(pairs, self$merge)
-      for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4), warn = FALSE)
-      candidates
-    },
-
     #' @description Create a clone of the current [`NormalBlockVarBase`] object after merging clusters `cl1` and `cl2`
     #' @param indices indices (couple of integer) of the clusters to merge
     #' @param in_place should the split applied to the object itself, or should a copy be sent?
@@ -377,6 +215,9 @@ NormalBlockVarBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    ## heuristics tried by best_of_inits(), best first (see
+    ## inst/methods_initialization_and_refine.md for the benchmark)
+    default_inits     = c("ward2", "kmeans", "spectral"),
     dm1               = NA, # diagonal vector of inverse variance matrix (variables level)
     kappa             = NA, # vector of zero-inflation probabilities
     B0                = NA, # vector of zero-inflation regression matrix
@@ -393,6 +234,13 @@ NormalBlockVarBase <- R6::R6Class(
     ## Closed-form M-step estimate of Omega from M/S (Sigma_hat = M'M/n +
     ## diag(S)); used by split()/merge() to reseed Omega from the new
     ## clustering's own M/S/C rather than the parent's stale Omega.
+    ## Cluster pairs are ranked by how strongly related they are in the
+    ## current fit: merging two nearly independent blocks is rarely
+    ## competitive.
+    merge_score = function(pairs) {
+      map_dbl(pairs, function(ij) abs(private$Omega[ij[1], ij[2]]))
+    },
+
     omega_from_M_S = function(M, S, weights) {
       s_vec <- if (is.matrix(S)) colMeans(S) else S
       Sigma_hat <- crossprod(M) / self$n + diag(s_vec, ncol(M))

@@ -17,25 +17,12 @@ models <- normal_block(data, blocks = 3, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 5))
 models$plot(c("BIC", "EBIC"))
 }
-\section{Super class}{
-\code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{NormalBlockMeanCollectionSparsity}
-}
-\section{Public fields}{
-  \if{html}{\out{<div class="r6-fields">}}
-  \describe{
-    \item{\code{data}}{object of NormalBlockData class, with responses and design matrix}
-  }
-  \if{html}{\out{</div>}}
+\section{Super classes}{
+\code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{NormalBlockCollectionSparsity} -> \code{NormalBlockMeanCollectionSparsity}
 }
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{q}}{number of blocks}
-
-    \item{\code{blocks}}{group matrix or number of blocks}
-
-    \item{\code{sparsity}}{list of sparsity penalties}
-
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }
   \if{html}{\out{</div>}}
@@ -44,10 +31,7 @@ models$plot(c("BIC", "EBIC"))
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockMeanCollectionSparsity-initialize}{\code{NormalBlockMeanCollectionSparsity$new()}}
-    \item \href{#method-NormalBlockMeanCollectionSparsity-optimize}{\code{NormalBlockMeanCollectionSparsity$optimize()}}
-    \item \href{#method-NormalBlockMeanCollectionSparsity-get_model}{\code{NormalBlockMeanCollectionSparsity$get_model()}}
     \item \href{#method-NormalBlockMeanCollectionSparsity-get_best_model}{\code{NormalBlockMeanCollectionSparsity$get_best_model()}}
-    \item \href{#method-NormalBlockMeanCollectionSparsity-plot}{\code{NormalBlockMeanCollectionSparsity$plot()}}
     \item \href{#method-NormalBlockMeanCollectionSparsity-clone}{\code{NormalBlockMeanCollectionSparsity$clone()}}
   }
 }
@@ -55,6 +39,9 @@ models$plot(c("BIC", "EBIC"))
 <ul>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
+  <li><code>NormalBlockCollectionSparsity$get_model()</code></li>
+  <li><code>NormalBlockCollectionSparsity$optimize()</code></li>
+  <li><code>NormalBlockCollectionSparsity$plot()</code></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
@@ -82,51 +69,6 @@ models$plot(c("BIC", "EBIC"))
 }
 
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanCollectionSparsity-optimize"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionSparsity-optimize}{}}}
-\subsection{\code{NormalBlockMeanCollectionSparsity$optimize()}}{
-  optimizes every model in the sparsity path, warm-starting
-each one (after the first) from the previous, adjacent penalty's
-converged parameters (see [NormalBlockMeanBase]'s `warm_start_from()`).
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanCollectionSparsity$optimize(
-  control = list(niter = 500, threshold = 1e-04, verbose = TRUE)
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{control}}{optimization parameters (niter and threshold)}
-    }
-    \if{html}{\out{</div>}}
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanCollectionSparsity-get_model"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionSparsity-get_model}{}}}
-\subsection{\code{NormalBlockMeanCollectionSparsity$get_model()}}{
-  returns the model corresponding to a given penalty
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanCollectionSparsity$get_model(sparsity)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{sparsity}}{sparsity penalty asked by user}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    a [`NormalBlockMeanBase`] object with the given penalty
-  }
-}
-
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockMeanCollectionSparsity-get_best_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionSparsity-get_best_model}{}}}
 \subsection{\code{NormalBlockMeanCollectionSparsity$get_best_model()}}{
@@ -148,32 +90,6 @@ either "BIC", "EBIC" or "ICL". Default is BIC}
   }
   \subsection{Returns}{
     a [`NormalBlockMeanBase`] object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanCollectionSparsity-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionSparsity-plot}{}}}
-\subsection{\code{NormalBlockMeanCollectionSparsity$plot()}}{
-  Display goodness-of-fit criteria along the sparsity path
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanCollectionSparsity$plot(
-  criteria = c("deviance", "BIC", "EBIC", "ICL"),
-  log.x = TRUE
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{criteria}}{vector of characters. The criteria to plot in `c("deviance", "BIC", "EBIC", "ICL")`. Defaults to all of them.}
-      \item{\code{log.x}}{logical: should the x-axis be represented in log-scale? Default is `TRUE`.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    a [`ggplot2::ggplot`] graph
   }
 }
 

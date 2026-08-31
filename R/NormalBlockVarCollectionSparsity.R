@@ -10,14 +10,11 @@
 #' @export
 NormalBlockVarCollectionSparsity <- R6::R6Class(
   classname = "NormalBlockVarCollectionSparsity",
-  inherit   = NormalBlockCollection,
+  inherit   = NormalBlockCollectionSparsity,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @field data object of NormalBlockData class, with responses and design matrix
-    data   = NA,
-
     #' @description Create a new [`NormalBlockVarCollectionSparsity`] object.
     #' @param mydata object of NormalBlockData class, with responses and design matrix
     #' @param blocks either a clustering matrix (known, fixed clustering) or a single integer (number of blocks to infer)
@@ -66,40 +63,6 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
       private$progress_label <- "penalty"
     },
 
-    #' @description optimizes every model in the sparsity path, warm-starting
-    #' each one (after the first) from the previous, adjacent penalty's
-    #' converged parameters (see [NormalBlockVarBase]'s `warm_start_from()`)
-    #' instead of re-deriving everything from the heuristic clustering, the
-    #' way the generic [NormalBlockCollection] `optimize()` would. `blocks`
-    #' (hence q) is fixed across the whole path, only the sparsity penalty
-    #' changes, so the warm start is always between models of matching shape.
-    #' @param control optimization parameters (niter and threshold)
-    optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {
-      previous <- NULL
-      self$models <- lapply(self$models, function(model) {
-        if (control$verbose)
-          cat("\t", private$progress_label, "=", model[[private$progress_field]], "          \r")
-        flush.console()
-        if (!is.null(previous)) model$warm_start_from(previous)
-        model$optimize(control)
-        previous <<- model
-        model
-      })
-      invisible(self)
-    },
-
-    #' @description returns the NormalBlockVarKnownClusters model corresponding to given penalty
-    #' @param sparsity sparsity penalty asked by user
-    #' @return A NormalBlockVarKnownClusters (sparse) object with given value penalty
-    get_model = function(sparsity) {
-      if (!(sparsity %in% private$sparsity_)) {
-        sparsity <-  private$sparsity_[[which.min(abs(private$sparsity_ - sparsity))]]
-        message("No model with this penalty in the collection. Returning model with closest penalty: ",
-                sparsity,  " Collection penalty values can be found via $sparsity")
-      }
-      self$models[[which(private$sparsity_ == sparsity)]]
-    },
-
     #' @description Extract best model in the collection
     #' @param crit a character for the criterion used to performed the selection.
     #' @param stability if criterion = "StARS" gives level of stability required.
@@ -125,17 +88,6 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
         model <- self$models[[id]]$clone()
       }
       model
-    },
-
-    #' @description Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
-    #' @param criteria vector of characters. The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults to all of them.
-    #' @param log.x logical: should the x-axis be represented in log-scale? Default is `TRUE`.
-    #' @return a [`ggplot`] graph
-    plot = function(criteria = c("deviance", "BIC", "EBIC", "ICL"), log.x = TRUE) {
-      stopifnot(!is.null(self$criteria[criteria]))
-      p <- private$plot_criteria_path("sparsity", criteria)
-      if (log.x) p <- p + ggplot2::coord_trans(x = "log10")
-      p
     },
 
     ## Stability -------------------------
@@ -199,20 +151,12 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-    stab_path    = NULL, # a field to store the stability path,
-    sparsity_    = NA,   # penalty values in the collection for sparsity (lambda)
-    blocks_      = NA    # blocks (either a scalar or an indicator matrix)
+    stab_path = NULL # stability path, filled in by stability_selection()
   ),
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field q number of blocks
-    q = function() ifelse(is.matrix(private$blocks_), ncol(private$blocks_), private$blocks_),
-    #' @field blocks group matrix or number of blocks.
-    blocks = function() private$blocks_,
-    #' @field sparsity list of sparsity penalties
-    sparsity = function() private$sparsity_,
     #' @field sparsity_details list of information about model's penalties
     sparsity_details = function()
       list("n_penalties" = length(self$sparsity), "min_ratio" = min(self$sparsity)/max(self$sparsity),

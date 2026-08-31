@@ -166,6 +166,87 @@ NormalBlockBase <- R6::R6Class(
       invisible(self)
     },
 
+    #' @description Try several clustering-initialization heuristics and keep
+    #' the best-ELBO converged fit (see `NB_control(clustering_init = )` and
+    #' `inst/methods_initialization_and_refine.md` for the rationale). Every
+    #' candidate is first screened with a short `trial_niter` run (same idea
+    #' as `candidates_split()`/`candidates_merge()`), and only the
+    #' `max_training` best-screened ones are fully retrained with `control`.
+    #' @param inits vector of clustering-heuristic names to try; defaults to
+    #' the model family's own preferred order (`private$default_inits`)
+    #' @param trial_niter number of (V)EM iterations used to cheaply screen
+    #' every candidate in `inits` before fully retraining the best few
+    #' @param max_training how many of the screened candidates (best `loglik`
+    #' after `trial_niter` iterations) get fully retrained with `control`
+    #' @param control `optimize()` control list (`niter`/`threshold`) used
+    #' for the final full retraining of the `max_training` best candidates
+    #' @return a new, already-optimized model. Does not mutate the current
+    #' object; reassign the result (`model <- model$best_of_inits()`).
+    best_of_inits = function(inits = private$default_inits,
+                             trial_niter = 10, max_training = 2,
+                             control = list(niter = 500, threshold = 1e-4, fixed_point_niter = 5)) {
+      stopifnot(
+        "best_of_inits() requires (V)EM inference (not the heuristic-only mode, see NB_control(heuristic = ))" =
+          !private$approx,
+        "best_of_inits() only applies when the initial clustering is inferred by a heuristic (see NB_control(clustering_init = ))" =
+          !is.na(private$clustering_approx)
+      )
+      candidates <- map(inits, function(init) {
+        cand <- self$clone()
+        cand$update(clustering_init = init)
+        cand$optimize(private$trial_control(trial_niter), warn = FALSE)
+        cand
+      })
+      ibest <- order(map_dbl(candidates, "loglik"), decreasing = TRUE)[1:min(max_training, length(candidates))]
+      best_candidates <- candidates[ibest]
+      map(best_candidates, function(cand) cand$optimize(control, warn = FALSE))
+      best_candidates[[which.max(map_dbl(best_candidates, "loglik"))]]
+    },
+
+    #' @description generate and select a set of candidate models
+    #' by splitting the clusters of the current model
+    #' @param trial_niter number of (V)EM iterations used to cheaply score each
+    #' candidate before the caller fully re-optimizes the best few -- kept
+    #' short on purpose.
+    candidates_split = function(trial_niter = 5) {
+      # do not split groups with less than 2 guys
+      candidates <- map((1:self$q)[self$cluster_sizes > 1], self$split)
+      # keep candidates with at least 2 guys per cluster and non empty split.
+      # Compared against the number of currently *live* (non-empty) clusters
+      # rather than self$q: the (V)EM can converge to an empty cluster (a
+      # known general failure mode, e.g. plot_network()'s cluster_sizes fix),
+      # in which case self$q overcounts and every split would otherwise look
+      # invalid, silently stalling explore_forward() before n_clusters_range[2].
+      clustering_sizes <- map(candidates, "clustering") %>% map(table)
+      min_sizes  <- clustering_sizes %>% map_dbl(min)
+      n_clusters <- clustering_sizes %>% map_dbl(length)
+      n_live <- length(unique(self$clustering))
+      candidates <- candidates[min_sizes > 1 & n_clusters == n_live + 1]
+
+      for (i in seq_along(candidates))
+        candidates[[i]]$optimize(private$trial_control(trial_niter), warn = FALSE)
+      candidates
+    },
+
+    #' @description generate and select a set of candidate models
+    #' by merging the clusters of the current model
+    #' @param max_candidates merge candidates are, unlike split's, quadratic
+    #' in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
+    #' the most promising ones are actually built and trial-optimized, ranked
+    #' by the family's own `private$merge_score()`. Set to `Inf` to always
+    #' try every pair.
+    #' @param trial_niter see [candidates_split()]
+    candidates_merge = function(max_candidates = 30, trial_niter = 2) {
+      stopifnot("need at least two clusters to merge them" = self$q > 1)
+      pairs <- combn(self$q, 2, simplify = FALSE)
+      if (length(pairs) > max_candidates)
+        pairs <- pairs[order(private$merge_score(pairs), decreasing = TRUE)[1:max_candidates]]
+      candidates <- map(pairs, self$merge)
+      for (i in seq_along(candidates))
+        candidates[[i]]$optimize(private$trial_control(trial_niter), warn = FALSE)
+      candidates
+    },
+
     #' @description Predicts observations Y for new covariates X.
     #' @param new_X new set of covariates.
     #' @return A n*p prediction matrix for new observations
@@ -370,6 +451,17 @@ NormalBlockBase <- R6::R6Class(
 
     ## Warns when the (V)EM hit the niter cap without reaching threshold
     ## (heuristic fits have no ll_list/niter to check, so stay silent).
+    ## Control list for the deliberately-truncated trial fits of
+    ## best_of_inits()/candidates_split()/candidates_merge(). fixed_point_niter
+    ## is only read by the mean-block family; the variance-block one ignores it.
+    trial_control = function(trial_niter) {
+      list(niter = trial_niter, threshold = 1e-4, fixed_point_niter = 5)
+    },
+
+    ## Ranks candidate cluster pairs for candidates_merge(), highest first.
+    ## Overridden by each family (see NormalBlockVarBase/NormalBlockMeanBase).
+    merge_score = function(pairs) rep(0, length(pairs)),
+
     warn_if_not_converged = function() {
       if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())
       last_increment <- abs(diff(private$ll_list))[private$niter]

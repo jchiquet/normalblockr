@@ -70,6 +70,9 @@ mean-block ([NormalBlockMeanBase]) model families.
     \item \href{#method-NormalBlockBase-initialize}{\code{NormalBlockBase$new()}}
     \item \href{#method-NormalBlockBase-update}{\code{NormalBlockBase$update()}}
     \item \href{#method-NormalBlockBase-optimize}{\code{NormalBlockBase$optimize()}}
+    \item \href{#method-NormalBlockBase-best_of_inits}{\code{NormalBlockBase$best_of_inits()}}
+    \item \href{#method-NormalBlockBase-candidates_split}{\code{NormalBlockBase$candidates_split()}}
+    \item \href{#method-NormalBlockBase-candidates_merge}{\code{NormalBlockBase$candidates_merge()}}
     \item \href{#method-NormalBlockBase-predict}{\code{NormalBlockBase$predict()}}
     \item \href{#method-NormalBlockBase-latent_network}{\code{NormalBlockBase$latent_network()}}
     \item \href{#method-NormalBlockBase-plot_loglik}{\code{NormalBlockBase$plot_loglik()}}
@@ -195,6 +198,93 @@ the cap is expected and not a sign of trouble.}
   }
   \subsection{Returns}{
     optimizes the model and updates its parameters
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockBase-best_of_inits"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockBase-best_of_inits}{}}}
+\subsection{\code{NormalBlockBase$best_of_inits()}}{
+  Try several clustering-initialization heuristics and keep
+the best-ELBO converged fit (see `NB_control(clustering_init = )` and
+`inst/methods_initialization_and_refine.md` for the rationale). Every
+candidate is first screened with a short `trial_niter` run (same idea
+as `candidates_split()`/`candidates_merge()`), and only the
+`max_training` best-screened ones are fully retrained with `control`.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockBase$best_of_inits(
+  inits = private$default_inits,
+  trial_niter = 10,
+  max_training = 2,
+  control = list(niter = 500, threshold = 1e-04, fixed_point_niter = 5)
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{inits}}{vector of clustering-heuristic names to try; defaults to
+the model family's own preferred order (`private$default_inits`)}
+      \item{\code{trial_niter}}{number of (V)EM iterations used to cheaply screen
+every candidate in `inits` before fully retraining the best few}
+      \item{\code{max_training}}{how many of the screened candidates (best `loglik`
+after `trial_niter` iterations) get fully retrained with `control`}
+      \item{\code{control}}{`optimize()` control list (`niter`/`threshold`) used
+for the final full retraining of the `max_training` best candidates}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a new, already-optimized model. Does not mutate the current
+object; reassign the result (`model <- model$best_of_inits()`).
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockBase-candidates_split"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockBase-candidates_split}{}}}
+\subsection{\code{NormalBlockBase$candidates_split()}}{
+  generate and select a set of candidate models
+by splitting the clusters of the current model
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockBase$candidates_split(trial_niter = 5)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{trial_niter}}{number of (V)EM iterations used to cheaply score each
+candidate before the caller fully re-optimizes the best few -- kept
+short on purpose.}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockBase-candidates_merge"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockBase-candidates_merge}{}}}
+\subsection{\code{NormalBlockBase$candidates_merge()}}{
+  generate and select a set of candidate models
+by merging the clusters of the current model
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockBase$candidates_merge(max_candidates = 30, trial_niter = 2)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{max_candidates}}{merge candidates are, unlike split's, quadratic
+in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
+the most promising ones are actually built and trial-optimized, ranked
+by the family's own `private$merge_score()`. Set to `Inf` to always
+try every pair.}
+      \item{\code{trial_niter}}{see [candidates_split()]}
+    }
+    \if{html}{\out{</div>}}
   }
 }
 

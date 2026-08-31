@@ -18,14 +18,11 @@
 #' @export
 NormalBlockMeanCollectionSparsity <- R6::R6Class(
   classname = "NormalBlockMeanCollectionSparsity",
-  inherit   = NormalBlockCollection,
+  inherit   = NormalBlockCollectionSparsity,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
-    #' @field data object of NormalBlockData class, with responses and design matrix
-    data = NA,
-
     #' @description Create a new [`NormalBlockMeanCollectionSparsity`] object.
     #' @param mydata object of NormalBlockData class, with responses and design matrix
     #' @param blocks either a clustering matrix (known, fixed clustering) or a single integer (number of blocks to infer)
@@ -72,36 +69,6 @@ NormalBlockMeanCollectionSparsity <- R6::R6Class(
       private$progress_label <- "penalty"
     },
 
-    #' @description optimizes every model in the sparsity path, warm-starting
-    #' each one (after the first) from the previous, adjacent penalty's
-    #' converged parameters (see [NormalBlockMeanBase]'s `warm_start_from()`).
-    #' @param control optimization parameters (niter and threshold)
-    optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {
-      previous <- NULL
-      self$models <- lapply(self$models, function(model) {
-        if (control$verbose)
-          cat("\t", private$progress_label, "=", model[[private$progress_field]], "          \r")
-        flush.console()
-        if (!is.null(previous)) model$warm_start_from(previous)
-        model$optimize(control)
-        previous <<- model
-        model
-      })
-      invisible(self)
-    },
-
-    #' @description returns the model corresponding to a given penalty
-    #' @param sparsity sparsity penalty asked by user
-    #' @return a [`NormalBlockMeanBase`] object with the given penalty
-    get_model = function(sparsity) {
-      if (!(sparsity %in% private$sparsity_)) {
-        sparsity <- private$sparsity_[[which.min(abs(private$sparsity_ - sparsity))]]
-        message("No model with this penalty in the collection. Returning model with closest penalty: ",
-                sparsity, " Collection penalty values can be found via $sparsity")
-      }
-      self$models[[which(private$sparsity_ == sparsity)]]
-    },
-
     #' @description Extract best model in the collection
     #' @param crit a character for the criterion used to perform the selection,
     #' either "BIC", "EBIC" or "ICL". Default is BIC
@@ -109,38 +76,16 @@ NormalBlockMeanCollectionSparsity <- R6::R6Class(
     get_best_model = function(crit = c("BIC", "EBIC", "ICL")) {
       crit <- match.arg(crit)
       self$models[[private$best_id(crit)]]$clone()
-    },
-
-    #' @description Display goodness-of-fit criteria along the sparsity path
-    #' @param criteria vector of characters. The criteria to plot in `c("deviance", "BIC", "EBIC", "ICL")`. Defaults to all of them.
-    #' @param log.x logical: should the x-axis be represented in log-scale? Default is `TRUE`.
-    #' @return a [`ggplot2::ggplot`] graph
-    plot = function(criteria = c("deviance", "BIC", "EBIC", "ICL"), log.x = TRUE) {
-      stopifnot(!is.null(self$criteria[criteria]))
-      p <- private$plot_criteria_path("sparsity", criteria)
-      if (log.x) p <- p + ggplot2::coord_trans(x = "log10")
-      p
     }
   ),
 
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  private = list(
-    sparsity_ = NA, # penalty values in the collection (lambda)
-    blocks_   = NA  # blocks (either a scalar or an indicator matrix)
-  ),
-
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field q number of blocks
-    q = function() ifelse(is.matrix(private$blocks_), ncol(private$blocks_), private$blocks_),
-    #' @field blocks group matrix or number of blocks
-    blocks = function() private$blocks_,
-    #' @field sparsity list of sparsity penalties
-    sparsity = function() private$sparsity_,
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function() "normal-block-mean model with sparsity path"
   )

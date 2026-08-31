@@ -32,15 +32,15 @@ structures the mean (mu_i = C B' X_i).
     \item \href{#method-NormalBlockMeanBase-initialize}{\code{NormalBlockMeanBase$new()}}
     \item \href{#method-NormalBlockMeanBase-warm_start_from}{\code{NormalBlockMeanBase$warm_start_from()}}
     \item \href{#method-NormalBlockMeanBase-split}{\code{NormalBlockMeanBase$split()}}
-    \item \href{#method-NormalBlockMeanBase-candidates_split}{\code{NormalBlockMeanBase$candidates_split()}}
-    \item \href{#method-NormalBlockMeanBase-candidates_merge}{\code{NormalBlockMeanBase$candidates_merge()}}
     \item \href{#method-NormalBlockMeanBase-merge}{\code{NormalBlockMeanBase$merge()}}
-    \item \href{#method-NormalBlockMeanBase-best_of_inits}{\code{NormalBlockMeanBase$best_of_inits()}}
     \item \href{#method-NormalBlockMeanBase-clone}{\code{NormalBlockMeanBase$clone()}}
   }
 }
 \if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="best_of_inits"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-best_of_inits'><code>NormalBlockBase$best_of_inits()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="candidates_merge"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-candidates_merge'><code>NormalBlockBase$candidates_merge()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="candidates_split"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-candidates_split'><code>NormalBlockBase$candidates_split()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>NormalBlockBase$latent_network()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="optimize"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-optimize'><code>NormalBlockBase$optimize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>NormalBlockBase$plot()</code></a></span></li>
@@ -134,52 +134,6 @@ should a copy be sent? Default FALSE (send a copy)}
 }
 
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanBase-candidates_split"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-candidates_split}{}}}
-\subsection{\code{NormalBlockMeanBase$candidates_split()}}{
-  generate and select a set of candidate models by
-splitting the clusters of the current model
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanBase$candidates_split(trial_niter = 5)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{trial_niter}}{number of (V)EM iterations used to cheaply score
-each candidate before fully re-optimizing the best few}
-    }
-    \if{html}{\out{</div>}}
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanBase-candidates_merge"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-candidates_merge}{}}}
-\subsection{\code{NormalBlockMeanBase$candidates_merge()}}{
-  generate and select a set of candidate models by
-merging the clusters of the current model
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanBase$candidates_merge(max_candidates = 30, trial_niter = 2)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{max_candidates}}{merge candidates are quadratic in q -- beyond
-`max_candidates` pairs, only the most promising ones (smallest
-distance between the two clusters' B columns, i.e. the most similar
-mean profiles) are actually built and trial-optimized. Set to `Inf`
-to always try every pair.}
-      \item{\code{trial_niter}}{see [candidates_split()]}
-    }
-    \if{html}{\out{</div>}}
-  }
-}
-
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockMeanBase-merge"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-merge}{}}}
 \subsection{\code{NormalBlockMeanBase$merge()}}{
@@ -201,46 +155,6 @@ should a copy be sent? Default FALSE (send a copy)}
   }
   \subsection{Returns}{
     A new [`NormalBlockMeanBase`] object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanBase-best_of_inits"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-best_of_inits}{}}}
-\subsection{\code{NormalBlockMeanBase$best_of_inits()}}{
-  Try several clustering-initialization heuristics and
-keep the best-ELBO converged fit (see `NB_control(clustering_init = )`).
-Every candidate is first screened with a short `trial_niter` run, and
-only the `max_training` best-screened ones are fully retrained with
-`control`.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanBase$best_of_inits(
-  inits = c("kmeans", "ward2", "spectral"),
-  trial_niter = 10,
-  max_training = 2,
-  control = list(niter = 500, threshold = 1e-04, fixed_point_niter = 5)
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{inits}}{vector of clustering-heuristic names to try}
-      \item{\code{trial_niter}}{number of (V)EM iterations used to cheaply screen
-every candidate in `inits` before fully retraining the best few}
-      \item{\code{max_training}}{how many of the screened candidates (best
-`loglik` after `trial_niter` iterations) get fully retrained with
-`control`}
-      \item{\code{control}}{`optimize()` control list used for the final full
-retraining of the `max_training` best candidates}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    a new, already-optimized [`NormalBlockMeanBase`] object. Does
-not mutate the current object; reassign the result
-(`model <- model$best_of_inits()`).
   }
 }
 

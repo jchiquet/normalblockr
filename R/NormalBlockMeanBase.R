@@ -103,45 +103,6 @@ NormalBlockMeanBase <- R6::R6Class(
       }
     },
 
-    #' @description generate and select a set of candidate models by
-    #' splitting the clusters of the current model
-    #' @param trial_niter number of (V)EM iterations used to cheaply score
-    #' each candidate before fully re-optimizing the best few
-    candidates_split = function(trial_niter = 5) {
-      candidates <- map((1:self$q)[self$cluster_sizes > 1], self$split)
-      ## keep candidates with a genuine 2-way split (vs. currently live clusters)
-      clustering_sizes <- map(candidates, "clustering") %>% map(table)
-      min_sizes  <- clustering_sizes %>% map_dbl(min)
-      n_clusters <- clustering_sizes %>% map_dbl(length)
-      n_live <- length(unique(self$clustering))
-      candidates <- candidates[min_sizes > 1 & n_clusters == n_live + 1]
-
-      for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4, fixed_point_niter = 5), warn = FALSE)
-      candidates
-    },
-
-    #' @description generate and select a set of candidate models by
-    #' merging the clusters of the current model
-    #' @param max_candidates merge candidates are quadratic in q -- beyond
-    #' `max_candidates` pairs, only the most promising ones (smallest
-    #' distance between the two clusters' B columns, i.e. the most similar
-    #' mean profiles) are actually built and trial-optimized. Set to `Inf`
-    #' to always try every pair.
-    #' @param trial_niter see [candidates_split()]
-    candidates_merge = function(max_candidates = 30, trial_niter = 2) {
-      stopifnot("need at least two clusters to merge them" = self$q > 1)
-      pairs <- combn(self$q, 2, simplify = FALSE)
-      if (length(pairs) > max_candidates) {
-        dist <- map_dbl(pairs, function(ij) sum((private$B[, ij[1]] - private$B[, ij[2]])^2))
-        pairs <- pairs[order(dist)[1:max_candidates]]
-      }
-      candidates <- map(pairs, self$merge)
-      for (i in seq_along(candidates))
-        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4, fixed_point_niter = 5), warn = FALSE)
-      candidates
-    },
-
     #' @description Create a clone of the current [`NormalBlockMeanBase`]
     #' object after merging clusters `indices`
     #' @param indices indices (couple of integer) of the clusters to merge
@@ -167,43 +128,6 @@ NormalBlockMeanBase <- R6::R6Class(
         new_NB$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
         return(new_NB)
       }
-    },
-
-    #' @description Try several clustering-initialization heuristics and
-    #' keep the best-ELBO converged fit (see `NB_control(clustering_init = )`).
-    #' Every candidate is first screened with a short `trial_niter` run, and
-    #' only the `max_training` best-screened ones are fully retrained with
-    #' `control`.
-    #' @param inits vector of clustering-heuristic names to try
-    #' @param trial_niter number of (V)EM iterations used to cheaply screen
-    #' every candidate in `inits` before fully retraining the best few
-    #' @param max_training how many of the screened candidates (best
-    #' `loglik` after `trial_niter` iterations) get fully retrained with
-    #' `control`
-    #' @param control `optimize()` control list used for the final full
-    #' retraining of the `max_training` best candidates
-    #' @return a new, already-optimized [`NormalBlockMeanBase`] object. Does
-    #' not mutate the current object; reassign the result
-    #' (`model <- model$best_of_inits()`).
-    best_of_inits = function(inits = c("kmeans", "ward2", "spectral"),
-                             trial_niter = 10, max_training = 2,
-                             control = list(niter = 500, threshold = 1e-4, fixed_point_niter = 5)) {
-      stopifnot(
-        "best_of_inits() requires (V)EM inference (not the heuristic-only mode, see NB_control(heuristic = ))" =
-          !private$approx,
-        "best_of_inits() only applies when the initial clustering is inferred by a heuristic (see NB_control(clustering_init = ))" =
-          !is.na(private$clustering_approx)
-      )
-      candidates <- map(inits, function(init) {
-        cand <- self$clone()
-        cand$update(clustering_init = init)
-        cand$optimize(list(niter = trial_niter, threshold = 1e-4, fixed_point_niter = 5), warn = FALSE)
-        cand
-      })
-      ibest <- order(map_dbl(candidates, "loglik"), decreasing = TRUE)[1:min(max_training, length(candidates))]
-      best_candidates <- candidates[ibest]
-      map(best_candidates, function(cand) cand$optimize(control, warn = FALSE))
-      best_candidates[[which.max(map_dbl(best_candidates, "loglik"))]]
     }
   ),
 
@@ -212,9 +136,17 @@ NormalBlockMeanBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    ## kmeans first: benchmarked better than ward2 for this family
+    default_inits     = c("kmeans", "ward2", "spectral"),
     Psi               = NA,
     Phi               = NA,
     Lambda            = NA,
+
+    ## Omega is p x p here, so it carries no cluster-pair information: the
+    ## closest mean profiles (columns of B) are the promising merges instead.
+    merge_score = function(pairs) {
+      -map_dbl(pairs, function(ij) sum((private$B[, ij[1]] - private$B[, ij[2]])^2))
+    },
 
     heuristic_cluster_B_from_variable_B = function(B_variable, C){
       B <- B_variable %*% C / rep(colSums(C), each = nrow(B_variable))

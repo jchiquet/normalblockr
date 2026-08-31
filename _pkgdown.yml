@@ -70,6 +70,8 @@ reference:
     - '`NormalBlockVarBase`'
     - '`NormalBlockMeanBase`'
     - '`NormalBlockCollection`'
+    - '`NormalBlockCollectionClusters`'
+    - '`NormalBlockCollectionSparsity`'
     - '`SelectionNClusters`'
     - '`get_model`'
     - '`isNB`'

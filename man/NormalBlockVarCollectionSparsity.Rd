@@ -7,25 +7,12 @@
 R6 class for a collection of normal-block models with a fixed clustering
 (blocks) and different sparsity levels.
 }
-\section{Super class}{
-\code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{NormalBlockVarCollectionSparsity}
-}
-\section{Public fields}{
-  \if{html}{\out{<div class="r6-fields">}}
-  \describe{
-    \item{\code{data}}{object of NormalBlockData class, with responses and design matrix}
-  }
-  \if{html}{\out{</div>}}
+\section{Super classes}{
+\code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{NormalBlockCollectionSparsity} -> \code{NormalBlockVarCollectionSparsity}
 }
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{q}}{number of blocks}
-
-    \item{\code{blocks}}{group matrix or number of blocks.}
-
-    \item{\code{sparsity}}{list of sparsity penalties}
-
     \item{\code{sparsity_details}}{list of information about model's penalties}
 
     \item{\code{criteria}}{a data frame with the values of some criteria ((approximated) log-likelihood, BIC) for the collection of models}
@@ -42,10 +29,7 @@ R6 class for a collection of normal-block models with a fixed clustering
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockVarCollectionSparsity-initialize}{\code{NormalBlockVarCollectionSparsity$new()}}
-    \item \href{#method-NormalBlockVarCollectionSparsity-optimize}{\code{NormalBlockVarCollectionSparsity$optimize()}}
-    \item \href{#method-NormalBlockVarCollectionSparsity-get_model}{\code{NormalBlockVarCollectionSparsity$get_model()}}
     \item \href{#method-NormalBlockVarCollectionSparsity-get_best_model}{\code{NormalBlockVarCollectionSparsity$get_best_model()}}
-    \item \href{#method-NormalBlockVarCollectionSparsity-plot}{\code{NormalBlockVarCollectionSparsity$plot()}}
     \item \href{#method-NormalBlockVarCollectionSparsity-stability_selection}{\code{NormalBlockVarCollectionSparsity$stability_selection()}}
     \item \href{#method-NormalBlockVarCollectionSparsity-clone}{\code{NormalBlockVarCollectionSparsity$clone()}}
   }
@@ -54,6 +38,9 @@ R6 class for a collection of normal-block models with a fixed clustering
 <ul>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
+  <li><code>NormalBlockCollectionSparsity$get_model()</code></li>
+  <li><code>NormalBlockCollectionSparsity$optimize()</code></li>
+  <li><code>NormalBlockCollectionSparsity$plot()</code></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
@@ -87,55 +74,6 @@ R6 class for a collection of normal-block models with a fixed clustering
 }
 
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionSparsity-optimize"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionSparsity-optimize}{}}}
-\subsection{\code{NormalBlockVarCollectionSparsity$optimize()}}{
-  optimizes every model in the sparsity path, warm-starting
-each one (after the first) from the previous, adjacent penalty's
-converged parameters (see [NormalBlockVarBase]'s `warm_start_from()`)
-instead of re-deriving everything from the heuristic clustering, the
-way the generic [NormalBlockCollection] `optimize()` would. `blocks`
-(hence q) is fixed across the whole path, only the sparsity penalty
-changes, so the warm start is always between models of matching shape.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionSparsity$optimize(
-  control = list(niter = 500, threshold = 1e-04, verbose = TRUE)
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{control}}{optimization parameters (niter and threshold)}
-    }
-    \if{html}{\out{</div>}}
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionSparsity-get_model"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionSparsity-get_model}{}}}
-\subsection{\code{NormalBlockVarCollectionSparsity$get_model()}}{
-  returns the NormalBlockVarKnownClusters model corresponding to given penalty
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionSparsity$get_model(sparsity)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{sparsity}}{sparsity penalty asked by user}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A NormalBlockVarKnownClusters (sparse) object with given value penalty
-  }
-}
-
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionSparsity-get_best_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionSparsity-get_best_model}{}}}
 \subsection{\code{NormalBlockVarCollectionSparsity$get_best_model()}}{
@@ -159,32 +97,6 @@ Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC}
   }
   \subsection{Returns}{
     a [`NormalBlockVarUnknownClusters`] object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionSparsity-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionSparsity-plot}{}}}
-\subsection{\code{NormalBlockVarCollectionSparsity$plot()}}{
-  Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionSparsity$plot(
-  criteria = c("deviance", "BIC", "EBIC", "ICL"),
-  log.x = TRUE
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{criteria}}{vector of characters. The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults to all of them.}
-      \item{\code{log.x}}{logical: should the x-axis be represented in log-scale? Default is `TRUE`.}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    a [`ggplot`] graph
   }
 }
 
