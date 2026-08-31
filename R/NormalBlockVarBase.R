@@ -407,14 +407,6 @@ NormalBlockVarBase <- R6::R6Class(
     ## Methods for heuristic inference----------------------
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    ## Converts a per-variable quantity from the internal (rescaled) fitting
-    ## scale back to Y's original units: power = 1 for additive quantities
-    ## (B, fitted values), power = -2 for inverse-variance quantities (dm1).
-    rescale_to_original = function(M, power = 1) {
-      factor <- self$data$Y_scale^power
-      if (is.matrix(M)) M * matrix(factor, nrow(M), ncol(M), byrow = TRUE) else M * factor
-    },
-
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     ## Per-variable inverse variance from a residual matrix ("diagonal": one

@@ -598,6 +598,14 @@ NormalBlockBase <- R6::R6Class(
 
     EM_initialize = function() {},
 
+    ## Converts a per-variable quantity from the internal (rescaled) fitting
+    ## scale back to Y's original units: power = 1 for additive quantities
+    ## (B, fitted values), power = -2 for inverse-variance quantities (dm1).
+    rescale_to_original = function(M, power = 1) {
+      factor <- self$data$Y_scale^power
+      if (is.matrix(M)) M * matrix(factor, nrow(M), ncol(M), byrow = TRUE) else M * factor
+    },
+
     get_Omega = function(Sigma) {
       if (private$sparsity_ == 0) {
         Omega <- chol2inv(chol(Sigma))

@@ -22,6 +22,8 @@ reference:
     - '`NormalBlockData`'
     - '`NormalBlockVarKnownClusters`'
     - '`NormalBlockVarUnknownClusters`'
+    - '`NormalBlockMeanKnownClusters`'
+    - '`NormalBlockMeanUnknownClusters`'
     - '`ZINormalBlockVarKnownClusters`'
     - '`ZINormalBlockVarUnknownClusters`'
     - '`NormalBlockVarCollectionClusters`'

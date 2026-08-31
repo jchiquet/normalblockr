@@ -114,8 +114,9 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
       YtXB <- crossprod(self$data$Y, self$data$X %*% B)
 
       term1 <- - matrix(1, nrow = self$data$p, ncol = self$q)
+      ## no clipping needed here: the softmax below is stabilized by
+      ## subtracting the row-wise max of the exponent.
       term2 <- Omega %*% (YtXB - tau %*% M)
-      term2 <- pmin(pmax(term2, -50), 50)
       term3 <- -0.5 * matrix(diag(Omega), nrow = self$data$p, ncol = 1) %*% matrix(1, nrow = 1, ncol = self$q) %*% diag(diag_M)
       term4 <- diag(diag(Omega)) %*% tau %*% M
 
@@ -174,7 +175,8 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
         }
 
 
-        # elbo updating
+        # elbo updating (Phi depends on the freshly updated Omega/tau)
+        Phi        <- private$Phi_estimator(Omega, tau, private$Psi_estimator(Omega, tau))
         ll_current <- private$compute_loglik(B, Omega, tau, alpha, Phi)
         ll_list     <- c(ll_list, ll_current)
         if(abs(ll_current - ll_prev) < control$threshold){
@@ -194,15 +196,17 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
   active = list(
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
-      res <- if (private$approx) {
-        self$data$X %*% private$B
-      } else {
-        self$data$X %*% private$B + private$mu %*% t(private$C)
-      }
-      private$rescale_to_original(res)
+      ## mean-block model: mu_i = C B' X_i, i.e. X B C' in matrix form
+      private$rescale_to_original(self$data$X %*% private$B %*% t(private$C))
     },
     #' @field var_par a list with the variational parameter: tau (posterior group probabilities)
     var_par    = function() list(tau = private$C),
+    #' @field nb_param number of parameters in the model
+    nb_param = function() {as.integer(super$nb_param + self$q - 1)}, # adding alpha
+    #' @field entropy Entropy of the conditional distribution
+    #' The only latent variable is the clustering, so the entropy of the
+    #' variational distribution reduces to -sum(tau * log(tau)).
+    entropy    = function() -sum(xlogx(private$C)),
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
     {paste("normal-block-mean model with unknown blocks")}

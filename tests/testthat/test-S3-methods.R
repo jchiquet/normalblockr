@@ -39,7 +39,7 @@ test_that("print.NormalBlockVarBase() reports the model type and criteria", {
 
 test_that("summary.NormalBlockVarBase() returns cluster sizes, edges and density", {
   s <- summary(model)
-  expect_s3_class(s, "summary.NormalBlockVarBase")
+  expect_s3_class(s, "summary.NormalBlockBase")
   expect_equal(s$who_am_I, model$who_am_I)
   expect_equal(s$criteria, model$criteria)
   expect_equal(s$cluster_sizes, model$cluster_sizes)

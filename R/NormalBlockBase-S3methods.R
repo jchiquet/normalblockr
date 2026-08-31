@@ -1,53 +1,58 @@
 ## =========================================================================================
 ##
-## PUBLIC S3 METHODS FOR NormalBlockVarBase
+## PUBLIC S3 METHODS FOR NormalBlockBase (all families)
 ##
 ## =========================================================================================
 
 #' @title Check if an Object is a Normal-Block Model
-#' @description Checks if a model is of class [NormalBlockVarBase()].
+#' @description Checks if a model is of class [NormalBlockBase()], i.e. any
+#' normal-block model (variance-block or mean-block family).
 #' @param object An R object.
-#' @return A boolean telling whether object inherits from the NormalBlockVarBase class.
+#' @return A boolean telling whether object inherits from the NormalBlockBase class.
 #' @export
-isNB <- function(object) {inherits(object, "NormalBlockVarBase")}
+isNB <- function(object) {inherits(object, "NormalBlockBase")}
 
 #' @title Extract Model Coefficients
-#' @description Extract coefficients from a NormalBlockVarBase object.
-#' @param object An object of class NormalBlockVarBase.
+#' @description Extract coefficients from a normal-block model.
+#' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
-#' @return A matrix of coefficients extracted from the NormalBlockVarBase model.
+#' @return A matrix of coefficients extracted from the model.
 #' @export
-coef.NormalBlockVarBase <- function(object, ...){
+coef.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
   object$model_par$B
 }
 
-#' @title Extract the Latent-Block Covariance Matrix
-#' @description Extract the covariance matrix between latent blocks (the inverse of `Omega`) from a [NormalBlockVarBase()] object.
-#' @param object An object of class NormalBlockVarBase.
+#' @title Extract the Covariance Matrix
+#' @description Extract the covariance matrix `Omega^-1`: between latent
+#' blocks (q x q) for the variance-block models, between variables (p x p)
+#' for the mean-block models.
+#' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
-#' @return The q x q covariance matrix between latent blocks.
+#' @return The covariance matrix, of size q x q or p x p depending on the model.
 #' @importFrom stats sigma
 #' @export
-sigma.NormalBlockVarBase <- function(object, ...){
+sigma.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
   chol2inv(chol(object$model_par$Omega))
 }
 
 #' @title Extract Fitted Values
-#' @description Extract fitted values from a NormalBlockVarBase object.
-#' @param object An object of class NormalBlockVarBase.
+#' @description Extract fitted values from a normal-block model.
+#' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return A matrix of fitted values extracted from the object.
 #' @export
-fitted.NormalBlockVarBase <- function(object, ...){
+fitted.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
   object$fitted
 }
 
 
-#' @title Predict Method for Normal-Block Models
-#' @description Predicts observations Y for new covariates X.
+#' @title Predict Method for Variance-Block Models
+#' @description Predicts observations Y for new covariates X. Specific to the
+#' variance-block family: the mean-block models have their own formula
+#' (mu = C B' X).
 #' @param object An object of class NormalBlockVarBase.
 #' @param new_X New set of covariates.
 #' @param ... not used, only here for S3 compatibility
@@ -62,7 +67,7 @@ predict.NormalBlockVarBase <- function(object, new_X, ...){
 #' @description Returns the (variational) log-likelihood of a fitted
 #' normal-block model as a `"logLik"` object, compatible with [stats::AIC()]
 #' and [stats::BIC()].
-#' @param object An object of class NormalBlockVarBase.
+#' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return An object of class `"logLik"`. The numeric value is the
 #' log-likelihood or its variational lower bound (ELBO). Attributes `df` and
@@ -74,7 +79,7 @@ predict.NormalBlockVarBase <- function(object, new_X, ...){
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 #' logLik(model)
-logLik.NormalBlockVarBase <- function(object, ...) {
+logLik.NormalBlockBase <- function(object, ...) {
   stopifnot(isNB(object))
   structure(object$loglik, class = "logLik", df = object$nb_param, nobs = object$n)
 }
@@ -82,7 +87,7 @@ logLik.NormalBlockVarBase <- function(object, ...) {
 #' @title Bayesian Information Criterion for a Normal-Block Model
 #' @description Extracts the (variational) BIC of a fitted normal-block
 #' model, computed as `deviance + log(n) * nb_param` (lower is better).
-#' @param object An object of class NormalBlockVarBase.
+#' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return A scalar: the (variational) BIC.
 #' @importFrom stats BIC
@@ -92,7 +97,7 @@ logLik.NormalBlockVarBase <- function(object, ...) {
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 #' BIC(model)
-BIC.NormalBlockVarBase <- function(object, ...) {
+BIC.NormalBlockBase <- function(object, ...) {
   stopifnot(isNB(object))
   object$BIC
 }
@@ -101,7 +106,7 @@ BIC.NormalBlockVarBase <- function(object, ...) {
 #' @description Print a short summary of a fitted normal-block model: model
 #' type, goodness-of-fit criteria, and the useful fields/methods to explore
 #' it further.
-#' @param x An object of class NormalBlockVarBase.
+#' @param x An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return Invisibly returns `x`.
 #' @export
@@ -110,7 +115,7 @@ BIC.NormalBlockVarBase <- function(object, ...) {
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 #' print(model)
-print.NormalBlockVarBase <- function(x, ...) {
+print.NormalBlockBase <- function(x, ...) {
   stopifnot(isNB(x))
   x$print()
   invisible(x)
@@ -120,38 +125,39 @@ print.NormalBlockVarBase <- function(x, ...) {
 #' @description Summarizes a fitted normal-block model: model type,
 #' goodness-of-fit criteria, cluster sizes, and the density of the inferred
 #' network between blocks.
-#' @param object An object of class NormalBlockVarBase.
+#' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
-#' @return An object of class `summary.NormalBlockVarBase` (a list with the
+#' @return An object of class `summary.NormalBlockBase` (a list with the
 #' model's `who_am_I`, `criteria`, `cluster_sizes` and network `density`),
-#' printed with a dedicated [print.summary.NormalBlockVarBase()] method.
+#' printed with a dedicated [print.summary.NormalBlockBase()] method.
 #' @export
 #' @examples
 #' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 #' summary(model)
-summary.NormalBlockVarBase <- function(object, ...) {
+summary.NormalBlockBase <- function(object, ...) {
   stopifnot(isNB(object))
-  q <- object$q
+  ## the network lives on Omega: q x q (variance-block) or p x p (mean-block)
+  size <- ncol(object$model_par$Omega)
   res <- list(
     who_am_I      = object$who_am_I,
     criteria      = object$criteria,
     cluster_sizes = object$cluster_sizes,
     n_edges       = object$n_edges,
-    density       = if (q > 1) object$n_edges / choose(q, 2) else NA
+    density       = if (size > 1) object$n_edges / choose(size, 2) else NA
   )
-  class(res) <- "summary.NormalBlockVarBase"
+  class(res) <- "summary.NormalBlockBase"
   res
 }
 
 #' @title Print a Normal-Block Model Summary
-#' @description Print method for objects returned by [summary.NormalBlockVarBase()].
-#' @param x An object of class `summary.NormalBlockVarBase`.
+#' @description Print method for objects returned by [summary.NormalBlockBase()].
+#' @param x An object of class `summary.NormalBlockBase`.
 #' @param ... not used, only here for S3 compatibility
 #' @return Invisibly returns `x`.
 #' @export
-print.summary.NormalBlockVarBase <- function(x, ...) {
+print.summary.NormalBlockBase <- function(x, ...) {
   cat("A", x$who_am_I, ".\n")
   cat("===========================================================================\n")
   print(as.data.frame(round(x$criteria, digits = 3), row.names = ""))
@@ -166,7 +172,7 @@ print.summary.NormalBlockVarBase <- function(x, ...) {
 #' @description Plots the evolution of the objective (log-likelihood or
 #' ELBO) across the (V)EM iterations of the last call to `optimize()`, see
 #' `$plot_loglik()`.
-#' @param x An object of class NormalBlockVarBase.
+#' @param x An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return Invisibly returns the [ggplot2::ggplot] object; called for its
 #' side effect of plotting.
@@ -176,7 +182,7 @@ print.summary.NormalBlockVarBase <- function(x, ...) {
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 #' plot(model)
-plot.NormalBlockVarBase <- function(x, ...) {
+plot.NormalBlockBase <- function(x, ...) {
   stopifnot(isNB(x))
   p <- x$plot()
   print(p)

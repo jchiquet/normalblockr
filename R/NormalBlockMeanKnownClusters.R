@@ -56,9 +56,9 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
     },
 
     compute_loglik = function(B = private$B, Omega = private$Omega){
-      log_det_omega <- - as.numeric(determinant(Omega, logarithm = TRUE)$modulus)
+      log_det_Omega <- as.numeric(determinant(Omega, logarithm = TRUE)$modulus)
       R <- self$data$Y - self$data$X %*% B %*% t(private$C)
-      l <- - self$n * self$p * log(2 * pi) / 2 + self$n * log_det_omega / 2 - sum((R %*% Omega) * R) / 2
+      l <- - self$n * self$p * log(2 * pi) / 2 + self$n * log_det_Omega / 2 - sum((R %*% Omega) * R) / 2
       return(as.numeric(l))
     },
 
@@ -91,12 +91,8 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
   active = list(
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
-      res <- if (private$approx) {
-        self$data$X %*% private$B
-      } else {
-        self$data$X %*% private$B + private$mu %*% t(private$C)
-      }
-      private$rescale_to_original(res)
+      ## mean-block model: mu_i = C B' X_i, i.e. X B C' in matrix form
+      private$rescale_to_original(self$data$X %*% private$B %*% t(private$C))
     },
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()

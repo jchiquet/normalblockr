@@ -17,6 +17,12 @@ R6 class for a Normal-Block-Mean model with a fixed number of clusters
 
     \item{\code{var_par}}{a list with the variational parameter: tau (posterior group probabilities)}
 
+    \item{\code{nb_param}}{number of parameters in the model}
+
+    \item{\code{entropy}}{Entropy of the conditional distribution
+The only latent variable is the clustering, so the entropy of the
+variational distribution reduces to -sum(tau * log(tau)).}
+
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }
   \if{html}{\out{</div>}}
