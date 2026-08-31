@@ -71,3 +71,4 @@ docs
 inst/doc
 snowflake.log
 inst/*.pdf
+inst/normalblockmean/
