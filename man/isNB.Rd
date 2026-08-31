@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockVarBase-S3methods.R
 \name{isNB}
 \alias{isNB}
-\title{Checks if a model is of class [NormalBlockVarBase()]}
+\title{Check if an Object is a Normal-Block Model}
 \usage{
 isNB(object)
 }
@@ -13,5 +13,5 @@ isNB(object)
 A boolean telling whether object inherits from the NormalBlockVarBase class.
 }
 \description{
-Checks if a model is of class [NormalBlockVarBase()]
+Checks if a model is of class [NormalBlockVarBase()].
 }

@@ -8,10 +8,9 @@
 
 // Normal-block model with unknown clusters, inferred through a variational
 // EM (mean-field on W and on the cluster membership C), templated on the
-// residual-noise policy (DiagonalNoise / SphericalNoise, see noise_models.h).
-// Equivalent of the R6 class NormalBlockVarUnknownClusters (R/NormalBlockVarUnknownClusters.R), implementing
-// the VEM recursion of section 4 (diagonal D) / section 5 (spherical D) of
-// normal_block_calculations_v2.pdf, summarized in 6.3.
+// residual-noise policy (see noise_models.h). Equivalent of the R6 class
+// NormalBlockVarUnknownClusters (R/NormalBlockVarUnknownClusters.R); see
+// inst/normal_block_models.qmd §3/§4 for the VEM recursion.
 template <typename NoisePolicy>
 class NormalBlockVarUnknownClusters : public NormalBlockVarBase {
   arma::mat C_;       // p x q, variational membership probabilities (tau)
@@ -75,11 +74,10 @@ public:
     Sigma_hat_ = M_.t() * M_ / data.n + arma::diagmat(S_); // matches the very first objective() call in run_em()
   }
 
-  // ELBO at the current parameter values, see "Criterion" in section 6.3 of
-  // normal_block_calculations_v2.pdf. When sparsity_ > 0, Omega_ is no
-  // longer the exact inverse of Sigma_hat, so the trace/penalty correction
-  // that otherwise cancels out must be added back (mirrors the `if
-  // (private$sparsity_ > 0)` branch of compute_loglik in R/NormalBlockVarUnknownClusters.R).
+  // ELBO at the current parameter values (see inst/normal_block_models.qmd
+  // §3). When sparsity_ > 0, Omega_ is no longer the exact inverse of
+  // Sigma_hat, so the trace/penalty correction that otherwise cancels out
+  // must be added back.
   double objective() const override {
     double log_det_Omega = arma::log_det_sympd(Omega_);
     double sum_log_dm1    = arma::sum(arma::log(dm1_));
@@ -116,19 +114,11 @@ public:
     R_ = o.R_;
     Sigma_hat_ = o.Sigma_hat_;
   }
-  // The same SQUAREM mechanism as NormalBlockVarKnownClusters applies here too
-  // (extrapolate only B_/dm1_/Omegaq_, refresh tau/alpha/M/S via a real
-  // VE+M cycle, accept based on objective()) -- but unlike that class, this
-  // is *not* relying on objective() being a general (always-valid)
-  // criterion; it doesn't need to be. Every call to objective() inside
-  // try_squarem_step() happens right after a fresh E_step()+M_step() pair,
-  // exactly the regime the existing profiled ELBO shortcut is already valid
-  // in (verified algebraically: unlike the known-clusters case before its
-  // fix, this formula has no sign bug -- the M-step-optimality collapse
-  // checks out term for term). Validated on real data (see git history):
-  // clean, growing speedup with q (e.g. q=25 on `brca_rppa`: 168 plain VEM
-  // iterations vs 45 accelerated), comparable monotonicity to plain VEM's
-  // own small pre-existing wobble (not made meaningfully worse).
+  // Same SQUAREM mechanism as NormalBlockVarKnownClusters, but relies on a
+  // different validity argument: every objective() comparison happens right
+  // after a fresh E_step()+M_step() pair, exactly the regime the profiled
+  // ELBO shortcut is already valid in. See inst/normal_block_models.qmd
+  // ("SQUAREM") for the speedup measured on real data.
   bool supports_acceleration() const override { return sparsity_ <= 0.0; }
 };
 

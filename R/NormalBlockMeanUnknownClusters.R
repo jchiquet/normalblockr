@@ -2,7 +2,10 @@
 ##  CLASS NormalBlockMeanUnknownClusters ###############
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 class for a normal-block model with known clustering.
+#' Mean-Block Model with Unknown Clustering
+#'
+#' R6 class for a Normal-Block-Mean model with a fixed number of clusters
+#' (but unknown clustering), inferred by variational EM.
 #' @export
 NormalBlockMeanUnknownClusters <- R6::R6Class(
   classname = "NormalBlockMeanUnknownClusters",

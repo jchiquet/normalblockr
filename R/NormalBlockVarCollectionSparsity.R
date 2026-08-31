@@ -3,7 +3,10 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#' R6 class for a collection of normal-block models with a fixed clustering (blocks) and different sparsity levels.
+#' Collection of Normal-Block Models over a Sparsity Path
+#'
+#' R6 class for a collection of normal-block models with a fixed clustering
+#' (blocks) and different sparsity levels.
 #' @export
 NormalBlockVarCollectionSparsity <- R6::R6Class(
   classname = "NormalBlockVarCollectionSparsity",
@@ -42,7 +45,7 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
       } else {
         init_model <- get_model(mydata, blocks, 0, zero_inflation, control)
         init_model$optimize(control = list(niter=5, threshold=1e-4, verbose=FALSE), warn = FALSE)
-        Sigmaq   <- solve(init_model$model_par$Omega)
+        Sigmaq   <- chol2inv(chol(init_model$model_par$Omega))
         diag_pen <- max(diag(init_model$sparsity_weights)) > 0
         weights  <- init_model$sparsity_weights
         weights  <- abs((Sigmaq / weights)[upper.tri(Sigmaq, diag = diag_pen)])
@@ -91,8 +94,8 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
     get_model = function(sparsity) {
       if (!(sparsity %in% private$sparsity_)) {
         sparsity <-  private$sparsity_[[which.min(abs(private$sparsity_ - sparsity))]]
-        cat(paste0("No model with this penalty in the collection. Returning model with closest penalty: ",
-                   sparsity,  " Collection penalty values can be found via $sparsity \n"))
+        message("No model with this penalty in the collection. Returning model with closest penalty: ",
+                sparsity,  " Collection penalty values can be found via $sparsity")
       }
       self$models[[which(private$sparsity_ == sparsity)]]
     },
@@ -109,7 +112,7 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
         if (is.null(private$stab_path)) self$stability_selection()
         max_stab <- max(self$criteria$stability)
         if (max_stab < stability) {
-          cat(paste0("No model reaches the required stability ", stability, ", returning model with highest stability: ", max_stab))
+          message("No model reaches the required stability ", stability, ", returning model with highest stability: ", max_stab)
           stability <- max_stab
         }
         id_stars <- self$criteria %>%

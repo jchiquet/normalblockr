@@ -2,7 +2,7 @@
 % Please edit documentation in R/normal_block.R
 \name{get_model}
 \alias{get_model}
-\title{Creates appropriate new normal block model depending on the parametrization}
+\title{Create a Normal-Block Model Object}
 \usage{
 get_model(
   data,
@@ -27,5 +27,6 @@ OR float to run model with a single penalty value}
 generated with NB_control() for collections of sparse models}
 }
 \description{
-Creates appropriate new normal block model depending on the parametrization
+Creates the appropriate normal-block model (or collection of models)
+depending on the parametrization.
 }

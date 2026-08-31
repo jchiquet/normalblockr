@@ -37,11 +37,9 @@ Fit a normal-block model with a variational or heuristic algorithm
 ex_data <- generate_normal_block_var_data(n=50, p=50, d=1, q=3)
 data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 my_normal_block <- normal_block(data, blocks = 1:6)
-\dontrun{
 my_normal_block$plot(c("deviance", "BIC", "ICL"))
 Y_hat <- my_normal_block$get_best_model()$fitted
 plot(data$Y, Y_hat, log = "xy"); abline(0,1)
-}
 ## Normal Data with Zero Inflation
 ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
 zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)

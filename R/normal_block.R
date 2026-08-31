@@ -15,11 +15,9 @@
 #' ex_data <- generate_normal_block_var_data(n=50, p=50, d=1, q=3)
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' my_normal_block <- normal_block(data, blocks = 1:6)
-#' \dontrun{
 #' my_normal_block$plot(c("deviance", "BIC", "ICL"))
 #' Y_hat <- my_normal_block$get_best_model()$fitted
 #' plot(data$Y, Y_hat, log = "xy"); abline(0,1)
-#' }
 #' ## Normal Data with Zero Inflation
 #' ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
 #' zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)
@@ -95,10 +93,13 @@ normal_block <- function(data,
 #' `optimize()` should automatically call `refine()` afterwards. Default
 #' `FALSE` since it adds real cost; call `collection$refine()` directly at
 #' any point afterwards for the same effect without setting this.
+#' @return A named list of parameters to pass to [normal_block()]'s `control`
+#' argument.
 #' @export
 NB_control <- function(
     niter                = 500,
     threshold            = 1e-4,
+    fixed_point_niter    = 5,
     sparsity_weights     = NULL,
     sparsity_penalties   = NULL,
     n_sparsity_penalties = 30,
@@ -119,6 +120,7 @@ NB_control <- function(
 
   structure(list(niter                = niter                ,
                  threshold            = threshold            ,
+                 fixed_point_niter    = fixed_point_niter    ,
                  sparsity_weights     = sparsity_weights     ,
                  sparsity_penalties   = sparsity_penalties   ,
                  n_sparsity_penalties = n_sparsity_penalties ,
@@ -132,7 +134,10 @@ NB_control <- function(
 }
 
 
-#' Creates appropriate new normal block model depending on the parametrization
+#' Create a Normal-Block Model Object
+#'
+#' Creates the appropriate normal-block model (or collection of models)
+#' depending on the parametrization.
 #' @param blocks either an integer (number of blocks), a vector of integer (list of possible number of block)
 #'  or a p * q matrix (for indicating block membership when its known)
 #' @param sparsity boolean to say whether the model should have a changing penalty

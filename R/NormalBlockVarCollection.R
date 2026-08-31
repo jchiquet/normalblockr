@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockVarCollection #################################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 abstract class for a collection of normal-block models
+#' Base Class for a Collection of Normal-Block Models
 #'
 #' Shared scaffolding for the collections explored by [get_model()]/
 #' [normal_block()]: a sweep over sparsity penalties ([`NormalBlockVarCollectionSparsity`]),
@@ -11,6 +11,12 @@
 #' `private$progress_field`/`private$progress_label` in their `initialize()`
 #' and provide their own `get_best_model()`, delegating the (row of
 #' `self$criteria` minimizing a criterion) lookup to `private$best_id()`.
+#' @examples
+#' # An internal abstract base class, never instantiated directly -- see
+#' # normal_block() for how collections (NormalBlockVarCollectionClusters,
+#' # NormalBlockVarCollectionSparsity, NormalBlockVarCollectionClustersSparsity)
+#' # are actually created and fitted.
+#' @keywords internal
 NormalBlockVarCollection <- R6::R6Class(
   classname = "NormalBlockVarCollection",
 
@@ -41,6 +47,42 @@ NormalBlockVarCollection <- R6::R6Class(
         model
       })
       invisible(self)
+    },
+
+    #' @description User-friendly print method: model type and the range of
+    #' q/sparsity explored. See `summary()` for the full criteria table.
+    print = function() {
+      crit <- self$criteria
+      cat("A", self$who_am_I, "\n")
+      cat("===========================================================================\n")
+      cat(" ", nrow(crit), "model(s) explored\n")
+      if (length(unique(crit$q)) > 1)
+        cat("    q ranging from", min(crit$q), "to", max(crit$q), "\n")
+      if (length(unique(crit$sparsity)) > 1)
+        cat("    sparsity ranging from", signif(min(crit$sparsity), 3),
+            "to", signif(max(crit$sparsity), 3), "\n")
+      cat("===========================================================================\n")
+      cat("* Useful fields\n")
+      cat("    $models, $criteria\n")
+      cat("* Useful methods\n")
+      cat("    print(), summary(), plot(), $get_best_model()\n")
+    },
+
+    #' @description Summarize the collection: model type, full criteria
+    #' table, and the range of q/sparsity explored.
+    #' @return An object of class `summary.NormalBlockVarCollection`,
+    #' printed with a dedicated [print.summary.NormalBlockVarCollection()]
+    #' method.
+    summary = function() {
+      crit <- self$criteria
+      res <- list(
+        who_am_I       = self$who_am_I,
+        criteria       = crit,
+        q_range        = if (length(unique(crit$q)) > 1) range(crit$q) else unique(crit$q),
+        sparsity_range = if (length(unique(crit$sparsity)) > 1) range(crit$sparsity) else unique(crit$sparsity)
+      )
+      class(res) <- "summary.NormalBlockVarCollection"
+      res
     }
   ),
 
@@ -51,14 +93,8 @@ NormalBlockVarCollection <- R6::R6Class(
     progress_field = NA_character_, # name of the field reported by optimize()'s progress message
     progress_label = NA_character_, # human-readable label for that field
 
-    ## Row of crit_df minimizing `crit`, after checking that the criterion is
-    ## well-defined for the whole collection. Centralizes the `length(...) >
-    ## 1` guard so that the id is always defined, even for a collection
-    ## reduced to a single model. `crit_df` defaults to (a fresh) self$criteria
-    ## but can be passed in explicitly to reuse one already computed by the
-    ## caller (see plot_criteria_path() below) instead of rebuilding it --
-    ## self$criteria rebuilds the whole collection's criteria data frame from
-    ## every model's own `criteria` field on every access, not a free lookup.
+    ## Row of crit_df minimizing `crit`. `crit_df` can be passed in to reuse
+    ## one already computed by the caller instead of rebuilding self$criteria.
     best_id = function(crit, check_inference = TRUE, crit_df = self$criteria) {
       if (check_inference)
         stopifnot("Log-likelihood based criteria do not apply to the heuristic method" =
@@ -69,23 +105,10 @@ NormalBlockVarCollection <- R6::R6Class(
       id
     },
 
-    ## Shared chart for plot() in NormalBlockVarCollectionClusters (x_var = "q") and
-    ## NormalBlockVarCollectionSparsity (x_var = "sparsity"): one line per
-    ## criterion against x_var, with a dashed vline at each criterion's own
-    ## best model, colour-matched to that criterion's line (so which vline
-    ## belongs to which criterion is unambiguous without a second legend --
-    ## a single grey vline used to mark only one hardcoded criterion's best
-    ## model regardless of how many were actually plotted, which made it
-    ## impossible to tell, e.g., the BIC-best from the ICL-best at a glance).
-    ## "deviance" is excluded by default: it is monotonic along x_var (more
-    ## blocks/less penalty always fits at least as well), so it has no
+    ## Shared chart for plot(): one line per criterion against x_var, with a
+    ## dashed, colour-matched vline at each criterion's own best model.
+    ## "deviance" is excluded by default: monotonic along x_var, so it has no
     ## interior best model the way a penalized criterion does.
-    ##
-    ## self$criteria is computed once, locally (crit_df), and reused for both
-    ## the line plot and every vline's position: vline x-positions are read
-    ## directly off crit_df via best_id(), not via get_best_model(), which
-    ## would (a) rebuild self$criteria all over again and (b) clone() a whole
-    ## fitted model just to read a single scalar (q or sparsity) off it.
     plot_criteria_path = function(x_var, criteria, vline_crit = setdiff(criteria, "deviance")) {
       vline_crit <- intersect(criteria, vline_crit)
       crit_df <- self$criteria
@@ -114,6 +137,18 @@ NormalBlockVarCollection <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field criteria a data frame with the values of some criteria for the collection of models
-    criteria = function() purrr::map_df(self$models, "criteria")
+    criteria = function() purrr::map_df(self$models, "criteria"),
+    #' @field loglik not defined for a collection (which of its models?) --
+    #' accessing it raises an informative error instead of silently
+    #' returning `NULL`. Use `logLik()` for every model's log-likelihood, or
+    #' `$get_best_model()$loglik` for a single one.
+    loglik = function() {
+      stop(
+        "`$loglik` is not defined for a collection of models (which one?) -- ",
+        "use `logLik(<collection>)` for every model's log-likelihood, or ",
+        "`<collection>$get_best_model()$loglik` for a single model.",
+        call. = FALSE
+      )
+    }
   )
 )

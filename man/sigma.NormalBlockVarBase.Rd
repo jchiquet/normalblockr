@@ -2,12 +2,12 @@
 % Please edit documentation in R/NormalBlockVarBase-S3methods.R
 \name{sigma.NormalBlockVarBase}
 \alias{sigma.NormalBlockVarBase}
-\title{Extracts the latent-block covariance matrix from objects returned by [NormalBlockBase()] and its variants}
+\title{Extract the Latent-Block Covariance Matrix}
 \usage{
 \method{sigma}{NormalBlockVarBase}(object, ...)
 }
 \arguments{
-\item{object}{An object of class NormalBlockBase.}
+\item{object}{An object of class NormalBlockVarBase.}
 
 \item{...}{not used, only here for S3 compatibility}
 }
@@ -15,5 +15,5 @@
 The q x q covariance matrix between latent blocks.
 }
 \description{
-Extract the covariance matrix between latent blocks (the inverse of `Omega`) from a NormalBlockBase object.
+Extract the covariance matrix between latent blocks (the inverse of `Omega`) from a [NormalBlockVarBase()] object.
 }

@@ -213,7 +213,7 @@ menu %>%
 ## whole collection (it needs adjacent q's), so this builds one collection
 ## per (dataset, method) via normal_block() itself, and records criteria both
 ## before and after a single refine() call -- see
-## results/compute_best_of_inits_refine_benchmark.R for the full script.
+## results/compute_boi_refine_benchmark.R for the full script.
 ## methods: kmeans, ward2, sbm, spectral, best_of_inits (without sbm, i.e.
 ## inits = c("ward2", "kmeans", "spectral") -- sbm's cost is dominated by the
 ## heuristic itself, not by VEM iterations, so it doesn't benefit from

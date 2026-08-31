@@ -2,7 +2,14 @@
 ##  CLASS NormalBlockMeanBase ##########################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 abstract class for a generic sparse Normal Block model
+#' Base Class for Mean-Block Models
+#'
+#' R6 abstract class for the Normal-Block models where the clustering
+#' structures the mean (mu_i = C B' X_i).
+#' @examples
+#' # An internal abstract base class, never instantiated directly -- use
+#' # NormalBlockMeanKnownClusters / NormalBlockMeanUnknownClusters.
+#' @keywords internal
 NormalBlockMeanBase <- R6::R6Class(
   classname = "NormalBlockMeanBase",
   inherit = NormalBlockBase,

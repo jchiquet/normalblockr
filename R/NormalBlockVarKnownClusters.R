@@ -2,6 +2,8 @@
 ##  CLASS NormalBlockVarKnownClusters #############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+#' Normal-Block Model with Known Clustering
+#'
 #' R6 class for a normal-block model with known clustering.
 #' @export
 NormalBlockVarKnownClusters <- R6::R6Class(
@@ -86,7 +88,7 @@ NormalBlockVarKnownClusters <- R6::R6Class(
       res <- if (private$approx) {
         self$data$X %*% private$B
       } else {
-        self$data$X %*% private$B + private$mu %*% t(private$C)
+        self$data$X %*% private$B + tcrossprod(private$mu, private$C)
       }
       private$rescale_to_original(res)
     },

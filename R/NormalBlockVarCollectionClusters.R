@@ -3,7 +3,10 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#' R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.
+#' Collection of Normal-Block Models over a Range of Cluster Counts
+#'
+#' R6 class for a collection of normal-block models with different number of
+#' clusters (q) and a fixed sparsity level.
 #' @export
 NormalBlockVarCollectionClusters <- R6::R6Class(
   classname = "NormalBlockVarCollectionClusters",

@@ -2,160 +2,164 @@
 % Please edit documentation in R/NormalBlockVarCollectionClustersSparsity.R
 \name{NormalBlockVarCollectionClustersSparsity}
 \alias{NormalBlockVarCollectionClustersSparsity}
-\title{R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.}
+\title{Collection of Normal-Block Models over Cluster Counts and Sparsity Levels}
 \description{
-R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.
-
-R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.
+R6 class for a collection of normal-block models with different number of
+clusters (q) and different sparsity levels.
 }
 \section{Super class}{
-\code{\link[normalblockr:NormalBlockVarCollection]{normalblockr::NormalBlockVarCollection}} -> \code{NormalBlockVarCollectionClustersSparsity}
+\code{\link[normalblockr:NormalBlockVarCollection]{NormalBlockVarCollection}} -> \code{NormalBlockVarCollectionClustersSparsity}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{q_list}}{number of blocks}
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{q_list}}{number of blocks}
 
-\item{\code{sparsity}}{list of penalties used for each q}
+    \item{\code{sparsity}}{list of penalties used for each q}
 
-\item{\code{who_am_I}}{a method to print what model is being fitted}
-}
-\if{html}{\out{</div>}}
+    \item{\code{who_am_I}}{a method to print what model is being fitted}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-NormalBlockVarCollectionClustersSparsity-new}{\code{NormalBlockVarCollectionClustersSparsity$new()}}
-\item \href{#method-NormalBlockVarCollectionClustersSparsity-get_model}{\code{NormalBlockVarCollectionClustersSparsity$get_model()}}
-\item \href{#method-NormalBlockVarCollectionClustersSparsity-get_best_model}{\code{NormalBlockVarCollectionClustersSparsity$get_best_model()}}
-\item \href{#method-NormalBlockVarCollectionClustersSparsity-plot}{\code{NormalBlockVarCollectionClustersSparsity$plot()}}
-\item \href{#method-NormalBlockVarCollectionClustersSparsity-clone}{\code{NormalBlockVarCollectionClustersSparsity$clone()}}
+  \itemize{
+    \item \href{#method-NormalBlockVarCollectionClustersSparsity-initialize}{\code{NormalBlockVarCollectionClustersSparsity$new()}}
+    \item \href{#method-NormalBlockVarCollectionClustersSparsity-get_model}{\code{NormalBlockVarCollectionClustersSparsity$get_model()}}
+    \item \href{#method-NormalBlockVarCollectionClustersSparsity-get_best_model}{\code{NormalBlockVarCollectionClustersSparsity$get_best_model()}}
+    \item \href{#method-NormalBlockVarCollectionClustersSparsity-plot}{\code{NormalBlockVarCollectionClustersSparsity$plot()}}
+    \item \href{#method-NormalBlockVarCollectionClustersSparsity-clone}{\code{NormalBlockVarCollectionClustersSparsity$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details open><summary>Inherited methods</summary>
+\if{html}{\out{<details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="optimize"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-optimize'><code>normalblockr::NormalBlockVarCollection$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="optimize"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-optimize'><code>NormalBlockVarCollection$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-print'><code>NormalBlockVarCollection$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-summary'><code>NormalBlockVarCollection$summary()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionClustersSparsity-new"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClustersSparsity-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new [`NormalBlockVarCollectionClustersSparsity`] object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClustersSparsity$new(
+\if{html}{\out{<a id="method-NormalBlockVarCollectionClustersSparsity-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClustersSparsity-initialize}{}}}
+\subsection{\code{NormalBlockVarCollectionClustersSparsity$new()}}{
+  Create a new [`NormalBlockVarCollectionClustersSparsity`] object.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClustersSparsity$new(
   mydata,
   q_list,
   zero_inflation = FALSE,
   control = NB_control()
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
+      \item{\code{q_list}}{list of q values (number of groups) in the collection}
+      \item{\code{zero_inflation}}{boolean to specify whether data is zero-inflated}
+      \item{\code{control}}{structured list of parameters to handle sparsity control}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NormalBlockVarCollectionClustersSparsity`] object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
-
-\item{\code{q_list}}{list of q values (number of groups) in the collection}
-
-\item{\code{zero_inflation}}{boolean to specify whether data is zero-inflated}
-
-\item{\code{control}}{structured list of parameters to handle sparsity control}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NormalBlockVarCollectionClustersSparsity`] object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClustersSparsity-get_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClustersSparsity-get_model}{}}}
-\subsection{Method \code{get_model()}}{
-returns a collection of models corresponding to given q
+\subsection{\code{NormalBlockVarCollectionClustersSparsity$get_model()}}{
+  returns a collection of models corresponding to given q
 or one single model if penalty is also given
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClustersSparsity$get_model(q, sparsity = NA)}\if{html}{\out{</div>}}
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClustersSparsity$get_model(q, sparsity = NA)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{q}}{number of blocks asked by user.}
+      \item{\code{sparsity}}{sparsity penalty asked by user}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    either a NormalBlockVarCollectionSparsity or a NormalBlockVarUnknownClusters object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{q}}{number of blocks asked by user.}
-
-\item{\code{sparsity}}{sparsity penalty asked by user}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-either a NormalBlockVarCollectionSparsity or a NormalBlockVarUnknownClusters object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClustersSparsity-get_best_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClustersSparsity-get_best_model}{}}}
-\subsection{Method \code{get_best_model()}}{
-Extract best model in the collection
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClustersSparsity$get_best_model(
+\subsection{\code{NormalBlockVarCollectionClustersSparsity$get_best_model()}}{
+  Extract best model in the collection
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClustersSparsity$get_best_model(
   crit = c("ICL", "BIC", "EBIC")
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{crit}}{a character for the criterion used to performed the selection.
+Either "BIC", "EBIC" or "ICL". "ICL" is the default criterion}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a [`NormalBlockVarUnknownClusters`] object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{crit}}{a character for the criterion used to performed the selection.
-Either "BIC", "EBIC" or "ICL". "ICL" is the default criterion}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-a [`NormalBlockVarUnknownClusters`] object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClustersSparsity-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClustersSparsity-plot}{}}}
-\subsection{Method \code{plot()}}{
-Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClustersSparsity$plot(
+\subsection{\code{NormalBlockVarCollectionClustersSparsity$plot()}}{
+  Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClustersSparsity$plot(
   criterion = c("deviance", "ICL", "BIC", "EBIC"),
   n_intervals = NULL
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{criterion}}{The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults deviance.}
+      \item{\code{n_intervals}}{number of intervals into which the penalties range should be split}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a [`ggplot`] heatmap
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{criterion}}{The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults deviance.}
-
-\item{\code{n_intervals}}{number of intervals into which the penalties range should be splitted}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-a [`ggplot`] heatmap
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClustersSparsity-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClustersSparsity-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClustersSparsity$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{NormalBlockVarCollectionClustersSparsity$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClustersSparsity$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

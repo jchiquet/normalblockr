@@ -183,7 +183,7 @@ one_simu_sparse_fixed_q <- function(simu, n, p, q, d, kappa,
 multiple_simulations <-
   function(n_simu, n, p, q, d, kappa,
            omega_structure = c("erdos_renyi", "preferential_attachment","community"),
-           saving_file_prefix = NULL, mc.cores = max(1, detectCores() - 2)){
+           saving_file_prefix = NULL, mc.cores = 1){
 
     cat("Settings: (n, p, q, d, kappa) = (",n, p, q, d, mean(kappa), ")\n")
     omega_structure <- match.arg(omega_structure)
@@ -208,7 +208,7 @@ multiple_simulations <-
 #' @param mc.cores number of cores to run the simulations on
 grid_simulations <- function(n_simu, n_list, p_list, q_list, d_list, kappa_list,
                              omega_structure_list, saving_folder = NULL,
-                             mc.cores = max(1, detectCores() - 2)){
+                             mc.cores = 1){
 
   settings <- expand.grid(n = n_list,
                           p = p_list,

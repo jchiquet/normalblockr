@@ -3,7 +3,10 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#' R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.
+#' Collection of Normal-Block Models over Cluster Counts and Sparsity Levels
+#'
+#' R6 class for a collection of normal-block models with different number of
+#' clusters (q) and different sparsity levels.
 #' @export
 NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
   classname = "NormalBlockVarCollectionClustersSparsity",
@@ -26,12 +29,8 @@ NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
       self$control$zero_inflation <- zero_inflation
       control_ <- control
 
-      ## See NormalBlockVarCollectionClusters$initialize() for the rationale: one wide SBM
-      ## exploration over the whole q_list range replaces one independent
-      ## exploration per q. control_$clustering_init is then read by every
-      ## get_model() call inside NormalBlockVarCollectionSparsity$initialize()
-      ## (including across its own sparsity sweep), so setting it once here
-      ## per q is enough.
+      ## One wide SBM exploration over q_list replaces one independent
+      ## exploration per q (see sbm_clustering_path()).
       sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
 
       self$models <- purrr::map(seq_along(q_list), function(rank) {
@@ -58,8 +57,8 @@ NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
       if (!is.na(sparsity)) {
         if (!(sparsity %in% model$sparsity)) {
           sparsity <-  model$sparsity[[which.min(abs(model$sparsity - sparsity))]]
-          cat(paste0("No model with this penalty in the collection. Returning model with closest penalty: ",
-                     sparsity,  " Collection penalty values can be found via $sparsity \n"))
+          message("No model with this penalty in the collection. Returning model with closest penalty: ",
+                  sparsity,  " Collection penalty values can be found via $sparsity")
         }
         model <- model$models[[which(model$sparsity == sparsity)]]
       }
@@ -80,7 +79,7 @@ NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
 
     #' @description Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
     #' @param criterion The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults deviance.
-    #' @param n_intervals number of intervals into which the penalties range should be splitted
+    #' @param n_intervals number of intervals into which the penalties range should be split
     #' @return a [`ggplot`] heatmap
     plot = function(criterion = c("deviance", "ICL", "BIC", "EBIC"),
                     n_intervals = NULL) {

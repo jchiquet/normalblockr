@@ -3,10 +3,9 @@
 
 #' Fit a normal-block model with known clusters (Rcpp/Armadillo core)
 #'
-#' Equivalent of the R6 class NormalBlockVarKnownClusters (R/NormalBlockVarKnownClusters.R),
-#' implementing sections 2/3 (summarized in 6.1/6.2) of
-#' normal_block_calculations_v2.pdf. Initialization is entirely done on the R
-#' side: this function only runs the EM recursion from the parameters given.
+#' Equivalent of R6's NormalBlockVarKnownClusters (R/NormalBlockVarKnownClusters.R);
+#' runs the EM recursion from parameters already initialized on the R side.
+#' See inst/normal_block_models.qmd.
 #'
 #' @param Y response matrix (n x p)
 #' @param X design matrix (n x d)
@@ -30,10 +29,9 @@ NormalBlockVarKnownClusters_fit <- function(Y, X, C, B0, dm1_0, Omega0, sparsity
 
 #' Fit a normal-block model with unknown clusters (Rcpp/Armadillo core, VEM)
 #'
-#' Equivalent of the R6 class NormalBlockVarUnknownClusters (R/NormalBlockVarUnknownClusters.R), implementing
-#' sections 4/5 (summarized in 6.3) of normal_block_calculations_v2.pdf.
-#' Initialization is entirely done on the R side: this function only runs the
-#' VEM recursion from the parameters given.
+#' Equivalent of R6's NormalBlockVarUnknownClusters (R/NormalBlockVarUnknownClusters.R);
+#' runs the VEM recursion from parameters already initialized on the R side.
+#' See inst/normal_block_models.qmd.
 #'
 #' @inheritParams NormalBlockVarKnownClusters_fit
 #' @param C0 initial variational membership probabilities (p x q)
@@ -51,12 +49,10 @@ NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omega0, C0, alpha
 
 #' Fit a zero-inflated normal-block model with known clusters (Rcpp/Armadillo core)
 #'
-#' Equivalent of the R6 class ZINormalBlockVarKnownClusters (R/ZINormalBlockVarKnownClusters.R).
-#' Initialization (including the fixed zero-inflation logistic regression)
-#' is entirely done on the R side: this function only runs the EM recursion
-#' from the parameters given. The zero-inflation mask makes the B-update's
-#' normal equations column-specific, so it is solved one column at a time
-#' (see src/zi_closed_form_solvers.h).
+#' Equivalent of R6's ZINormalBlockVarKnownClusters (R/ZINormalBlockVarKnownClusters.R);
+#' runs the EM recursion from parameters already initialized on the R side.
+#' The zero-inflation mask makes the B-update column-specific, solved one
+#' column at a time (see zi_closed_form_solvers.h).
 #'
 #' @param Y response matrix (n x p)
 #' @param X design matrix (n x d)
@@ -83,12 +79,10 @@ ZINormalBlockVarKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, 
 
 #' Fit a zero-inflated normal-block model with unknown clusters (Rcpp/Armadillo core, VEM)
 #'
-#' Equivalent of the R6 class ZINormalBlockVarUnknownClusters (R/ZINormalBlockVarUnknownClusters.R).
-#' Initialization is entirely done on the R side: this function only runs
-#' the VEM recursion from the parameters given. The zero-inflation mask
-#' makes the B- and M-updates' normal equations column-/row-specific, so
-#' both are solved through direct linear systems rather than an iterative
-#' optimizer (see src/zi_closed_form_solvers.h).
+#' Equivalent of R6's ZINormalBlockVarUnknownClusters (R/ZINormalBlockVarUnknownClusters.R);
+#' runs the VEM recursion from parameters already initialized on the R side.
+#' The zero-inflation mask makes the B-/M-updates column-/row-specific,
+#' solved through direct linear systems (see zi_closed_form_solvers.h).
 #'
 #' @inheritParams ZINormalBlockVarKnownClusters_fit
 #' @param C0 initial variational membership probabilities (p x q)

@@ -8,13 +8,10 @@
 #include "normal_block_data.h"
 #include "omega_estimation.h"
 
-// Abstract base class, equivalent of the R6 class NormalBlockVarBase (R/NormalBlockVarBase.R) stripped
-// of everything related to initialization, heuristics and clustering
-// approximation (all of that is done in R and the resulting parameters are
-// passed in at construction time): only the data reference, the
-// regression/precision parameters shared by every variant, and the generic
-// (V)EM loop are kept here. Concrete subclasses implement E_step(), M_step()
-// and objective().
+// Abstract base class, equivalent of the R6 class NormalBlockVarBase
+// (R/NormalBlockVarBase.R) stripped of initialization/heuristics (done in R;
+// resulting parameters are passed in at construction). Concrete subclasses
+// implement E_step(), M_step() and objective(). See inst/normal_block_models.qmd.
 class NormalBlockVarBase {
 protected:
   const NormalBlockData& data_;
@@ -28,24 +25,15 @@ protected:
   virtual void E_step() = 0;
   virtual void M_step() = 0;
 
-  // Equivalent of the shared private method `NormalBlockVarBase$get_Omega` (R/NormalBlockVarBase.R):
-  // plain inversion when sparsity_ <= 0, graphical lasso (callback to R's
-  // glassoFast) otherwise. See omega_estimation.h.
+  // Plain inversion when sparsity_ <= 0, graphical lasso otherwise; see
+  // omega_estimation.h.
   arma::mat estimate_omega(const arma::mat& Sigma_hat) const {
     return nb_omega::estimate(Sigma_hat, sparsity_, sparsity_weights_);
   }
 
-  // Lazily-cached data_.X * B_, the one product every concrete E_step()/
-  // M_step() needs (as Y - XB()) at least once per (V)EM step. Without this
-  // cache, the *same* X*B_ product (O(n*d*p)) gets recomputed up to three
-  // times per settled B_ value: once inside M_step() itself (to get the new
-  // residual), once more in the *next* E_step() (B_ hasn't changed since),
-  // and -- for the two known-clusters classes, whose objective() is the
-  // general criterion and needs R explicitly -- a third time in objective()
-  // (called right after M_step(), same B_ again). Subclasses must update B_
-  // through set_B() (never assign B_ directly) for this cache to stay
-  // correct; set_state()/copy_tracked_state_from() below (the only other
-  // places B_ changes) invalidate it themselves.
+  // Lazily-cached X*B_ (see inst/normal_block_models.qmd). Subclasses must
+  // update B_ through set_B() (never assign B_ directly) for the cache to
+  // stay correct.
   void set_B(const arma::mat& new_B) {
     B_ = new_B;
     XB_valid_ = false;
@@ -58,31 +46,13 @@ protected:
     return XB_cache_;
   }
 
-  // Opt-in gate for the SQUAREM-style acceleration in run_em() (see its
-  // docstring). Defaults to off. Currently overridden to (conditionally)
-  // `true` by all four leaf classes (each: sparsity_ <= 0; see each class's
-  // own override for why sparsity_ > 0 is excluded -- glassoFast's
-  // approximate M-step makes even *plain* EM/VEM's own ascent unreliable
-  // there, and SQUAREM's larger jumps amplify that pre-existing
-  // instability for a much smaller speedup than the unpenalized case).
-  // tau/alpha/M/S (the variational state of the two *Unknown* classes) and
-  // Mu/Gamma (the posterior moments of the two *Known* classes) are never
-  // part of the extrapolated vector below -- they are always refreshed by a
-  // real E_step()/VE-step before every objective() comparison, so the
-  // comparison is sound regardless of which subclass: for the Known
-  // classes, because objective() is then the *general* marginal
-  // log-likelihood (valid at any theta, not just an M-step optimum -- the
-  // fix that this acceleration originally needed, see git history); for
-  // the Unknown classes, because every such comparison happens right after
-  // a fresh VE-step+M-step pair, exactly the regime their existing
-  // *profiled* ELBO shortcut was already valid in (no analogous sign bug
-  // there to begin with). Override to return `true` only once a subclass
-  // has been validated this way (see git history for all four).
+  // Opt-in gate for the SQUAREM-style acceleration in run_em(). Off by
+  // default; each leaf class overrides it (typically sparsity_ <= 0 only --
+  // see inst/normal_block_models.qmd for why sparsity excludes it).
   virtual bool supports_acceleration() const { return false; }
 
-  // Used by every subclass's restore_from() override to copy back the
-  // B_/dm1_/Omega_ slice of `other` (see restore_from()'s docstring on
-  // clone() for why this can't just be `*this = other`).
+  // Copies back the B_/dm1_/Omega_ slice of `other`; used by every
+  // subclass's restore_from() (can't just be `*this = other`, see clone()).
   void copy_tracked_state_from(const NormalBlockVarBase& other) {
     B_ = other.B_;
     dm1_ = other.dm1_;
@@ -102,49 +72,20 @@ public:
   // (V)EM criterion (log-likelihood or ELBO) at the current parameter values.
   virtual double objective() const = 0;
 
-  // Deep copy / restore of the *entire* concrete object (every subclass's
-  // extra state -- Gamma_, Mu_, C_, alpha_, M_, S_... -- not just the
-  // B_/dm1_/Omega_ tracked by SQUAREM below). Used by run_em() to snapshot
-  // a known-good iterate before trying a SQUAREM extrapolation, and to back
-  // out of it exactly if it turns out infeasible. `clone()` is implemented
-  // per concrete subclass as `return std::make_unique<ThisClass>(*this)`,
-  // relying on the compiler-generated copy constructor (every member is a
-  // plain value type, so a member-wise copy is exactly right). `restore_from()`
-  // cannot likewise use the compiler-generated copy *assignment* operator --
-  // `data_` is a reference member, so that operator is implicitly deleted --
-  // hence the explicit field-by-field copy via `copy_tracked_state_from()`
-  // (this class's own B_/dm1_/Omega_) plus each subclass's own extra fields.
+  // Deep copy/restore of the entire concrete object; used by run_em() to
+  // snapshot a known-good iterate before a SQUAREM extrapolation and back
+  // out of it if infeasible. clone() relies on the compiler-generated copy
+  // constructor; restore_from() copies field-by-field since data_ (a
+  // reference member) blocks copy assignment.
   virtual std::unique_ptr<NormalBlockVarBase> clone() const = 0;
   virtual void restore_from(const NormalBlockVarBase& other) = 0;
 
-  // Alternates E_step()/M_step(), recording objective() after each full
-  // iteration, and stops once the increment falls below `tol` (or after
-  // `maxit` iterations). Equivalent of `private$EM_optimize` in R/NormalBlockVarBase.R.
-  //
-  // Every cycle also attempts a SQUAREM extrapolation (Varadhan & Roland,
-  // 2008) on top of plain EM: from three consecutive plain iterates
-  // p0 -> p1 -> p2 (p = vec(B_, dm1_, Omega_); everything else is a pure
-  // byproduct of E_step()/M_step() given those three, exactly as in plain
-  // EM), it extrapolates a point much further along the p0->p1->p2
-  // direction than two more EM steps would reach, then "stabilizes" it with
-  // one more E_step()/M_step() pass. This is the fix for the slow-linear-EM
-  // regime documented in inst/CSDA_analyses (real fits stuck at the `niter`
-  // cap as the number of blocks grows): it reaches the same fixed point in
-  // far fewer recorded iterations.
-  //
-  // Acceptance is the textbook SQUAREM test: compare objective() at the
-  // stabilized candidate against objective() at p2, and back out (restoring
-  // p2 exactly) if it isn't at least as good, backtracking the steplength
-  // (Varadhan & Roland's own scheme: alpha <- (alpha - 1) / 2, halving the
-  // distance to "no extrapolation") before giving up on this cycle. This
-  // requires objective() to be a valid criterion value at *any* theta, not
-  // just one reached by a real M-step from its own preceding E-step -- true
-  // for NormalBlockVarKnownClusters (see its objective(), and the comment on
-  // supports_acceleration() below for which subclasses this does *not* hold
-  // for yet). state_is_feasible() is now only a cheap guard against
-  // numerically degenerate candidates (dm1 <= 0, Omega not meaningfully
-  // PD) that would make E_step()/M_step() produce garbage outright -- the
-  // objective comparison is what actually judges quality.
+  // Alternates E_step()/M_step(), recording objective() each iteration,
+  // stopping once the increment falls below `tol` or after `maxit`
+  // iterations -- equivalent of `private$EM_optimize` in R/NormalBlockVarBase.R.
+  // Each cycle also attempts a SQUAREM extrapolation (Varadhan & Roland,
+  // 2008) on top of plain EM to accelerate the slow-linear-EM regime; see
+  // inst/normal_block_models.qmd for the full derivation and acceptance test.
   void run_em(int maxit, double tol) {
     objective_trace_.clear();
     objective_trace_.push_back(objective());
@@ -212,18 +153,10 @@ private:
     XB_valid_ = false;
   }
 
-  // Cheap guard against numerically degenerate candidates -- not a quality
-  // judgment (objective() comparison in try_squarem_step() is what actually
-  // decides that now). dm1 must stay positive (it is an inverse variance)
-  // and Omega must stay symmetric positive-definite with *some* margin:
-  // a technically-PD but near-machine-singular candidate can make
-  // log_det_sympd()/inv_sympd() return outright garbage (not just lose a
-  // few digits) rather than erroring, which would corrupt the very
-  // objective() comparison meant to catch a bad step. 1e-8 is far looser
-  // than what an earlier, purely feasibility-gated version of this safety
-  // net needed (it had no other way to judge quality, so it leaned on tight
-  // conditioning as a proxy for it); here it only needs to rule out
-  // candidates that are *unusable*, not merely poor.
+  // Cheap guard against numerically degenerate candidates (dm1 <= 0, Omega
+  // not meaningfully PD) that would make E_step()/M_step() produce garbage
+  // outright; the objective() comparison in try_squarem_step() is what
+  // actually judges quality.
   bool state_is_feasible(const arma::vec& p) const {
     arma::uword nB = B_.n_elem, nd = dm1_.n_elem;
     if (arma::any(p.subvec(nB, nB + nd - 1) <= 0.0)) return false;
@@ -233,18 +166,10 @@ private:
     return eigval.min() > 1e-8 * eigval.max();
   }
 
-  // One SQUAREM cycle from the current (valid, == p2, objective() == obj2)
-  // state. Varadhan & Roland's own backtracking rule: starting from the
-  // data-driven steplength "S3", repeatedly halve the *distance to no
-  // extrapolation* (alpha <- (alpha - 1) / 2) until the (feasible,
-  // stabilized) candidate's objective() is at least as good as obj2, or
-  // until alpha reaches -1 (no extrapolation at all -- not worth taking,
-  // give up and keep plain EM's p2). Every attempt is judged on actual
-  // objective() value, not a feasibility/conditioning proxy, since
-  // objective() is valid at any theta for this subclass (see run_em()'s
-  // docstring). On success, leaves the model in the accelerated+stabilized
-  // state and returns true; on failure, leaves it exactly back at p2
-  // (restored from a snapshot) and returns false.
+  // One SQUAREM cycle from the current (p2, objective() == obj2) state;
+  // backtracks the steplength (Varadhan & Roland's scheme) until the
+  // stabilized candidate is at least as good as obj2, or gives up and
+  // restores p2. See inst/normal_block_models.qmd for the full derivation.
   bool try_squarem_step(const arma::vec& p0, const arma::vec& p1, const arma::vec& p2, double obj2) {
     arma::vec r = p1 - p0;
     arma::vec v = (p2 - p1) - r;
@@ -270,4 +195,4 @@ private:
   }
 };
 
-#endif // NORMALBLOCKR_NORMAL_BLOCK_BASE_H
+#endif // NORMALBLOCKR_NORMAL_BLOCK_VAR_BASE_H

@@ -8,17 +8,11 @@
 #include "zi_closed_form_solvers.h"
 
 // Zero-inflated normal-block model with unknown clusters, templated on the
-// residual-noise policy (ZIDiagonalNoise / ZISphericalNoise, see
-// zi_noise_models.h). Equivalent of the R6 class ZINormalBlockUnknownClusters
-// (R/ZINormalBlockUnknownClusters.R).
-//
-// Unlike the non zero-inflated counterpart (NormalBlockUnknownClusters), the
-// variational variance of W | Y is *row-dependent* (the zero-inflation mask
-// varies row by row), hence S_ is a matrix (n x q) rather than a vector of
-// length q. The zero-inflation mask reweights B's normal equations
-// per-column and M's per-row, but both subproblems stay exactly quadratic,
-// so both are solved by direct linear systems rather than an iterative
-// optimizer (see zi_closed_form_solvers.h).
+// residual-noise policy (see zi_noise_models.h). Equivalent of the R6 class
+// ZINormalBlockVarUnknownClusters (R/ZINormalBlockVarUnknownClusters.R).
+// Unlike the non-ZI counterpart, the variational variance of W | Y is
+// row-dependent, so S_ is a matrix (n x q) rather than a vector; B/M's
+// normal equations stay exactly quadratic, solved directly (zi_closed_form_solvers.h).
 template <typename NoisePolicy>
 class ZINormalBlockVarUnknownClusters : public NormalBlockVarBase {
   const ZINormalBlockData& zi_data_;
@@ -125,15 +119,7 @@ public:
     Sigma_hat_ = o.Sigma_hat_;
   }
   // Same mechanism as NormalBlockVarUnknownClusters (see its
-  // supports_acceleration()): no sign bug in this profiled ELBO (same "+1"
-  // shortcut structure), and every objective() call inside
-  // try_squarem_step() happens right after a fresh VE-step+M-step pair, the
-  // exact regime that shortcut is valid in. Validated on synthetic
-  // zero-inflated data (see git history): clean, growing speedup with q
-  // (e.g. q=25: 2378 plain VEM iterations vs 279 accelerated), and the only
-  // non-monotonicity observed (q=2, q=5) is a pre-existing artifact of this
-  // model's first iteration specifically (reproduces identically with
-  // acceleration off), unrelated to this gate.
+  // supports_acceleration())
   bool supports_acceleration() const override { return sparsity_ <= 0.0; }
 };
 

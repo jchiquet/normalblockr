@@ -25,11 +25,11 @@ bibentry(
   author   = c(person("Jeanne", "Tous"), person("Julien", "Chiquet")),
   year     = year,
   note     = note,
-  url      = "https://github.com/jeannetous/normalblockr",
+  url      = "https://github.com/jchiquet/normalblockr",
   textVersion = paste0(
     "Tous, J., & Chiquet, J. (", year, "). ",
     "normalblockr: Implementation of the Normal-Block Model. ",
     note, ". ",
-    "https://github.com/jeannetous/normalblockr"
+    "https://github.com/jchiquet/normalblockr"
   )
 )

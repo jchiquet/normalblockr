@@ -2,88 +2,91 @@
 % Please edit documentation in R/NormalBlockMeanBase.R
 \name{NormalBlockMeanBase}
 \alias{NormalBlockMeanBase}
-\title{R6 abstract class for a generic sparse Normal Block model}
+\title{Base Class for Mean-Block Models}
 \description{
-R6 abstract class for a generic sparse Normal Block model
-
-R6 abstract class for a generic sparse Normal Block model
+R6 abstract class for the Normal-Block models where the clustering
+structures the mean (mu_i = C B' X_i).
 }
+\examples{
+# An internal abstract base class, never instantiated directly -- use
+# NormalBlockMeanKnownClusters / NormalBlockMeanUnknownClusters.
+}
+\keyword{internal}
 \section{Super class}{
-\code{\link[normalblockr:NormalBlockBase]{normalblockr::NormalBlockBase}} -> \code{NormalBlockMeanBase}
+\code{\link[normalblockr:NormalBlockBase]{NormalBlockBase}} -> \code{NormalBlockMeanBase}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalMeanBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalMeanBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
 
-\item{\code{nb_param}}{number of parameters in the model}
+    \item{\code{nb_param}}{number of parameters in the model}
 
-\item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
-}
-\if{html}{\out{</div>}}
+    \item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-NormalBlockMeanBase-new}{\code{NormalBlockMeanBase$new()}}
-\item \href{#method-NormalBlockMeanBase-clone}{\code{NormalBlockMeanBase$clone()}}
+  \itemize{
+    \item \href{#method-NormalBlockMeanBase-initialize}{\code{NormalBlockMeanBase$new()}}
+    \item \href{#method-NormalBlockMeanBase-clone}{\code{NormalBlockMeanBase$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>normalblockr::NormalBlockBase$latent_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="optimize"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-optimize'><code>normalblockr::NormalBlockBase$optimize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>normalblockr::NormalBlockBase$plot()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>normalblockr::NormalBlockBase$plot_loglik()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>normalblockr::NormalBlockBase$plot_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>normalblockr::NormalBlockBase$predict()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>normalblockr::NormalBlockBase$print()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>normalblockr::NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>NormalBlockBase$latent_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="optimize"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-optimize'><code>NormalBlockBase$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>NormalBlockBase$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>NormalBlockBase$plot_loglik()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>NormalBlockBase$plot_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanBase-new"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new [`NormalBlockMeanBase`] object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockMeanBase$new(data, q, sparsity = 0, control = NB_control())}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-NormalBlockMeanBase-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-initialize}{}}}
+\subsection{\code{NormalBlockMeanBase$new()}}{
+  Create a new [`NormalBlockMeanBase`] object.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanBase$new(data, q, sparsity = 0, control = NB_control())}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{object of NormalMeanBlockData class, with responses and design matrix}
+      \item{\code{q}}{number of block/cluster}
+      \item{\code{sparsity}}{sparsity penalty on the network density}
+      \item{\code{control}}{structured list of more specific parameters, to generate with NB_Mean_control}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NormalBlockMeanBase`] object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{object of NormalMeanBlockData class, with responses and design matrix}
-
-\item{\code{q}}{number of block/cluster}
-
-\item{\code{sparsity}}{sparsity penalty on the network density}
-
-\item{\code{control}}{structured list of more specific parameters, to generate with NB_Mean_control}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NormalBlockMeanBase`] object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockMeanBase-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockMeanBase$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{NormalBlockMeanBase$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanBase$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

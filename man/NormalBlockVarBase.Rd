@@ -2,32 +2,38 @@
 % Please edit documentation in R/NormalBlockVarBase.R
 \name{NormalBlockVarBase}
 \alias{NormalBlockVarBase}
-\title{R6 abstract class for a generic sparse Normal Block model}
+\title{Base Class for Variance-Block Models}
 \description{
-R6 abstract class for a generic sparse Normal Block model
-
-R6 abstract class for a generic sparse Normal Block model
+R6 abstract class for the sparse Normal-Block models, where the clustering
+structures the latent covariance.
 }
+\examples{
+# An internal abstract base class, never instantiated directly -- see
+# normal_block() for how concrete models (NormalBlockVarKnownClusters,
+# NormalBlockVarUnknownClusters, and their zero-inflated variants) are
+# actually created and fitted.
+}
+\keyword{internal}
 \section{Super class}{
-\code{\link[normalblockr:NormalBlockBase]{normalblockr::NormalBlockBase}} -> \code{NormalBlockVarBase}
+\code{\link[normalblockr:NormalBlockBase]{NormalBlockBase}} -> \code{NormalBlockVarBase}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{B_original}}{regression coefficients (d x p), converted back to
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{B_original}}{regression coefficients (d x p), converted back to
 Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
 column-wise rescaling, if any). Use `model_par$B` instead for the
 coefficients on the internal fitting scale.}
 
-\item{\code{d0}}{number of zi variables (dimensions in X0)}
+    \item{\code{d0}}{number of zi variables (dimensions in X0)}
 
-\item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
+    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
 
-\item{\code{nb_param}}{number of parameters in the model}
+    \item{\code{nb_param}}{number of parameters in the model}
 
-\item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
+    \item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
 
-\item{\code{dm1_original}}{inverse residual variance per variable
+    \item{\code{dm1_original}}{inverse residual variance per variable
 (1 / Var(Y_j)), converted back to Y's original units. Use
 `model_par$dm1` instead for the internal fitting scale. With
 `noise_covariance = "spherical"`, `model_par$dm1` is a single value
@@ -38,83 +44,80 @@ different factors -- correctly so, since a single shared *scaled*
 variance does not correspond to a single shared variance in the
 original, heterogeneous-scale units.}
 
-\item{\code{get_res_covariance}}{whether the residual covariance is diagonal or spherical}
-}
-\if{html}{\out{</div>}}
+    \item{\code{get_res_covariance}}{whether the residual covariance is diagonal or spherical}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-NormalBlockVarBase-new}{\code{NormalBlockVarBase$new()}}
-\item \href{#method-NormalBlockVarBase-update}{\code{NormalBlockVarBase$update()}}
-\item \href{#method-NormalBlockVarBase-best_of_inits}{\code{NormalBlockVarBase$best_of_inits()}}
-\item \href{#method-NormalBlockVarBase-optimize}{\code{NormalBlockVarBase$optimize()}}
-\item \href{#method-NormalBlockVarBase-warm_start_from}{\code{NormalBlockVarBase$warm_start_from()}}
-\item \href{#method-NormalBlockVarBase-split}{\code{NormalBlockVarBase$split()}}
-\item \href{#method-NormalBlockVarBase-candidates_split}{\code{NormalBlockVarBase$candidates_split()}}
-\item \href{#method-NormalBlockVarBase-candidates_merge}{\code{NormalBlockVarBase$candidates_merge()}}
-\item \href{#method-NormalBlockVarBase-merge}{\code{NormalBlockVarBase$merge()}}
-\item \href{#method-NormalBlockVarBase-clone}{\code{NormalBlockVarBase$clone()}}
+  \itemize{
+    \item \href{#method-NormalBlockVarBase-initialize}{\code{NormalBlockVarBase$new()}}
+    \item \href{#method-NormalBlockVarBase-update}{\code{NormalBlockVarBase$update()}}
+    \item \href{#method-NormalBlockVarBase-best_of_inits}{\code{NormalBlockVarBase$best_of_inits()}}
+    \item \href{#method-NormalBlockVarBase-optimize}{\code{NormalBlockVarBase$optimize()}}
+    \item \href{#method-NormalBlockVarBase-warm_start_from}{\code{NormalBlockVarBase$warm_start_from()}}
+    \item \href{#method-NormalBlockVarBase-split}{\code{NormalBlockVarBase$split()}}
+    \item \href{#method-NormalBlockVarBase-candidates_split}{\code{NormalBlockVarBase$candidates_split()}}
+    \item \href{#method-NormalBlockVarBase-candidates_merge}{\code{NormalBlockVarBase$candidates_merge()}}
+    \item \href{#method-NormalBlockVarBase-merge}{\code{NormalBlockVarBase$merge()}}
+    \item \href{#method-NormalBlockVarBase-clone}{\code{NormalBlockVarBase$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>normalblockr::NormalBlockBase$latent_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>normalblockr::NormalBlockBase$plot()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>normalblockr::NormalBlockBase$plot_loglik()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>normalblockr::NormalBlockBase$plot_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>normalblockr::NormalBlockBase$predict()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>normalblockr::NormalBlockBase$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>NormalBlockBase$latent_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>NormalBlockBase$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>NormalBlockBase$plot_loglik()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>NormalBlockBase$plot_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarBase-new"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new [`NormalBlockVarBase`] object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$new(
+\if{html}{\out{<a id="method-NormalBlockVarBase-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-initialize}{}}}
+\subsection{\code{NormalBlockVarBase$new()}}{
+  Create a new [`NormalBlockVarBase`] object.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$new(
   data,
   q,
   sparsity = 0,
   control = NB_control(),
   zero_inflation = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{object of NormalBlockData class, with responses and design matrix}
-
-\item{\code{q}}{number of block/cluster}
-
-\item{\code{sparsity}}{sparsity penalty on the network density}
-
-\item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
-
-\item{\code{zero_inflation}}{whether the concrete subclass models zero-inflation;
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{object of NormalBlockData class, with responses and design matrix}
+      \item{\code{q}}{number of block/cluster}
+      \item{\code{sparsity}}{sparsity penalty on the network density}
+      \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
+      \item{\code{zero_inflation}}{whether the concrete subclass models zero-inflation;
 set by the ZI subclasses themselves, not meant to be set by the end user.
 When `FALSE`, the (costly) zero-inflation probability fit (`kappa`/`B0`)
 is skipped entirely, since it would otherwise never be used downstream.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NormalBlockVarBase`] object
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NormalBlockVarBase`] object
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-update"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-update}{}}}
-\subsection{Method \code{update()}}{
-Update a [`NormalBlockBase`] object
+\subsection{\code{NormalBlockVarBase$update()}}{
+  Update a [`NormalBlockBase`] object
 
 All possible parameters of the child classes
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$update(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$update(
   B = NA,
   dm1 = NA,
   C = NA,
@@ -128,258 +131,251 @@ All possible parameters of the child classes
   ll_list = NA,
   warm_started = NA,
   clustering_init = NA
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{B}}{regression matrix}
-
-\item{\code{dm1}}{diagonal vector of inverse variance matrix (variables level)}
-
-\item{\code{C}}{the matrix of groups memberships (posterior probabilities)}
-
-\item{\code{Omega}}{groups inverse variance matrix}
-
-\item{\code{gamma}}{variance of posterior distribution of W}
-
-\item{\code{mu}}{mean for posterior distribution of W}
-
-\item{\code{kappa}}{vector of zero-inflation probabilities}
-
-\item{\code{alpha}}{vector of groups probabilities}
-
-\item{\code{M}}{variational mean for posterior distribution of W}
-
-\item{\code{S}}{variational diagonal of variances for posterior distribution of W}
-
-\item{\code{ll_list}}{list of log-lik (elbo) values}
-
-\item{\code{warm_started}}{whether `EM_initialize()` should treat the model as
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{B}}{regression matrix}
+      \item{\code{dm1}}{diagonal vector of inverse variance matrix (variables level)}
+      \item{\code{C}}{the matrix of groups memberships (posterior probabilities)}
+      \item{\code{Omega}}{groups inverse variance matrix}
+      \item{\code{gamma}}{variance of posterior distribution of W}
+      \item{\code{mu}}{mean for posterior distribution of W}
+      \item{\code{kappa}}{vector of zero-inflation probabilities}
+      \item{\code{alpha}}{vector of groups probabilities}
+      \item{\code{M}}{variational mean for posterior distribution of W}
+      \item{\code{S}}{variational diagonal of variances for posterior distribution of W}
+      \item{\code{ll_list}}{list of log-lik (elbo) values}
+      \item{\code{warm_started}}{whether `EM_initialize()` should treat the model as
 already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
 rather than recomputing a fresh heuristic initialization -- set by
 [warm_start_from()] and by [split()]/[merge()].}
-
-\item{\code{clustering_init}}{name of a clustering heuristic to switch to,
+      \item{\code{clustering_init}}{name of a clustering heuristic to switch to,
 re-derived at the next `optimize()` call instead of reusing the
 current state (see `NB_control(clustering_init = )`). Used by
 [best_of_inits()].}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Update the current [`normal`] object
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Update the current [`normal`] object
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-best_of_inits"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-best_of_inits}{}}}
-\subsection{Method \code{best_of_inits()}}{
-Try several clustering-initialization heuristics and keep
+\subsection{\code{NormalBlockVarBase$best_of_inits()}}{
+  Try several clustering-initialization heuristics and keep
 the best-ELBO converged fit (see `NB_control(clustering_init = )` and
 `inst/methods_initialization_and_refine.md` for the rationale). Every
 candidate is first screened with a short `trial_niter` run (same idea
 as `candidates_split()`/`candidates_merge()`), and only the
 `max_training` best-screened ones are fully retrained with `control`.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$best_of_inits(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$best_of_inits(
   inits = c("ward2", "kmeans", "spectral"),
   trial_niter = 10,
   max_training = 2,
   control = list(niter = 500, threshold = 1e-04)
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{inits}}{vector of clustering-heuristic names to try}
-
-\item{\code{trial_niter}}{number of (V)EM iterations used to cheaply screen
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{inits}}{vector of clustering-heuristic names to try}
+      \item{\code{trial_niter}}{number of (V)EM iterations used to cheaply screen
 every candidate in `inits` before fully retraining the best few}
-
-\item{\code{max_training}}{how many of the screened candidates (best `loglik`
+      \item{\code{max_training}}{how many of the screened candidates (best `loglik`
 after `trial_niter` iterations) get fully retrained with `control`}
-
-\item{\code{control}}{`optimize()` control list (`niter`/`threshold`) used
+      \item{\code{control}}{`optimize()` control list (`niter`/`threshold`) used
 for the final full retraining of the `max_training` best candidates}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-a new, already-optimized [`NormalBlockVarBase`] object. Does not
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a new, already-optimized [`NormalBlockVarBase`] object. Does not
 mutate the current object; reassign the result
 (`model <- model$best_of_inits()`).
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-optimize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-optimize}{}}}
-\subsection{Method \code{optimize()}}{
-calls optimization (EM or heuristic) and updates relevant fields
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$optimize(
+\subsection{\code{NormalBlockVarBase$optimize()}}{
+  calls optimization (EM or heuristic) and updates relevant fields
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$optimize(
   control = list(niter = 500, threshold = 1e-04),
   warn = TRUE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{control}}{a list for controlling the optimization proces}
-
-\item{\code{warn}}{whether to warn when the (V)EM stops at the `niter` cap
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{control}}{a list for controlling the optimization process}
+      \item{\code{warn}}{whether to warn when the (V)EM stops at the `niter` cap
 without reaching `threshold` (see `private$warn_if_not_converged()`).
 Set to `FALSE` for deliberately-truncated trial fits (cheap candidate
 scoring in `candidates_split()`/`candidates_merge()`, the sparsity-path
 warm-start probe in [NormalBlockCollectionSparsity]) where stopping at
 the cap is expected and not a sign of trouble.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    optimizes the model and updates its parameters
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-optimizes the model and updates its parameters
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-warm_start_from"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-warm_start_from}{}}}
-\subsection{Method \code{warm_start_from()}}{
-Seed this model's starting parameters from another,
-already-optimized model with the same q, instead of the heuristic
-clustering-derived values set at construction time. Used by
-[NormalBlockVarCollectionSparsity] to warm-start each penalty in a sparsity
-path from the previous (adjacent) one's converged solution -- adjacent
-penalties along a sorted path usually have similar optima, so this
-typically needs far fewer EM iterations than starting cold each time
-(the same rationale as warm-starting in glmnet/glassoFast's own
-regularization paths). `B0`/`kappa` (zero-inflation) are deliberately
-left untouched: they depend only on the data, not on sparsity/blocks,
-so they are already set correctly and independently on every model.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$warm_start_from(other)}\if{html}{\out{</div>}}
+\subsection{\code{NormalBlockVarBase$warm_start_from()}}{
+  Seed this model's starting parameters from another,
+already-optimized model with the same q, instead of a fresh heuristic
+clustering. Used by [NormalBlockVarCollectionSparsity] to warm-start
+each penalty in a sparsity path from the previous one's solution.
+`B0`/`kappa` (zero-inflation) are left untouched: they depend only on
+the data, already set correctly and independently on every model.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$warm_start_from(other)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{other}}{a [NormalBlockVarBase] object, already optimized}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Update the current object in place with `other`'s parameters
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{other}}{a [NormalBlockVarBase] object, already optimized}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Update the current object in place with `other`'s parameters
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-split"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-split}{}}}
-\subsection{Method \code{split()}}{
-Create a clone of the current [`NormalBlockVarBase`] object after splitting cluster `cl`
+\subsection{\code{NormalBlockVarBase$split()}}{
+  Create a clone of the current [`NormalBlockVarBase`] object after splitting cluster `cl`
 We split the cluster according to the species variances
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$split(index, in_place = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{index}}{index (integer) of the cluster to split}
-
-\item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$split(index, in_place = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{index}}{index (integer) of the cluster to split}
+      \item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
 default FALSE (send a copy)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NormalBlockVarBase`] object
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NormalBlockVarBase`] object
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-candidates_split"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-candidates_split}{}}}
-\subsection{Method \code{candidates_split()}}{
-generate and select a set of candidate models
+\subsection{\code{NormalBlockVarBase$candidates_split()}}{
+  generate and select a set of candidate models
 by splitting the clusters of the current model
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$candidates_split(trial_niter = 5)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{trial_niter}}{number of EM iterations used to cheaply score each
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$candidates_split(trial_niter = 5)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{trial_niter}}{number of EM iterations used to cheaply score each
 candidate before [SelectionNClusters] fully re-optimizes the best few
 (`train_best_candidates()`'s `max_training`) -- kept short on purpose.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
-\if{html}{\out{</div>}}
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-candidates_merge"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-candidates_merge}{}}}
-\subsection{Method \code{candidates_merge()}}{
-generate and select a set of candidate models
+\subsection{\code{NormalBlockVarBase$candidates_merge()}}{
+  generate and select a set of candidate models
 by merging the clusters of the current model
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$candidates_merge(max_candidates = 30, trial_niter = 2)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{max_candidates}}{merge candidates are, unlike split's, quadratic
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$candidates_merge(max_candidates = 30, trial_niter = 2)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{max_candidates}}{merge candidates are, unlike split's, quadratic
 in q (`choose(q, q-2)` pairs) -- beyond `max_candidates` pairs, only
 the most promising ones (largest `|Omega[i, j]|`, i.e. the most
 strongly related cluster pairs in the current fit) are actually built
 and trial-optimized, since merging two nearly independent blocks is
 rarely competitive anyway. Set to `Inf` to always try every pair.}
+      \item{\code{trial_niter}}{see [candidates_split()]}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
 
-\item{\code{trial_niter}}{see [candidates_split()]}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-merge"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-merge}{}}}
-\subsection{Method \code{merge()}}{
-Create a clone of the current [`NormalBlockVarBase`] object after merging clusters `cl1` and `cl2`
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$merge(indices, in_place = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{indices}}{indices (couple of integer) of the clusters to merge}
-
-\item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
+\subsection{\code{NormalBlockVarBase$merge()}}{
+  Create a clone of the current [`NormalBlockVarBase`] object after merging clusters `cl1` and `cl2`
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$merge(indices, in_place = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{indices}}{indices (couple of integer) of the clusters to merge}
+      \item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
 default FALSE (send a copy)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NormalBlockVarBase`] object
+  }
 }
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NormalBlockVarBase`] object
-}
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarBase-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarBase$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{NormalBlockVarBase$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

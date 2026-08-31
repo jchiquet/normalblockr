@@ -2,93 +2,91 @@
 % Please edit documentation in R/NormalBlockMeanUnknownClusters.R
 \name{NormalBlockMeanUnknownClusters}
 \alias{NormalBlockMeanUnknownClusters}
-\title{R6 class for a normal-block model with known clustering.}
+\title{Mean-Block Model with Unknown Clustering}
 \description{
-R6 class for a normal-block model with known clustering.
-
-R6 class for a normal-block model with known clustering.
+R6 class for a Normal-Block-Mean model with a fixed number of clusters
+(but unknown clustering), inferred by variational EM.
 }
 \section{Super classes}{
-\code{\link[normalblockr:NormalBlockBase]{normalblockr::NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockMeanBase]{normalblockr::NormalBlockMeanBase}} -> \code{NormalBlockMeanUnknownClusters}
+\code{\link[normalblockr:NormalBlockBase]{NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockMeanBase]{NormalBlockMeanBase}} -> \code{NormalBlockMeanUnknownClusters}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{fitted}}{Y values predicted by the model, in Y's original units}
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 
-\item{\code{var_par}}{a list with the variational parameter: tau (posterior group probabilities)}
+    \item{\code{var_par}}{a list with the variational parameter: tau (posterior group probabilities)}
 
-\item{\code{who_am_I}}{a method to print what model is being fitted}
-}
-\if{html}{\out{</div>}}
+    \item{\code{who_am_I}}{a method to print what model is being fitted}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-NormalBlockMeanUnknownClusters-new}{\code{NormalBlockMeanUnknownClusters$new()}}
-\item \href{#method-NormalBlockMeanUnknownClusters-clone}{\code{NormalBlockMeanUnknownClusters$clone()}}
+  \itemize{
+    \item \href{#method-NormalBlockMeanUnknownClusters-initialize}{\code{NormalBlockMeanUnknownClusters$new()}}
+    \item \href{#method-NormalBlockMeanUnknownClusters-clone}{\code{NormalBlockMeanUnknownClusters$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>normalblockr::NormalBlockBase$latent_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="optimize"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-optimize'><code>normalblockr::NormalBlockBase$optimize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>normalblockr::NormalBlockBase$plot()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>normalblockr::NormalBlockBase$plot_loglik()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>normalblockr::NormalBlockBase$plot_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>normalblockr::NormalBlockBase$predict()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>normalblockr::NormalBlockBase$print()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>normalblockr::NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>NormalBlockBase$latent_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="optimize"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-optimize'><code>NormalBlockBase$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>NormalBlockBase$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>NormalBlockBase$plot_loglik()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>NormalBlockBase$plot_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanUnknownClusters-new"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanUnknownClusters-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new [`NormalBlockMeanUnknownClusters`] object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockMeanUnknownClusters$new(
+\if{html}{\out{<a id="method-NormalBlockMeanUnknownClusters-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockMeanUnknownClusters-initialize}{}}}
+\subsection{\code{NormalBlockMeanUnknownClusters$new()}}{
+  Create a new [`NormalBlockMeanUnknownClusters`] object.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanUnknownClusters$new(
   data,
   q,
   sparsity = 0,
   control = NB_control()
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{object of NormalMeanBlockData class, with responses and design matrix}
+      \item{\code{q}}{number of clusters}
+      \item{\code{sparsity}}{to apply on variance matrix when calling GLASSO}
+      \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NormalBlockMeanUnknownClusters`] object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{object of NormalMeanBlockData class, with responses and design matrix}
-
-\item{\code{q}}{number of clusters}
-
-\item{\code{sparsity}}{to apply on variance matrix when calling GLASSO}
-
-\item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NormalBlockMeanUnknownClusters`] object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockMeanUnknownClusters-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanUnknownClusters-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockMeanUnknownClusters$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{NormalBlockMeanUnknownClusters$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanUnknownClusters$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

@@ -2,7 +2,14 @@
 ##  CLASS NormalBlockBase ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 abstract class for a generic sparse Normal Block model or Normal Mean Block model
+#' Root Base Class for Normal-Block Models
+#'
+#' R6 abstract class shared by the variance-block ([NormalBlockVarBase]) and
+#' mean-block ([NormalBlockMeanBase]) model families.
+#' @examples
+#' # An internal abstract base class, never instantiated directly -- see
+#' # normal_block() for how concrete models are created and fitted.
+#' @keywords internal
 NormalBlockBase <- R6::R6Class(
   classname = "NormalBlockBase",
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -370,7 +377,8 @@ NormalBlockBase <- R6::R6Class(
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Extractors ------------------------
-    #' @description Extract interaction network in the latent space
+    #' @description Extract interaction network in the latent space, as a
+    #' matrix rather than a plot -- see `$plot_network()` to plot it instead.
     #' @param type edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)
     #' @return a square matrix of size `self$q`
     latent_network = function(type = c("partial_cor", "support", "precision")) {
@@ -383,20 +391,15 @@ NormalBlockBase <- R6::R6Class(
           tmp
         }
       )
-      ## Enforce sparse Matrix encoding to avoid downstream problems with igraph::graph_from_adjacency_matrix
-      ## as it fails when given dsyMatrix objects
+      ## Sparse encoding: igraph::graph_from_adjacency_matrix() fails on dsyMatrix
       Matrix::Matrix(net, sparse = TRUE)
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Graphical methods------------------
-    #' @param show_increment whether to add, below the objective trace, a second
-    #' panel with the (log10) absolute increment between consecutive iterations
-    #' and the convergence `threshold` used to stop optimize() (dashed line).
-    #' That second panel is what actually tells convergence apart from merely
-    #' running out of iterations: the objective trace alone tends to look flat
-    #' well before the increment has actually crossed the threshold, especially
-    #' as the number of blocks grows (see inst/CSDA_analyses).
+    #' @param show_increment whether to add a second panel with the (log10)
+    #' absolute increment between iterations and the convergence `threshold`
+    #' -- distinguishes true convergence from a flat-looking objective trace.
     #' @description plots the evolution of the objective (log-likelihood or ELBO)
     #' across the (V)EM iterations of the last call to `optimize()`.
     #' @return a [`ggplot2::ggplot`] graph
@@ -408,17 +411,8 @@ NormalBlockBase <- R6::R6Class(
         return(invisible(NULL))
       }
 
-      ## The objective (log-lik/ELBO) trace climbs fast then flattens out
-      ## visually on a linear scale, well before it has actually converged
-      ## (the same effect show_increment exists to catch). When every value
-      ## is negative -- always true in practice in this model, since the
-      ## leading -0.5*n*p*log(2*pi) term dominates -- plotting log10(-obj)
-      ## instead spreads out the near-convergence iterations (where -obj is
-      ## smallest) at the expense of the early, already-obvious big jumps,
-      ## the same log-scale trick already used for the increment panel
-      ## below. Left as the raw value in the (rare) edge case where that
-      ## doesn't hold, e.g. a tiny/degenerate fit where the objective is
-      ## not guaranteed negative.
+      ## log10(-obj) spreads out near-convergence iterations on the plot,
+      ## same trick as the increment panel below; raw value if not all-negative.
       obj_is_neg <- all(obj < 0)
       obj_facet  <- if (obj_is_neg) "log10(-objective)" else "objective"
       obj_value  <- if (obj_is_neg) log10(-obj) else obj
@@ -462,7 +456,8 @@ NormalBlockBase <- R6::R6Class(
       p
     },
 
-    #' @description plot the latent network.
+    #' @description plot the latent network. To extract the network as a
+    #' matrix instead of plotting it, use `$latent_network()`.
     #' @param type edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).
     #' @param output Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)
     #' @param edge.color Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.
@@ -543,7 +538,7 @@ NormalBlockBase <- R6::R6Class(
       cat("    $model_par, $posterior_par / $var_par, $clustering \n")
       cat("    $loglik, $BIC, $ICL, $objective, $nb_param, $criteria\n")
       cat("* Useful S3 methods\n")
-      cat("    print(), coef(), sigma(), fitted(), predict() \n")
+      cat("    print(), summary(), plot(), coef(), sigma(), fitted(), predict() \n")
     }
   ),
 
@@ -575,13 +570,8 @@ NormalBlockBase <- R6::R6Class(
     # which would also be true for split()/merge() clones (those
     # keep their own, different, already-tested initialization path).
 
-    ## Warns when the (V)EM stopped because it hit the niter cap rather than
-    ## because it actually converged below threshold -- silently otherwise
-    ## (heuristic fits have no ll_list/niter to check). This is increasingly
-    ## likely as the number of blocks q grows: more latent structure means a
-    ## higher fraction of missing information, hence a slower EM convergence
-    ## rate (see inst/CSDA_analyses) -- the fix for genuinely slow cases is to
-    ## raise `niter` in NB_control(), not to loosen `threshold`.
+    ## Warns when the (V)EM hit the niter cap without reaching threshold
+    ## (heuristic fits have no ll_list/niter to check, so stay silent).
     warn_if_not_converged = function() {
       if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())
       last_increment <- abs(diff(private$ll_list))[private$niter]
@@ -610,7 +600,7 @@ NormalBlockBase <- R6::R6Class(
 
     get_Omega = function(Sigma) {
       if (private$sparsity_ == 0) {
-        Omega <- solve(Sigma)
+        Omega <- chol2inv(chol(Sigma))
       } else {
         glasso_out <- glassoFast::glassoFast(Sigma, rho = private$sparsity_ * self$sparsity_weights)
         if (anyNA(glasso_out$wi)) {
@@ -618,7 +608,7 @@ NormalBlockBase <- R6::R6Class(
             "GLasso fails, the penalty is probably too small and the system badly conditionned \n reciprocal condition number =",
             rcond(Sigma), "\n We send back the original matrix and its inverse (unpenalized)."
           )
-          Omega <- solve(Sigma)
+          Omega <- chol2inv(chol(Sigma))
         } else {
           Omega <- Matrix::symmpart(glasso_out$wi)
         }

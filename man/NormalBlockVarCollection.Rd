@@ -2,13 +2,8 @@
 % Please edit documentation in R/NormalBlockVarCollection.R
 \name{NormalBlockVarCollection}
 \alias{NormalBlockVarCollection}
-\title{R6 abstract class for a collection of normal-block models}
+\title{Base Class for a Collection of Normal-Block Models}
 \description{
-R6 abstract class for a collection of normal-block models
-
-R6 abstract class for a collection of normal-block models
-}
-\details{
 Shared scaffolding for the collections explored by [get_model()]/
 [normal_block()]: a sweep over sparsity penalties ([`NormalBlockVarCollectionSparsity`]),
 over the number of clusters ([`NormalBlockVarCollectionClusters`]), or over both
@@ -17,65 +12,114 @@ over the number of clusters ([`NormalBlockVarCollectionClusters`]), or over both
 and provide their own `get_best_model()`, delegating the (row of
 `self$criteria` minimizing a criterion) lookup to `private$best_id()`.
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{models}}{list of models (or sub-collections) explored by the collection}
-
-\item{\code{control}}{store the list of user-defined model settings and optimization parameters}
+\examples{
+# An internal abstract base class, never instantiated directly -- see
+# normal_block() for how collections (NormalBlockVarCollectionClusters,
+# NormalBlockVarCollectionSparsity, NormalBlockVarCollectionClustersSparsity)
+# are actually created and fitted.
 }
-\if{html}{\out{</div>}}
+\keyword{internal}
+\section{Public fields}{
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{models}}{list of models (or sub-collections) explored by the collection}
+
+    \item{\code{control}}{store the list of user-defined model settings and optimization parameters}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{criteria}}{a data frame with the values of some criteria for the collection of models}
-}
-\if{html}{\out{</div>}}
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{criteria}}{a data frame with the values of some criteria for the collection of models}
+
+    \item{\code{loglik}}{not defined for a collection (which of its models?) --
+accessing it raises an informative error instead of silently
+returning `NULL`. Use `logLik()` for every model's log-likelihood, or
+`$get_best_model()$loglik` for a single one.}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-NormalBlockVarCollection-optimize}{\code{NormalBlockVarCollection$optimize()}}
-\item \href{#method-NormalBlockVarCollection-clone}{\code{NormalBlockVarCollection$clone()}}
-}
+  \itemize{
+    \item \href{#method-NormalBlockVarCollection-optimize}{\code{NormalBlockVarCollection$optimize()}}
+    \item \href{#method-NormalBlockVarCollection-print}{\code{NormalBlockVarCollection$print()}}
+    \item \href{#method-NormalBlockVarCollection-summary}{\code{NormalBlockVarCollection$summary()}}
+    \item \href{#method-NormalBlockVarCollection-clone}{\code{NormalBlockVarCollection$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollection-optimize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollection-optimize}{}}}
-\subsection{Method \code{optimize()}}{
-optimizes every model (or sub-collection) in the collection
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollection$optimize(
+\subsection{\code{NormalBlockVarCollection$optimize()}}{
+  optimizes every model (or sub-collection) in the collection
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollection$optimize(
   control = list(niter = 500, threshold = 1e-04, verbose = TRUE)
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{control}}{optimization parameters (niter and threshold). When
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{control}}{optimization parameters (niter and threshold). When
 `control$clustering_init` is `"best_of_inits"`, each leaf model is fit
 via its own `best_of_inits()` instead of a plain `optimize()`.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
-\if{html}{\out{</div>}}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockVarCollection-print"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockVarCollection-print}{}}}
+\subsection{\code{NormalBlockVarCollection$print()}}{
+  User-friendly print method: model type and the range of
+q/sparsity explored. See `summary()` for the full criteria table.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollection$print()}
+    \if{html}{\out{</div>}}
+  }
 }
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockVarCollection-summary"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockVarCollection-summary}{}}}
+\subsection{\code{NormalBlockVarCollection$summary()}}{
+  Summarize the collection: model type, full criteria
+table, and the range of q/sparsity explored.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollection$summary()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    An object of class `summary.NormalBlockVarCollection`,
+printed with a dedicated [print.summary.NormalBlockVarCollection()]
+method.
+  }
 }
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollection-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollection-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollection$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{NormalBlockVarCollection$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollection$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

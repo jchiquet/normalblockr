@@ -2,8 +2,10 @@
 ##  CLASS SelectionNClusters ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+#' Select the Number of Clusters by Split/Merge Search
+#'
 #' R6 class for selecting the number of clusters (q) by forward/backward
-#' split-and-merge exploration, comparing models with the ICL
+#' split-and-merge exploration, comparing models with the ICL.
 #'
 #' Kept internal/unexported for reference: empirically (see
 #' [NormalBlockVarCollectionClusters]'s `refine()` documentation) chaining every
@@ -113,7 +115,7 @@ SelectionNClusters <- R6::R6Class(
         candidates <- self$train_best_candidates(current, "split")
         if (length(candidates) == 0) break
 
-        cat("Explore by spliting a model with", current$q, "clusters \r")
+        if (self$control$verbose) cat("Explore by spliting a model with", current$q, "clusters \r")
         candidates_ICL <- map_dbl(candidates, "ICL")
         best_model <- candidates[[which.min(candidates_ICL)]]
 
@@ -150,7 +152,7 @@ SelectionNClusters <- R6::R6Class(
         if (length(icurrent) == 0) break
         current <- self$best_models$model[[icurrent[1]]]
         self$best_models$merge_explored[icurrent[1]] <- TRUE
-        cat("Explore by merging a model with", current$q, "clusters \r")
+        if (self$control$verbose) cat("Explore by merging a model with", current$q, "clusters \r")
 
         ## Exit if the minimum nb of clusters is reached
         if (current$q <= 2) break

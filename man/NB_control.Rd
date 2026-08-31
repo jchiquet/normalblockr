@@ -7,6 +7,7 @@
 NB_control(
   niter = 500,
   threshold = 1e-04,
+  fixed_point_niter = 5,
   sparsity_weights = NULL,
   sparsity_penalties = NULL,
   n_sparsity_penalties = 30,
@@ -23,6 +24,8 @@ NB_control(
 \item{niter}{number of iterations in model optimization}
 
 \item{threshold}{loglikelihood / elbo threshold under which optimization stops}
+
+\item{fixed_point_niter}{number of fixed-point iterations in tau estimation for Normal-Block-Mean with unknown clusters}
 
 \item{sparsity_weights}{weights with which the penalty should be applied in case
 sparsity is required, non-0 values on the diagonal mean diagonal shall be
@@ -61,8 +64,10 @@ are all `NA` on the resulting model.}
 `optimize()` should automatically call `refine()` afterwards. Default
 `FALSE` since it adds real cost; call `collection$refine()` directly at
 any point afterwards for the same effect without setting this.}
-
-\item{fixed_point_niter}{number of fixed-point iterations in tau estimation for Normal-Block-Mean with unknown clusters}
+}
+\value{
+A named list of parameters to pass to [normal_block()]'s `control`
+argument.
 }
 \description{
 Control the model settings and various optimization parameters

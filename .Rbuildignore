@@ -5,6 +5,7 @@
 ^\.github$
 ^inst/CSDA_analyses
 ^inst/normal_block_models.*
+^inst/clustering_initialization_benchmark
 
 ^_pkgdown\.yml$
 ^docs$
@@ -13,3 +14,8 @@
 snowflake.log
 Rplots.pdf
 ^\.claude$
+^README_cache$
+^README\.qmd$
+\.DS_Store$
+^cran-comments\.md$
+^CRAN-SUBMISSION$

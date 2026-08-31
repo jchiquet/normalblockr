@@ -2,112 +2,110 @@
 % Please edit documentation in R/ZINormalBlockVarUnknownClusters.R
 \name{ZINormalBlockVarUnknownClusters}
 \alias{ZINormalBlockVarUnknownClusters}
-\title{R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).}
+\title{Zero-Inflated Normal-Block Model with Unknown Clustering}
 \description{
-R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).
-
-R6 class for zero-inflated normal-block model with a fixed number of clusters (but unknown clustering).
+R6 class for a zero-inflated normal-block model with a fixed number of
+clusters (but unknown clustering).
 }
 \section{Super classes}{
-\code{\link[normalblockr:NormalBlockBase]{normalblockr::NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockVarBase]{normalblockr::NormalBlockVarBase}} -> \code{ZINormalBlockVarUnknownClusters}
+\code{\link[normalblockr:NormalBlockBase]{NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockVarBase]{NormalBlockVarBase}} -> \code{ZINormalBlockVarUnknownClusters}
 }
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{fixed_tau}}{whether tau should be fixed at clustering_init during optimization, useful for stability selection}
-}
-\if{html}{\out{</div>}}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{fixed_tau}}{whether tau should be fixed at clustering_init during optimization, useful for stability selection}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{nb_param}}{number of parameters in the model}
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{nb_param}}{number of parameters in the model}
 
-\item{\code{var_par}}{a list with variational parameters}
+    \item{\code{var_par}}{a list with variational parameters}
 
-\item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omega (blocks precision matrix), kappa (zero-inflation probabilities)}
+    \item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omega (blocks precision matrix), kappa (zero-inflation probabilities)}
 
-\item{\code{entropy}}{Entropy of the conditional distribution}
+    \item{\code{entropy}}{Entropy of the conditional distribution}
 
-\item{\code{fitted}}{Y values predicted by the model, in Y's original units}
+    \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 
-\item{\code{who_am_I}}{a method to print what model is being fitted}
-}
-\if{html}{\out{</div>}}
+    \item{\code{who_am_I}}{a method to print what model is being fitted}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-ZINormalBlockVarUnknownClusters-new}{\code{ZINormalBlockVarUnknownClusters$new()}}
-\item \href{#method-ZINormalBlockVarUnknownClusters-clone}{\code{ZINormalBlockVarUnknownClusters$clone()}}
+  \itemize{
+    \item \href{#method-ZINormalBlockVarUnknownClusters-initialize}{\code{ZINormalBlockVarUnknownClusters$new()}}
+    \item \href{#method-ZINormalBlockVarUnknownClusters-clone}{\code{ZINormalBlockVarUnknownClusters$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>normalblockr::NormalBlockBase$latent_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>normalblockr::NormalBlockBase$plot()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>normalblockr::NormalBlockBase$plot_loglik()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>normalblockr::NormalBlockBase$plot_network()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>normalblockr::NormalBlockBase$predict()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>normalblockr::NormalBlockBase$print()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="best_of_inits"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-best_of_inits'><code>normalblockr::NormalBlockVarBase$best_of_inits()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="candidates_merge"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-candidates_merge'><code>normalblockr::NormalBlockVarBase$candidates_merge()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="candidates_split"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-candidates_split'><code>normalblockr::NormalBlockVarBase$candidates_split()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="merge"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-merge'><code>normalblockr::NormalBlockVarBase$merge()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="optimize"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-optimize'><code>normalblockr::NormalBlockVarBase$optimize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="split"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-split'><code>normalblockr::NormalBlockVarBase$split()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="update"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-update'><code>normalblockr::NormalBlockVarBase$update()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-warm_start_from'><code>normalblockr::NormalBlockVarBase$warm_start_from()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>NormalBlockBase$latent_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>NormalBlockBase$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>NormalBlockBase$plot_loglik()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>NormalBlockBase$plot_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="best_of_inits"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-best_of_inits'><code>NormalBlockVarBase$best_of_inits()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="candidates_merge"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-candidates_merge'><code>NormalBlockVarBase$candidates_merge()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="candidates_split"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-candidates_split'><code>NormalBlockVarBase$candidates_split()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="merge"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-merge'><code>NormalBlockVarBase$merge()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="optimize"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-optimize'><code>NormalBlockVarBase$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="split"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-split'><code>NormalBlockVarBase$split()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="update"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-update'><code>NormalBlockVarBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-warm_start_from'><code>NormalBlockVarBase$warm_start_from()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ZINormalBlockVarUnknownClusters-new"></a>}}
-\if{latex}{\out{\hypertarget{method-ZINormalBlockVarUnknownClusters-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new [`ZINormalBlockVarUnknownClusters`] object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ZINormalBlockVarUnknownClusters$new(
+\if{html}{\out{<a id="method-ZINormalBlockVarUnknownClusters-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-ZINormalBlockVarUnknownClusters-initialize}{}}}
+\subsection{\code{ZINormalBlockVarUnknownClusters$new()}}{
+  Create a new [`ZINormalBlockVarUnknownClusters`] object.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ZINormalBlockVarUnknownClusters$new(
   data,
   q,
   sparsity = 0,
   control = NB_control()
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{object of NormalBlockVarData class, with responses and design matrix}
+      \item{\code{q}}{required number of groups}
+      \item{\code{sparsity}}{to apply on variance matrix when calling GLASSO}
+      \item{\code{control}}{structured list of more specific parameters}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`ZINormalBlockVarUnknownClusters`] object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{object of NormalBlockVarData class, with responses and design matrix}
-
-\item{\code{q}}{required number of groups}
-
-\item{\code{sparsity}}{to apply on variance matrix when calling GLASSO}
-
-\item{\code{control}}{structured list of more specific parameters}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`ZINormalBlockVarUnknownClusters`] object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ZINormalBlockVarUnknownClusters-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-ZINormalBlockVarUnknownClusters-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ZINormalBlockVarUnknownClusters$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{ZINormalBlockVarUnknownClusters$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ZINormalBlockVarUnknownClusters$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

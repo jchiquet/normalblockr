@@ -2,7 +2,9 @@
 ##  CLASS NormalBlockMeanKnownClusters #################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' R6 class for a normal-block model with known clustering.
+#' Mean-Block Model with Known Clustering
+#'
+#' R6 class for a Normal-Block-Mean model with a known clustering.
 #' @export
 NormalBlockMeanKnownClusters <- R6::R6Class(
   classname = "NormalBlockMeanKnownClusters",

@@ -2,161 +2,172 @@
 % Please edit documentation in R/NormalBlockVarCollectionClusters.R
 \name{NormalBlockVarCollectionClusters}
 \alias{NormalBlockVarCollectionClusters}
-\title{R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.}
+\title{Collection of Normal-Block Models over a Range of Cluster Counts}
 \description{
-R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.
-
-R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.
+R6 class for a collection of normal-block models with different number of
+clusters (q) and a fixed sparsity level.
 }
 \section{Super class}{
-\code{\link[normalblockr:NormalBlockVarCollection]{normalblockr::NormalBlockVarCollection}} -> \code{NormalBlockVarCollectionClusters}
+\code{\link[normalblockr:NormalBlockVarCollection]{NormalBlockVarCollection}} -> \code{NormalBlockVarCollectionClusters}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{q_list}}{number of blocks}
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{q_list}}{number of blocks}
 
-\item{\code{who_am_I}}{a method to print what model is being fitted}
-}
-\if{html}{\out{</div>}}
+    \item{\code{who_am_I}}{a method to print what model is being fitted}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-NormalBlockVarCollectionClusters-new}{\code{NormalBlockVarCollectionClusters$new()}}
-\item \href{#method-NormalBlockVarCollectionClusters-get_model}{\code{NormalBlockVarCollectionClusters$get_model()}}
-\item \href{#method-NormalBlockVarCollectionClusters-get_best_model}{\code{NormalBlockVarCollectionClusters$get_best_model()}}
-\item \href{#method-NormalBlockVarCollectionClusters-plot}{\code{NormalBlockVarCollectionClusters$plot()}}
-\item \href{#method-NormalBlockVarCollectionClusters-optimize}{\code{NormalBlockVarCollectionClusters$optimize()}}
-\item \href{#method-NormalBlockVarCollectionClusters-refine}{\code{NormalBlockVarCollectionClusters$refine()}}
-\item \href{#method-NormalBlockVarCollectionClusters-clone}{\code{NormalBlockVarCollectionClusters$clone()}}
+  \itemize{
+    \item \href{#method-NormalBlockVarCollectionClusters-initialize}{\code{NormalBlockVarCollectionClusters$new()}}
+    \item \href{#method-NormalBlockVarCollectionClusters-get_model}{\code{NormalBlockVarCollectionClusters$get_model()}}
+    \item \href{#method-NormalBlockVarCollectionClusters-get_best_model}{\code{NormalBlockVarCollectionClusters$get_best_model()}}
+    \item \href{#method-NormalBlockVarCollectionClusters-plot}{\code{NormalBlockVarCollectionClusters$plot()}}
+    \item \href{#method-NormalBlockVarCollectionClusters-optimize}{\code{NormalBlockVarCollectionClusters$optimize()}}
+    \item \href{#method-NormalBlockVarCollectionClusters-refine}{\code{NormalBlockVarCollectionClusters$refine()}}
+    \item \href{#method-NormalBlockVarCollectionClusters-clone}{\code{NormalBlockVarCollectionClusters$clone()}}
+  }
 }
-}
+\if{html}{\out{<details open><summary>Inherited methods</summary>
+<ul>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-print'><code>NormalBlockVarCollection$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-summary'><code>NormalBlockVarCollection$summary()</code></a></span></li>
+</ul>
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-new"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-new}{}}}
-\subsection{Method \code{new()}}{
-Create a new [`NormalBlockVarCollectionClusters`] object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClusters$new(
+\if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-initialize}{}}}
+\subsection{\code{NormalBlockVarCollectionClusters$new()}}{
+  Create a new [`NormalBlockVarCollectionClusters`] object.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClusters$new(
   mydata,
   q_list,
   zero_inflation = FALSE,
   sparsity = 0,
   control = NB_control()
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
+      \item{\code{q_list}}{list of q values (number of groups) in the collection}
+      \item{\code{zero_inflation}}{whether the models in the collection should be zero-inflated or not}
+      \item{\code{sparsity}}{sparsity penalty on the network density}
+      \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NormalBlockVarCollectionClusters`] object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
-
-\item{\code{q_list}}{list of q values (number of groups) in the collection}
-
-\item{\code{zero_inflation}}{whether the models in the collection should be zero-inflated or not}
-
-\item{\code{sparsity}}{sparsity penalty on the network density}
-
-\item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A new [`NormalBlockVarCollectionClusters`] object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-get_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-get_model}{}}}
-\subsection{Method \code{get_model()}}{
-returns the NormalBlockVarUnknownClusters model corresponding to given q
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClusters$get_model(q)}\if{html}{\out{</div>}}
+\subsection{\code{NormalBlockVarCollectionClusters$get_model()}}{
+  returns the NormalBlockVarUnknownClusters model corresponding to given q
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClusters$get_model(q)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{q}}{number of blocks asked by user}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A NormalBlockVarUnknownClusters object with given value q
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{q}}{number of blocks asked by user}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A NormalBlockVarUnknownClusters object with given value q
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-get_best_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-get_best_model}{}}}
-\subsection{Method \code{get_best_model()}}{
-Extract best model in the collection
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClusters$get_best_model(
+\subsection{\code{NormalBlockVarCollectionClusters$get_best_model()}}{
+  Extract best model in the collection
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClusters$get_best_model(
   crit = c("ICL", "BIC", "EBIC", "deviance")
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{crit}}{a character for the criterion used to performed the selection.
+Either "ICL" or "BIC". "ICL" is the default criterion}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a [`NormalBlockVarUnknownClusters`] object
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{crit}}{a character for the criterion used to performed the selection.
-Either "ICL" or "BIC". "ICL" is the default criterion}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-a [`NormalBlockVarUnknownClusters`] object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-plot}{}}}
-\subsection{Method \code{plot()}}{
-Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClusters$plot(
+\subsection{\code{NormalBlockVarCollectionClusters$plot()}}{
+  Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClusters$plot(
   criteria = c("deviance", "ICL", "BIC", "EBIC")
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{criteria}}{vector of characters. The criteria to plot in `c("deviance", "BIC", "ICL")`. Defaults to all of them.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a [`ggplot2::ggplot`] graph
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{criteria}}{vector of characters. The criteria to plot in `c("deviance", "BIC", "ICL")`. Defaults to all of them.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-a [`ggplot2::ggplot`] graph
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-optimize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-optimize}{}}}
-\subsection{Method \code{optimize()}}{
-optimizes every model in the collection, then -- if
+\subsection{\code{NormalBlockVarCollectionClusters$optimize()}}{
+  optimizes every model in the collection, then -- if
 `control$refine` is `TRUE` (see [NB_control()], default `FALSE`) --
 calls [refine()] automatically.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClusters$optimize(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClusters$optimize(
   control = list(niter = 500, threshold = 1e-04, verbose = TRUE)
-)}\if{html}{\out{</div>}}
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{control}}{optimization parameters (niter, threshold, verbose)}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{control}}{optimization parameters (niter, threshold, verbose)}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-refine"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-refine}{}}}
-\subsection{Method \code{refine()}}{
-Tries to improve every model in the collection with a
+\subsection{\code{NormalBlockVarCollectionClusters$refine()}}{
+  Tries to improve every model in the collection with a
 short split-and-reoptimize trial seeded from its smaller-q neighbor
 (`"split"`), a short merge-and-reoptimize trial seeded from its
 larger-q neighbor (`"merge"`), or both (the default); a candidate
@@ -165,57 +176,58 @@ can only improve (or leave unchanged) each model it touches. Only
 contiguous q pairs (`q` and `q -/+ 1`, both present in the collection)
 are refined. See `inst/methods_initialization_and_refine.md` for the
 rationale and empirical evidence.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClusters$refine(
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClusters$refine(
   trial_niter = 2,
   max_candidates = 30,
   directions = c("split", "merge"),
   verbose = self$control$verbose
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{trial_niter}}{number of EM iterations used for the cheap trial
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{trial_niter}}{number of EM iterations used for the cheap trial
 candidates (passed to `candidates_split()`/`candidates_merge()`)
 before fully re-optimizing only the best one.}
-
-\item{\code{max_candidates}}{passed to `candidates_merge()` (ignored for
+      \item{\code{max_candidates}}{passed to `candidates_merge()` (ignored for
 `"split"`, which is never combinatorial in q) -- see its
 documentation.}
-
-\item{\code{directions}}{which neighbor(s) to seed refinement candidates
+      \item{\code{directions}}{which neighbor(s) to seed refinement candidates
 from: `"split"` (smaller-q neighbor), `"merge"` (larger-q neighbor),
 or both (the default).}
-
-\item{\code{verbose}}{whether to print, for each q attempted, whether the
+      \item{\code{verbose}}{whether to print, for each q attempted, whether the
 candidate from that neighbor improved on it. Defaults to
 `control$verbose` (the value set at construction, see
 [NB_control()]).}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-invisibly returns `self`; improved models replace the
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    invisibly returns `self`; improved models replace the
 originals in `$models` in place.
+  }
 }
-}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{NormalBlockVarCollectionClusters$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{NormalBlockVarCollectionClusters$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarCollectionClusters$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }
