@@ -31,6 +31,10 @@ NormalBlockVarBase <- R6::R6Class(
     #' is skipped entirely, since it would otherwise never be used downstream.
     #' @return A new [`NormalBlockVarBase`] object
     initialize = function(data, q, sparsity = 0, control = NB_control(), zero_inflation = FALSE) {
+      ## NB_control()'s clustering_init default is NULL, resolved here to
+      ## this family's own default (see NormalBlockMeanBase for the other
+      ## family's, and why they differ).
+      if (is.null(control$clustering_init)) control$clustering_init <- "ward2"
       super$initialize(data, q, sparsity, control)
       ## penalty mask
       private$sparsity_ <- sparsity

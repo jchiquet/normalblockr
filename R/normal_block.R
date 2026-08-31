@@ -91,12 +91,15 @@ normal_block <- function(data,
 #' @param fixed_tau whether tau should be fixed at clustering_init during optimization
 #' useful for calls to fixed_q models in stability_selection
 #' @param clustering_init how to obtain the initial clustering of the q
-#' unknown blocks: a heuristic name ("ward2", the default, "kmeans", "sbm" or
+#' unknown blocks: a heuristic name ("ward2", "kmeans", "sbm" or
 #' "spectral"), an actual clustering (a vector of labels or a p x q indicator
 #' matrix, or a list of either per q for a collection), or "best_of_inits" to
 #' try several heuristics per model and keep the best-ELBO fit (see
 #' [NormalBlockVarBase]'s `best_of_inits()`; not supported with `sparsity =
-#' TRUE`). See `inst/methods_initialization_and_refine.md` for the
+#' TRUE`). Default `NULL`, resolved per model family at fit time: "ward2"
+#' for variance-block models, "kmeans" for mean-block models ("ward2" was
+#' benchmarked substantially worse there -- see [NormalBlockMeanBase]).
+#' See `inst/methods_initialization_and_refine.md` for the
 #' heuristics' rationale, why no single one dominates, and how this interacts
 #' with `refine` (below).
 #' @param verbose telling if information should be printed during optimization
@@ -121,7 +124,7 @@ NB_control <- function(
     n_sparsity_penalties = 30,
     min_ratio            = 0.01,
     fixed_tau            = FALSE,
-    clustering_init      = "ward2",
+    clustering_init      = NULL,
     verbose              = TRUE,
     heuristic            = FALSE,
     noise_covariance     = c("diagonal", "spherical"),

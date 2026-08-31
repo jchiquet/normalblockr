@@ -25,6 +25,14 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @param control structured list of more specific parameters, to generate with NB_Mean_control
     #' @return A new [`NormalBlockMeanBase`] object
     initialize = function(data, q, sparsity = 0, control = NB_control()) {
+      ## NB_control()'s clustering_init default is NULL, resolved here to
+      ## "kmeans": clustering is done on each variable's fitted mean
+      ## trajectory X %*% B_j (get_heuristic_parameters(), in the concrete
+      ## subclasses); benchmarked against "ward2" on simulated data, kmeans
+      ## consistently lands in a better basin (see best_of_inits() and the
+      ## commit history for the numbers), so it is the more sensible default
+      ## here even though "ward2" remains the variance-block family's.
+      if (is.null(control$clustering_init)) control$clustering_init <- "kmeans"
       super$initialize(data, q, sparsity, control)
       ## penalty mask
       private$sparsity_ <- sparsity
