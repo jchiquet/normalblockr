@@ -25,7 +25,10 @@ NB_control(
 
 \item{threshold}{loglikelihood / elbo threshold under which optimization stops}
 
-\item{fixed_point_niter}{number of fixed-point iterations in tau estimation for Normal-Block-Mean with unknown clusters}
+\item{fixed_point_niter}{number of sweeps of the tau update for
+Normal-Block-Mean with unknown clusters. Each sweep visits the rows of
+tau sequentially and maximizes the ELBO exactly in each, so it can never
+decrease the ELBO.}
 
 \item{sparsity_weights}{weights with which the penalty should be applied in case
 sparsity is required, non-0 values on the diagonal mean diagonal shall be

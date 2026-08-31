@@ -104,30 +104,30 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
       return(colMeans(tau))
     },
 
+    ## Sequential (Gauss-Seidel) sweep over the rows of tau. With the other
+    ## rows held fixed, the ELBO is linear in tau_j up to its entropy -- the
+    ## quadratic contributions of Tr(R Omega R') and Tr(Phi M) cancel exactly --
+    ## so the softmax below maximizes it exactly and a sweep can never decrease
+    ## the ELBO. Updating every row at once has no such guarantee and can cycle.
     tau_estimator = function(Omega = private$Omega,
                              B     = private$B,
                              alpha = private$alpha,
                              tau = private$C) {
       M      <- crossprod(B, self$data$XtX) %*% B
       diag_M <- diag(M)
-
-      YtXB <- crossprod(self$data$Y, self$data$X %*% B)
-
-      term1 <- - matrix(1, nrow = self$data$p, ncol = self$q)
-      ## no clipping needed here: the softmax below is stabilized by
-      ## subtracting the row-wise max of the exponent.
-      term2 <- Omega %*% (YtXB - tau %*% M)
-      term3 <- -0.5 * matrix(diag(Omega), nrow = self$data$p, ncol = 1) %*% matrix(1, nrow = 1, ncol = self$q) %*% diag(diag_M)
-      term4 <- diag(diag(Omega)) %*% tau %*% M
-
-      exposant <- term1 + term2 + term3 + term4
-
+      w      <- diag(Omega)
+      ZtXB   <- crossprod(self$data$Y, self$data$X %*% B)
       log_alpha <- log(pmax(alpha, 1e-300))
-      log_numerator <- matrix(log_alpha, nrow = self$data$p,
-                               ncol = self$q, byrow = TRUE) + exposant
-      log_numerator <- log_numerator - apply(log_numerator, 1, max)
-      tau <- exp(log_numerator)
-      tau <- tau / rowSums(tau)
+
+      G <- ZtXB - tau %*% M ## kept in sync with tau, row by row
+      for (j in seq_len(self$data$p)) {
+        expo  <- log_alpha + as.vector(Omega[j, ] %*% G) +
+          w[j] * as.vector(tau[j, ] %*% M) - 0.5 * w[j] * diag_M
+        tau_j <- exp(expo - max(expo))
+        tau_j <- tau_j / sum(tau_j)
+        tau[j, ] <- tau_j
+        G[j, ]   <- ZtXB[j, ] - tau_j %*% M
+      }
       tau <- check_one_boundary(check_zero_boundary(tau))
       tau <- tau / rowSums(tau)
       return(tau)
