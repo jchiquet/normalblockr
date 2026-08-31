@@ -3,6 +3,7 @@
 #include <string>
 #include "normal_block_data.h"
 #include "normal_block_var_types.h"
+#include "normal_block_mean_types.h"
 #include "zi_normal_block_data.h"
 #include "zi_normal_block_var_types.h"
 
@@ -241,4 +242,82 @@ Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::m
     return ZINormalBlockVarUnknownClusters_result(model);
   }
   Rcpp::stop("noise_covariance must be either \"diagonal\" or \"spherical\"");
+}
+
+//' Fit a mean-block model with known clusters (Rcpp/Armadillo core)
+//'
+//' Equivalent of R6's NormalBlockMeanKnownClusters
+//' (R/NormalBlockMeanKnownClusters.R); runs the EM recursion from parameters
+//' already initialized on the R side.
+//'
+//' @param Y response matrix (n x p)
+//' @param X design matrix (n x d)
+//' @param C fixed cluster-indicator matrix (p x q)
+//' @param B0 initial regression coefficients (d x q)
+//' @param Omega0 initial precision matrix of the variables (p x p)
+//' @param sparsity sparsity penalty applied to Omega through the graphical
+//' lasso (glassoFast); 0 means an unpenalized inversion
+//' @param sparsity_weights p x p matrix of per-pair penalty weights
+//' @param niter maximum number of EM iterations
+//' @param threshold convergence threshold on the objective increment
+//' @return a list with the fitted parameters (B, Omega), the log-likelihood
+//' trace and the number of iterations performed
+//' @noRd
+// [[Rcpp::export]]
+Rcpp::List NormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& C,
+                                            arma::mat B0, arma::mat Omega0,
+                                            double sparsity, arma::mat sparsity_weights,
+                                            int niter, double threshold) {
+  NormalBlockData data(Y, X);
+  norm_block_mean_known_clusters model(data, C, B0, Omega0, sparsity, sparsity_weights);
+  model.run_em(niter, threshold);
+  return Rcpp::List::create(
+    Rcpp::Named("B")         = model.B(),
+    Rcpp::Named("Omega")     = model.Omega(),
+    Rcpp::Named("objective") = Rcpp::wrap(model.objective_trace()),
+    Rcpp::Named("niter")     = model.niter()
+  );
+}
+
+//' Fit a mean-block model with unknown clusters (Rcpp/Armadillo core, VEM)
+//'
+//' Equivalent of R6's NormalBlockMeanUnknownClusters
+//' (R/NormalBlockMeanUnknownClusters.R); runs the variational EM recursion
+//' from parameters already initialized on the R side.
+//'
+//' @param Y response matrix (n x p)
+//' @param X design matrix (n x d)
+//' @param B0 initial regression coefficients (d x q)
+//' @param Omega0 initial precision matrix of the variables (p x p)
+//' @param tau0 initial variational membership probabilities (p x q)
+//' @param sparsity sparsity penalty applied to Omega through the graphical
+//' lasso (glassoFast); 0 means an unpenalized inversion
+//' @param sparsity_weights p x p matrix of per-pair penalty weights
+//' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
+//' @param niter maximum number of VEM iterations
+//' @param threshold convergence threshold on the ELBO increment
+//' @return a list with the fitted parameters (B, Omega, C, alpha, Psi, Phi,
+//' Lambda), the ELBO trace and the number of iterations performed
+//' @noRd
+// [[Rcpp::export]]
+Rcpp::List NormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::mat& X,
+                                              arma::mat B0, arma::mat Omega0, arma::mat tau0,
+                                              double sparsity, arma::mat sparsity_weights,
+                                              int fixed_point_niter,
+                                              int niter, double threshold) {
+  NormalBlockData data(Y, X);
+  norm_block_mean_unknown_clusters model(data, B0, Omega0, tau0, sparsity, sparsity_weights,
+                                         fixed_point_niter);
+  model.run_em(niter, threshold);
+  return Rcpp::List::create(
+    Rcpp::Named("B")         = model.B(),
+    Rcpp::Named("Omega")     = model.Omega(),
+    Rcpp::Named("C")         = model.tau(),
+    Rcpp::Named("alpha")     = to_rvector(model.alpha()),
+    Rcpp::Named("Psi")       = model.Psi(),
+    Rcpp::Named("Phi")       = model.Phi(),
+    Rcpp::Named("Lambda")    = model.Lambda(),
+    Rcpp::Named("objective") = Rcpp::wrap(model.objective_trace()),
+    Rcpp::Named("niter")     = model.niter()
+  );
 }

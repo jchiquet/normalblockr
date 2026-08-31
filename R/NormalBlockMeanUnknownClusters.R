@@ -48,7 +48,9 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
       ## cluster on the fitted mean trajectory X %*% B_j (n x p): unlike the
       ## raw coefficient B_j (d x 1), it has enough rows for the shared
       ## cor()/cov()-based heuristics (ward2/sbm/spectral) even when d is small
-      tau <- private$heuristic_clustering(self$data$X %*% reg_res$B)
+      if (anyNA(private$C))
+        private$C <- private$heuristic_clustering(self$data$X %*% reg_res$B)
+      tau <- private$C
       ## soften the hard indicator away from 0/1: compute_loglik()'s entropy
       ## term (tau * log(tau)) is evaluated on this tau before any
       ## tau_estimator() update, and 0 * log(0) is NaN
@@ -158,7 +160,25 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
       return(as.numeric(l))
     },
 
-    EM_optimize = function(control){
+    ## Runs the VEM recursion via the Rcpp/Armadillo core (src/exports.cpp,
+    ## NormalBlockMeanUnknownClusters_fit).
+    EM_optimize = function(control) {
+      init <- private$optim_initialize()
+      res  <- NormalBlockMeanUnknownClusters_fit(
+        Y = self$data$Y, X = self$data$X,
+        B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
+        sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
+        fixed_point_niter = control$fixed_point_niter,
+        niter = control$niter, threshold = control$threshold
+      )
+      private$niter <- res$niter
+      list(B = res$B, Omega = res$Omega, C = res$C, alpha = res$alpha,
+           Psi = res$Psi, Phi = res$Phi, Lambda = res$Lambda, ll_list = res$objective)
+    },
+
+    ## Reference R implementation of the same recursion, kept while the C++
+    ## port is being validated against it (test-cpp-normal-block-mean.R).
+    EM_optimize_R = function(control){
       init_params <- private$optim_initialize()
       B           <- init_params$B
       Omega       <- init_params$Omega

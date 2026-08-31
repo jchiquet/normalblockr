@@ -70,7 +70,23 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
       return(as.numeric(l))
     },
 
-    EM_optimize = function(control){
+    ## Runs the EM recursion via the Rcpp/Armadillo core (src/exports.cpp,
+    ## NormalBlockMeanKnownClusters_fit).
+    EM_optimize = function(control) {
+      init <- private$optim_initialize()
+      res  <- NormalBlockMeanKnownClusters_fit(
+        Y = self$data$Y, X = self$data$X, C = private$C,
+        B0 = init$B, Omega0 = init$Omega,
+        sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
+        niter = control$niter, threshold = control$threshold
+      )
+      private$niter <- res$niter
+      list(B = res$B, Omega = res$Omega, ll_list = res$objective)
+    },
+
+    ## Reference R implementation of the same recursion, kept while the C++
+    ## port is being validated against it (test-cpp-normal-block-mean.R).
+    EM_optimize_R = function(control){
       init_params <- private$optim_initialize()
       B           <- init_params$B
       Omega       <- init_params$Omega

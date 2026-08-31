@@ -1,0 +1,83 @@
+###############################################################################
+###############################################################################
+## Use pre-save testdata (seed are hard to handle in testhat)
+testdata <- readRDS("testdata/testdata_normal_mean_block.RDS")
+Y <- testdata$Y
+X <- testdata$X
+C <- testdata$parameters$C ; q <- ncol(C)
+
+niter     <- 6
+threshold <- -1 # never trigger early stopping: forces exactly `niter` iterations
+
+###############################################################################
+###############################################################################
+## These tests check that the Rcpp/RcppArmadillo (V)EM core
+## (NormalBlockMeanKnownClusters_fit / NormalBlockMeanUnknownClusters_fit,
+## src/exports.cpp) reproduces *exactly* (up to numerical precision) the
+## EM/VEM recursion implemented in R (private$EM_optimize_R, kept in
+## R/NormalBlockMean*Clusters.R while the port is validated), starting from
+## the same initial parameters, both unpenalized (sparsity = 0, plain
+## inversion) and penalized (sparsity > 0, graphical lasso via glassoFast,
+## called back from C++, see src/omega_estimation.h).
+##
+## Both recursions are driven through a fresh model object each time so that
+## private$optim_initialize() returns the same starting point: the clustering
+## is passed explicitly (rather than re-derived by a randomized heuristic) for
+## the unknown-clusters case.
+
+test_that("NormalBlockMeanKnownClusters_fit matches the R recursion (unpenalized/sparse)", {
+  data <- NormalBlockData$new(Y, X)
+
+  for (sparsity in c(0, 0.05)) {
+    model <- NormalBlockMeanKnownClusters$new(data, C, sparsity = sparsity,
+                                              control = NB_control(verbose = FALSE))
+    init <- model$.__enclos_env__$private$optim_initialize()
+    ref  <- model$.__enclos_env__$private$EM_optimize_R(
+      list(niter = niter, threshold = threshold))
+
+    res <- NormalBlockMeanKnownClusters_fit(
+      Y = data$Y, X = data$X, C = C, B0 = init$B, Omega0 = init$Omega,
+      sparsity = sparsity, sparsity_weights = model$sparsity_weights,
+      niter = niter, threshold = threshold)
+
+    expect_equal(res$B,     ref$B,     tolerance = 1e-8)
+    expect_equal(res$Omega, ref$Omega, tolerance = 1e-8)
+    expect_equal(res$objective, ref$ll_list, tolerance = 1e-8)
+  }
+})
+
+test_that("NormalBlockMeanUnknownClusters_fit matches the R recursion (unpenalized/sparse)", {
+  data <- NormalBlockData$new(Y, X)
+  fixed_point_niter <- 5
+
+  for (sparsity in c(0, 0.05)) {
+    ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C))
+    model_R   <- NormalBlockMeanUnknownClusters$new(data, q, sparsity = sparsity, control = ctrl)
+    model_cpp <- NormalBlockMeanUnknownClusters$new(data, q, sparsity = sparsity, control = ctrl)
+
+    init <- model_cpp$.__enclos_env__$private$optim_initialize()
+    ref  <- model_R$.__enclos_env__$private$EM_optimize_R(
+      list(niter = niter, threshold = threshold, fixed_point_niter = fixed_point_niter))
+
+    res <- NormalBlockMeanUnknownClusters_fit(
+      Y = data$Y, X = data$X, B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
+      sparsity = sparsity, sparsity_weights = model_R$sparsity_weights,
+      fixed_point_niter = fixed_point_niter, niter = niter, threshold = threshold)
+
+    expect_equal(res$B,      ref$B,      tolerance = 1e-8)
+    expect_equal(res$Omega,  ref$Omega,  tolerance = 1e-8)
+    expect_equal(res$C,      ref$C,      tolerance = 1e-8)
+    expect_equal(res$alpha,  ref$alpha,  tolerance = 1e-8)
+    expect_equal(res$Psi,    ref$Psi,    tolerance = 1e-8)
+    expect_equal(res$Phi,    ref$Phi,    tolerance = 1e-8)
+    expect_equal(res$Lambda, ref$Lambda, tolerance = 1e-8)
+    expect_equal(res$objective, ref$ll_list, tolerance = 1e-8)
+  }
+})
+
+test_that("the ELBO trace of the C++ core is non-decreasing", {
+  data  <- NormalBlockData$new(Y, X)
+  model <- NormalBlockMeanUnknownClusters$new(data, q, control = NB_control(verbose = FALSE))
+  model$optimize(control = NB_control(verbose = FALSE))
+  expect_true(all(diff(model$objective) >= -1e-6))
+})

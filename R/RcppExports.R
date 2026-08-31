@@ -99,3 +99,50 @@ ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B
     .Call(`_normalblockr_ZINormalBlockVarUnknownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold)
 }
 
+#' Fit a mean-block model with known clusters (Rcpp/Armadillo core)
+#'
+#' Equivalent of R6's NormalBlockMeanKnownClusters
+#' (R/NormalBlockMeanKnownClusters.R); runs the EM recursion from parameters
+#' already initialized on the R side.
+#'
+#' @param Y response matrix (n x p)
+#' @param X design matrix (n x d)
+#' @param C fixed cluster-indicator matrix (p x q)
+#' @param B0 initial regression coefficients (d x q)
+#' @param Omega0 initial precision matrix of the variables (p x p)
+#' @param sparsity sparsity penalty applied to Omega through the graphical
+#' lasso (glassoFast); 0 means an unpenalized inversion
+#' @param sparsity_weights p x p matrix of per-pair penalty weights
+#' @param niter maximum number of EM iterations
+#' @param threshold convergence threshold on the objective increment
+#' @return a list with the fitted parameters (B, Omega), the log-likelihood
+#' trace and the number of iterations performed
+#' @noRd
+NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, sparsity_weights, niter, threshold) {
+    .Call(`_normalblockr_NormalBlockMeanKnownClusters_fit`, Y, X, C, B0, Omega0, sparsity, sparsity_weights, niter, threshold)
+}
+
+#' Fit a mean-block model with unknown clusters (Rcpp/Armadillo core, VEM)
+#'
+#' Equivalent of R6's NormalBlockMeanUnknownClusters
+#' (R/NormalBlockMeanUnknownClusters.R); runs the variational EM recursion
+#' from parameters already initialized on the R side.
+#'
+#' @param Y response matrix (n x p)
+#' @param X design matrix (n x d)
+#' @param B0 initial regression coefficients (d x q)
+#' @param Omega0 initial precision matrix of the variables (p x p)
+#' @param tau0 initial variational membership probabilities (p x q)
+#' @param sparsity sparsity penalty applied to Omega through the graphical
+#' lasso (glassoFast); 0 means an unpenalized inversion
+#' @param sparsity_weights p x p matrix of per-pair penalty weights
+#' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
+#' @param niter maximum number of VEM iterations
+#' @param threshold convergence threshold on the ELBO increment
+#' @return a list with the fitted parameters (B, Omega, C, alpha, Psi, Phi,
+#' Lambda), the ELBO trace and the number of iterations performed
+#' @noRd
+NormalBlockMeanUnknownClusters_fit <- function(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold) {
+    .Call(`_normalblockr_NormalBlockMeanUnknownClusters_fit`, Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold)
+}
+
