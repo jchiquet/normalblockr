@@ -168,7 +168,7 @@ generate_normal_block_var_data <-
 }
 
 
-#' Generate normal block mean set of model parameters
+## Generate normal block mean set of model parameters (internal helper, not exported)
 generate_normal_block_mean_param <- function(X = matrix(rnorm(100*p), 100, p),
                                              p = 40,
                                              q = 3,
@@ -215,7 +215,6 @@ generate_normal_block_mean_param <- function(X = matrix(rnorm(100*p), 100, p),
 #' @param kappa vector (or scalar) of variable-wise probability of zero inflation. Default to 0.
 #' @param omega_structure the structure of the graph on which the precision matrix between variables is built. Can be a symmetric matrix with p rows/columns or a character picked in "erdos-renyi", "preferential_attachment", "community" in which case a graph is drawn with sensible generation parameters. See generate_precision_matrix for details.
 #' @param range_X A 2-size vector defining the range of the uniform distribution used to draw values in X, the regressor matrix. Default is c(0, 10)
-#' @param range_D A 2-size vector defining the range of the uniform distribution used to draw values in D, the diagonal matrix of variances of variables. Default is c(0.5, 1.5)
 #' @param u_v two-size vector of positive numbers v and u controlling the generation of the precision matrix Omega: v scales the off-diagonal elements of the precision matrix (magnitude of partial correlations), and u is a positive number added to the diagonal elements to ensure positive-definiteness. The default value is c(0.3, 0.1).
 #' @param alpha the q-size vector of group proportion. Default to rep(1/q, q)
 #' @param SNR Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desired SNR.
@@ -226,9 +225,8 @@ generate_normal_block_mean_param <- function(X = matrix(rnorm(100*p), 100, p),
 #' - a list of model parameters, encompassing
 #'    - B: matrix of regression coefficients
 #'    - C: matrix of group membership
-#'    - D: diagonal matrix of variance of the variables
-#'    - Omega: precision matrix of the groups
-#'    - Sigma: covariance matrix of the groups
+#'    - Omega: precision matrix of the variables
+#'    - Sigma: covariance matrix of the variables
 #'    - kappa: vector of ZI inflation probabilities (one per variable)
 #'
 #' @importFrom igraph sample_pa sample_sbm sample_gnp as_adjacency_matrix

@@ -150,9 +150,9 @@ models, variable-level for Normal Mean Block models) [all]}
       \item{\code{alpha}}{vector of groups probabilities [NBVar]}
       \item{\code{M}}{variational mean for posterior distribution of W [NBVar - unknown]}
       \item{\code{S}}{variational diagonal of variances for posterior distribution of W [NBVar - unknown]}
-      \item{\code{Psi}}{crossprod(tau, Omega) %% tau + diag(as.vector(crossprod(tau, diag_Sigma_inv))) - crossprod(tau, diag(diag_Sigma_inv, p)) %*% tau, intermediary term in calculations [NBMean - unknown]}
-      \item{\code{Phi}}{Diag(Tau' diag(Omega)) - tau' Diag(diag(Omega)) tau, intermediary term in calculations [NBMean - unknown]}
-      \item{\code{Lambda}}{(diag(as.vector(tau % diag_M)) - diag(diag(tau % M % t(tau)))) / n, intermediary term in calculations [NBMean - unknown]}
+      \item{\code{Psi}}{variational expectation of C'Omega C, intermediary term in calculations [NBMean - unknown]}
+      \item{\code{Phi}}{variational correction term used in the Psi/ELBO computations [NBMean - unknown]}
+      \item{\code{Lambda}}{variational correction term used in the Sigma-hat update [NBMean - unknown]}
       \item{\code{ll_list}}{list of log-lik (elbo) values}
       \item{\code{warm_started}}{whether `EM_initialize()` should treat the model as
 already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)

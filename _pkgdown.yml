@@ -10,6 +10,7 @@ reference:
     - '`normal_block`'
     - '`NB_control`'
     - '`generate_normal_block_var_data`'
+    - '`generate_normal_block_mean_data`'
 
 - title: 'Model and data classes'
   desc: >
@@ -39,19 +40,19 @@ reference:
 
 - title: 'S3 methods'
   desc: >
-    Standard extractors and methods for a fitted model (any NormalBlockVarBase
+    Standard extractors and methods for a fitted model (any NormalBlockBase
     subclass) and for a collection of models (any NormalBlockVarCollection subclass)
   contents:
-    - '`coef.NormalBlockVarBase`'
-    - '`fitted.NormalBlockVarBase`'
+    - '`coef.NormalBlockBase`'
+    - '`fitted.NormalBlockBase`'
     - '`predict.NormalBlockVarBase`'
-    - '`sigma.NormalBlockVarBase`'
-    - '`print.NormalBlockVarBase`'
-    - '`summary.NormalBlockVarBase`'
-    - '`print.summary.NormalBlockVarBase`'
-    - '`plot.NormalBlockVarBase`'
-    - '`logLik.NormalBlockVarBase`'
-    - '`BIC.NormalBlockVarBase`'
+    - '`sigma.NormalBlockBase`'
+    - '`print.NormalBlockBase`'
+    - '`summary.NormalBlockBase`'
+    - '`print.summary.NormalBlockBase`'
+    - '`plot.NormalBlockBase`'
+    - '`logLik.NormalBlockBase`'
+    - '`BIC.NormalBlockBase`'
     - '`print.NormalBlockVarCollection`'
     - '`summary.NormalBlockVarCollection`'
     - '`print.summary.NormalBlockVarCollection`'
@@ -63,7 +64,9 @@ reference:
     Abstract base classes, low-level helpers and exploratory code kept for
     reference; not part of the user-facing API
   contents:
+    - '`NormalBlockBase`'
     - '`NormalBlockVarBase`'
+    - '`NormalBlockMeanBase`'
     - '`NormalBlockVarCollection`'
     - '`SelectionNClusters`'
     - '`get_model`'

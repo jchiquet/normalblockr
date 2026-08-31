@@ -88,9 +88,9 @@ NormalBlockBase <- R6::R6Class(
     #' @param alpha vector of groups probabilities [NBVar]
     #' @param M variational mean for posterior distribution of W [NBVar - unknown]
     #' @param S variational diagonal of variances for posterior distribution of W [NBVar - unknown]
-    #' @param Psi crossprod(tau, Omega) %% tau + diag(as.vector(crossprod(tau, diag_Sigma_inv))) - crossprod(tau, diag(diag_Sigma_inv, p)) %*% tau, intermediary term in calculations [NBMean - unknown]
-    #' @param Phi Diag(Tau' diag(Omega)) - tau' Diag(diag(Omega)) tau, intermediary term in calculations [NBMean - unknown]
-    #' @param Lambda (diag(as.vector(tau % diag_M)) - diag(diag(tau % M % t(tau)))) / n, intermediary term in calculations [NBMean - unknown]
+    #' @param Psi variational expectation of C'Omega C, intermediary term in calculations [NBMean - unknown]
+    #' @param Phi variational correction term used in the Psi/ELBO computations [NBMean - unknown]
+    #' @param Lambda variational correction term used in the Sigma-hat update [NBMean - unknown]
     #' @param ll_list  list of log-lik (elbo) values
     #' @param warm_started whether `EM_initialize()` should treat the model as
     #' already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)

@@ -37,8 +37,6 @@ generate_normal_block_mean_data(
 \item{alpha}{the q-size vector of group proportion. Default to rep(1/q, q)}
 
 \item{range_X}{A 2-size vector defining the range of the uniform distribution used to draw values in X, the regressor matrix. Default is c(0, 10)}
-
-\item{range_D}{A 2-size vector defining the range of the uniform distribution used to draw values in D, the diagonal matrix of variances of variables. Default is c(0.5, 1.5)}
 }
 \value{
 A named list with the following element
@@ -47,9 +45,8 @@ A named list with the following element
 - a list of model parameters, encompassing
    - B: matrix of regression coefficients
    - C: matrix of group membership
-   - D: diagonal matrix of variance of the variables
-   - Omega: precision matrix of the groups
-   - Sigma: covariance matrix of the groups
+   - Omega: precision matrix of the variables
+   - Sigma: covariance matrix of the variables
    - kappa: vector of ZI inflation probabilities (one per variable)
 }
 \description{
