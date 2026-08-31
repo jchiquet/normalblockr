@@ -100,12 +100,12 @@ public:
   const arma::mat& M() const { return M_; }
   const arma::vec& S() const { return S_; }
 
-  std::unique_ptr<NormalBlockVarBase> clone() const override {
+  std::unique_ptr<NormalBlockEMBase> clone() const override {
     return std::make_unique<NormalBlockVarUnknownClusters<NoisePolicy>>(*this);
   }
-  void restore_from(const NormalBlockVarBase& other) override {
-    copy_tracked_state_from(other);
+  void restore_from(const NormalBlockEMBase& other) override {
     const auto& o = static_cast<const NormalBlockVarUnknownClusters<NoisePolicy>&>(other);
+    copy_tracked_state_from(o);
     C_ = o.C_;
     alpha_ = o.alpha_;
     M_ = o.M_;

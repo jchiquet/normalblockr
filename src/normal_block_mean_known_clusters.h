@@ -29,11 +29,11 @@ public:
     NormalBlockMeanBase(data, C.n_cols, B0, Omega0, sparsity, sparsity_weights, accelerate),
     C_(C) {}
 
-  std::unique_ptr<NormalBlockMeanBase> clone() const override {
+  std::unique_ptr<NormalBlockEMBase> clone() const override {
     return std::make_unique<NormalBlockMeanKnownClusters>(*this);
   }
-  void restore_from(const NormalBlockMeanBase& other) override {
-    copy_tracked_state_from(other);
+  void restore_from(const NormalBlockEMBase& other) override {
+    copy_tracked_state_from(static_cast<const NormalBlockMeanKnownClusters&>(other));
   }
 
   double objective() const override {

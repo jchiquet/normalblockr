@@ -104,12 +104,12 @@ public:
   const arma::mat& Phi() const { return Phi_; }
   arma::mat Lambda() const { return arma::diagmat(lambda_); }
 
-  std::unique_ptr<NormalBlockMeanBase> clone() const override {
+  std::unique_ptr<NormalBlockEMBase> clone() const override {
     return std::make_unique<NormalBlockMeanUnknownClusters>(*this);
   }
-  void restore_from(const NormalBlockMeanBase& other) override {
-    copy_tracked_state_from(other);
+  void restore_from(const NormalBlockEMBase& other) override {
     const auto& o = static_cast<const NormalBlockMeanUnknownClusters&>(other);
+    copy_tracked_state_from(o);
     tau_ = o.tau_; alpha_ = o.alpha_; Psi_ = o.Psi_; lambda_ = o.lambda_; Phi_ = o.Phi_;
   }
 };

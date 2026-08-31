@@ -72,12 +72,12 @@ public:
   const arma::mat& Gamma() const { return Gamma_; }
   const arma::mat& Mu() const { return Mu_; }
 
-  std::unique_ptr<NormalBlockVarBase> clone() const override {
+  std::unique_ptr<NormalBlockEMBase> clone() const override {
     return std::make_unique<NormalBlockVarKnownClusters<NoisePolicy>>(*this);
   }
-  void restore_from(const NormalBlockVarBase& other) override {
-    copy_tracked_state_from(other);
+  void restore_from(const NormalBlockEMBase& other) override {
     const auto& o = static_cast<const NormalBlockVarKnownClusters<NoisePolicy>&>(other);
+    copy_tracked_state_from(o);
     Gamma_ = o.Gamma_;
     Mu_ = o.Mu_;
   }
