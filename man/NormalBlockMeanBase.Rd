@@ -35,6 +35,7 @@ structures the mean (mu_i = C B' X_i).
     \item \href{#method-NormalBlockMeanBase-candidates_split}{\code{NormalBlockMeanBase$candidates_split()}}
     \item \href{#method-NormalBlockMeanBase-candidates_merge}{\code{NormalBlockMeanBase$candidates_merge()}}
     \item \href{#method-NormalBlockMeanBase-merge}{\code{NormalBlockMeanBase$merge()}}
+    \item \href{#method-NormalBlockMeanBase-best_of_inits}{\code{NormalBlockMeanBase$best_of_inits()}}
     \item \href{#method-NormalBlockMeanBase-clone}{\code{NormalBlockMeanBase$clone()}}
   }
 }
@@ -200,6 +201,46 @@ should a copy be sent? Default FALSE (send a copy)}
   }
   \subsection{Returns}{
     A new [`NormalBlockMeanBase`] object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockMeanBase-best_of_inits"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-best_of_inits}{}}}
+\subsection{\code{NormalBlockMeanBase$best_of_inits()}}{
+  Try several clustering-initialization heuristics and
+keep the best-ELBO converged fit (see `NB_control(clustering_init = )`).
+Every candidate is first screened with a short `trial_niter` run, and
+only the `max_training` best-screened ones are fully retrained with
+`control`.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanBase$best_of_inits(
+  inits = c("kmeans", "ward2", "spectral"),
+  trial_niter = 10,
+  max_training = 2,
+  control = list(niter = 500, threshold = 1e-04, fixed_point_niter = 5)
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{inits}}{vector of clustering-heuristic names to try}
+      \item{\code{trial_niter}}{number of (V)EM iterations used to cheaply screen
+every candidate in `inits` before fully retraining the best few}
+      \item{\code{max_training}}{how many of the screened candidates (best
+`loglik` after `trial_niter` iterations) get fully retrained with
+`control`}
+      \item{\code{control}}{`optimize()` control list used for the final full
+retraining of the `max_training` best candidates}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a new, already-optimized [`NormalBlockMeanBase`] object. Does
+not mutate the current object; reassign the result
+(`model <- model$best_of_inits()`).
   }
 }
 

@@ -38,14 +38,23 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
     },
 
     get_heuristic_parameters = function(){
-      reg_res   <- private$multivariate_normal_inference()
-      Omega     <- private$get_Omega(reg_res$Sigma)
-      kmeans_init <- kmeans(t(reg_res$B), centers = self$q, nstart = 20)
-      tau         <- as_indicator(kmeans_init$cluster)
-      tau         <- check_one_boundary(check_zero_boundary(tau))
-      tau         <- tau / rowSums(tau)
-      B           <- private$heuristic_cluster_B_from_variable_B(reg_res$B,
-                                                                 tau)
+      reg_res <- private$multivariate_normal_inference()
+      Omega   <- private$get_Omega(reg_res$Sigma)
+      ## Cluster variables on their fitted mean trajectory X %*% B_j (n x p)
+      ## rather than on the raw per-variable coefficient B_j (d x 1): B_j
+      ## alone degenerates the shared cor()/cov()-based heuristics
+      ## (ward2/sbm/spectral) whenever d is small (even d = 1, common here,
+      ## makes cor() all-NA), while X %*% B_j has n rows like the residuals
+      ## Var models cluster on, and is the natural moment-based proxy for
+      ## "which variables would share a cluster mean" (mu_i = C B' X_i).
+      ## heuristic_clustering() returns a hard 0/1 indicator; soften it away
+      ## from the boundary since compute_loglik()'s entropy term (tau *
+      ## log(tau)) is evaluated on this initial tau before any tau_estimator()
+      ## update, and 0 * log(0) is NaN.
+      tau <- private$heuristic_clustering(self$data$X %*% reg_res$B)
+      tau <- check_one_boundary(check_zero_boundary(tau))
+      tau <- tau / rowSums(tau)
+      B   <- private$heuristic_cluster_B_from_variable_B(reg_res$B, tau)
       list(B = B, Omega = Omega, tau = tau)
     },
 

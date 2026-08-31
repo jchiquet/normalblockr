@@ -48,9 +48,7 @@ normal_block <- function(data,
   if (is.list(control$clustering_init)) stopifnot(length(control$clustering_init) == length(blocks))
   stopifnot(
     "clustering_init = 'best_of_inits' is not supported together with sparsity = TRUE (a sparsity path warm-starts a single clustering across all penalties)" =
-      !(uses_best_of_inits(control) && isTRUE(sparsity)),
-    "clustering_init = 'best_of_inits' is not yet implemented for mean-block models (model = 'mean')" =
-      !(uses_best_of_inits(control) && model == "mean")
+      !(uses_best_of_inits(control) && isTRUE(sparsity))
   )
 
   fit <- get_model(data, blocks, sparsity = sparsity,

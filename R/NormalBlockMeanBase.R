@@ -159,6 +159,43 @@ NormalBlockMeanBase <- R6::R6Class(
         new_NB$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
         return(new_NB)
       }
+    },
+
+    #' @description Try several clustering-initialization heuristics and
+    #' keep the best-ELBO converged fit (see `NB_control(clustering_init = )`).
+    #' Every candidate is first screened with a short `trial_niter` run, and
+    #' only the `max_training` best-screened ones are fully retrained with
+    #' `control`.
+    #' @param inits vector of clustering-heuristic names to try
+    #' @param trial_niter number of (V)EM iterations used to cheaply screen
+    #' every candidate in `inits` before fully retraining the best few
+    #' @param max_training how many of the screened candidates (best
+    #' `loglik` after `trial_niter` iterations) get fully retrained with
+    #' `control`
+    #' @param control `optimize()` control list used for the final full
+    #' retraining of the `max_training` best candidates
+    #' @return a new, already-optimized [`NormalBlockMeanBase`] object. Does
+    #' not mutate the current object; reassign the result
+    #' (`model <- model$best_of_inits()`).
+    best_of_inits = function(inits = c("kmeans", "ward2", "spectral"),
+                             trial_niter = 10, max_training = 2,
+                             control = list(niter = 500, threshold = 1e-4, fixed_point_niter = 5)) {
+      stopifnot(
+        "best_of_inits() requires (V)EM inference (not the heuristic-only mode, see NB_control(heuristic = ))" =
+          !private$approx,
+        "best_of_inits() only applies when the initial clustering is inferred by a heuristic (see NB_control(clustering_init = ))" =
+          !is.na(private$clustering_approx)
+      )
+      candidates <- map(inits, function(init) {
+        cand <- self$clone()
+        cand$update(clustering_init = init)
+        cand$optimize(list(niter = trial_niter, threshold = 1e-4, fixed_point_niter = 5), warn = FALSE)
+        cand
+      })
+      ibest <- order(map_dbl(candidates, "loglik"), decreasing = TRUE)[1:min(max_training, length(candidates))]
+      best_candidates <- candidates[ibest]
+      map(best_candidates, function(cand) cand$optimize(control, warn = FALSE))
+      best_candidates[[which.max(map_dbl(best_candidates, "loglik"))]]
     }
   ),
 
