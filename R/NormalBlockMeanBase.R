@@ -34,6 +34,131 @@ NormalBlockMeanBase <- R6::R6Class(
         weights <- control$sparsity_weights
       }
       private$weights <- weights
+    },
+
+    #' @description Seed this model's starting parameters from another,
+    #' already-optimized model with the same q, instead of the heuristic
+    #' clustering-derived values set at construction time. Used by
+    #' [split()]/[merge()].
+    #' @param other a [NormalBlockMeanBase] object, already optimized
+    #' @return Update the current object in place with `other`'s parameters
+    warm_start_from = function(other) {
+      stopifnot("warm_start_from() requires both models to have the same q" = self$q == other$q)
+      args <- other$model_par
+      args$C     <- other$var_par$tau
+      args$alpha <- colMeans(other$var_par$tau)
+      do.call(self$update, args)
+      private$warm_started <- TRUE
+      invisible(self)
+    },
+
+    #' @description Create a clone of the current [`NormalBlockMeanBase`]
+    #' object after splitting cluster `index`. Unlike the variance-block
+    #' family, Omega and the sparsity weights are p x p here and do not
+    #' depend on q, so they carry over unchanged; only C (tau) and B (one
+    #' column per cluster) are affected. Variables are split by their
+    #' current noise variance (1 / diag(Omega)) around its within-cluster
+    #' median -- the same criterion [NormalBlockVarBase]'s `split()` uses
+    #' via `dm1`, since `diag(Omega)` plays the same per-variable-precision
+    #' role here.
+    #' @param index index (integer) of the cluster to split
+    #' @param in_place should the split be applied to the object itself, or
+    #' should a copy be sent? Default FALSE (send a copy)
+    #' @return A new [`NormalBlockMeanBase`] object
+    split = function(index, in_place = FALSE) {
+      cl  <- self$clustering == index
+      var <- 1 / diag(private$Omega); var_median <- median(var[cl])
+      split1 <- (var > var_median) & cl; split2 <- (var <= var_median) & cl
+
+      new_C <- cbind(private$C, .Machine$double.eps)
+      new_C[split1, index] <- new_C[split1, index] - .Machine$double.eps
+      new_C[split2, self$q + 1] <- new_C[split2, index]
+      new_C[split2, index] <- .Machine$double.eps
+      new_C <- new_C / rowSums(new_C)
+
+      ## The new cluster starts as a copy of its parent's B column; the
+      ## next M-step differentiates the two since it is driven by C/tau,
+      ## which already differs between them (same rationale as
+      ## NormalBlockVarBase's split() duplicating M's column).
+      new_B <- cbind(private$B, private$B[, index])
+
+      if (in_place) {
+        self$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
+        return(invisible(self))
+      } else {
+        new_NB <- self$clone()
+        new_NB$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
+        return(invisible(new_NB))
+      }
+    },
+
+    #' @description generate and select a set of candidate models by
+    #' splitting the clusters of the current model
+    #' @param trial_niter number of (V)EM iterations used to cheaply score
+    #' each candidate before fully re-optimizing the best few
+    candidates_split = function(trial_niter = 5) {
+      candidates <- map((1:self$q)[self$cluster_sizes > 1], self$split)
+      ## keep candidates with at least 2 variables per cluster and a
+      ## genuine split (see NormalBlockVarBase's candidates_split() for why
+      ## this is compared against the number of currently *live* clusters
+      ## rather than self$q)
+      clustering_sizes <- map(candidates, "clustering") %>% map(table)
+      min_sizes  <- clustering_sizes %>% map_dbl(min)
+      n_clusters <- clustering_sizes %>% map_dbl(length)
+      n_live <- length(unique(self$clustering))
+      candidates <- candidates[min_sizes > 1 & n_clusters == n_live + 1]
+
+      for (i in seq_along(candidates))
+        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4, fixed_point_niter = 5), warn = FALSE)
+      candidates
+    },
+
+    #' @description generate and select a set of candidate models by
+    #' merging the clusters of the current model
+    #' @param max_candidates merge candidates are quadratic in q -- beyond
+    #' `max_candidates` pairs, only the most promising ones (smallest
+    #' distance between the two clusters' B columns, i.e. the most similar
+    #' mean profiles) are actually built and trial-optimized. Set to `Inf`
+    #' to always try every pair.
+    #' @param trial_niter see [candidates_split()]
+    candidates_merge = function(max_candidates = 30, trial_niter = 2) {
+      stopifnot("need at least two clusters to merge them" = self$q > 1)
+      pairs <- combn(self$q, 2, simplify = FALSE)
+      if (length(pairs) > max_candidates) {
+        dist <- map_dbl(pairs, function(ij) sum((private$B[, ij[1]] - private$B[, ij[2]])^2))
+        pairs <- pairs[order(dist)[1:max_candidates]]
+      }
+      candidates <- map(pairs, self$merge)
+      for (i in seq_along(candidates))
+        candidates[[i]]$optimize(list(niter = trial_niter, threshold = 1e-4, fixed_point_niter = 5), warn = FALSE)
+      candidates
+    },
+
+    #' @description Create a clone of the current [`NormalBlockMeanBase`]
+    #' object after merging clusters `indices`
+    #' @param indices indices (couple of integer) of the clusters to merge
+    #' @param in_place should the merge be applied to the object itself, or
+    #' should a copy be sent? Default FALSE (send a copy)
+    #' @return A new [`NormalBlockMeanBase`] object
+    merge = function(indices, in_place = FALSE) {
+      indices <- sort(indices)
+
+      ## drop = FALSE: merging q = 2 down to q = 1 would otherwise silently
+      ## drop these to a plain vector/scalar.
+      new_C <- private$C[, -indices[2], drop = FALSE]
+      new_C[, indices[1]] <- private$C[, indices[1]] + private$C[, indices[2]]
+
+      new_B <- private$B[, -indices[2], drop = FALSE]
+      new_B[, indices[1]] <- .5 * (private$B[, indices[1]] + private$B[, indices[2]])
+
+      if (in_place) {
+        self$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
+        return(self)
+      } else {
+        new_NB <- self$clone()
+        new_NB$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
+        return(new_NB)
+      }
     }
   ),
 

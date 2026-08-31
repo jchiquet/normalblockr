@@ -35,6 +35,11 @@ R6 class for a Normal-Block-Mean model with a known clustering.
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="candidates_merge"><a href='../../normalblockr/html/NormalBlockMeanBase.html#method-NormalBlockMeanBase-candidates_merge'><code>NormalBlockMeanBase$candidates_merge()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="candidates_split"><a href='../../normalblockr/html/NormalBlockMeanBase.html#method-NormalBlockMeanBase-candidates_split'><code>NormalBlockMeanBase$candidates_split()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="merge"><a href='../../normalblockr/html/NormalBlockMeanBase.html#method-NormalBlockMeanBase-merge'><code>NormalBlockMeanBase$merge()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="split"><a href='../../normalblockr/html/NormalBlockMeanBase.html#method-NormalBlockMeanBase-split'><code>NormalBlockMeanBase$split()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockMeanBase.html#method-NormalBlockMeanBase-warm_start_from'><code>NormalBlockMeanBase$warm_start_from()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}

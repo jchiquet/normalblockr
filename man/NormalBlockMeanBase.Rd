@@ -30,6 +30,11 @@ structures the mean (mu_i = C B' X_i).
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockMeanBase-initialize}{\code{NormalBlockMeanBase$new()}}
+    \item \href{#method-NormalBlockMeanBase-warm_start_from}{\code{NormalBlockMeanBase$warm_start_from()}}
+    \item \href{#method-NormalBlockMeanBase-split}{\code{NormalBlockMeanBase$split()}}
+    \item \href{#method-NormalBlockMeanBase-candidates_split}{\code{NormalBlockMeanBase$candidates_split()}}
+    \item \href{#method-NormalBlockMeanBase-candidates_merge}{\code{NormalBlockMeanBase$candidates_merge()}}
+    \item \href{#method-NormalBlockMeanBase-merge}{\code{NormalBlockMeanBase$merge()}}
     \item \href{#method-NormalBlockMeanBase-clone}{\code{NormalBlockMeanBase$clone()}}
   }
 }
@@ -62,6 +67,134 @@ structures the mean (mu_i = C B' X_i).
       \item{\code{q}}{number of block/cluster}
       \item{\code{sparsity}}{sparsity penalty on the network density}
       \item{\code{control}}{structured list of more specific parameters, to generate with NB_Mean_control}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NormalBlockMeanBase`] object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockMeanBase-warm_start_from"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-warm_start_from}{}}}
+\subsection{\code{NormalBlockMeanBase$warm_start_from()}}{
+  Seed this model's starting parameters from another,
+already-optimized model with the same q, instead of the heuristic
+clustering-derived values set at construction time. Used by
+[split()]/[merge()].
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanBase$warm_start_from(other)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{other}}{a [NormalBlockMeanBase] object, already optimized}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Update the current object in place with `other`'s parameters
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockMeanBase-split"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-split}{}}}
+\subsection{\code{NormalBlockMeanBase$split()}}{
+  Create a clone of the current [`NormalBlockMeanBase`]
+object after splitting cluster `index`. Unlike the variance-block
+family, Omega and the sparsity weights are p x p here and do not
+depend on q, so they carry over unchanged; only C (tau) and B (one
+column per cluster) are affected. Variables are split by their
+current noise variance (1 / diag(Omega)) around its within-cluster
+median -- the same criterion [NormalBlockVarBase]'s `split()` uses
+via `dm1`, since `diag(Omega)` plays the same per-variable-precision
+role here.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanBase$split(index, in_place = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{index}}{index (integer) of the cluster to split}
+      \item{\code{in_place}}{should the split be applied to the object itself, or
+should a copy be sent? Default FALSE (send a copy)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new [`NormalBlockMeanBase`] object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockMeanBase-candidates_split"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-candidates_split}{}}}
+\subsection{\code{NormalBlockMeanBase$candidates_split()}}{
+  generate and select a set of candidate models by
+splitting the clusters of the current model
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanBase$candidates_split(trial_niter = 5)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{trial_niter}}{number of (V)EM iterations used to cheaply score
+each candidate before fully re-optimizing the best few}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockMeanBase-candidates_merge"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-candidates_merge}{}}}
+\subsection{\code{NormalBlockMeanBase$candidates_merge()}}{
+  generate and select a set of candidate models by
+merging the clusters of the current model
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanBase$candidates_merge(max_candidates = 30, trial_niter = 2)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{max_candidates}}{merge candidates are quadratic in q -- beyond
+`max_candidates` pairs, only the most promising ones (smallest
+distance between the two clusters' B columns, i.e. the most similar
+mean profiles) are actually built and trial-optimized. Set to `Inf`
+to always try every pair.}
+      \item{\code{trial_niter}}{see [candidates_split()]}
+    }
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockMeanBase-merge"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-merge}{}}}
+\subsection{\code{NormalBlockMeanBase$merge()}}{
+  Create a clone of the current [`NormalBlockMeanBase`]
+object after merging clusters `indices`
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanBase$merge(indices, in_place = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{indices}}{indices (couple of integer) of the clusters to merge}
+      \item{\code{in_place}}{should the merge be applied to the object itself, or
+should a copy be sent? Default FALSE (send a copy)}
     }
     \if{html}{\out{</div>}}
   }

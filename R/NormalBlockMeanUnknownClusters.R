@@ -30,8 +30,11 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
     optim_initialize = function() {
-      # warm restart to integrate later
-      return(private$get_heuristic_parameters())
+      if (private$warm_started) {
+        list(B = private$B, Omega = private$Omega, tau = private$C)
+      } else {
+        private$get_heuristic_parameters()
+      }
     },
 
     get_heuristic_parameters = function(){
