@@ -51,7 +51,8 @@ Suggests:
     pheatmap,
     paletteer,
     ggthemes,
-    knitr
+    knitr,
+    RhpcBLASctl
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.1.0

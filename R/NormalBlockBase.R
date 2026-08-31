@@ -151,6 +151,15 @@ NormalBlockBase <- R6::R6Class(
                                        fixed_point_niter = 5), warn = TRUE) {
       private$niter_max  <- control$niter
       private$threshold  <- control$threshold
+      if (!is.null(control$blas_threads)) {
+        if (requireNamespace("RhpcBLASctl", quietly = TRUE)) {
+          old_threads <- RhpcBLASctl::blas_get_num_procs() # currently configured count, not core count
+          RhpcBLASctl::blas_set_num_threads(control$blas_threads)
+          on.exit(RhpcBLASctl::blas_set_num_threads(old_threads), add = TRUE)
+        } else {
+          warning("control$blas_threads is set but the RhpcBLASctl package is not installed; ignoring it.", call. = FALSE)
+        }
+      }
       optim_out <- private$optimizer(control)
       do.call(self$update, optim_out)
       if (warn) private$warn_if_not_converged()
