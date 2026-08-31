@@ -292,7 +292,9 @@ try every pair.}
 \if{html}{\out{<a id="method-NormalBlockBase-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockBase-predict}{}}}
 \subsection{\code{NormalBlockBase$predict()}}{
-  Predicts observations Y for new covariates X.
+  Predicts observations Y for new covariates X, in Y's
+original units (like `$fitted`, so that predicting on the training X
+reproduces it).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockBase$predict(new_X)}

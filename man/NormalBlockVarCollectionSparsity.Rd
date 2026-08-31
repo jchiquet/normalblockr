@@ -8,7 +8,7 @@ R6 class for a collection of normal-block models with a fixed clustering
 (blocks) and different sparsity levels.
 }
 \section{Super classes}{
-\code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{NormalBlockCollectionSparsity} -> \code{NormalBlockVarCollectionSparsity}
+\code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{\link[normalblockr:NormalBlockCollectionSparsity]{NormalBlockCollectionSparsity}} -> \code{NormalBlockVarCollectionSparsity}
 }
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
@@ -38,9 +38,9 @@ R6 class for a collection of normal-block models with a fixed clustering
 <ul>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
-  <li><code>NormalBlockCollectionSparsity$get_model()</code></li>
-  <li><code>NormalBlockCollectionSparsity$optimize()</code></li>
-  <li><code>NormalBlockCollectionSparsity$plot()</code></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="get_model"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-get_model'><code>NormalBlockCollectionSparsity$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-optimize'><code>NormalBlockCollectionSparsity$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="plot"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-plot'><code>NormalBlockCollectionSparsity$plot()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}

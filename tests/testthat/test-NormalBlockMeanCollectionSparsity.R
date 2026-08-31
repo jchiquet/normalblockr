@@ -47,3 +47,22 @@ test_that("mean-block models require n > p unless the penalty regularizes Omega"
   expect_no_error(
     normal_block(narrow, blocks = q, sparsity = TRUE, model = "mean", control = fast))
 })
+
+test_that("the mean-block objective is penalized, so $loglik is the plain ELBO", {
+  model <- normal_block(data, blocks = q, sparsity = 0.01, model = "mean", control = fast)
+  expect_gt(model$sparsity_term, 0)
+  ## $loglik adds the penalty back to the penalized trace, as for the
+  ## variance-block family: it must land above the penalized objective
+  expect_equal(model$loglik, tail(model$objective, 1) + model$sparsity_term)
+  expect_gt(model$loglik, tail(model$objective, 1))
+})
+
+test_that("q and sparsity can be crossed for mean-block models", {
+  coll <- normal_block(data, blocks = 2:3, sparsity = TRUE, model = "mean",
+                       control = NB_control(verbose = FALSE, n_sparsity_penalties = 3, niter = 15))
+  expect_s3_class(coll, "NormalBlockMeanCollectionClustersSparsity")
+  expect_equal(nrow(coll$criteria), 6)
+  expect_s3_class(coll$get_model(2), "NormalBlockMeanCollectionSparsity")
+  expect_s3_class(coll$get_best_model("BIC"), "NormalBlockMeanBase")
+  expect_s3_class(coll$plot("BIC"), "ggplot")
+})

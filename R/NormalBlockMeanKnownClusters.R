@@ -67,7 +67,18 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
       log_det_Omega <- as.numeric(determinant(Omega, logarithm = TRUE)$modulus)
       R <- self$data$Y - self$data$X %*% B %*% t(private$C)
       l <- - self$n * self$p * log(2 * pi) / 2 + self$n * log_det_Omega / 2 - sum((R %*% Omega) * R) / 2
+      ## penalized objective (see the C++ core): $loglik adds the penalty back
+      if (self$sparsity > 0) l <- l - self$sparsity * sum(abs(self$sparsity_weights * Omega))
       return(as.numeric(l))
+    },
+
+    ## Moment-based fit (NB_control(heuristic = TRUE)): the heuristic
+    ## initialization *is* the moment estimate, so there is nothing to iterate.
+    ## No likelihood is computed, hence no ll_list (see NormalBlockBase's
+    ## `loglik`, NA in this mode).
+    heuristic_optimize = function(control) {
+      private$niter <- 0
+      private$get_heuristic_parameters()
     },
 
     ## Runs the EM recursion via the Rcpp/Armadillo core (src/exports.cpp,

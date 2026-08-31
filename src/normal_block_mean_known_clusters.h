@@ -38,9 +38,11 @@ public:
 
   double objective() const override {
     arma::mat R = data_.Y - (data_.X * B_) * C_.t();
-    return -0.5 * data_.n * data_.p * std::log(2.0 * arma::datum::pi)
+    double l = -0.5 * data_.n * data_.p * std::log(2.0 * arma::datum::pi)
            + 0.5 * data_.n * arma::log_det_sympd(Omega_)
            - 0.5 * arma::accu(R % (R * Omega_));
+    if (sparsity_ > 0.0) l -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omega_));
+    return l;
   }
 };
 

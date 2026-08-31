@@ -128,8 +128,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // NormalBlockMeanUnknownClusters_fit
-Rcpp::List NormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::mat& X, arma::mat B0, arma::mat Omega0, arma::mat tau0, double sparsity, arma::mat sparsity_weights, int fixed_point_niter, int niter, double threshold, bool accelerate);
-RcppExport SEXP _normalblockr_NormalBlockMeanUnknownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP B0SEXP, SEXP Omega0SEXP, SEXP tau0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP fixed_point_niterSEXP, SEXP niterSEXP, SEXP thresholdSEXP, SEXP accelerateSEXP) {
+Rcpp::List NormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::mat& X, arma::mat B0, arma::mat Omega0, arma::mat tau0, double sparsity, arma::mat sparsity_weights, int fixed_point_niter, int niter, double threshold, bool accelerate, bool fixed_tau);
+RcppExport SEXP _normalblockr_NormalBlockMeanUnknownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP B0SEXP, SEXP Omega0SEXP, SEXP tau0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP fixed_point_niterSEXP, SEXP niterSEXP, SEXP thresholdSEXP, SEXP accelerateSEXP, SEXP fixed_tauSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -144,7 +144,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< bool >::type accelerate(accelerateSEXP);
-    rcpp_result_gen = Rcpp::wrap(NormalBlockMeanUnknownClusters_fit(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate));
+    Rcpp::traits::input_parameter< bool >::type fixed_tau(fixed_tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(NormalBlockMeanUnknownClusters_fit(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate, fixed_tau));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -155,7 +156,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_normalblockr_ZINormalBlockVarKnownClusters_fit", (DL_FUNC) &_normalblockr_ZINormalBlockVarKnownClusters_fit, 13},
     {"_normalblockr_ZINormalBlockVarUnknownClusters_fit", (DL_FUNC) &_normalblockr_ZINormalBlockVarUnknownClusters_fit, 17},
     {"_normalblockr_NormalBlockMeanKnownClusters_fit", (DL_FUNC) &_normalblockr_NormalBlockMeanKnownClusters_fit, 10},
-    {"_normalblockr_NormalBlockMeanUnknownClusters_fit", (DL_FUNC) &_normalblockr_NormalBlockMeanUnknownClusters_fit, 11},
+    {"_normalblockr_NormalBlockMeanUnknownClusters_fit", (DL_FUNC) &_normalblockr_NormalBlockMeanUnknownClusters_fit, 12},
     {NULL, NULL, 0}
 };
 

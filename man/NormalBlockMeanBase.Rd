@@ -30,6 +30,7 @@ structures the mean (mu_i = C B' X_i).
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockMeanBase-initialize}{\code{NormalBlockMeanBase$new()}}
+    \item \href{#method-NormalBlockMeanBase-predict}{\code{NormalBlockMeanBase$predict()}}
     \item \href{#method-NormalBlockMeanBase-warm_start_from}{\code{NormalBlockMeanBase$warm_start_from()}}
     \item \href{#method-NormalBlockMeanBase-split}{\code{NormalBlockMeanBase$split()}}
     \item \href{#method-NormalBlockMeanBase-merge}{\code{NormalBlockMeanBase$merge()}}
@@ -46,7 +47,6 @@ structures the mean (mu_i = C B' X_i).
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>NormalBlockBase$plot()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>NormalBlockBase$plot_loglik()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>NormalBlockBase$plot_network()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
 </ul>
@@ -73,6 +73,31 @@ structures the mean (mu_i = C B' X_i).
   }
   \subsection{Returns}{
     A new [`NormalBlockMeanBase`] object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockMeanBase-predict"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-predict}{}}}
+\subsection{\code{NormalBlockMeanBase$predict()}}{
+  Predicts observations Y for new covariates X, in Y's
+original units. The mean-block mean is mu_i = C B' X_i, so the
+cluster-level predictor has to be mapped back to the variables
+through C.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockMeanBase$predict(new_X)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{new_X}}{new set of covariates.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A n*p prediction matrix for new observations
   }
 }
 

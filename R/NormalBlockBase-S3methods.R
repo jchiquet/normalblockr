@@ -58,7 +58,7 @@ fitted.NormalBlockBase <- function(object, ...){
 #' @param ... not used, only here for S3 compatibility
 #' @return A n*p prediction matrix for new observations
 #' @export
-predict.NormalBlockVarBase <- function(object, new_X, ...){
+predict.NormalBlockBase <- function(object, new_X, ...){
   stopifnot(isNB(object))
   object$predict(new_X)
 }

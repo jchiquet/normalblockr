@@ -139,6 +139,8 @@ NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, spar
 #' lasso (glassoFast); 0 means an unpenalized inversion
 #' @param sparsity_weights p x p matrix of per-pair penalty weights
 #' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
+#' @param fixed_tau if TRUE, the variational membership probabilities are not
+#' re-estimated (useful for stability selection)
 #' @param niter maximum number of VEM iterations
 #' @param threshold convergence threshold on the ELBO increment
 #' @param accelerate whether to attempt the SQUAREM extrapolation on top of
@@ -146,7 +148,7 @@ NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, spar
 #' @return a list with the fitted parameters (B, Omega, C, alpha, Psi, Phi,
 #' Lambda), the ELBO trace and the number of iterations performed
 #' @noRd
-NormalBlockMeanUnknownClusters_fit <- function(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate = TRUE) {
-    .Call(`_normalblockr_NormalBlockMeanUnknownClusters_fit`, Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate)
+NormalBlockMeanUnknownClusters_fit <- function(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate = TRUE, fixed_tau = FALSE) {
+    .Call(`_normalblockr_NormalBlockMeanUnknownClusters_fit`, Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate, fixed_tau)
 }
 

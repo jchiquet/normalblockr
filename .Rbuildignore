@@ -19,3 +19,4 @@ Rplots.pdf
 \.DS_Store$
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
+^inst/normalblockmean$

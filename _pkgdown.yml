@@ -32,6 +32,7 @@ reference:
     - '`NormalBlockVarCollectionClustersSparsity`'
     - '`NormalBlockMeanCollectionClusters`'
     - '`NormalBlockMeanCollectionSparsity`'
+    - '`NormalBlockMeanCollectionClustersSparsity`'
 
 - title: 'Data sets'
   desc: ~
@@ -47,7 +48,7 @@ reference:
   contents:
     - '`coef.NormalBlockBase`'
     - '`fitted.NormalBlockBase`'
-    - '`predict.NormalBlockVarBase`'
+    - '`predict.NormalBlockBase`'
     - '`sigma.NormalBlockBase`'
     - '`print.NormalBlockBase`'
     - '`summary.NormalBlockBase`'
@@ -72,6 +73,7 @@ reference:
     - '`NormalBlockCollection`'
     - '`NormalBlockCollectionClusters`'
     - '`NormalBlockCollectionSparsity`'
+    - '`NormalBlockCollectionClustersSparsity`'
     - '`SelectionNClusters`'
     - '`get_model`'
     - '`isNB`'

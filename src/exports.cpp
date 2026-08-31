@@ -296,6 +296,8 @@ Rcpp::List NormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat&
 //' lasso (glassoFast); 0 means an unpenalized inversion
 //' @param sparsity_weights p x p matrix of per-pair penalty weights
 //' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
+//' @param fixed_tau if TRUE, the variational membership probabilities are not
+//' re-estimated (useful for stability selection)
 //' @param niter maximum number of VEM iterations
 //' @param threshold convergence threshold on the ELBO increment
 //' @param accelerate whether to attempt the SQUAREM extrapolation on top of
@@ -308,10 +310,11 @@ Rcpp::List NormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::ma
                                               arma::mat B0, arma::mat Omega0, arma::mat tau0,
                                               double sparsity, arma::mat sparsity_weights,
                                               int fixed_point_niter,
-                                              int niter, double threshold, bool accelerate = true) {
+                                              int niter, double threshold, bool accelerate = true,
+                                              bool fixed_tau = false) {
   NormalBlockData data(Y, X);
   norm_block_mean_unknown_clusters model(data, B0, Omega0, tau0, sparsity, sparsity_weights,
-                                         fixed_point_niter, accelerate);
+                                         fixed_point_niter, accelerate, fixed_tau);
   model.run_em(niter, threshold);
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),

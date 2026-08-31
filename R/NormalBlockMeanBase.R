@@ -46,6 +46,16 @@ NormalBlockMeanBase <- R6::R6Class(
       private$weights <- weights
     },
 
+    #' @description Predicts observations Y for new covariates X, in Y's
+    #' original units. The mean-block mean is mu_i = C B' X_i, so the
+    #' cluster-level predictor has to be mapped back to the variables
+    #' through C.
+    #' @param new_X new set of covariates.
+    #' @return A n*p prediction matrix for new observations
+    predict = function(new_X) {
+      private$rescale_to_original(new_X %*% private$B %*% t(private$C))
+    },
+
     #' @description Seed this model's starting parameters from another,
     #' already-optimized model with the same q, instead of the heuristic
     #' clustering-derived values set at construction time. Used by

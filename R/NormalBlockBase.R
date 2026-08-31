@@ -32,10 +32,11 @@ NormalBlockBase <- R6::R6Class(
       self$data <- data
       stopifnot("There cannot be more blocks than there are entities to cluster" = q <= ncol(self$data$Y))
 
-      ## pointer to the chosen optimization function
-      private$optimizer <- ifelse(control$heuristic,
-                                  private$heuristic_optimize,
-                                  private$EM_optimize)
+      ## pointer to the chosen optimization function (a plain if/else: ifelse()
+      ## is vectorized and mangles function objects)
+      private$optimizer <- if (control$heuristic) private$heuristic_optimize else private$EM_optimize
+      stopifnot("this model family does not implement NB_control(heuristic = TRUE)" =
+                  is.function(private$optimizer))
       private$approx <- control$heuristic
 
 
@@ -247,11 +248,13 @@ NormalBlockBase <- R6::R6Class(
       candidates
     },
 
-    #' @description Predicts observations Y for new covariates X.
+    #' @description Predicts observations Y for new covariates X, in Y's
+    #' original units (like `$fitted`, so that predicting on the training X
+    #' reproduces it).
     #' @param new_X new set of covariates.
     #' @return A n*p prediction matrix for new observations
     predict = function(new_X){
-      return(new_X %*% private$B)
+      private$rescale_to_original(new_X %*% private$B)
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

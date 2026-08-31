@@ -156,8 +156,19 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
            (self$n / 2) * as.numeric(determinant(Omega, logarithm = TRUE)$modulus) +
            sum(tau * outer(rep(1, self$p), log(alpha))) - sum(tau * log(tau)) -
            0.5 * (sum(R_bar * (R_bar %*% Omega)) + sum(diag(Phi %*% M)))
+      ## penalized objective (see the C++ core): $loglik adds the penalty back
+      if (self$sparsity > 0) l <- l - self$sparsity * sum(abs(self$sparsity_weights * Omega))
 
       return(as.numeric(l))
+    },
+
+    ## Moment-based fit (NB_control(heuristic = TRUE)); see the known-clusters
+    ## class for why this is just the heuristic initialization.
+    heuristic_optimize = function(control) {
+      private$niter <- 0
+      init <- private$get_heuristic_parameters()
+      list(B = init$B, Omega = init$Omega, C = init$tau,
+           alpha = private$alpha_estimator(init$tau))
     },
 
     ## Runs the VEM recursion via the Rcpp/Armadillo core (src/exports.cpp,
@@ -169,6 +180,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
         B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
         fixed_point_niter = control$fixed_point_niter,
+        fixed_tau = isTRUE(control$fixed_tau),
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter
@@ -200,8 +212,10 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
         alpha  <- private$alpha_estimator(tau)
 
         # VE-step
-        for (k in 1:control$fixed_point_niter) {
-          tau <- private$tau_estimator(Omega, B, alpha, tau)
+        if (!isTRUE(control$fixed_tau)) {
+          for (k in 1:control$fixed_point_niter) {
+            tau <- private$tau_estimator(Omega, B, alpha, tau)
+          }
         }
 
 

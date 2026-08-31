@@ -17,6 +17,7 @@ class NormalBlockMeanUnknownClusters : public NormalBlockMeanBase {
   arma::mat Psi_;      // q x q, E_Q[C' Omega C], set by the M-step
   arma::vec lambda_;   // p, diagonal of the M-step's variational correction
   int fixed_point_niter_;
+  bool fixed_tau_;     // if true, tau is left at its initial value (stability selection)
   mutable arma::mat Phi_; // Psi - tau' Omega tau, refreshed by objective()
 
   // Psi = tau' Omega tau + Diag(tau' w) - tau' Diag(w) tau, w = diag(Omega),
@@ -51,6 +52,7 @@ class NormalBlockMeanUnknownClusters : public NormalBlockMeanBase {
   // maximizes the ELBO exactly (its quadratic terms cancel), so a sweep can't
   // decrease it -- updating all rows at once can cycle.
   void E_step() override {
+    if (fixed_tau_) return;
     arma::mat M = (B_.t() * data_.XtX) * B_;
     arma::rowvec diag_M = M.diag().t();
     arma::vec w = Omega_.diag();
@@ -77,25 +79,31 @@ public:
                                  const arma::mat& B0, const arma::mat& Omega0,
                                  const arma::mat& tau0,
                                  double sparsity, const arma::mat& sparsity_weights,
-                                 int fixed_point_niter, bool accelerate) :
+                                 int fixed_point_niter, bool accelerate, bool fixed_tau) :
     NormalBlockMeanBase(data, tau0.n_cols, B0, Omega0, sparsity, sparsity_weights, accelerate),
-    tau_(tau0), fixed_point_niter_(fixed_point_niter) {
+    tau_(tau0), fixed_point_niter_(fixed_point_niter), fixed_tau_(fixed_tau) {
     alpha_  = arma::vectorise(arma::mean(tau_, 0));
     Psi_    = psi_from(Omega_, tau_);
     lambda_ = lambda_from(B_, tau_);
   }
 
-  // ELBO of eq. (2.33). Phi is recomputed here rather than reused from the
+  // Penalized ELBO of eq. (2.33). Phi is recomputed here rather than reused from the
   // M-step: it depends on the Omega/tau that step has just updated.
   double objective() const override {
     Phi_ = psi_from(Omega_, tau_) - (tau_.t() * Omega_) * tau_;
     arma::mat M = (B_.t() * data_.XtX) * B_;
     arma::mat R_bar = data_.Y - (data_.X * B_) * tau_.t();
 
-    return -0.5 * data_.n * data_.p * std::log(2.0 * arma::datum::pi)
+    double J = -0.5 * data_.n * data_.p * std::log(2.0 * arma::datum::pi)
            + 0.5 * data_.n * arma::log_det_sympd(Omega_)
            + arma::accu(tau_ * arma::log(alpha_)) - arma::accu(tau_ % arma::log(tau_))
            - 0.5 * (arma::accu(R_bar % (R_bar * Omega_)) + arma::trace(Phi_ * M));
+    // penalized objective, as in the variance-block core: the R side adds the
+    // penalty back through the `sparsity_term` active binding, so $loglik
+    // stays the plain ELBO. Unlike there, no trace correction is needed: this
+    // ELBO is written out in full and never assumes Omega = Sigma^-1.
+    if (sparsity_ > 0.0) J -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omega_));
+    return J;
   }
 
   const arma::mat& tau() const { return tau_; }

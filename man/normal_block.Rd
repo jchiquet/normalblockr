@@ -30,11 +30,12 @@ generated with NB_control().}
 \item{model}{which model family to fit: "var" (the default) structures the
 clustering in the latent covariance (see [NormalBlockVarBase]), "mean"
 structures it in the mean (mu_i = C B' X_i, see [NormalBlockMeanBase]).
-The mean-block family supports a sparsity path
-([NormalBlockMeanCollectionSparsity]) and a collection over several
-`blocks` values ([NormalBlockMeanCollectionClusters], each q fit
-independently, unlike the variance-block family's SBM-path shortcut), but
-not yet zero-inflation nor crossing both axes at once.}
+The mean-block family covers the same collections as the variance-block
+one ([NormalBlockMeanCollectionClusters],
+[NormalBlockMeanCollectionSparsity] and their crossing,
+[NormalBlockMeanCollectionClustersSparsity]) -- each q simply fit
+independently, without the variance-block family's SBM-path shortcut --
+but does not support zero-inflation yet.}
 }
 \value{
 an R6 object with one of the model classes (or a collection of model objects).
