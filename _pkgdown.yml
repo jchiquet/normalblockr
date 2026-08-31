@@ -30,6 +30,7 @@ reference:
     - '`NormalBlockVarCollectionClusters`'
     - '`NormalBlockVarCollectionSparsity`'
     - '`NormalBlockVarCollectionClustersSparsity`'
+    - '`NormalBlockMeanCollectionClusters`'
 
 - title: 'Data sets'
   desc: ~

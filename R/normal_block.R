@@ -10,9 +10,11 @@
 #' @param model which model family to fit: "var" (the default) structures the
 #' clustering in the latent covariance (see [NormalBlockVarBase]), "mean"
 #' structures it in the mean (mu_i = C B' X_i, see [NormalBlockMeanBase]).
-#' The mean-block family does not yet support zero-inflation, a sparsity
-#' path (`sparsity = TRUE`) or a collection over several `blocks` values --
-#' fit one q at a time.
+#' The mean-block family does not yet support zero-inflation or a sparsity
+#' path (`sparsity = TRUE`); a collection over several `blocks` values
+#' (`q_list`) is supported, but -- unlike the variance-block family -- each
+#' q is fit independently (no SBM-path shortcut, see
+#' [NormalBlockMeanCollectionClusters]).
 #' @param control a list-like structure for detailed control on parameters should be
 #' generated with NB_control().
 #' @return an R6 object with one of the model classes (or a collection of model objects).
@@ -183,9 +185,12 @@ get_model <- function(data,
   if (model == "mean") {
     stopifnot("zero-inflation is not implemented for mean-block models (model = 'mean')" = !zero_inflation)
     stopifnot(
-      "a sparsity path (sparsity = TRUE) or a collection over several q values is not yet implemented for mean-block models (model = 'mean') -- fit one q at a time" =
-        !is_collection
+      "a sparsity path (sparsity = TRUE) is not yet implemented for mean-block models (model = 'mean')" =
+        !changing_sparsity
     )
+    if (unknown_q_list) {
+      return(NormalBlockMeanCollectionClusters$new(data, blocks, sparsity = sparsity, control = control))
+    }
     class_name <- if (is.matrix(blocks)) "NormalBlockMeanKnownClusters" else "NormalBlockMeanUnknownClusters"
     myClass <- eval(str2lang(class_name))
     return(myClass$new(data, blocks, sparsity, control = control))
