@@ -5,6 +5,11 @@
 #' Mean-Block Model with Known Clustering
 #'
 #' R6 class for a Normal-Block-Mean model with a known clustering.
+#' @examples
+#' ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex$Y, ex$X)
+#' model <- normal_block(data, blocks = ex$parameters$C, model = "mean")
+#' model$plot()
 #' @export
 NormalBlockMeanKnownClusters <- R6::R6Class(
   classname = "NormalBlockMeanKnownClusters",

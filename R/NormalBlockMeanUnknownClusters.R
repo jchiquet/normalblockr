@@ -6,6 +6,11 @@
 #'
 #' R6 class for a Normal-Block-Mean model with a fixed number of clusters
 #' (but unknown clustering), inferred by variational EM.
+#' @examples
+#' ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex$Y, ex$X)
+#' model <- normal_block(data, blocks = 3, model = "mean")
+#' model$clustering
 #' @export
 NormalBlockMeanUnknownClusters <- R6::R6Class(
   classname = "NormalBlockMeanUnknownClusters",
@@ -40,18 +45,13 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
     get_heuristic_parameters = function(){
       reg_res <- private$multivariate_normal_inference()
       Omega   <- private$get_Omega(reg_res$Sigma)
-      ## Cluster variables on their fitted mean trajectory X %*% B_j (n x p)
-      ## rather than on the raw per-variable coefficient B_j (d x 1): B_j
-      ## alone degenerates the shared cor()/cov()-based heuristics
-      ## (ward2/sbm/spectral) whenever d is small (even d = 1, common here,
-      ## makes cor() all-NA), while X %*% B_j has n rows like the residuals
-      ## Var models cluster on, and is the natural moment-based proxy for
-      ## "which variables would share a cluster mean" (mu_i = C B' X_i).
-      ## heuristic_clustering() returns a hard 0/1 indicator; soften it away
-      ## from the boundary since compute_loglik()'s entropy term (tau *
-      ## log(tau)) is evaluated on this initial tau before any tau_estimator()
-      ## update, and 0 * log(0) is NaN.
+      ## cluster on the fitted mean trajectory X %*% B_j (n x p): unlike the
+      ## raw coefficient B_j (d x 1), it has enough rows for the shared
+      ## cor()/cov()-based heuristics (ward2/sbm/spectral) even when d is small
       tau <- private$heuristic_clustering(self$data$X %*% reg_res$B)
+      ## soften the hard indicator away from 0/1: compute_loglik()'s entropy
+      ## term (tau * log(tau)) is evaluated on this tau before any
+      ## tau_estimator() update, and 0 * log(0) is NaN
       tau <- check_one_boundary(check_zero_boundary(tau))
       tau <- tau / rowSums(tau)
       B   <- private$heuristic_cluster_B_from_variable_B(reg_res$B, tau)
@@ -116,11 +116,9 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
       return(colMeans(tau))
     },
 
-    ## Sequential (Gauss-Seidel) sweep over the rows of tau. With the other
-    ## rows held fixed, the ELBO is linear in tau_j up to its entropy -- the
-    ## quadratic contributions of Tr(R Omega R') and Tr(Phi M) cancel exactly --
-    ## so the softmax below maximizes it exactly and a sweep can never decrease
-    ## the ELBO. Updating every row at once has no such guarantee and can cycle.
+    ## Sequential (Gauss-Seidel) sweep over the rows of tau: each row's
+    ## softmax maximizes the ELBO exactly (its quadratic terms cancel),
+    ## so a sweep can't decrease it -- updating all rows at once can cycle.
     tau_estimator = function(Omega = private$Omega,
                              B     = private$B,
                              alpha = private$alpha,

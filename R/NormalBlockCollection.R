@@ -1,5 +1,5 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-##  CLASS NormalBlockVarCollection #################################
+##  CLASS NormalBlockCollection #################################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #' Base Class for a Collection of Normal-Block Models
@@ -17,8 +17,8 @@
 #' # NormalBlockVarCollectionSparsity, NormalBlockVarCollectionClustersSparsity)
 #' # are actually created and fitted.
 #' @keywords internal
-NormalBlockVarCollection <- R6::R6Class(
-  classname = "NormalBlockVarCollection",
+NormalBlockCollection <- R6::R6Class(
+  classname = "NormalBlockCollection",
 
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
@@ -70,8 +70,8 @@ NormalBlockVarCollection <- R6::R6Class(
 
     #' @description Summarize the collection: model type, full criteria
     #' table, and the range of q/sparsity explored.
-    #' @return An object of class `summary.NormalBlockVarCollection`,
-    #' printed with a dedicated [print.summary.NormalBlockVarCollection()]
+    #' @return An object of class `summary.NormalBlockCollection`,
+    #' printed with a dedicated [print.summary.NormalBlockCollection()]
     #' method.
     summary = function() {
       crit <- self$criteria
@@ -81,7 +81,7 @@ NormalBlockVarCollection <- R6::R6Class(
         q_range        = if (length(unique(crit$q)) > 1) range(crit$q) else unique(crit$q),
         sparsity_range = if (length(unique(crit$sparsity)) > 1) range(crit$sparsity) else unique(crit$sparsity)
       )
-      class(res) <- "summary.NormalBlockVarCollection"
+      class(res) <- "summary.NormalBlockCollection"
       res
     }
   ),

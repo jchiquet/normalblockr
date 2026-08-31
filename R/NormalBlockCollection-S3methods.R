@@ -1,16 +1,16 @@
 ## =========================================================================================
 ##
-## PUBLIC S3 METHODS FOR NormalBlockVarCollection
+## PUBLIC S3 METHODS FOR NormalBlockCollection
 ##
 ## =========================================================================================
 
-isNBcollection <- function(object) inherits(object, "NormalBlockVarCollection")
+isNBcollection <- function(object) inherits(object, "NormalBlockCollection")
 
 #' @title Extract Log-Likelihood of a Collection of Normal-Block Models
 #' @description Returns the log-likelihood of every model in a collection of
 #' normal-block models (see [NormalBlockVarCollectionClusters],
 #' [NormalBlockVarCollectionSparsity], [NormalBlockVarCollectionClustersSparsity]).
-#' @param object An object inheriting from NormalBlockVarCollection.
+#' @param object An object inheriting from NormalBlockCollection.
 #' @param ... not used, only here for S3 compatibility
 #' @return A numeric vector of log-likelihood values, one per model in the collection.
 #' @importFrom stats logLik
@@ -20,7 +20,7 @@ isNBcollection <- function(object) inherits(object, "NormalBlockVarCollection")
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' models <- normal_block(data, blocks = 2:5, control = NB_control(verbose = FALSE))
 #' logLik(models)
-logLik.NormalBlockVarCollection <- function(object, ...) {
+logLik.NormalBlockCollection <- function(object, ...) {
   stopifnot(isNBcollection(object))
   object$criteria$loglik
 }
@@ -28,7 +28,7 @@ logLik.NormalBlockVarCollection <- function(object, ...) {
 #' @title Bayesian Information Criterion for a Collection of Normal-Block Models
 #' @description Returns the (variational) BIC of every model in a collection
 #' of normal-block models.
-#' @param object An object inheriting from NormalBlockVarCollection.
+#' @param object An object inheriting from NormalBlockCollection.
 #' @param ... not used, only here for S3 compatibility
 #' @return A numeric vector of BIC values, one per model in the collection.
 #' @importFrom stats BIC
@@ -38,7 +38,7 @@ logLik.NormalBlockVarCollection <- function(object, ...) {
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' models <- normal_block(data, blocks = 2:5, control = NB_control(verbose = FALSE))
 #' BIC(models)
-BIC.NormalBlockVarCollection <- function(object, ...) {
+BIC.NormalBlockCollection <- function(object, ...) {
   stopifnot(isNBcollection(object))
   object$criteria$BIC
 }
@@ -46,8 +46,8 @@ BIC.NormalBlockVarCollection <- function(object, ...) {
 #' @title Print a Collection of Normal-Block Models
 #' @description Print a short summary of a collection of normal-block
 #' models: model type and the range of q/sparsity explored. See
-#' [summary.NormalBlockVarCollection()] for the full criteria table.
-#' @param x An object inheriting from NormalBlockVarCollection.
+#' [summary.NormalBlockCollection()] for the full criteria table.
+#' @param x An object inheriting from NormalBlockCollection.
 #' @param ... not used, only here for S3 compatibility
 #' @return Invisibly returns `x`.
 #' @export
@@ -56,7 +56,7 @@ BIC.NormalBlockVarCollection <- function(object, ...) {
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' models <- normal_block(data, blocks = 2:5, control = NB_control(verbose = FALSE))
 #' print(models)
-print.NormalBlockVarCollection <- function(x, ...) {
+print.NormalBlockCollection <- function(x, ...) {
   stopifnot(isNBcollection(x))
   x$print()
   invisible(x)
@@ -65,30 +65,30 @@ print.NormalBlockVarCollection <- function(x, ...) {
 #' @title Summarize a Collection of Normal-Block Models
 #' @description Summarizes a collection of normal-block models: model type,
 #' the full criteria table, and the range of q/sparsity explored.
-#' @param object An object inheriting from NormalBlockVarCollection.
+#' @param object An object inheriting from NormalBlockCollection.
 #' @param ... not used, only here for S3 compatibility
-#' @return An object of class `summary.NormalBlockVarCollection` (a list
+#' @return An object of class `summary.NormalBlockCollection` (a list
 #' with the collection's `who_am_I`, `criteria`, `q_range` and
 #' `sparsity_range`), printed with a dedicated
-#' [print.summary.NormalBlockVarCollection()] method.
+#' [print.summary.NormalBlockCollection()] method.
 #' @export
 #' @examples
 #' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' models <- normal_block(data, blocks = 2:5, control = NB_control(verbose = FALSE))
 #' summary(models)
-summary.NormalBlockVarCollection <- function(object, ...) {
+summary.NormalBlockCollection <- function(object, ...) {
   stopifnot(isNBcollection(object))
   object$summary()
 }
 
 #' @title Print a Collection Summary
-#' @description Print method for objects returned by [summary.NormalBlockVarCollection()].
-#' @param x An object of class `summary.NormalBlockVarCollection`.
+#' @description Print method for objects returned by [summary.NormalBlockCollection()].
+#' @param x An object of class `summary.NormalBlockCollection`.
 #' @param ... not used, only here for S3 compatibility
 #' @return Invisibly returns `x`.
 #' @export
-print.summary.NormalBlockVarCollection <- function(x, ...) {
+print.summary.NormalBlockCollection <- function(x, ...) {
   cat("A", x$who_am_I, "\n")
   cat("===========================================================================\n")
   if (length(x$q_range) > 1)

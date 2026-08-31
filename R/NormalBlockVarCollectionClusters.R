@@ -10,7 +10,7 @@
 #' @export
 NormalBlockVarCollectionClusters <- R6::R6Class(
   classname = "NormalBlockVarCollectionClusters",
-  inherit   = NormalBlockVarCollection,
+  inherit   = NormalBlockCollection,
 
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----

@@ -10,7 +10,7 @@
 #' @export
 NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
   classname = "NormalBlockVarCollectionClustersSparsity",
-  inherit   = NormalBlockVarCollection,
+  inherit   = NormalBlockCollection,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

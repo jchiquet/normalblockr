@@ -7,15 +7,22 @@
 R6 class for a collection of mean-block models ([NormalBlockMeanBase])
 with different numbers of clusters (q). Inherits its scaffolding
 (`print()`/`summary()`/`plot()`/`optimize()`, the `criteria` table) from
-[NormalBlockVarCollection], which despite its name is generic across
+[NormalBlockCollection], which despite its name is generic across
 both model families -- unlike [NormalBlockVarCollectionClusters], there
 is no SBM-path shortcut here: the shared clustering-heuristic registry's
 cov()/correlation-based methods are ill-suited to the mean-block family
 (see [NormalBlockMeanBase]'s own default), so each q is fit
 independently.
 }
+\examples{
+ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+models <- normal_block(data, blocks = 2:5, model = "mean")
+models$plot(c("BIC", "ICL"))
+models$get_best_model()
+}
 \section{Super class}{
-\code{\link[normalblockr:NormalBlockVarCollection]{NormalBlockVarCollection}} -> \code{NormalBlockMeanCollectionClusters}
+\code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{NormalBlockMeanCollectionClusters}
 }
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
@@ -40,8 +47,8 @@ independently.
 }
 \if{html}{\out{<details open><summary>Inherited methods</summary>
 <ul>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-print'><code>NormalBlockVarCollection$print()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-summary'><code>NormalBlockVarCollection$summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}

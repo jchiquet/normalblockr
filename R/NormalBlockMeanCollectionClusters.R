@@ -7,16 +7,22 @@
 #' R6 class for a collection of mean-block models ([NormalBlockMeanBase])
 #' with different numbers of clusters (q). Inherits its scaffolding
 #' (`print()`/`summary()`/`plot()`/`optimize()`, the `criteria` table) from
-#' [NormalBlockVarCollection], which despite its name is generic across
+#' [NormalBlockCollection], which despite its name is generic across
 #' both model families -- unlike [NormalBlockVarCollectionClusters], there
 #' is no SBM-path shortcut here: the shared clustering-heuristic registry's
 #' cov()/correlation-based methods are ill-suited to the mean-block family
 #' (see [NormalBlockMeanBase]'s own default), so each q is fit
 #' independently.
+#' @examples
+#' ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex$Y, ex$X)
+#' models <- normal_block(data, blocks = 2:5, model = "mean")
+#' models$plot(c("BIC", "ICL"))
+#' models$get_best_model()
 #' @export
 NormalBlockMeanCollectionClusters <- R6::R6Class(
   classname = "NormalBlockMeanCollectionClusters",
-  inherit   = NormalBlockVarCollection,
+  inherit   = NormalBlockCollection,
 
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----

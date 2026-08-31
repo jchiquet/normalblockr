@@ -17,7 +17,7 @@ reference:
     R6 classes returned by normal_block(). NormalBlockData wraps the
     responses and design matrix; NormalBlockVar*Clusters (optionally
     ZI-prefixed) are single fitted models, known- or unknown-clustering;
-    NormalBlockVarCollection* are collections of models explored over a
+    NormalBlockCollection* are collections of models explored over a
     range of q and/or sparsity penalties.
   contents:
     - '`NormalBlockData`'
@@ -42,7 +42,7 @@ reference:
 - title: 'S3 methods'
   desc: >
     Standard extractors and methods for a fitted model (any NormalBlockBase
-    subclass) and for a collection of models (any NormalBlockVarCollection subclass)
+    subclass) and for a collection of models (any NormalBlockCollection subclass)
   contents:
     - '`coef.NormalBlockBase`'
     - '`fitted.NormalBlockBase`'
@@ -54,11 +54,11 @@ reference:
     - '`plot.NormalBlockBase`'
     - '`logLik.NormalBlockBase`'
     - '`BIC.NormalBlockBase`'
-    - '`print.NormalBlockVarCollection`'
-    - '`summary.NormalBlockVarCollection`'
-    - '`print.summary.NormalBlockVarCollection`'
-    - '`logLik.NormalBlockVarCollection`'
-    - '`BIC.NormalBlockVarCollection`'
+    - '`print.NormalBlockCollection`'
+    - '`summary.NormalBlockCollection`'
+    - '`print.summary.NormalBlockCollection`'
+    - '`logLik.NormalBlockCollection`'
+    - '`BIC.NormalBlockCollection`'
 
 - title: 'Internal'
   desc: >
@@ -68,7 +68,7 @@ reference:
     - '`NormalBlockBase`'
     - '`NormalBlockVarBase`'
     - '`NormalBlockMeanBase`'
-    - '`NormalBlockVarCollection`'
+    - '`NormalBlockCollection`'
     - '`SelectionNClusters`'
     - '`get_model`'
     - '`isNB`'

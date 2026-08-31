@@ -8,7 +8,7 @@ R6 class for a collection of normal-block models with a fixed clustering
 (blocks) and different sparsity levels.
 }
 \section{Super class}{
-\code{\link[normalblockr:NormalBlockVarCollection]{NormalBlockVarCollection}} -> \code{NormalBlockVarCollectionSparsity}
+\code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{NormalBlockVarCollectionSparsity}
 }
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
@@ -52,8 +52,8 @@ R6 class for a collection of normal-block models with a fixed clustering
 }
 \if{html}{\out{<details open><summary>Inherited methods</summary>
 <ul>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-print'><code>NormalBlockVarCollection$print()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-summary'><code>NormalBlockVarCollection$summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
@@ -94,7 +94,7 @@ R6 class for a collection of normal-block models with a fixed clustering
 each one (after the first) from the previous, adjacent penalty's
 converged parameters (see [NormalBlockVarBase]'s `warm_start_from()`)
 instead of re-deriving everything from the heuristic clustering, the
-way the generic [NormalBlockVarCollection] `optimize()` would. `blocks`
+way the generic [NormalBlockCollection] `optimize()` would. `blocks`
 (hence q) is fixed across the whole path, only the sparsity penalty
 changes, so the warm start is always between models of matching shape.
   \subsection{Usage}{

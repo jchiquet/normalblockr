@@ -25,13 +25,7 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @param control structured list of more specific parameters, to generate with NB_Mean_control
     #' @return A new [`NormalBlockMeanBase`] object
     initialize = function(data, q, sparsity = 0, control = NB_control()) {
-      ## NB_control()'s clustering_init default is NULL, resolved here to
-      ## "kmeans": clustering is done on each variable's fitted mean
-      ## trajectory X %*% B_j (get_heuristic_parameters(), in the concrete
-      ## subclasses); benchmarked against "ward2" on simulated data, kmeans
-      ## consistently lands in a better basin (see best_of_inits() and the
-      ## commit history for the numbers), so it is the more sensible default
-      ## here even though "ward2" remains the variance-block family's.
+      ## family default (benchmarked better than "ward2" here)
       if (is.null(control$clustering_init)) control$clustering_init <- "kmeans"
       super$initialize(data, q, sparsity, control)
       ## penalty mask
@@ -84,10 +78,7 @@ NormalBlockMeanBase <- R6::R6Class(
       new_C[split2, index] <- .Machine$double.eps
       new_C <- new_C / rowSums(new_C)
 
-      ## The new cluster starts as a copy of its parent's B column; the
-      ## next M-step differentiates the two since it is driven by C/tau,
-      ## which already differs between them (same rationale as
-      ## NormalBlockVarBase's split() duplicating M's column).
+      ## the next M-step differentiates the duplicated column via C/tau
       new_B <- cbind(private$B, private$B[, index])
 
       if (in_place) {
@@ -106,10 +97,7 @@ NormalBlockMeanBase <- R6::R6Class(
     #' each candidate before fully re-optimizing the best few
     candidates_split = function(trial_niter = 5) {
       candidates <- map((1:self$q)[self$cluster_sizes > 1], self$split)
-      ## keep candidates with at least 2 variables per cluster and a
-      ## genuine split (see NormalBlockVarBase's candidates_split() for why
-      ## this is compared against the number of currently *live* clusters
-      ## rather than self$q)
+      ## keep candidates with a genuine 2-way split (vs. currently live clusters)
       clustering_sizes <- map(candidates, "clustering") %>% map(table)
       min_sizes  <- clustering_sizes %>% map_dbl(min)
       n_clusters <- clustering_sizes %>% map_dbl(length)

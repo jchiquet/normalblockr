@@ -10,7 +10,7 @@
 #' @export
 NormalBlockVarCollectionSparsity <- R6::R6Class(
   classname = "NormalBlockVarCollectionSparsity",
-  inherit   = NormalBlockVarCollection,
+  inherit   = NormalBlockCollection,
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,7 +70,7 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
     #' each one (after the first) from the previous, adjacent penalty's
     #' converged parameters (see [NormalBlockVarBase]'s `warm_start_from()`)
     #' instead of re-deriving everything from the heuristic clustering, the
-    #' way the generic [NormalBlockVarCollection] `optimize()` would. `blocks`
+    #' way the generic [NormalBlockCollection] `optimize()` would. `blocks`
     #' (hence q) is fixed across the whole path, only the sparsity penalty
     #' changes, so the warm start is always between models of matching shape.
     #' @param control optimization parameters (niter and threshold)
