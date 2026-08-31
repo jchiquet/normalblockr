@@ -77,8 +77,8 @@ public:
                                  const arma::mat& B0, const arma::mat& Omega0,
                                  const arma::mat& tau0,
                                  double sparsity, const arma::mat& sparsity_weights,
-                                 int fixed_point_niter) :
-    NormalBlockMeanBase(data, tau0.n_cols, B0, Omega0, sparsity, sparsity_weights),
+                                 int fixed_point_niter, bool accelerate) :
+    NormalBlockMeanBase(data, tau0.n_cols, B0, Omega0, sparsity, sparsity_weights, accelerate),
     tau_(tau0), fixed_point_niter_(fixed_point_niter) {
     alpha_  = arma::vectorise(arma::mean(tau_, 0));
     Psi_    = psi_from(Omega_, tau_);
@@ -103,6 +103,15 @@ public:
   const arma::mat& Psi() const { return Psi_; }
   const arma::mat& Phi() const { return Phi_; }
   arma::mat Lambda() const { return arma::diagmat(lambda_); }
+
+  std::unique_ptr<NormalBlockMeanBase> clone() const override {
+    return std::make_unique<NormalBlockMeanUnknownClusters>(*this);
+  }
+  void restore_from(const NormalBlockMeanBase& other) override {
+    copy_tracked_state_from(other);
+    const auto& o = static_cast<const NormalBlockMeanUnknownClusters&>(other);
+    tau_ = o.tau_; alpha_ = o.alpha_; Psi_ = o.Psi_; lambda_ = o.lambda_; Phi_ = o.Phi_;
+  }
 };
 
 #endif // NORMALBLOCKR_NORMAL_BLOCK_MEAN_UNKNOWN_CLUSTERS_H

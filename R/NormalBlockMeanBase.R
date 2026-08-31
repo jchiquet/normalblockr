@@ -27,6 +27,14 @@ NormalBlockMeanBase <- R6::R6Class(
     initialize = function(data, q, sparsity = 0, control = NB_control()) {
       ## family default (benchmarked better than "ward2" here)
       if (is.null(control$clustering_init)) control$clustering_init <- "kmeans"
+      ## Sigma is p x p and estimated from n residuals: singular as soon as
+      ## n <= p, which would only surface as a cryptic chol() failure. The
+      ## graphical lasso regularizes it, hence the sparsity exemption.
+      if (!isTRUE(sparsity > 0) && data$n <= data$p)
+        stop("mean-block models estimate a full p x p covariance from n observations, ",
+             "so they need n > p (here n = ", data$n, ", p = ", data$p,
+             "). Use sparsity > 0 to regularize it through the graphical lasso, ",
+             "or reduce the number of variables.", call. = FALSE)
       super$initialize(data, q, sparsity, control)
       ## penalty mask
       private$sparsity_ <- sparsity

@@ -24,9 +24,17 @@ class NormalBlockMeanKnownClusters : public NormalBlockMeanBase {
 public:
   NormalBlockMeanKnownClusters(const NormalBlockData& data, const arma::mat& C,
                                const arma::mat& B0, const arma::mat& Omega0,
-                               double sparsity, const arma::mat& sparsity_weights) :
-    NormalBlockMeanBase(data, C.n_cols, B0, Omega0, sparsity, sparsity_weights),
+                               double sparsity, const arma::mat& sparsity_weights,
+                               bool accelerate) :
+    NormalBlockMeanBase(data, C.n_cols, B0, Omega0, sparsity, sparsity_weights, accelerate),
     C_(C) {}
+
+  std::unique_ptr<NormalBlockMeanBase> clone() const override {
+    return std::make_unique<NormalBlockMeanKnownClusters>(*this);
+  }
+  void restore_from(const NormalBlockMeanBase& other) override {
+    copy_tracked_state_from(other);
+  }
 
   double objective() const override {
     arma::mat R = data_.Y - (data_.X * B_) * C_.t();

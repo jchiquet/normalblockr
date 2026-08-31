@@ -20,6 +20,11 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ## inversion) and penalized (sparsity > 0, graphical lasso via glassoFast,
 ## called back from C++, see src/omega_estimation.h).
 ##
+## The comparison runs with accelerate = FALSE: the SQUAREM extrapolation
+## the C++ core applies by default deliberately changes the trajectory (it is
+## checked separately below), so only the plain recursion can be compared
+## trace-for-trace.
+##
 ## Both recursions are driven through a fresh model object each time so that
 ## private$optim_initialize() returns the same starting point: the clustering
 ## is passed explicitly (rather than re-derived by a randomized heuristic) for
@@ -38,7 +43,7 @@ test_that("NormalBlockMeanKnownClusters_fit matches the R recursion (unpenalized
     res <- NormalBlockMeanKnownClusters_fit(
       Y = data$Y, X = data$X, C = C, B0 = init$B, Omega0 = init$Omega,
       sparsity = sparsity, sparsity_weights = model$sparsity_weights,
-      niter = niter, threshold = threshold)
+      niter = niter, threshold = threshold, accelerate = FALSE)
 
     expect_equal(res$B,     ref$B,     tolerance = 1e-8)
     expect_equal(res$Omega, ref$Omega, tolerance = 1e-8)
@@ -62,7 +67,8 @@ test_that("NormalBlockMeanUnknownClusters_fit matches the R recursion (unpenaliz
     res <- NormalBlockMeanUnknownClusters_fit(
       Y = data$Y, X = data$X, B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
       sparsity = sparsity, sparsity_weights = model_R$sparsity_weights,
-      fixed_point_niter = fixed_point_niter, niter = niter, threshold = threshold)
+      fixed_point_niter = fixed_point_niter, niter = niter, threshold = threshold,
+      accelerate = FALSE)
 
     expect_equal(res$B,      ref$B,      tolerance = 1e-8)
     expect_equal(res$Omega,  ref$Omega,  tolerance = 1e-8)
@@ -80,4 +86,23 @@ test_that("the ELBO trace of the C++ core is non-decreasing", {
   model <- NormalBlockMeanUnknownClusters$new(data, q, control = NB_control(verbose = FALSE))
   model$optimize(control = NB_control(verbose = FALSE))
   expect_true(all(diff(model$objective) >= -1e-6))
+})
+
+test_that("the SQUAREM extrapolation reaches at least the plain recursion's ELBO", {
+  data <- NormalBlockData$new(Y, X)
+  ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C))
+  init <- NormalBlockMeanUnknownClusters$new(data, q, control = ctrl
+            )$.__enclos_env__$private$optim_initialize()
+
+  fit <- function(accelerate) {
+    NormalBlockMeanUnknownClusters_fit(
+      Y = data$Y, X = data$X, B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
+      sparsity = 0, sparsity_weights = matrix(1, ncol(Y), ncol(Y)) - diag(ncol(Y)),
+      fixed_point_niter = 5, niter = 50, threshold = 1e-6, accelerate = accelerate)
+  }
+  plain <- fit(FALSE)
+  accel <- fit(TRUE)
+
+  expect_gte(tail(accel$objective, 1), tail(plain$objective, 1) - 1e-6)
+  expect_true(all(diff(accel$objective) >= -1e-6)) # still monotone
 })

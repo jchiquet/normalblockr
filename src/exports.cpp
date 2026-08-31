@@ -260,6 +260,8 @@ Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::m
 //' @param sparsity_weights p x p matrix of per-pair penalty weights
 //' @param niter maximum number of EM iterations
 //' @param threshold convergence threshold on the objective increment
+//' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+//' plain EM (ignored when sparsity > 0)
 //' @return a list with the fitted parameters (B, Omega), the log-likelihood
 //' trace and the number of iterations performed
 //' @noRd
@@ -267,9 +269,9 @@ Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::m
 Rcpp::List NormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& C,
                                             arma::mat B0, arma::mat Omega0,
                                             double sparsity, arma::mat sparsity_weights,
-                                            int niter, double threshold) {
+                                            int niter, double threshold, bool accelerate = true) {
   NormalBlockData data(Y, X);
-  norm_block_mean_known_clusters model(data, C, B0, Omega0, sparsity, sparsity_weights);
+  norm_block_mean_known_clusters model(data, C, B0, Omega0, sparsity, sparsity_weights, accelerate);
   model.run_em(niter, threshold);
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),
@@ -296,6 +298,8 @@ Rcpp::List NormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat&
 //' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
 //' @param niter maximum number of VEM iterations
 //' @param threshold convergence threshold on the ELBO increment
+//' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+//' plain VEM (ignored when sparsity > 0)
 //' @return a list with the fitted parameters (B, Omega, C, alpha, Psi, Phi,
 //' Lambda), the ELBO trace and the number of iterations performed
 //' @noRd
@@ -304,10 +308,10 @@ Rcpp::List NormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::ma
                                               arma::mat B0, arma::mat Omega0, arma::mat tau0,
                                               double sparsity, arma::mat sparsity_weights,
                                               int fixed_point_niter,
-                                              int niter, double threshold) {
+                                              int niter, double threshold, bool accelerate = true) {
   NormalBlockData data(Y, X);
   norm_block_mean_unknown_clusters model(data, B0, Omega0, tau0, sparsity, sparsity_weights,
-                                         fixed_point_niter);
+                                         fixed_point_niter, accelerate);
   model.run_em(niter, threshold);
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),

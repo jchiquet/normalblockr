@@ -115,11 +115,13 @@ ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B
 #' @param sparsity_weights p x p matrix of per-pair penalty weights
 #' @param niter maximum number of EM iterations
 #' @param threshold convergence threshold on the objective increment
+#' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+#' plain EM (ignored when sparsity > 0)
 #' @return a list with the fitted parameters (B, Omega), the log-likelihood
 #' trace and the number of iterations performed
 #' @noRd
-NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, sparsity_weights, niter, threshold) {
-    .Call(`_normalblockr_NormalBlockMeanKnownClusters_fit`, Y, X, C, B0, Omega0, sparsity, sparsity_weights, niter, threshold)
+NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, sparsity_weights, niter, threshold, accelerate = TRUE) {
+    .Call(`_normalblockr_NormalBlockMeanKnownClusters_fit`, Y, X, C, B0, Omega0, sparsity, sparsity_weights, niter, threshold, accelerate)
 }
 
 #' Fit a mean-block model with unknown clusters (Rcpp/Armadillo core, VEM)
@@ -139,10 +141,12 @@ NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, spar
 #' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
 #' @param niter maximum number of VEM iterations
 #' @param threshold convergence threshold on the ELBO increment
+#' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+#' plain VEM (ignored when sparsity > 0)
 #' @return a list with the fitted parameters (B, Omega, C, alpha, Psi, Phi,
 #' Lambda), the ELBO trace and the number of iterations performed
 #' @noRd
-NormalBlockMeanUnknownClusters_fit <- function(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold) {
-    .Call(`_normalblockr_NormalBlockMeanUnknownClusters_fit`, Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold)
+NormalBlockMeanUnknownClusters_fit <- function(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate = TRUE) {
+    .Call(`_normalblockr_NormalBlockMeanUnknownClusters_fit`, Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate)
 }
 
