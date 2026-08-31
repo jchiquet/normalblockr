@@ -10,11 +10,11 @@
 #' @param model which model family to fit: "var" (the default) structures the
 #' clustering in the latent covariance (see [NormalBlockVarBase]), "mean"
 #' structures it in the mean (mu_i = C B' X_i, see [NormalBlockMeanBase]).
-#' The mean-block family does not yet support zero-inflation or a sparsity
-#' path (`sparsity = TRUE`); a collection over several `blocks` values
-#' (`q_list`) is supported, but -- unlike the variance-block family -- each
-#' q is fit independently (no SBM-path shortcut, see
-#' [NormalBlockMeanCollectionClusters]).
+#' The mean-block family supports a sparsity path
+#' ([NormalBlockMeanCollectionSparsity]) and a collection over several
+#' `blocks` values ([NormalBlockMeanCollectionClusters], each q fit
+#' independently, unlike the variance-block family's SBM-path shortcut), but
+#' not yet zero-inflation nor crossing both axes at once.
 #' @param control a list-like structure for detailed control on parameters should be
 #' generated with NB_control().
 #' @return an R6 object with one of the model classes (or a collection of model objects).
@@ -197,9 +197,12 @@ get_model <- function(data,
   if (model == "mean") {
     stopifnot("zero-inflation is not implemented for mean-block models (model = 'mean')" = !zero_inflation)
     stopifnot(
-      "a sparsity path (sparsity = TRUE) is not yet implemented for mean-block models (model = 'mean')" =
-        !changing_sparsity
+      "crossing a sparsity path with a range of q values is not yet implemented for mean-block models (model = 'mean') -- vary one at a time" =
+        !(changing_sparsity && unknown_q_list)
     )
+    if (changing_sparsity) {
+      return(NormalBlockMeanCollectionSparsity$new(data, blocks, control = control))
+    }
     if (unknown_q_list) {
       return(NormalBlockMeanCollectionClusters$new(data, blocks, sparsity = sparsity, control = control))
     }

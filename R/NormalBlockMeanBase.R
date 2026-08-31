@@ -55,8 +55,12 @@ NormalBlockMeanBase <- R6::R6Class(
     warm_start_from = function(other) {
       stopifnot("warm_start_from() requires both models to have the same q" = self$q == other$q)
       args <- other$model_par
-      args$C     <- other$var_par$tau
-      args$alpha <- colMeans(other$var_par$tau)
+      ## var_par only exists on the unknown-clusters side; a known clustering
+      ## is fixed and must not be carried over
+      if (!is.null(other$var_par)) {
+        args$C     <- other$var_par$tau
+        args$alpha <- colMeans(other$var_par$tau)
+      }
       do.call(self$update, args)
       private$warm_started <- TRUE
       invisible(self)

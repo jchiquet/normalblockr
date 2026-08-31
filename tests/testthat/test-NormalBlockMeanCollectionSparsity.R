@@ -1,0 +1,49 @@
+###############################################################################
+###############################################################################
+## Use pre-save testdata (seed are hard to handle in testhat)
+testdata <- readRDS("testdata/testdata_normal_mean_block.RDS")
+Y <- testdata$Y
+X <- testdata$X
+C <- testdata$parameters$C ; q <- ncol(C)
+
+fast <- NB_control(verbose = FALSE, n_sparsity_penalties = 5, niter = 20)
+
+###############################################################################
+###############################################################################
+data <- NormalBlockData$new(Y, X)
+
+test_that("mean-block sparsity path sparsifies Omega monotonically", {
+  coll <- normal_block(data, blocks = q, sparsity = TRUE, model = "mean", control = fast)
+
+  expect_s3_class(coll, "NormalBlockMeanCollectionSparsity")
+  expect_length(coll$models, 5)
+  expect_true(all(diff(coll$sparsity) < 0))       # decreasing penalties
+  expect_true(all(diff(coll$criteria$n_edges) >= 0)) # denser as the penalty drops
+  expect_equal(coll$criteria$n_edges[1], 0)       # the largest penalty empties the network
+})
+
+test_that("a known clustering is accepted along the sparsity path", {
+  coll <- normal_block(data, blocks = C, sparsity = TRUE, model = "mean", control = fast)
+  expect_equal(coll$q, q)
+  expect_true(all(sapply(coll$models, function(m) inherits(m, "NormalBlockMeanKnownClusters"))))
+})
+
+test_that("get_best_model()/plot() work on the mean-block sparsity path", {
+  coll <- normal_block(data, blocks = q, sparsity = TRUE, model = "mean", control = fast)
+  for (crit in c("BIC", "EBIC", "ICL")) {
+    best <- coll$get_best_model(crit)
+    expect_s3_class(best, "NormalBlockMeanUnknownClusters")
+    expect_equal(best[[crit]], min(coll$criteria[[crit]]))
+  }
+  expect_s3_class(coll$plot(c("BIC", "EBIC")), "ggplot")
+  expect_message(coll$get_model(-1), "closest penalty")
+})
+
+test_that("mean-block models require n > p unless the penalty regularizes Omega", {
+  narrow <- NormalBlockData$new(Y[1:(ncol(Y) - 2), , drop = FALSE],
+                                X[1:(ncol(Y) - 2), , drop = FALSE])
+  expect_error(normal_block(narrow, blocks = q, model = "mean", control = fast),
+               "need n > p", fixed = TRUE)
+  expect_no_error(
+    normal_block(narrow, blocks = q, sparsity = TRUE, model = "mean", control = fast))
+})
