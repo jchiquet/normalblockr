@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <memory>
+#include <string>
 #include "normal_block_data.h"
 #include "normal_block_em_base.h"
 #include "omega_estimation.h"
@@ -29,6 +30,7 @@ protected:
   double sparsity_;
   arma::mat sparsity_weights_; // p x p
   bool accelerate_;
+  std::string cov_structure_;  // "full", "diagonal" or "spherical"
 
   virtual void M_step() = 0;
   virtual void E_step() = 0; // no-op for known clusterings
@@ -36,6 +38,38 @@ protected:
 
   arma::mat estimate_omega(const arma::mat& Sigma_hat) const {
     return nb_omega::estimate(Sigma_hat, sparsity_, sparsity_weights_);
+  }
+
+  // Omega-specific algebra, specialized when Omega is known to be diagonal:
+  // the dense p x p products below then collapse to column scalings.
+  bool omega_is_diagonal() const { return cov_structure_ != "full"; }
+
+  double log_det_omega() const {
+    return omega_is_diagonal() ? arma::accu(arma::log(Omega_.diag()))
+                               : arma::log_det_sympd(Omega_);
+  }
+
+  arma::mat rmult_omega(const arma::mat& M) const { // M * Omega
+    if (!omega_is_diagonal()) return M * Omega_;
+    arma::mat out = M;
+    out.each_row() %= Omega_.diag().t();
+    return out;
+  }
+
+  // Precision matrix from the M-step residuals and the variational correction
+  // (a p-vector, empty for a known clustering). "diagonal"/"spherical" never
+  // form the p x p cross-product: only its diagonal is needed, which is also
+  // what frees them from the n > p requirement of the full covariance.
+  arma::mat omega_from_residuals(const arma::mat& R_bar, const arma::vec& lambda) const {
+    if (cov_structure_ == "full") {
+      arma::mat Sigma = R_bar.t() * R_bar / data_.n;
+      if (!lambda.is_empty()) Sigma += arma::diagmat(lambda);
+      return estimate_omega(Sigma);
+    }
+    arma::vec s = arma::vectorise(arma::sum(arma::square(R_bar), 0)) / data_.n;
+    if (!lambda.is_empty()) s += lambda;
+    if (cov_structure_ == "spherical") s.fill(arma::mean(s));
+    return arma::diagmat(1.0 / s);
   }
 
   // As in the variance-block family, sparsity excludes the acceleration; the
@@ -53,9 +87,10 @@ public:
   NormalBlockMeanBase(const NormalBlockData& data, int q,
                       const arma::mat& B0, const arma::mat& Omega0,
                       double sparsity, const arma::mat& sparsity_weights,
-                      bool accelerate) :
+                      bool accelerate, const std::string& cov_structure) :
     data_(data), q_(q), B_(B0), Omega_(Omega0),
-    sparsity_(sparsity), sparsity_weights_(sparsity_weights), accelerate_(accelerate) {}
+    sparsity_(sparsity), sparsity_weights_(sparsity_weights), accelerate_(accelerate),
+    cov_structure_(cov_structure) {}
 
   virtual ~NormalBlockMeanBase() = default;
 
@@ -87,6 +122,7 @@ protected:
     arma::uword nB = B_.n_elem;
     if (!p.is_finite()) return false;
     arma::mat Omega_cand = arma::reshape(p.subvec(nB, p.n_elem - 1), Omega_.n_rows, Omega_.n_cols);
+    if (cov_structure_ != "full") return arma::all(Omega_cand.diag() > 0.0);
     arma::mat R;
     return arma::chol(R, arma::symmatu(Omega_cand));
   }

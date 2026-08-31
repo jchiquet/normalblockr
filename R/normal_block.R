@@ -106,7 +106,14 @@ normal_block <- function(data,
 #' heuristics' rationale, why no single one dominates, and how this interacts
 #' with `refine` (below).
 #' @param verbose telling if information should be printed during optimization
-#' @param noise_covariance variance can be variable specific ("diagonal", the default) or common ("spherical")
+#' @param noise_covariance shape of the residual covariance. Variance-block
+#' models accept "diagonal" (variable-specific) or "spherical" (common);
+#' mean-block models, whose Sigma is the full p x p residual covariance, also
+#' accept "full". Default `NULL`, resolved per model family at fit time:
+#' "diagonal" for variance-block models, "full" for mean-block ones. The
+#' mean-block "diagonal"/"spherical" variants need no matrix inversion, hence
+#' no `n > p` requirement, but leave no off-diagonal coefficient for the
+#' graphical lasso to penalize (`sparsity > 0` is rejected with them).
 #' @param heuristic whether to use the heuristic approach (moment-based, no (V)EM
 #' recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no
 #' likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
@@ -140,12 +147,16 @@ NB_control <- function(
     clustering_init      = NULL,
     verbose              = TRUE,
     heuristic            = FALSE,
-    noise_covariance     = c("diagonal", "spherical"),
+    noise_covariance     = NULL,
     refine               = FALSE,
     blas_threads         = NULL) {
 
   if (!is.null(sparsity_weights))
     stopifnot(all(is.matrix(sparsity_weights), isSymmetric(sparsity_weights)))
+  if (!is.null(noise_covariance))
+    stopifnot("noise_covariance must be one of 'diagonal', 'spherical' or (mean-block models only) 'full'" =
+                length(noise_covariance) == 1 &&
+                noise_covariance %in% c("diagonal", "spherical", "full"))
   if (is.character(clustering_init) && length(clustering_init) == 1) {
     stopifnot("clustering_init, when given as a single string, must name a known heuristic ('kmeans', 'ward2', 'sbm' or 'spectral'), or be 'best_of_inits' -- otherwise pass an actual clustering (a vector of labels, a p x q indicator matrix, or a list of either for a collection over several q values)" =
                 clustering_init %in% c("kmeans", "ward2", "sbm", "spectral", "best_of_inits"))
@@ -162,7 +173,7 @@ NB_control <- function(
                  clustering_init      = clustering_init      ,
                  verbose              = verbose              ,
                  heuristic            = heuristic            ,
-                 noise_covariance     = match.arg(noise_covariance),
+                 noise_covariance     = noise_covariance     ,
                  refine               = refine               ,
                  blas_threads         = blas_threads         ))
 }

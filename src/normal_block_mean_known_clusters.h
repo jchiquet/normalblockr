@@ -16,7 +16,7 @@ class NormalBlockMeanKnownClusters : public NormalBlockMeanBase {
     arma::mat CtOC = (C_.t() * Omega_) * C_;
     B_ = (((data_.XtXm1 * data_.XtY) * Omega_) * C_) * arma::inv(CtOC);
     arma::mat R = data_.Y - (data_.X * B_) * C_.t();
-    Omega_ = estimate_omega(R.t() * R / data_.n);
+    Omega_ = omega_from_residuals(R, arma::vec());
   }
 
   void E_step() override {}
@@ -25,8 +25,9 @@ public:
   NormalBlockMeanKnownClusters(const NormalBlockData& data, const arma::mat& C,
                                const arma::mat& B0, const arma::mat& Omega0,
                                double sparsity, const arma::mat& sparsity_weights,
-                               bool accelerate) :
-    NormalBlockMeanBase(data, C.n_cols, B0, Omega0, sparsity, sparsity_weights, accelerate),
+                               bool accelerate, const std::string& cov_structure) :
+    NormalBlockMeanBase(data, C.n_cols, B0, Omega0, sparsity, sparsity_weights, accelerate,
+                        cov_structure),
     C_(C) {}
 
   std::unique_ptr<NormalBlockEMBase> clone() const override {
@@ -39,8 +40,8 @@ public:
   double objective() const override {
     arma::mat R = data_.Y - (data_.X * B_) * C_.t();
     double l = -0.5 * data_.n * data_.p * std::log(2.0 * arma::datum::pi)
-           + 0.5 * data_.n * arma::log_det_sympd(Omega_)
-           - 0.5 * arma::accu(R % (R * Omega_));
+           + 0.5 * data_.n * log_det_omega()
+           - 0.5 * arma::accu(R % rmult_omega(R));
     if (sparsity_ > 0.0) l -= sparsity_ * arma::accu(arma::abs(sparsity_weights_ % Omega_));
     return l;
   }

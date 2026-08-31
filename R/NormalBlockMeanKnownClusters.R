@@ -46,7 +46,7 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
 
     get_heuristic_parameters = function(){
       reg_res   <- private$multivariate_normal_inference()
-      Omega     <- private$get_Omega(reg_res$Sigma)
+      Omega     <- private$omega_from_sigma(reg_res$Sigma)
       B         <- private$heuristic_cluster_B_from_variable_B(reg_res$B,
                                                                private$C)
       list(B = B, Omega = Omega)
@@ -89,6 +89,7 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
         Y = self$data$Y, X = self$data$X, C = private$C,
         B0 = init$B, Omega0 = init$Omega,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
+        noise_covariance = private$res_covariance,
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter
@@ -106,7 +107,7 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
       for(i in 1:control$niter){
         B     <- private$B_estimator(Omega)
         Sigma <- private$Sigma_estimator(B)
-        Omega <- private$get_Omega(Sigma)
+        Omega <- private$omega_from_sigma(Sigma)
 
         ll_current <- private$compute_loglik(B, Omega)
         ll_list     <- c(ll_list, ll_current)

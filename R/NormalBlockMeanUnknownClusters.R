@@ -44,7 +44,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
 
     get_heuristic_parameters = function(){
       reg_res <- private$multivariate_normal_inference()
-      Omega   <- private$get_Omega(reg_res$Sigma)
+      Omega   <- private$omega_from_sigma(reg_res$Sigma)
       ## cluster on the fitted mean trajectory X %*% B_j (n x p): unlike the
       ## raw coefficient B_j (d x 1), it has enough rows for the shared
       ## cor()/cov()-based heuristics (ward2/sbm/spectral) even when d is small
@@ -179,6 +179,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
         Y = self$data$Y, X = self$data$X,
         B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
+        noise_covariance = private$res_covariance,
         fixed_point_niter = control$fixed_point_niter,
         fixed_tau = isTRUE(control$fixed_tau),
         niter = control$niter, threshold = control$threshold
@@ -208,7 +209,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
         B      <- private$B_estimator(Omega, tau, Psi)
         Lambda <- private$Lambda_estimator(B, tau)
         Sigma  <- private$Sigma_estimator(Omega, B, tau, Lambda)
-        Omega  <- private$get_Omega(Sigma)
+        Omega  <- private$omega_from_sigma(Sigma)
         alpha  <- private$alpha_estimator(tau)
 
         # VE-step

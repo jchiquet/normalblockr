@@ -16,7 +16,7 @@ NB_control(
   clustering_init = NULL,
   verbose = TRUE,
   heuristic = FALSE,
-  noise_covariance = c("diagonal", "spherical"),
+  noise_covariance = NULL,
   refine = FALSE,
   blas_threads = NULL
 )
@@ -65,7 +65,14 @@ recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no
 likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`
 are all `NA` on the resulting model.}
 
-\item{noise_covariance}{variance can be variable specific ("diagonal", the default) or common ("spherical")}
+\item{noise_covariance}{shape of the residual covariance. Variance-block
+models accept "diagonal" (variable-specific) or "spherical" (common);
+mean-block models, whose Sigma is the full p x p residual covariance, also
+accept "full". Default `NULL`, resolved per model family at fit time:
+"diagonal" for variance-block models, "full" for mean-block ones. The
+mean-block "diagonal"/"spherical" variants need no matrix inversion, hence
+no `n > p` requirement, but leave no off-diagonal coefficient for the
+graphical lasso to penalize (`sparsity > 0` is rejected with them).}
 
 \item{refine}{for [NormalBlockVarCollectionClusters] only: whether
 `optimize()` should automatically call `refine()` afterwards. Default

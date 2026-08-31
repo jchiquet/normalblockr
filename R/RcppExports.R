@@ -113,6 +113,7 @@ ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B
 #' @param sparsity sparsity penalty applied to Omega through the graphical
 #' lasso (glassoFast); 0 means an unpenalized inversion
 #' @param sparsity_weights p x p matrix of per-pair penalty weights
+#' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
 #' @param niter maximum number of EM iterations
 #' @param threshold convergence threshold on the objective increment
 #' @param accelerate whether to attempt the SQUAREM extrapolation on top of
@@ -120,8 +121,8 @@ ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B
 #' @return a list with the fitted parameters (B, Omega), the log-likelihood
 #' trace and the number of iterations performed
 #' @noRd
-NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, sparsity_weights, niter, threshold, accelerate = TRUE) {
-    .Call(`_normalblockr_NormalBlockMeanKnownClusters_fit`, Y, X, C, B0, Omega0, sparsity, sparsity_weights, niter, threshold, accelerate)
+NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold, accelerate = TRUE) {
+    .Call(`_normalblockr_NormalBlockMeanKnownClusters_fit`, Y, X, C, B0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold, accelerate)
 }
 
 #' Fit a mean-block model with unknown clusters (Rcpp/Armadillo core, VEM)
@@ -138,6 +139,7 @@ NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, spar
 #' @param sparsity sparsity penalty applied to Omega through the graphical
 #' lasso (glassoFast); 0 means an unpenalized inversion
 #' @param sparsity_weights p x p matrix of per-pair penalty weights
+#' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
 #' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
 #' @param fixed_tau if TRUE, the variational membership probabilities are not
 #' re-estimated (useful for stability selection)
@@ -148,7 +150,7 @@ NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, spar
 #' @return a list with the fitted parameters (B, Omega, C, alpha, Psi, Phi,
 #' Lambda), the ELBO trace and the number of iterations performed
 #' @noRd
-NormalBlockMeanUnknownClusters_fit <- function(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate = TRUE, fixed_tau = FALSE) {
-    .Call(`_normalblockr_NormalBlockMeanUnknownClusters_fit`, Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, fixed_point_niter, niter, threshold, accelerate, fixed_tau)
+NormalBlockMeanUnknownClusters_fit <- function(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, noise_covariance, fixed_point_niter, niter, threshold, accelerate = TRUE, fixed_tau = FALSE) {
+    .Call(`_normalblockr_NormalBlockMeanUnknownClusters_fit`, Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, noise_covariance, fixed_point_niter, niter, threshold, accelerate, fixed_tau)
 }
 

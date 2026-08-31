@@ -24,11 +24,22 @@ class NormalBlockMeanUnknownClusters : public NormalBlockMeanBase {
   // plus the same jitter the R implementation adds (eq. 2.32).
   arma::mat psi_from(const arma::mat& Omega, const arma::mat& tau) const {
     arma::vec w = Omega.diag();
-    arma::mat tw = tau;
-    tw.each_col() %= w;
-    arma::mat Psi = (tau.t() * Omega) * tau + arma::diagmat(tau.t() * w) - tau.t() * tw;
+    arma::mat Psi = arma::diagmat(tau.t() * w);
+    // with a diagonal Omega the two remaining terms cancel exactly
+    if (!omega_is_diagonal()) {
+      arma::mat tw = tau;
+      tw.each_col() %= w;
+      Psi += (tau.t() * Omega) * tau - tau.t() * tw;
+    }
     Psi.diag() += 1e-8;
     return Psi;
+  }
+
+  arma::mat tau_omega_tau(const arma::mat& tau) const {
+    if (!omega_is_diagonal()) return (tau.t() * Omega_) * tau;
+    arma::mat tw = tau;
+    tw.each_col() %= Omega_.diag();
+    return tau.t() * tw;
   }
 
   // Diagonal of the correction term of eq. (2.35), kept as a vector (the R
@@ -44,7 +55,7 @@ class NormalBlockMeanUnknownClusters : public NormalBlockMeanBase {
     lambda_ = lambda_from(B_, tau_);
 
     arma::mat R_bar = data_.Y - (data_.X * B_) * tau_.t();
-    Omega_ = estimate_omega(R_bar.t() * R_bar / data_.n + arma::diagmat(lambda_));
+    Omega_ = omega_from_residuals(R_bar, lambda_);
     alpha_ = arma::vectorise(arma::mean(tau_, 0));
   }
 
@@ -62,7 +73,9 @@ class NormalBlockMeanUnknownClusters : public NormalBlockMeanBase {
     for (int sweep = 0; sweep < fixed_point_niter_; ++sweep) {
       arma::mat G = ZtXB - tau_ * M; // kept in sync with tau_, row by row
       for (arma::uword j = 0; j < tau_.n_rows; ++j) {
-        arma::rowvec expo = log_alpha + Omega_.row(j) * G
+        arma::rowvec omega_row_G;
+        if (omega_is_diagonal()) omega_row_G = w(j) * G.row(j); else omega_row_G = Omega_.row(j) * G;
+        arma::rowvec expo = log_alpha + omega_row_G
           + w(j) * (tau_.row(j) * M) - 0.5 * w(j) * diag_M;
         arma::rowvec t = arma::exp(expo - expo.max());
         t /= arma::accu(t);
@@ -79,8 +92,10 @@ public:
                                  const arma::mat& B0, const arma::mat& Omega0,
                                  const arma::mat& tau0,
                                  double sparsity, const arma::mat& sparsity_weights,
-                                 int fixed_point_niter, bool accelerate, bool fixed_tau) :
-    NormalBlockMeanBase(data, tau0.n_cols, B0, Omega0, sparsity, sparsity_weights, accelerate),
+                                 int fixed_point_niter, bool accelerate, bool fixed_tau,
+                                 const std::string& cov_structure) :
+    NormalBlockMeanBase(data, tau0.n_cols, B0, Omega0, sparsity, sparsity_weights, accelerate,
+                        cov_structure),
     tau_(tau0), fixed_point_niter_(fixed_point_niter), fixed_tau_(fixed_tau) {
     alpha_  = arma::vectorise(arma::mean(tau_, 0));
     Psi_    = psi_from(Omega_, tau_);
@@ -90,14 +105,14 @@ public:
   // Penalized ELBO of eq. (2.33). Phi is recomputed here rather than reused from the
   // M-step: it depends on the Omega/tau that step has just updated.
   double objective() const override {
-    Phi_ = psi_from(Omega_, tau_) - (tau_.t() * Omega_) * tau_;
+    Phi_ = psi_from(Omega_, tau_) - tau_omega_tau(tau_);
     arma::mat M = (B_.t() * data_.XtX) * B_;
     arma::mat R_bar = data_.Y - (data_.X * B_) * tau_.t();
 
     double J = -0.5 * data_.n * data_.p * std::log(2.0 * arma::datum::pi)
-           + 0.5 * data_.n * arma::log_det_sympd(Omega_)
+           + 0.5 * data_.n * log_det_omega()
            + arma::accu(tau_ * arma::log(alpha_)) - arma::accu(tau_ % arma::log(tau_))
-           - 0.5 * (arma::accu(R_bar % (R_bar * Omega_)) + arma::trace(Phi_ * M));
+           - 0.5 * (arma::accu(R_bar % rmult_omega(R_bar)) + arma::trace(Phi_ * M));
     // penalized objective, as in the variance-block core: the R side adds the
     // penalty back through the `sparsity_term` active binding, so $loglik
     // stays the plain ELBO. Unlike there, no trace correction is needed: this

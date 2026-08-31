@@ -36,6 +36,7 @@ test_that("NormalBlockMeanKnownClusters_fit matches the R recursion (unpenalized
   for (sparsity in c(0, 0.05)) {
     model <- NormalBlockMeanKnownClusters$new(data, C, sparsity = sparsity,
                                               control = NB_control(verbose = FALSE))
+    nc <- "full"
     init <- model$.__enclos_env__$private$optim_initialize()
     ref  <- model$.__enclos_env__$private$EM_optimize_R(
       list(niter = niter, threshold = threshold))
@@ -43,7 +44,7 @@ test_that("NormalBlockMeanKnownClusters_fit matches the R recursion (unpenalized
     res <- NormalBlockMeanKnownClusters_fit(
       Y = data$Y, X = data$X, C = C, B0 = init$B, Omega0 = init$Omega,
       sparsity = sparsity, sparsity_weights = model$sparsity_weights,
-      niter = niter, threshold = threshold, accelerate = FALSE)
+      noise_covariance = nc, niter = niter, threshold = threshold, accelerate = FALSE)
 
     expect_equal(res$B,     ref$B,     tolerance = 1e-8)
     expect_equal(res$Omega, ref$Omega, tolerance = 1e-8)
@@ -57,6 +58,7 @@ test_that("NormalBlockMeanUnknownClusters_fit matches the R recursion (unpenaliz
 
   for (sparsity in c(0, 0.05)) {
     ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C))
+    nc <- "full"
     model_R   <- NormalBlockMeanUnknownClusters$new(data, q, sparsity = sparsity, control = ctrl)
     model_cpp <- NormalBlockMeanUnknownClusters$new(data, q, sparsity = sparsity, control = ctrl)
 
@@ -67,8 +69,8 @@ test_that("NormalBlockMeanUnknownClusters_fit matches the R recursion (unpenaliz
     res <- NormalBlockMeanUnknownClusters_fit(
       Y = data$Y, X = data$X, B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
       sparsity = sparsity, sparsity_weights = model_R$sparsity_weights,
-      fixed_point_niter = fixed_point_niter, niter = niter, threshold = threshold,
-      accelerate = FALSE)
+      noise_covariance = nc, fixed_point_niter = fixed_point_niter,
+      niter = niter, threshold = threshold, accelerate = FALSE)
 
     expect_equal(res$B,      ref$B,      tolerance = 1e-8)
     expect_equal(res$Omega,  ref$Omega,  tolerance = 1e-8)
@@ -98,11 +100,50 @@ test_that("the SQUAREM extrapolation reaches at least the plain recursion's ELBO
     NormalBlockMeanUnknownClusters_fit(
       Y = data$Y, X = data$X, B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
       sparsity = 0, sparsity_weights = matrix(1, ncol(Y), ncol(Y)) - diag(ncol(Y)),
-      fixed_point_niter = 5, niter = 50, threshold = 1e-6, accelerate = accelerate)
+      noise_covariance = "full", fixed_point_niter = 5, niter = 50, threshold = 1e-6,
+      accelerate = accelerate)
   }
   plain <- fit(FALSE)
   accel <- fit(TRUE)
 
   expect_gte(tail(accel$objective, 1), tail(plain$objective, 1) - 1e-6)
   expect_true(all(diff(accel$objective) >= -1e-6)) # still monotone
+})
+
+test_that("the diagonal/spherical Sigma variants also match the R recursion", {
+  data <- NormalBlockData$new(Y, X)
+  fixed_point_niter <- 5
+
+  for (nc in c("diagonal", "spherical")) {
+    ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C), noise_covariance = nc)
+    model_R   <- NormalBlockMeanUnknownClusters$new(data, q, control = ctrl)
+    model_cpp <- NormalBlockMeanUnknownClusters$new(data, q, control = ctrl)
+
+    init <- model_cpp$.__enclos_env__$private$optim_initialize()
+    ref  <- model_R$.__enclos_env__$private$EM_optimize_R(
+      list(niter = niter, threshold = threshold, fixed_point_niter = fixed_point_niter))
+
+    res <- NormalBlockMeanUnknownClusters_fit(
+      Y = data$Y, X = data$X, B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
+      sparsity = 0, sparsity_weights = model_R$sparsity_weights, noise_covariance = nc,
+      fixed_point_niter = fixed_point_niter, niter = niter, threshold = threshold,
+      accelerate = FALSE)
+
+    expect_equal(res$B,     ref$B,     tolerance = 1e-8)
+    expect_equal(res$Omega, ref$Omega, tolerance = 1e-8)
+    expect_equal(res$C,     ref$C,     tolerance = 1e-8)
+    expect_equal(res$objective, ref$ll_list, tolerance = 1e-8)
+    ## the whole point of these variants: Omega stays diagonal
+    expect_equal(res$Omega, diag(diag(res$Omega)))
+  }
+})
+
+test_that("a diagonal Sigma lifts the n > p requirement", {
+  narrow <- NormalBlockData$new(Y[1:(ncol(Y) - 10), , drop = FALSE],
+                                X[1:(ncol(Y) - 10), , drop = FALSE])
+  expect_error(normal_block(narrow, blocks = q, model = "mean",
+                            control = NB_control(verbose = FALSE)), "need n > p", fixed = TRUE)
+  for (nc in c("diagonal", "spherical"))
+    expect_no_error(normal_block(narrow, blocks = q, model = "mean",
+                                 control = NB_control(verbose = FALSE, noise_covariance = nc)))
 })

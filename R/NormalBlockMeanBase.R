@@ -25,12 +25,20 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @param control structured list of more specific parameters, to generate with NB_Mean_control
     #' @return A new [`NormalBlockMeanBase`] object
     initialize = function(data, q, sparsity = 0, control = NB_control()) {
-      ## family default (benchmarked better than "ward2" here)
+      ## family defaults (benchmarked better than "ward2" here; Sigma full,
+      ## the variance-block family's own default being "diagonal")
       if (is.null(control$clustering_init)) control$clustering_init <- "kmeans"
-      ## Sigma is p x p and estimated from n residuals: singular as soon as
-      ## n <= p, which would only surface as a cryptic chol() failure. The
-      ## graphical lasso regularizes it, hence the sparsity exemption.
-      if (!isTRUE(sparsity > 0) && data$n <= data$p)
+      if (is.null(control$noise_covariance)) control$noise_covariance <- "full"
+      private$res_covariance <- control$noise_covariance
+      stopifnot(
+        "sparsity > 0 needs noise_covariance = 'full': a diagonal or spherical Sigma has no off-diagonal coefficient for the graphical lasso to penalize" =
+          !(isTRUE(sparsity > 0) && control$noise_covariance != "full")
+      )
+      ## A full Sigma is p x p and estimated from n residuals: singular as
+      ## soon as n <= p, which would only surface as a cryptic chol() failure.
+      ## The graphical lasso regularizes it, and the diagonal/spherical
+      ## variants never invert anything -- hence both exemptions.
+      if (control$noise_covariance == "full" && !isTRUE(sparsity > 0) && data$n <= data$p)
         stop("mean-block models estimate a full p x p covariance from n observations, ",
              "so they need n > p (here n = ", data$n, ", p = ", data$p,
              "). Use sparsity > 0 to regularize it through the graphical lasso, ",
@@ -148,9 +156,20 @@ NormalBlockMeanBase <- R6::R6Class(
   private = list(
     ## kmeans first: benchmarked better than ward2 for this family
     default_inits     = c("kmeans", "ward2", "spectral"),
+    res_covariance    = NA, # shape of Sigma: "full", "diagonal" or "spherical"
     Psi               = NA,
     Phi               = NA,
     Lambda            = NA,
+
+    ## Precision matrix for the requested shape of Sigma. Mirrors
+    ## omega_from_residuals() in src/normal_block_mean_base.h (which skips
+    ## forming the full p x p Sigma for the diagonal/spherical variants).
+    omega_from_sigma = function(Sigma) {
+      switch(private$res_covariance,
+             "full"      = private$get_Omega(Sigma),
+             "diagonal"  = diag(1 / diag(Sigma), nrow(Sigma)),
+             "spherical" = diag(1 / mean(diag(Sigma)), nrow(Sigma)))
+    },
 
     ## Omega is p x p here, so it carries no cluster-pair information: the
     ## closest mean profiles (columns of B) are the promising merges instead.
@@ -171,7 +190,11 @@ NormalBlockMeanBase <- R6::R6Class(
     model_par = function() list(B = private$B, Omega = private$Omega),
     #' @field nb_param number of parameters in the model
     nb_param = function() {
-      as.integer(self$q * self$d + self$p + self$n_edges)
+      n_cov <- switch(private$res_covariance,
+                      "full"      = self$p + self$n_edges,
+                      "diagonal"  = self$p,
+                      "spherical" = 1L)
+      as.integer(self$q * self$d + n_cov)
     },
     #' @field sparsity_weights (weights associated to each pair of groups)
     sparsity_weights = function(value) {

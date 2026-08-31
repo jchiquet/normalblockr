@@ -258,6 +258,7 @@ Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::m
 //' @param sparsity sparsity penalty applied to Omega through the graphical
 //' lasso (glassoFast); 0 means an unpenalized inversion
 //' @param sparsity_weights p x p matrix of per-pair penalty weights
+//' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
 //' @param niter maximum number of EM iterations
 //' @param threshold convergence threshold on the objective increment
 //' @param accelerate whether to attempt the SQUAREM extrapolation on top of
@@ -269,9 +270,11 @@ Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::m
 Rcpp::List NormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& C,
                                             arma::mat B0, arma::mat Omega0,
                                             double sparsity, arma::mat sparsity_weights,
+                                            std::string noise_covariance,
                                             int niter, double threshold, bool accelerate = true) {
   NormalBlockData data(Y, X);
-  norm_block_mean_known_clusters model(data, C, B0, Omega0, sparsity, sparsity_weights, accelerate);
+  norm_block_mean_known_clusters model(data, C, B0, Omega0, sparsity, sparsity_weights, accelerate,
+                                       noise_covariance);
   model.run_em(niter, threshold);
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),
@@ -295,6 +298,7 @@ Rcpp::List NormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat&
 //' @param sparsity sparsity penalty applied to Omega through the graphical
 //' lasso (glassoFast); 0 means an unpenalized inversion
 //' @param sparsity_weights p x p matrix of per-pair penalty weights
+//' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
 //' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
 //' @param fixed_tau if TRUE, the variational membership probabilities are not
 //' re-estimated (useful for stability selection)
@@ -309,12 +313,14 @@ Rcpp::List NormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat&
 Rcpp::List NormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::mat& X,
                                               arma::mat B0, arma::mat Omega0, arma::mat tau0,
                                               double sparsity, arma::mat sparsity_weights,
+                                              std::string noise_covariance,
                                               int fixed_point_niter,
                                               int niter, double threshold, bool accelerate = true,
                                               bool fixed_tau = false) {
   NormalBlockData data(Y, X);
   norm_block_mean_unknown_clusters model(data, B0, Omega0, tau0, sparsity, sparsity_weights,
-                                         fixed_point_niter, accelerate, fixed_tau);
+                                         fixed_point_niter, accelerate, fixed_tau,
+                                         noise_covariance);
   model.run_em(niter, threshold);
   return Rcpp::List::create(
     Rcpp::Named("B")         = model.B(),
