@@ -7,6 +7,12 @@
 #' @param sparsity either TRUE to run the optimization for different sparsity penalty values
 #' OR float to run model with a single sparsity penalty value
 #' @param zero_inflation boolean to indicate if Y is zero-inflated and adjust fitted model as a consequence
+#' @param model which model family to fit: "var" (the default) structures the
+#' clustering in the latent covariance (see [NormalBlockVarBase]), "mean"
+#' structures it in the mean (mu_i = C B' X_i, see [NormalBlockMeanBase]).
+#' The mean-block family does not yet support zero-inflation, a sparsity
+#' path (`sparsity = TRUE`) or a collection over several `blocks` values --
+#' fit one q at a time.
 #' @param control a list-like structure for detailed control on parameters should be
 #' generated with NB_control().
 #' @return an R6 object with one of the model classes (or a collection of model objects).
@@ -22,40 +28,49 @@
 #' ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
 #' zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)
 #' my_normal_block <- normal_block(zidata, blocks = 1:6, zero_inflation = TRUE)
+#' ## Mean-Block model (clustering in the mean rather than the covariance)
+#' ex_mean <- generate_normal_block_mean_data(n=50, p=20, d=1, q=3)
+#' mean_data <- NormalBlockData$new(ex_mean$Y, ex_mean$X)
+#' my_mean_block <- normal_block(mean_data, blocks = 3, model = "mean")
 #'
 #' @export
 normal_block <- function(data,
                          blocks,
                          sparsity = 0,
                          zero_inflation = FALSE,
-                         control = NB_control()) {
+                         control = NB_control(),
+                         model = c("var", "mean")) {
   ## Recovering the requested model from the function arguments
+  model <- match.arg(model)
   stopifnot(is.numeric(blocks) | is.matrix(blocks))
   stopifnot(is.null(control$sparsity_weights) | is.matrix(control$sparsity_weights))
   if (!is.null(control$sparsity_weights)) stopifnot(isSymmetric(control$sparsity_weights))
   if (is.list(control$clustering_init)) stopifnot(length(control$clustering_init) == length(blocks))
   stopifnot(
     "clustering_init = 'best_of_inits' is not supported together with sparsity = TRUE (a sparsity path warm-starts a single clustering across all penalties)" =
-      !(uses_best_of_inits(control) && isTRUE(sparsity))
+      !(uses_best_of_inits(control) && isTRUE(sparsity)),
+    "clustering_init = 'best_of_inits' is not yet implemented for mean-block models (model = 'mean')" =
+      !(uses_best_of_inits(control) && model == "mean")
   )
 
-  model <- get_model(data, blocks, sparsity = sparsity,
-                     zero_inflation = zero_inflation,
-                     control = control)
+  fit <- get_model(data, blocks, sparsity = sparsity,
+                   zero_inflation = zero_inflation,
+                   model = model,
+                   control = control)
 
   ## Estimation/optimization
-  if (control$verbose) cat("Fitting a", model$who_am_I, "\n")
+  if (control$verbose) cat("Fitting a", fit$who_am_I, "\n")
 
-  if (uses_best_of_inits(control) && !is.null(model$best_of_inits)) {
-    model <- model$best_of_inits(control = control)
+  if (uses_best_of_inits(control) && !is.null(fit$best_of_inits)) {
+    fit <- fit$best_of_inits(control = control)
   } else {
-    model$optimize(control)
+    fit$optimize(control)
   }
 
   ## Finishing
   if (control$verbose) cat("\nDONE\n")
 
-  model
+  fit
 }
 
 #' NB_control
@@ -146,6 +161,8 @@ NB_control <- function(
 #' @param sparsity boolean to say whether the model should have a changing penalty
 #' OR float to run model with a single penalty value
 #' @param zero_inflation boolean to indicate if Y is zero-inflated and adjust fitted model as a consequence
+#' @param model which model family to fit, "var" (the default) or "mean" --
+#' see [normal_block()]
 #' @param control a list-like structure for detailed control on parameters should be
 #' generated with NB_control() for collections of sparse models
 #' @param data contains the matrix of responses (Y) and the design matrix (X).
@@ -154,11 +171,24 @@ get_model <- function(data,
                       blocks,
                       sparsity = 0,
                       zero_inflation = FALSE,
-                      control = NB_control()) {
+                      control = NB_control(),
+                      model = c("var", "mean")) {
+  model <- match.arg(model)
 
   changing_sparsity <- isTRUE(sparsity)
   unknown_q_list    <- !is.matrix(blocks) && length(blocks) > 1
   is_collection     <- changing_sparsity || unknown_q_list
+
+  if (model == "mean") {
+    stopifnot("zero-inflation is not implemented for mean-block models (model = 'mean')" = !zero_inflation)
+    stopifnot(
+      "a sparsity path (sparsity = TRUE) or a collection over several q values is not yet implemented for mean-block models (model = 'mean') -- fit one q at a time" =
+        !is_collection
+    )
+    class_name <- if (is.matrix(blocks)) "NormalBlockMeanKnownClusters" else "NormalBlockMeanUnknownClusters"
+    myClass <- eval(str2lang(class_name))
+    return(myClass$new(data, blocks, sparsity, control = control))
+  }
 
   if (is_collection) {
     class_name <- if (changing_sparsity && unknown_q_list) {
