@@ -1,5 +1,5 @@
 suppressMessages(devtools::load_all(".", quiet = TRUE))
-library(aricode); RhpcBLASctl::blas_set_num_threads(1)
+library(aricode)
 ctl <- function(...) NB_control(verbose = FALSE, ...)
 
 ## Etape 1 : clustering dans la moyenne (Sigma diagonale). Etape 2 : clustering

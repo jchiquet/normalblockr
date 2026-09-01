@@ -1,5 +1,5 @@
 suppressMessages(devtools::load_all(".", quiet = TRUE))
-library(aricode); RhpcBLASctl::blas_set_num_threads(1)
+library(aricode)
 q_true <- 5; n <- 200; qs <- 1:10; nseed <- 12
 res <- NULL
 for (p in c(60, 150)) for (gen in c("Sigma pleine", "Sigma diagonale")) for (s in seq_len(nseed)) {

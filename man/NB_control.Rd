@@ -17,8 +17,7 @@ NB_control(
   verbose = TRUE,
   heuristic = FALSE,
   noise_covariance = NULL,
-  refine = FALSE,
-  blas_threads = NULL
+  refine = FALSE
 )
 }
 \arguments{
@@ -82,17 +81,6 @@ parameters otherwise drown the mean structure BIC/ICL are weighing. Use
 `optimize()` should automatically call `refine()` afterwards. Default
 `FALSE` since it adds real cost; call `collection$refine()` directly at
 any point afterwards for the same effect without setting this.}
-
-\item{blas_threads}{number of BLAS threads to use during `optimize()`
-(via `RhpcBLASctl::blas_set_num_threads()`, restored to whatever it was
-set to beforehand on exit), or `NULL` (the default) to leave the
-current setting untouched. Mean-block models call BLAS many times per
-iteration on small matrices (`tau_estimator()`'s per-variable sweep);
-with a multi-threaded BLAS (the common default, e.g. OpenBLAS), thread
-scheduling overhead can then dwarf the actual computation --
-`blas_threads = 1` was measured to cut a mean-block fit's CPU time by an
-order of magnitude on a n=300, p=150 example. Needs the (`Suggests`)
-RhpcBLASctl package; ignored with a warning if it isn't installed.}
 }
 \value{
 A named list of parameters to pass to [normal_block()]'s `control`
