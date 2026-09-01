@@ -104,10 +104,12 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
       Omega       <- init_params$Omega
       ll_prev     <- private$compute_loglik(B, Omega)
       ll_list     <- c(ll_prev)
+      warm        <- NULL
       for(i in 1:control$niter){
         B     <- private$B_estimator(Omega)
         Sigma <- private$Sigma_estimator(B)
-        Omega <- private$omega_from_sigma(Sigma)
+        og    <- private$omega_from_sigma_warm(Sigma, warm)
+        Omega <- og$Omega; warm <- og$warm
 
         ll_current <- private$compute_loglik(B, Omega)
         ll_list     <- c(ll_list, ll_current)

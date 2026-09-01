@@ -31,8 +31,13 @@ protected:
 
   // Plain inversion when sparsity_ <= 0, graphical lasso otherwise; see
   // omega_estimation.h.
+  // The state is per-model and lives across the whole recursion, so every
+  // M-step after the first resumes from the previous one; see nb_omega::estimate.
+  mutable nb_glasso::State glasso_state_;
+
   arma::mat estimate_omega(const arma::mat& Sigma_hat) const {
-    return nb_omega::estimate(Sigma_hat, sparsity_, sparsity_weights_);
+    return nb_omega::estimate(Sigma_hat, sparsity_, sparsity_weights_,
+                              &glasso_state_, nb_omega::kGlassoThreshold);
   }
 
   // Lazily-cached X*B_ (see inst/normal_block_models.qmd). Subclasses must

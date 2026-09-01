@@ -202,6 +202,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
       Lambda      <- private$Lambda_estimator(B, tau)
       ll_prev     <- private$compute_loglik(B, Omega, tau, alpha, Phi)
       ll_list     <- c(ll_prev)
+      warm        <- NULL
 
       for(i in 1:control$niter){
         # M-step
@@ -209,7 +210,8 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
         B      <- private$B_estimator(Omega, tau, Psi)
         Lambda <- private$Lambda_estimator(B, tau)
         Sigma  <- private$Sigma_estimator(Omega, B, tau, Lambda)
-        Omega  <- private$omega_from_sigma(Sigma)
+        og     <- private$omega_from_sigma_warm(Sigma, warm)
+        Omega  <- og$Omega; warm <- og$warm
         alpha  <- private$alpha_estimator(tau)
 
         # VE-step

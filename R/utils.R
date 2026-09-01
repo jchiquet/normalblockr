@@ -47,6 +47,12 @@ ensure_pd <- function(M, floor = 1e-6) {
 # reference implementations and the C++ (V)EM cores run the very same code --
 # tests/testthat/test-cpp-*.R compare the two at 1e-8, which only holds if they
 # share this step exactly.
+# Convergence threshold the (V)EM's M-step uses for the graphical lasso.
+# MUST match nb_omega::kGlassoThreshold (src/omega_estimation.h): the two
+# recursions are compared trace-for-trace at 1e-8 in test-cpp-*.R, so any
+# drift between them shows up there rather than silently.
+NB_GLASSO_THRESHOLD <- 1e-6
+
 glasso_omega <- function(Sigma, rho) {
   glasso_out <- graphical_lasso_fit(Sigma, rho)
   if (anyNA(glasso_out$wi)) {

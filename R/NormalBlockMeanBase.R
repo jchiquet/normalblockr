@@ -192,6 +192,22 @@ NormalBlockMeanBase <- R6::R6Class(
              "spherical" = diag(1 / mean(diag(Sigma)), nrow(Sigma)))
     },
 
+    ## Warm-started counterpart of omega_from_sigma(), used only by the R
+    ## reference recursion so that it mirrors the C++ core's M-step, which
+    ## resumes each graphical lasso from the previous one (nb_omega::estimate,
+    ## src/omega_estimation.h). Kept separate so omega_from_sigma() stays
+    ## stateless for the heuristic and split()/merge() paths, where a carried
+    ## -over state would be stale.
+    omega_from_sigma_warm = function(Sigma, warm = NULL) {
+      if (private$res_covariance != "full" || !isTRUE(private$sparsity_ > 0))
+        return(list(Omega = private$omega_from_sigma(Sigma), warm = NULL))
+      out <- graphical_lasso_fit(Sigma, private$sparsity_ * self$sparsity_weights,
+                                 thr = NB_GLASSO_THRESHOLD,
+                                 w_init = warm$w, wi_init = warm$wi)
+      if (anyNA(out$wi)) return(list(Omega = chol2inv(chol(Sigma)), warm = NULL))
+      list(Omega = Matrix::symmpart(out$wi), warm = list(w = out$w, wi = out$wi))
+    },
+
     ## Omega is p x p here, so it carries no cluster-pair information: the
     ## closest mean profiles (columns of B) are the promising merges instead.
     merge_score = function(pairs) {

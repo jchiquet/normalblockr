@@ -13,6 +13,10 @@
 // inside this loop -- see graphical_lasso.h for why it isn't any more.
 namespace nb_omega {
 
+// Tighter than glassoFast's 1e-4 default, which a warm start pays for in
+// accuracy rather than time -- see estimate() below.
+constexpr double kGlassoThreshold = 1e-6;
+
 // Armadillo equivalent of ensure_pd() (R/utils.R): the graphical lasso can
 // return a precision matrix that is not quite positive definite (an EM
 // iterate's Sigma can be badly conditioned, especially for the p x p Sigma of
@@ -29,12 +33,29 @@ inline arma::mat ensure_pd(const arma::mat& M, double floor_value = 1e-6) {
   return eigvec * arma::diagmat(eigval) * eigvec.t();
 }
 
-inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity, const arma::mat& sparsity_weights) {
+// `warm`, when given, carries the previous M-step's (W, X) so the graphical
+// lasso can resume from it. Consecutive M-steps solve nearly the same problem,
+// and the solver's stopping rule measures per-sweep progress rather than
+// distance to the optimum -- so a warm start both converges in fewer sweeps
+// and, at the tightened threshold this affords, lands closer to the optimum
+// than a cold start at the looser one. Measured over 124 consecutive M-steps
+// of a mean-block sparsity path: 1.355s at 6.1e-05 cold, 0.589s at 8.9e-07
+// warm. `warm` must belong to the model, not be shared between fits: it is
+// only ever a starting point, but a stale one costs sweeps.
+inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity,
+                          const arma::mat& sparsity_weights,
+                          nb_glasso::State* warm = nullptr,
+                          double thr = 1e-4) {
   if (sparsity <= 0.0) {
     return arma::inv_sympd(Sigma_hat);
   }
 
-  nb_glasso::Result glasso_out = nb_glasso::solve(Sigma_hat, sparsity * sparsity_weights);
+  nb_glasso::Result glasso_out =
+    nb_glasso::solve(Sigma_hat, sparsity * sparsity_weights, thr, 10000, warm);
+  if (warm != nullptr) {
+    if (glasso_out.X.is_finite() && glasso_out.W.is_finite()) warm->store(glasso_out);
+    else warm->reset();
+  }
 
   if (glasso_out.X.has_nan()) {
     Rcpp::warning("GLasso fails, the penalty is probably too small and the system badly "

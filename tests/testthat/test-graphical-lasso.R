@@ -159,3 +159,53 @@ test_that("w and wi are inverses of each other where the penalty does not bind",
   ## Theta is non-zero; the whole product is the identity at convergence
   expect_equal(res$w %*% res$wi, diag(n), tolerance = 1e-3)
 })
+
+###############################################################################
+## The (V)EM warm-starts each M-step's graphical lasso from the previous one
+## (nb_omega::estimate). That state belongs to one model and one recursion:
+## nothing about a fit may depend on what was fitted before it.
+###############################################################################
+
+test_that("a penalized fit does not depend on what was fitted before it", {
+  set.seed(201)
+  ex <- generate_normal_block_mean_data(n = 120, p = 25, d = 1, q = 3)
+  d  <- NormalBlockData$new(ex$Y, ex$X)
+  ctl <- NB_control(verbose = FALSE, noise_covariance = "full")
+
+  ## seeded identically either side: the initial clustering is drawn, so this
+  ## isolates the carried-over solver state from the heuristic's own randomness
+  set.seed(999)
+  alone <- normal_block(d, blocks = 3, sparsity = 0.05, model = "mean", control = ctl)
+
+  ## the same fit, after an unrelated one on different data
+  set.seed(202)
+  other <- generate_normal_block_mean_data(n = 90, p = 25, d = 1, q = 4)
+  invisible(normal_block(NormalBlockData$new(other$Y, other$X), blocks = 4,
+                         sparsity = 0.2, model = "mean", control = ctl))
+  set.seed(999)
+  after <- normal_block(d, blocks = 3, sparsity = 0.05, model = "mean", control = ctl)
+
+  expect_equal(after$loglik, alone$loglik, tolerance = 0)
+  expect_equal(as.matrix(after$model_par$Omega), as.matrix(alone$model_par$Omega),
+               tolerance = 0)
+})
+
+test_that("repeating a penalized fit is exactly reproducible", {
+  set.seed(203)
+  ex <- generate_normal_block_var_data(n = 100, p = 30, d = 1, q = 3)
+  d  <- NormalBlockData$new(ex$Y, ex$X)
+  C  <- ex$parameters$C
+  a <- normal_block(d, blocks = C, sparsity = 0.05, control = NB_control(verbose = FALSE))
+  b <- normal_block(d, blocks = C, sparsity = 0.05, control = NB_control(verbose = FALSE))
+  expect_equal(as.matrix(a$model_par$Omega), as.matrix(b$model_par$Omega), tolerance = 0)
+  expect_equal(a$loglik, b$loglik, tolerance = 0)
+})
+
+test_that("the R reference and the C++ core use the same M-step threshold", {
+  ## NB_GLASSO_THRESHOLD (R/utils.R) must track nb_omega::kGlassoThreshold
+  ## (src/omega_estimation.h). They cannot be read from one another, so the
+  ## guard is that the two recursions are compared trace-for-trace at 1e-8 in
+  ## test-cpp-normal-block-mean.R -- drift there fails loudly. This just pins
+  ## the R side against silent edits.
+  expect_equal(normalblockr:::NB_GLASSO_THRESHOLD, 1e-6)
+})
