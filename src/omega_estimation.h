@@ -14,12 +14,33 @@
 // step.
 namespace nb_omega {
 
+// Armadillo equivalent of ensure_pd() (R/utils.R): the graphical lasso can
+// return a precision matrix that is not quite positive definite (an EM
+// iterate's Sigma can be badly conditioned, especially for the p x p Sigma of
+// the mean-block family), which would then make log_det_sympd() throw. The
+// Cholesky attempt makes the common case free; only a failing candidate pays
+// for the eigendecomposition.
+inline arma::mat ensure_pd(const arma::mat& M, double floor_value = 1e-6) {
+  arma::mat sym = arma::symmatu(M), R;
+  if (arma::chol(R, sym)) return sym;
+  arma::vec eigval;
+  arma::mat eigvec;
+  if (!arma::eig_sym(eigval, eigvec, sym)) return sym;
+  eigval = arma::clamp(eigval, floor_value, eigval.max());
+  return eigvec * arma::diagmat(eigval) * eigvec.t();
+}
+
 inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity, const arma::mat& sparsity_weights) {
   if (sparsity <= 0.0) {
     return arma::inv_sympd(Sigma_hat);
   }
 
-  static Rcpp::Function glassoFast(Rcpp::Environment::namespace_env("glassoFast")["glassoFast"]);
+  // Looked up on every call, deliberately: caching it in a `static` keeps an
+  // R object alive outside R's protection discipline, across garbage
+  // collections and namespace reloads. A stale SEXP then corrupts memory
+  // non-deterministically -- heap corruption or a segfault, depending on the
+  // run. The lookup is negligible next to the graphical lasso itself.
+  Rcpp::Function glassoFast(Rcpp::Environment::namespace_env("glassoFast")["glassoFast"]);
 
   Rcpp::List glasso_out = glassoFast(Rcpp::wrap(Sigma_hat), Rcpp::wrap(sparsity * sparsity_weights));
   arma::mat Wi = Rcpp::as<arma::mat>(glasso_out["wi"]);
@@ -31,7 +52,7 @@ inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity, const arm
                   arma::rcond(Sigma_hat));
     return arma::inv_sympd(Sigma_hat);
   }
-  return 0.5 * (Wi + Wi.t()); // equivalent of Matrix::symmpart(glasso_out$wi)
+  return ensure_pd(Wi); // symmpart(), plus a guard against a non-PD glasso output
 }
 
 } // namespace nb_omega

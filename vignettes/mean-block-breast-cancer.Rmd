@@ -154,7 +154,7 @@ NB_means <- normal_block(nb_data, blocks = 1:15, model = "mean",
 ```
 
 ```{r, collection-criteria, fig.width=7, fig.height=4}
-NB_means$plot(c("deviance", "BIC", "ICL"))
+NB_means$plot(c("deviance", "BIC"))
 ```
 
 ```{r, collection-selection}
