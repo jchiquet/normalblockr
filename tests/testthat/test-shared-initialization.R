@@ -111,3 +111,33 @@ test_that("a heuristic that collapses below q falls back to the model's own", {
     expect_true(identical(cl, "ward2") || length(unique(cl)) == c(2, 4)[i])
   }
 })
+
+test_that("zero-inflation works with more than one zero-inflation covariate", {
+  ## B0 used to be built as t(sapply(...)), which is d0 x p only because
+  ## sapply collapses to a vector when d0 == 1; with d0 > 1 it came out
+  ## transposed and X0 %*% B0 failed with "non-conformable arguments".
+  set.seed(31)
+  ex <- generate_normal_block_var_data(n = 90, p = 8, d = 1, q = 2, kappa = rep(0.3, 8))
+  d  <- NormalBlockData$new(ex$Y, ex$X, X0 = cbind(1, rnorm(90)))
+  expect_equal(d$d0, 2)
+  expect_equal(dim(d$zi_fit()$B0), c(2L, 8L))
+  expect_equal(dim(d$zi_fit()$kappa), c(90L, 8L))
+
+  fit <- normal_block(d, blocks = 2, zero_inflation = TRUE,
+                      control = NB_control(verbose = FALSE))
+  expect_true(is.finite(fit$loglik))
+  ## kappa costs p * d0 parameters, so a second ZI covariate is counted
+  d1  <- NormalBlockData$new(ex$Y, ex$X)
+  fit1 <- normal_block(d1, blocks = 2, zero_inflation = TRUE,
+                       control = NB_control(verbose = FALSE))
+  expect_equal(fit$nb_param - fit1$nb_param, 8L)
+})
+
+test_that("B0 keeps its d0 x p orientation in the degenerate all-nonzero case", {
+  set.seed(32)
+  ex <- generate_normal_block_var_data(n = 50, p = 6, d = 1, q = 2) # no zeros at all
+  d  <- NormalBlockData$new(ex$Y, ex$X, X0 = cbind(1, rnorm(50)))
+  expect_equal(dim(d$zi_fit()$B0), c(2L, 6L))
+  expect_true(all(is.infinite(d$zi_fit()$B0)))
+  expect_true(all(d$zi_fit()$kappa == 0))
+})

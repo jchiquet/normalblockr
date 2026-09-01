@@ -152,15 +152,28 @@ NormalBlockData <- R6::R6Class(
     #' probabilities) and `ZI_cond_mean` (a scalar)
     zi_fit = function() {
       if (is.null(private$zi_cache)) {
-        B0 <- if (self$npY < self$n * self$p) {
-          t(sapply(lapply(1:self$p, function(j) {
+        ## d0 x p, one column of coefficients per variable. Built with an
+        ## explicit matrix() rather than t(sapply(...)): sapply collapses to a
+        ## plain vector when d0 == 1 and returns d0 x p when d0 > 1, so the
+        ## transpose that made the first case work broke the second (a
+        ## non-conformable X0 %*% B0 as soon as a second zero-inflation
+        ## covariate was supplied).
+        no_zeros <- self$npY == self$n * self$p
+        B0 <- if (!no_zeros) {
+          coefs <- lapply(1:self$p, function(j) {
             df <- data.frame("zeros" = self$zeros[, j], self$X0)
             glm(zeros ~ 0 + ., family = binomial(link = "logit"), data = df)$coefficients
-          }), unlist))
+          })
+          matrix(unlist(coefs), nrow = self$d0, ncol = self$p)
         } else {
           matrix(rep(-Inf, self$p * self$d0), nrow = self$d0)
         }
-        kappa <- apply(self$X0 %*% B0, MARGIN = c(1, 2), FUN = sigmoid)
+        ## With no zeros to model, kappa is 0 by construction. Taking it from
+        ## the -Inf sentinel instead only works when d0 == 1: a second
+        ## covariate contributes x * -Inf, which is +Inf wherever x < 0, and
+        ## the linear predictor collapses to NaN.
+        kappa <- if (no_zeros) matrix(0, self$n, self$p)
+                 else apply(self$X0 %*% B0, MARGIN = c(1, 2), FUN = sigmoid)
         private$zi_cache <- list(
           B0 = B0, kappa = kappa,
           ZI_cond_mean = sum(xlogy(self$zeros, kappa)) +
