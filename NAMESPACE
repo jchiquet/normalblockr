@@ -57,6 +57,7 @@ importFrom(igraph,
 importFrom(scales,pretty_breaks)
 importFrom(stats,
   BIC,
+  fitted,
   logLik,
   rbinom,
   rmultinom,

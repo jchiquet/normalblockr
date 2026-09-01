@@ -10,6 +10,11 @@
 #' @param X design matrix.
 #' @param X0 zero-inflation design matrix, if applicable.
 #' @param formula describes the relationship between Y and X, and X0 if applicable, useful if not all of X's or X0's covariates should be used, should be formatted ~ X1 + X2... | Z1 + Z2... with the Normal formula before the | and the ZI formula after the |
+#' @param zeros an optional n x p 0/1 matrix marking the structural zeros of
+#' Y. By default they are read off Y itself (`Y == 0`), which is what a
+#' zero-inflated model expects. Pass it explicitly when the matrix handed
+#' to the model is no longer the one carrying the zeros -- typically the
+#' residuals of a first stage, see [normal_block_sequential()].
 #' @param scale whether to rescale each column of Y by its own standard
 #' deviation before fitting (default TRUE). Columns are *not* centered: the
 #' model's own intercept (the constant or group-indicator columns a user is
@@ -74,7 +79,10 @@ NormalBlockData <- R6::R6Class(
     #' @param scale whether to rescale each column of Y by its own standard
     #' deviation (no centering). Default TRUE -- see the class-level
     #' documentation for the rationale and its limits.
-    initialize = function(Y, X, X0 = NULL, formula = NULL, scale = TRUE) {
+    #' @param zeros an optional 0/1 matrix of structural zeros, overriding the
+    #' default `Y == 0`.
+    initialize = function(Y, X, X0 = NULL, formula = NULL, scale = TRUE,
+                          zeros = NULL) {
       stopifnot("Y and X must be matrices" = all(is.matrix(Y), is.matrix(X)))
       stopifnot("Y and X must have the same number of rows" = (nrow(Y) == nrow(X)))
       self$Y_scale <- if (scale) pmax(apply(Y, 2, sd), .Machine$double.eps) else rep(1, ncol(Y))
@@ -106,8 +114,14 @@ NormalBlockData <- R6::R6Class(
       self$XtX       <- crossprod(self$X)
       self$XtXm1     <- chol2inv(chol(self$XtX))
       self$XtY       <- crossprod(self$X, self$Y)
-      self$zeros     <- 1 * (self$Y == 0)
-      self$zeros_bar <- 1 * (self$Y != 0)
+      if (is.null(zeros)) {
+        self$zeros <- 1 * (self$Y == 0)
+      } else {
+        stopifnot("zeros must be a matrix with the same dimensions as Y" =
+          is.matrix(zeros) && all(dim(zeros) == dim(self$Y)))
+        self$zeros <- 1 * (zeros != 0)
+      }
+      self$zeros_bar <- 1 - self$zeros
       self$npY       <- sum(self$zeros_bar)
       self$nY        <- colSums(self$zeros_bar)
     }

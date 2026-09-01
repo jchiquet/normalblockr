@@ -8,6 +8,7 @@ reference:
     Main entry points for fitting a Normal-Block model and simulating data
   contents:
     - '`normal_block`'
+    - '`normal_block_sequential`'
     - '`NB_control`'
     - '`generate_normal_block_var_data`'
     - '`generate_normal_block_mean_data`'
@@ -61,6 +62,7 @@ reference:
     - '`print.summary.NormalBlockCollection`'
     - '`logLik.NormalBlockCollection`'
     - '`BIC.NormalBlockCollection`'
+    - '`print.normal_block_sequential`'
 
 - title: 'Internal'
   desc: >

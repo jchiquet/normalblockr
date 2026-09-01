@@ -59,7 +59,14 @@ normal-block model.
   Create a new [`NormalBlockData`] object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockData$new(Y, X, X0 = NULL, formula = NULL, scale = TRUE)}
+    \preformatted{NormalBlockData$new(
+  Y,
+  X,
+  X0 = NULL,
+  formula = NULL,
+  scale = TRUE,
+  zeros = NULL
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -72,6 +79,8 @@ normal-block model.
       \item{\code{scale}}{whether to rescale each column of Y by its own standard
 deviation (no centering). Default TRUE -- see the class-level
 documentation for the rationale and its limits.}
+      \item{\code{zeros}}{an optional 0/1 matrix of structural zeros, overriding the
+default `Y == 0`.}
     }
     \if{html}{\out{</div>}}
   }
