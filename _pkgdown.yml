@@ -28,6 +28,8 @@ reference:
     - '`NormalBlockMeanUnknownClusters`'
     - '`ZINormalBlockVarKnownClusters`'
     - '`ZINormalBlockVarUnknownClusters`'
+    - '`ZINormalBlockMeanKnownClusters`'
+    - '`ZINormalBlockMeanUnknownClusters`'
     - '`NormalBlockVarCollectionClusters`'
     - '`NormalBlockVarCollectionSparsity`'
     - '`NormalBlockVarCollectionClustersSparsity`'

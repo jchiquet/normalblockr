@@ -23,8 +23,11 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @param q number of block/cluster
     #' @param sparsity sparsity penalty on the network density
     #' @param control structured list of more specific parameters, to generate with NB_Mean_control
+    #' @param zero_inflation whether the concrete subclass models zero-inflation;
+    #' set by the ZI subclasses themselves, not meant to be set by the end user.
     #' @return A new [`NormalBlockMeanBase`] object
-    initialize = function(data, q, sparsity = 0, control = NB_control()) {
+    initialize = function(data, q, sparsity = 0, control = NB_control(),
+                          zero_inflation = FALSE) {
       ## family default for the initial clustering (benchmarked better than
       ## the variance-block family's "ward2" here)
       if (is.null(control$clustering_init)) control$clustering_init <- "kmeans"
@@ -36,8 +39,18 @@ NormalBlockMeanBase <- R6::R6Class(
       ## either way. Asking for sparsity means asking for off-diagonal
       ## structure, so it implies a full Sigma unless one was named explicitly.
       if (is.null(control$noise_covariance))
-        control$noise_covariance <- if (isTRUE(sparsity > 0)) "full" else "diagonal"
+        control$noise_covariance <- if (isTRUE(sparsity > 0) && !zero_inflation) "full" else "diagonal"
       private$res_covariance <- control$noise_covariance
+      ## A full Sigma ties the variables together within each row, and the
+      ## zero-inflation mask leaves a different set of them observed in every
+      ## row: each row would then need its own submatrix inverse -- a
+      ## missing-data EM rather than the reweighting the diagonal shape allows.
+      stopifnot(
+        "zero-inflated mean-block models only support noise_covariance = 'diagonal' or 'spherical'" =
+          !(zero_inflation && control$noise_covariance == "full"),
+        "sparsity > 0 is not available for zero-inflated mean-block models: it penalizes the off-diagonal terms of a full Sigma, which they do not carry" =
+          !(zero_inflation && isTRUE(sparsity > 0))
+      )
       stopifnot(
         "sparsity > 0 needs noise_covariance = 'full': a diagonal or spherical Sigma has no off-diagonal coefficient for the graphical lasso to penalize" =
           !(isTRUE(sparsity > 0) && control$noise_covariance != "full")
@@ -51,7 +64,7 @@ NormalBlockMeanBase <- R6::R6Class(
              "so they need n > p (here n = ", data$n, ", p = ", data$p,
              "). Use sparsity > 0 to regularize it through the graphical lasso, ",
              "or reduce the number of variables.", call. = FALSE)
-      super$initialize(data, q, sparsity, control)
+      super$initialize(data, q, sparsity, control, zero_inflation)
       ## penalty mask
       private$sparsity_ <- sparsity
       weights <- matrix(1, self$data$p, self$data$p)
@@ -183,6 +196,15 @@ NormalBlockMeanBase <- R6::R6Class(
     ## closest mean profiles (columns of B) are the promising merges instead.
     merge_score = function(pairs) {
       -map_dbl(pairs, function(ij) sum((private$B[, ij[1]] - private$B[, ij[2]])^2))
+    },
+
+    ## Masked counterpart of multivariate_normal_inference(), used by the ZI
+    ## subclasses to initialize: a per-variable weighted fit of B under the
+    ## zero-inflation mask (R/utils.R), whose dm1 is already the diagonal
+    ## precision the model carries.
+    zi_mean_inference = function() {
+      fit <- zi_weighted_fit(self$data)
+      list(B = fit$B, Omega = private$omega_from_sigma(diag(1 / fit$dm1, self$p)), R = fit$R)
     },
 
     heuristic_cluster_B_from_variable_B = function(B_variable, C){

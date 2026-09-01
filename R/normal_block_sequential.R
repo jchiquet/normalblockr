@@ -24,6 +24,11 @@
 #' @param blocks_var idem for the variance-block stage, run on the residuals
 #' @param crit criterion used to pick a model when a range is explored,
 #' "ICL" (the default) or "BIC"
+#' @param zero_inflation whether Y carries structural zeros. Both stages are
+#' then zero-inflated, sharing the same mask: the second one would otherwise
+#' re-derive it from residuals, which are never exactly zero. The mean-block
+#' stage then only accepts a single q or a known clustering (see
+#' [normal_block()]).
 #' @param control_mean control list for the mean-block stage, see [NB_control()]
 #' @param control_var control list for the variance-block stage
 #' @return an object of class `normal_block_sequential`, a list with the fitted
@@ -38,6 +43,7 @@
 #' @export
 normal_block_sequential <- function(data, blocks_mean, blocks_var,
                                     crit = c("ICL", "BIC"),
+                                    zero_inflation = FALSE,
                                     control_mean = NB_control(verbose = FALSE),
                                     control_var  = NB_control(verbose = FALSE)) {
   stopifnot("data must be a NormalBlockData object" = inherits(data, "NormalBlockData"))
@@ -45,14 +51,16 @@ normal_block_sequential <- function(data, blocks_mean, blocks_var,
 
   pick <- function(fit) if (isNBcollection(fit)) fit$get_best_model(crit) else fit
 
-  fit_mean  <- pick(normal_block(data, blocks_mean, model = "mean", control = control_mean))
+  fit_mean  <- pick(normal_block(data, blocks_mean, model = "mean",
+                                 zero_inflation = zero_inflation, control = control_mean))
   residuals <- data$Y * matrix(data$Y_scale, data$n, data$p, byrow = TRUE) - fitted(fit_mean)
 
   intercept <- matrix(1, data$n, 1, dimnames = list(NULL, "(Intercept)"))
   ## the zeros live in Y, not in the residuals: carry the mask over rather than
   ## letting the second stage re-derive it from a matrix that has none.
   data_var  <- NormalBlockData$new(residuals, intercept, zeros = data$zeros)
-  fit_var   <- pick(normal_block(data_var, blocks_var, control = control_var))
+  fit_var   <- pick(normal_block(data_var, blocks_var,
+                                 zero_inflation = zero_inflation, control = control_var))
 
   structure(list(mean = fit_mean, var = fit_var, residuals = residuals),
             class = "normal_block_sequential")

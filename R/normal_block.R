@@ -14,8 +14,11 @@
 #' one ([NormalBlockMeanCollectionClusters],
 #' [NormalBlockMeanCollectionSparsity] and their crossing,
 #' [NormalBlockMeanCollectionClustersSparsity]) -- each q simply fit
-#' independently, without the variance-block family's SBM-path shortcut --
-#' but does not support zero-inflation yet.
+#' independently, without the variance-block family's SBM-path shortcut.
+#' Zero-inflation is supported for a single q or a known clustering
+#' ([ZINormalBlockMeanKnownClusters],
+#' [ZINormalBlockMeanUnknownClusters]), with a diagonal or spherical Sigma
+#' only -- see [NormalBlockMeanBase].
 #' @param control a list-like structure for detailed control on parameters should be
 #' generated with NB_control().
 #' @return an R6 object with one of the model classes (or a collection of model objects).
@@ -216,7 +219,10 @@ get_model <- function(data,
   is_collection     <- changing_sparsity || unknown_q_list
 
   if (model == "mean") {
-    stopifnot("zero-inflation is not implemented for mean-block models (model = 'mean')" = !zero_inflation)
+    stopifnot(
+      "zero-inflated mean-block models are only available for a single q or a known clustering, not for a collection" =
+        !(zero_inflation && (changing_sparsity || unknown_q_list))
+    )
     if (changing_sparsity) {
       return(if (unknown_q_list)
                NormalBlockMeanCollectionClustersSparsity$new(data, blocks, control = control)
@@ -227,6 +233,7 @@ get_model <- function(data,
       return(NormalBlockMeanCollectionClusters$new(data, blocks, sparsity = sparsity, control = control))
     }
     class_name <- if (is.matrix(blocks)) "NormalBlockMeanKnownClusters" else "NormalBlockMeanUnknownClusters"
+    if (zero_inflation) class_name <- paste0("ZI", class_name)
     myClass <- eval(str2lang(class_name))
     return(myClass$new(data, blocks, sparsity, control = control))
   }

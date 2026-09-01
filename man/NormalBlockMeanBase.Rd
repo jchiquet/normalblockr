@@ -58,7 +58,13 @@ structures the mean (mu_i = C B' X_i).
   Create a new [`NormalBlockMeanBase`] object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanBase$new(data, q, sparsity = 0, control = NB_control())}
+    \preformatted{NormalBlockMeanBase$new(
+  data,
+  q,
+  sparsity = 0,
+  control = NB_control(),
+  zero_inflation = FALSE
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -68,6 +74,8 @@ structures the mean (mu_i = C B' X_i).
       \item{\code{q}}{number of block/cluster}
       \item{\code{sparsity}}{sparsity penalty on the network density}
       \item{\code{control}}{structured list of more specific parameters, to generate with NB_Mean_control}
+      \item{\code{zero_inflation}}{whether the concrete subclass models zero-inflation;
+set by the ZI subclasses themselves, not meant to be set by the end user.}
     }
     \if{html}{\out{</div>}}
   }

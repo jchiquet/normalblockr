@@ -58,3 +58,21 @@ test_that("an explicit zeros mask overrides the default Y == 0", {
   expect_error(NormalBlockData$new(ex$Y, ex$X, zeros = mask[, -1]),
                "same dimensions")
 })
+
+test_that("the zero-inflated chain runs and shares one mask across both stages", {
+  set.seed(7)
+  ex <- generate_normal_block_mean_data(n = 80, p = 20, d = 1, q = 3)
+  Y  <- ex$Y; Y[runif(length(Y)) < 0.2] <- 0
+  data <- NormalBlockData$new(Y, ex$X)
+
+  fit <- normal_block_sequential(data, blocks_mean = 3, blocks_var = 2,
+                                 zero_inflation = TRUE)
+
+  expect_s3_class(fit, "normal_block_sequential")
+  expect_true(inherits(fit$mean, "ZINormalBlockMeanUnknownClusters"))
+  expect_true(inherits(fit$var, "ZINormalBlockVarUnknownClusters"))
+  ## the residuals carry no zero of their own, so only the inherited mask can
+  ## have told the second stage where the structural zeros are
+  expect_equal(fit$var$data$zeros, data$zeros)
+  expect_true(all(fit$residuals[data$zeros == 1] == 0))
+})

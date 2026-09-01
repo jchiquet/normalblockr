@@ -36,7 +36,7 @@ NormalBlockVarBase <- R6::R6Class(
       if (is.null(control$noise_covariance)) control$noise_covariance <- "diagonal"
       stopifnot("noise_covariance = 'full' only applies to mean-block models, whose Sigma is the full p x p residual covariance" =
                   control$noise_covariance %in% c("diagonal", "spherical"))
-      super$initialize(data, q, sparsity, control)
+      super$initialize(data, q, sparsity, control, zero_inflation)
       ## penalty mask
       private$sparsity_ <- sparsity
       weights <- matrix(1, q, q)
@@ -48,25 +48,6 @@ NormalBlockVarBase <- R6::R6Class(
       ## variant (either diagonal or spherical residuals covariance)
       private$res_covariance <- control$noise_covariance
 
-      ## kappa/B0/ZI_cond_mean are only used by the ZI subclasses; skip the
-      ## p logistic regressions entirely for plain models.
-      if (zero_inflation) {
-        if(self$data$npY < self$n * self$p){
-          B0_list <- lapply(1:self$data$p,
-                            f <- function(j){
-                              df <- data.frame("zeros" = data$zeros[,j], self$data$X0)
-                              model <- glm(zeros ~ 0 + ., family=binomial(link = "logit"), data=df)
-                              return(model$coefficients)})
-          private$B0 <- t(sapply(B0_list, unlist))
-        }else{
-          private$B0 <- matrix(rep(-Inf, self$data$p * self$data$d0), nrow = self$data$d0)
-        }
-
-        private$kappa <- apply(self$data$X0 %*% private$B0, MARGIN = c(1,2), FUN = sigmoid)
-        private$ZI_cond_mean <-
-          sum(xlogy(data$zeros, private$kappa)) +
-          sum(xlogy(data$zeros_bar, 1 - private$kappa))
-      }
     },
 
     #' @description Seed this model's starting parameters from another,
@@ -222,14 +203,11 @@ NormalBlockVarBase <- R6::R6Class(
     ## inst/methods_initialization_and_refine.md for the benchmark)
     default_inits     = c("ward2", "kmeans", "spectral"),
     dm1               = NA, # diagonal vector of inverse variance matrix (variables level)
-    kappa             = NA, # vector of zero-inflation probabilities
-    B0                = NA, # vector of zero-inflation regression matrix
     gamma             = NA, # variance of  posterior distribution of W
     mu                = NA, # mean for posterior distribution of W
     M                 = NA, # variational mean for posterior distribution of W
     S                 = NA, # variational diagonal of variances for posterior distribution of W
     res_covariance    = NA, # shape of the residuals covariance (diagonal or spherical)
-    ZI_cond_mean      = NA, # conditional mean of the ZI component (fixed),
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated (V)EM inference --------------

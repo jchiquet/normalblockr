@@ -154,3 +154,46 @@ NormalBlockMeanUnknownClusters_fit <- function(Y, X, B0, Omega0, tau0, sparsity,
     .Call(`_normalblockr_NormalBlockMeanUnknownClusters_fit`, Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, noise_covariance, fixed_point_niter, niter, threshold, accelerate, fixed_tau)
 }
 
+#' Fit a zero-inflated mean-block model with known clusters (Rcpp/Armadillo core)
+#'
+#' Equivalent of R6's ZINormalBlockMeanKnownClusters
+#' (R/ZINormalBlockMeanKnownClusters.R); runs the EM recursion from parameters
+#' already initialized on the R side.
+#'
+#' @param Y response matrix (n x p)
+#' @param X design matrix (n x d)
+#' @param zeros_bar zero-inflation mask (n x p), 1 where Y is observed
+#' @param zi_cond_mean fixed log-likelihood contribution of the (pre-estimated)
+#' zero-inflation component (private$ZI_cond_mean in R/NormalBlockBase.R)
+#' @param C fixed cluster-indicator matrix (p x q)
+#' @param B0 initial regression coefficients (d x q)
+#' @param Omega0 initial (diagonal) precision matrix of the variables (p x p)
+#' @param noise_covariance shape of Sigma: "diagonal" or "spherical"
+#' @param niter maximum number of EM iterations
+#' @param threshold convergence threshold on the objective increment
+#' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+#' plain EM
+#' @return a list with the fitted parameters (B, Omega), the log-likelihood
+#' trace and the number of iterations performed
+#' @noRd
+ZINormalBlockMeanKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, B0, Omega0, noise_covariance, niter, threshold, accelerate = TRUE) {
+    .Call(`_normalblockr_ZINormalBlockMeanKnownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, C, B0, Omega0, noise_covariance, niter, threshold, accelerate)
+}
+
+#' Fit a zero-inflated mean-block model with unknown clusters (Rcpp/Armadillo core, VEM)
+#'
+#' Equivalent of R6's ZINormalBlockMeanUnknownClusters
+#' (R/ZINormalBlockMeanUnknownClusters.R); runs the variational EM recursion
+#' from parameters already initialized on the R side.
+#'
+#' @inheritParams ZINormalBlockMeanKnownClusters_fit
+#' @param tau0 initial variational membership probabilities (p x q)
+#' @param fixed_tau if TRUE, the variational membership probabilities are not
+#' re-estimated (useful for stability selection)
+#' @return a list with the fitted parameters (B, Omega, C, alpha), the ELBO
+#' trace and the number of iterations performed
+#' @noRd
+ZINormalBlockMeanUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B0, Omega0, tau0, noise_covariance, niter, threshold, accelerate = TRUE, fixed_tau = FALSE) {
+    .Call(`_normalblockr_ZINormalBlockMeanUnknownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, B0, Omega0, tau0, noise_covariance, niter, threshold, accelerate, fixed_tau)
+}
+

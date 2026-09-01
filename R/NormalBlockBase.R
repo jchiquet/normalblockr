@@ -24,11 +24,12 @@ NormalBlockBase <- R6::R6Class(
     #' @param q number of block/cluster
     #' @param sparsity sparsity penalty on the network density
     #' @param control structured list of more specific parameters, to generate with NB_control
-    #' The ZI parameters are not handled in this class for now because the ZI has
-    #' yet to be implemented in the NormalMeanBlock models. We will also need to create
-    #' a Normal-Mean-Block equivalent to the NB_control function
+    #' @param zero_inflation whether the concrete subclass models zero-inflation;
+    #' set by the ZI subclasses themselves, not meant to be set by the end user.
+    #' When `FALSE`, the (costly) zero-inflation probability fit (`kappa`/`B0`)
+    #' is skipped entirely, since it would otherwise never be used downstream.
     #' @return A new [`NormalBlockBase`] object
-    initialize = function(data, q, sparsity = 0, control) {
+    initialize = function(data, q, sparsity = 0, control, zero_inflation = FALSE) {
       self$data <- data
       stopifnot("There cannot be more blocks than there are entities to cluster" = q <= ncol(self$data$Y))
 
@@ -70,6 +71,8 @@ NormalBlockBase <- R6::R6Class(
       } else {
         private$C <- matrix(NA, self$data$n, q)
       }
+
+      if (zero_inflation) private$fit_zi_component()
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -429,6 +432,9 @@ NormalBlockBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    kappa             = NA, # matrix of zero-inflation probabilities
+    B0                = NA, # zero-inflation regression matrix
+    ZI_cond_mean      = NA, # fixed contribution of the ZI component to the log-likelihood
     B                 = NA, # regression matrix
     C                 = NA, # the matrix of posterior probabilities (tau) or group affectation
     Omega            = NA, # precision matrix for clusters or variables
@@ -476,6 +482,26 @@ NormalBlockBase <- R6::R6Class(
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ## Zero-inflation probabilities, fitted once from X0 by p independent
+    ## logistic regressions and never revisited by the (V)EM: only their fixed
+    ## log-likelihood contribution (ZI_cond_mean) reaches the recursion. Shared
+    ## by both model families.
+    fit_zi_component = function() {
+      if (self$data$npY < self$n * self$p) {
+        B0_list <- lapply(1:self$data$p, function(j) {
+          df <- data.frame("zeros" = self$data$zeros[, j], self$data$X0)
+          glm(zeros ~ 0 + ., family = binomial(link = "logit"), data = df)$coefficients
+        })
+        private$B0 <- t(sapply(B0_list, unlist))
+      } else {
+        private$B0 <- matrix(rep(-Inf, self$data$p * self$data$d0), nrow = self$data$d0)
+      }
+      private$kappa <- apply(self$data$X0 %*% private$B0, MARGIN = c(1, 2), FUN = sigmoid)
+      private$ZI_cond_mean <-
+        sum(xlogy(self$data$zeros, private$kappa)) +
+        sum(xlogy(self$data$zeros_bar, 1 - private$kappa))
+    },
+
     ## Methods for integrated (V)EM inference --------------
     ## Each concrete subclass overrides EM_optimize() to call its
     ## Rcpp/Armadillo core (see src/exports.cpp and

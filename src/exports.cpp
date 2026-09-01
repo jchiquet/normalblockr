@@ -6,6 +6,7 @@
 #include "normal_block_mean_types.h"
 #include "zi_normal_block_data.h"
 #include "zi_normal_block_var_types.h"
+#include "zi_normal_block_mean_types.h"
 
 namespace {
 
@@ -330,6 +331,82 @@ Rcpp::List NormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::ma
     Rcpp::Named("Psi")       = model.Psi(),
     Rcpp::Named("Phi")       = model.Phi(),
     Rcpp::Named("Lambda")    = model.Lambda(),
+    Rcpp::Named("objective") = Rcpp::wrap(model.objective_trace()),
+    Rcpp::Named("niter")     = model.niter()
+  );
+}
+
+//' Fit a zero-inflated mean-block model with known clusters (Rcpp/Armadillo core)
+//'
+//' Equivalent of R6's ZINormalBlockMeanKnownClusters
+//' (R/ZINormalBlockMeanKnownClusters.R); runs the EM recursion from parameters
+//' already initialized on the R side.
+//'
+//' @param Y response matrix (n x p)
+//' @param X design matrix (n x d)
+//' @param zeros_bar zero-inflation mask (n x p), 1 where Y is observed
+//' @param zi_cond_mean fixed log-likelihood contribution of the (pre-estimated)
+//' zero-inflation component (private$ZI_cond_mean in R/NormalBlockBase.R)
+//' @param C fixed cluster-indicator matrix (p x q)
+//' @param B0 initial regression coefficients (d x q)
+//' @param Omega0 initial (diagonal) precision matrix of the variables (p x p)
+//' @param noise_covariance shape of Sigma: "diagonal" or "spherical"
+//' @param niter maximum number of EM iterations
+//' @param threshold convergence threshold on the objective increment
+//' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+//' plain EM
+//' @return a list with the fitted parameters (B, Omega), the log-likelihood
+//' trace and the number of iterations performed
+//' @noRd
+// [[Rcpp::export]]
+Rcpp::List ZINormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat& X,
+                                              const arma::mat& zeros_bar, double zi_cond_mean,
+                                              const arma::mat& C,
+                                              arma::mat B0, arma::mat Omega0,
+                                              std::string noise_covariance,
+                                              int niter, double threshold,
+                                              bool accelerate = true) {
+  ZINormalBlockData data(Y, X, zeros_bar, zi_cond_mean);
+  zi_norm_block_mean_known_clusters model(data, C, B0, Omega0, accelerate, noise_covariance);
+  model.run_em(niter, threshold);
+  return Rcpp::List::create(
+    Rcpp::Named("B")         = model.B(),
+    Rcpp::Named("Omega")     = model.Omega(),
+    Rcpp::Named("objective") = Rcpp::wrap(model.objective_trace()),
+    Rcpp::Named("niter")     = model.niter()
+  );
+}
+
+//' Fit a zero-inflated mean-block model with unknown clusters (Rcpp/Armadillo core, VEM)
+//'
+//' Equivalent of R6's ZINormalBlockMeanUnknownClusters
+//' (R/ZINormalBlockMeanUnknownClusters.R); runs the variational EM recursion
+//' from parameters already initialized on the R side.
+//'
+//' @inheritParams ZINormalBlockMeanKnownClusters_fit
+//' @param tau0 initial variational membership probabilities (p x q)
+//' @param fixed_tau if TRUE, the variational membership probabilities are not
+//' re-estimated (useful for stability selection)
+//' @return a list with the fitted parameters (B, Omega, C, alpha), the ELBO
+//' trace and the number of iterations performed
+//' @noRd
+// [[Rcpp::export]]
+Rcpp::List ZINormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::mat& X,
+                                                const arma::mat& zeros_bar, double zi_cond_mean,
+                                                arma::mat B0, arma::mat Omega0, arma::mat tau0,
+                                                std::string noise_covariance,
+                                                int niter, double threshold,
+                                                bool accelerate = true,
+                                                bool fixed_tau = false) {
+  ZINormalBlockData data(Y, X, zeros_bar, zi_cond_mean);
+  zi_norm_block_mean_unknown_clusters model(data, B0, Omega0, tau0, accelerate, fixed_tau,
+                                            noise_covariance);
+  model.run_em(niter, threshold);
+  return Rcpp::List::create(
+    Rcpp::Named("B")         = model.B(),
+    Rcpp::Named("Omega")     = model.Omega(),
+    Rcpp::Named("C")         = model.tau(),
+    Rcpp::Named("alpha")     = to_rvector(model.alpha()),
     Rcpp::Named("objective") = Rcpp::wrap(model.objective_trace()),
     Rcpp::Named("niter")     = model.niter()
   );
