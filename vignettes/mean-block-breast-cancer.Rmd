@@ -159,7 +159,7 @@ for a long time: on a narrow range such as `1:15` they would still be
 decreasing at the upper end, and "selecting" its boundary would mean nothing.
 
 ```{r, collection-criteria, fig.width=7, fig.height=4}
-NB_means$plot(c("deviance", "BIC"))
+NB_means$plot(c("deviance", "BIC", "ICL"))
 ```
 
 ```{r, collection-selection}
