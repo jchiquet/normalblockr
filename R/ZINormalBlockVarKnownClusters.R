@@ -39,7 +39,7 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
       list(B = zi_diag$B, dm1 = zi_diag$dm1, Omega = Omega, kappa = zi_diag$kappa)
     },
 
-    EM_initialize = function() {
+    optim_initialize = function() {
       if (private$warm_started) {
         list(B = private$B, dm1 = private$dm1, Omega = private$Omega, kappa = private$kappa,
              gamma = private$gamma, mu = private$mu)
@@ -53,7 +53,7 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
     ## Runs the EM recursion via the Rcpp/Armadillo core (src/exports.cpp,
     ## ZINormalBlockVarKnownClusters_fit); see inst/normal_block_models.qmd §6/§7.
     EM_optimize = function(control) {
-      init <- private$EM_initialize()
+      init <- private$optim_initialize()
       res  <- ZINormalBlockVarKnownClusters_fit(
         Y = self$data$Y, X = self$data$X,
         zeros_bar = self$data$zeros_bar, zi_cond_mean = private$ZI_cond_mean, C = private$C,
@@ -104,7 +104,7 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
     },
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
-    {paste("zero-inflated", private$res_covariance, "normal-block model with fixed blocks")}
+    {paste("zero-inflated", private$res_covariance, "normal-block-var model with fixed blocks")}
   )
 )
 

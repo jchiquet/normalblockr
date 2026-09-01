@@ -24,7 +24,7 @@
 #' @return an R6 object with one of the model classes (or a collection of model objects).
 #' @examples
 #' ## Normal Data
-#' ex_data <- generate_normal_block_var_data(n=50, p=50, d=1, q=3)
+#' ex_data <- generate_normal_block_var_data(n=100, p=30, d=1, q=3)
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' my_normal_block <- normal_block(data, blocks = 1:6)
 #' my_normal_block$plot(c("deviance", "BIC", "ICL"))

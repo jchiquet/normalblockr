@@ -96,7 +96,7 @@ NormalBlockBase <- R6::R6Class(
     #' @param Phi variational correction term used in the Psi/ELBO computations [NBMean - unknown]
     #' @param Lambda variational correction term used in the Sigma-hat update [NBMean - unknown]
     #' @param ll_list  list of log-lik (elbo) values
-    #' @param warm_started whether `EM_initialize()` should treat the model as
+    #' @param warm_started whether `optim_initialize()` should treat the model as
     #' already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
     #' rather than recomputing a fresh heuristic initialization -- set by
     #' [warm_start_from()] and by [split()]/[merge()].
@@ -451,7 +451,7 @@ NormalBlockBase <- R6::R6Class(
     # hit the cap?" diagnostic)
     threshold         = NA, # convergence threshold passed to the last optimize() call (idem)
     warm_started      = FALSE, # set by warm_start_from() and by split()/merge(): tells
-    # EM_initialize() to reuse the current B/dm1/Omega (and
+    # optim_initialize() to reuse the current B/dm1/Omega (and
     # C/M/S/alpha or gamma/mu) instead of (re-)deriving them
     # from the heuristic clustering.
     # Deliberately NOT inferred from "are these fields non-NA",
@@ -505,7 +505,7 @@ NormalBlockBase <- R6::R6Class(
     ## Methods for integrated (V)EM inference --------------
     ## Each concrete subclass overrides EM_optimize() to call its
     ## Rcpp/Armadillo core (see src/exports.cpp and
-    ## inst/normal_block_models.qmd); EM_initialize() (heuristic
+    ## inst/normal_block_models.qmd); optim_initialize() (heuristic
     ## initialization) stays in R and supplies the starting values.
     ## MLE of MV Normal distribution
     multivariate_normal_inference = function(){
@@ -515,7 +515,7 @@ NormalBlockBase <- R6::R6Class(
       list(B = B, R = R, Sigma = Sigma)
     },
 
-    EM_initialize = function() {},
+    optim_initialize = function() {},
 
     ## Converts a per-variable quantity from the internal (rescaled) fitting
     ## scale back to Y's original units: power = 1 for additive quantities

@@ -124,7 +124,7 @@ NormalBlockVarBase <- R6::R6Class(
       ## omega_from_M_S().
       new_Omega <- private$omega_from_M_S(new_M, new_S, new_weights)
 
-      ## Mark as already initialized so EM_initialize() reuses this state
+      ## Mark as already initialized so optim_initialize() reuses this state
       ## instead of a fresh heuristic clustering.
       if (in_place) {
         self$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
@@ -176,7 +176,7 @@ NormalBlockVarBase <- R6::R6Class(
       ## omega_from_M_S().
       new_Omega <- private$omega_from_M_S(new_M, new_S, new_weights)
 
-      ## See split()'s comment: mark as warm-started so EM_initialize()
+      ## See split()'s comment: mark as warm-started so optim_initialize()
       ## reuses this state instead of a fresh heuristic Sigmaq/Omega.
       if (in_place) {
         self$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
@@ -352,8 +352,6 @@ NormalBlockVarBase <- R6::R6Class(
     #' different factors -- correctly so, since a single shared *scaled*
     #' variance does not correspond to a single shared variance in the
     #' original, heterogeneous-scale units.
-    dm1_original = function() private$rescale_to_original(private$dm1, power = -2),
-    #' @field get_res_covariance whether the residual covariance is diagonal or spherical
-    get_res_covariance = function() private$res_covariance
+    dm1_original = function() private$rescale_to_original(private$dm1, power = -2)
   )
 )

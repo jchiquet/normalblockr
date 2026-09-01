@@ -40,7 +40,7 @@ NormalBlockVarKnownClusters <- R6::R6Class(
       list(B = reg_res$B, dm1 = dm1, Omega = Omega)
     },
 
-    EM_initialize = function() {
+    optim_initialize = function() {
       if (private$warm_started) {
         list(B = private$B, dm1 = private$dm1, Omega = private$Omega,
              gamma = private$gamma, mu = private$mu)
@@ -54,7 +54,7 @@ NormalBlockVarKnownClusters <- R6::R6Class(
     ## Runs the EM recursion via the Rcpp/Armadillo core (src/exports.cpp,
     ## NormalBlockVarKnownClusters_fit); see inst/normal_block_models.qmd §1/§2.
     EM_optimize = function(control) {
-      init <- private$EM_initialize()
+      init <- private$optim_initialize()
       res  <- NormalBlockVarKnownClusters_fit(
         Y = self$data$Y, X = self$data$X, C = private$C,
         B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,

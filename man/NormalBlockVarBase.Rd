@@ -43,8 +43,6 @@ differ from one another whenever Y's columns were rescaled by
 different factors -- correctly so, since a single shared *scaled*
 variance does not correspond to a single shared variance in the
 original, heterogeneous-scale units.}
-
-    \item{\code{get_res_covariance}}{whether the residual covariance is diagonal or spherical}
   }
   \if{html}{\out{</div>}}
 }

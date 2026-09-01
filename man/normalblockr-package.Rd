@@ -25,5 +25,10 @@ Authors:
   \item Jeanne Tous \email{jeanne.tous@inrae.fr}
 }
 
+Other contributors:
+\itemize{
+  \item Nestor Nglala Manguitini [contractor]
+}
+
 }
 \keyword{internal}

@@ -44,7 +44,7 @@ test_that("NormalBlockVarCollectionClusters with clustering_init = 'sbm' eagerly
     ## every model converges to a valid q-cluster initialization once
     ## actually initialized, whether served by the shared path or (for q's it
     ## didn't cover) by the per-q heuristic fallback
-    init <- model$.__enclos_env__$private$EM_initialize()
+    init <- model$.__enclos_env__$private$optim_initialize()
     expect_equal(length(unique(get_clusters(init$C))), model$q)
   }
   expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
@@ -84,7 +84,7 @@ test_that("zero-inflated collections also use the shared sbm path, clustering on
                                   control = NB_control(verbose = FALSE, clustering_init = "sbm"))
   ## clustering_init is now eagerly injected from the shared path, just like
   ## for non-ZI collections -- private$C is already a valid q-cluster
-  ## indicator matrix before optimize()/EM_initialize() ever runs
+  ## indicator matrix before optimize()/optim_initialize() ever runs
   for (model in coll$models) {
     C0 <- model$.__enclos_env__$private$C
     expect_false(anyNA(C0))

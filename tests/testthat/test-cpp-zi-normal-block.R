@@ -22,7 +22,7 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ## C++ side solves it directly (see src/zi_closed_form_solvers.h) instead of
 ## going through an iterative optimizer -- hence the comparable tolerance to
 ## the non zero-inflated tests (test-cpp-normal-block.R). The R6 heuristic
-## initialization (private method EM_initialize) is reached into via R6's
+## initialization (private method optim_initialize) is reached into via R6's
 ## `.__enclos_env__` so that both implementations start from the very same
 ## point.
 
@@ -33,7 +33,7 @@ test_that("ZINormalBlockVarKnownClusters_fit matches ZINormalBlockVarKnownCluste
     for (sparsity in c(0, 0.05)) {
       model <- ZINormalBlockVarKnownClusters$new(data, C, sparsity = sparsity,
                                       control = NB_control(noise_covariance = nc, verbose = FALSE))
-      init <- model$.__enclos_env__$private$EM_initialize()
+      init <- model$.__enclos_env__$private$optim_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       zi_cond_mean <- model$.__enclos_env__$private$ZI_cond_mean
@@ -64,7 +64,7 @@ test_that("ZINormalBlockVarUnknownClusters_fit matches ZINormalBlockVarUnknownCl
     for (sparsity in c(0, 0.05)) {
       model <- ZINormalBlockVarUnknownClusters$new(data, q, sparsity = sparsity,
                                  control = NB_control(noise_covariance = nc, verbose = FALSE))
-      init <- model$.__enclos_env__$private$EM_initialize()
+      init <- model$.__enclos_env__$private$optim_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       zi_cond_mean <- model$.__enclos_env__$private$ZI_cond_mean

@@ -52,7 +52,7 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated inference ------------------------
 
-    EM_initialize = function() {
+    optim_initialize = function() {
       if (private$warm_started) {
         list(B = private$B, dm1 = private$dm1, Omega = private$Omega, kappa = private$kappa,
              alpha = private$alpha, C = private$C, M = private$M, S = private$S)
@@ -66,7 +66,7 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
     ## Runs the VEM recursion via the Rcpp/Armadillo core (src/exports.cpp,
     ## ZINormalBlockVarUnknownClusters_fit); see inst/normal_block_models.qmd §8/§9.
     EM_optimize = function(control) {
-      init <- private$EM_initialize()
+      init <- private$optim_initialize()
       res  <- ZINormalBlockVarUnknownClusters_fit(
         Y = self$data$Y, X = self$data$X,
         zeros_bar = self$data$zeros_bar, zi_cond_mean = private$ZI_cond_mean,
@@ -118,7 +118,7 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
     },
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
-    {paste("zero-inflated", private$res_covariance, "normal-block model with", self$q, "unknown blocks")}
+    {paste("zero-inflated", private$res_covariance, "normal-block-var model with", self$q, "unknown blocks")}
   )
 )
 

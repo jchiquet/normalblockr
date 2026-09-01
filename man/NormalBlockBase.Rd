@@ -158,7 +158,7 @@ models, variable-level for Normal Mean Block models) [all]}
       \item{\code{Phi}}{variational correction term used in the Psi/ELBO computations [NBMean - unknown]}
       \item{\code{Lambda}}{variational correction term used in the Sigma-hat update [NBMean - unknown]}
       \item{\code{ll_list}}{list of log-lik (elbo) values}
-      \item{\code{warm_started}}{whether `EM_initialize()` should treat the model as
+      \item{\code{warm_started}}{whether `optim_initialize()` should treat the model as
 already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
 rather than recomputing a fresh heuristic initialization -- set by
 [warm_start_from()] and by [split()]/[merge()].}

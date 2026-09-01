@@ -53,7 +53,7 @@ NormalBlockVarUnknownClusters <- R6::R6Class(
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated inference ------------------------
 
-    EM_initialize = function() {
+    optim_initialize = function() {
       if (private$warm_started) {
         list(B = private$B, Omega = private$Omega, dm1 = private$dm1,
              C = private$C, alpha = private$alpha, M = private$M, S = private$S)
@@ -67,7 +67,7 @@ NormalBlockVarUnknownClusters <- R6::R6Class(
     ## Runs the VEM recursion via the Rcpp/Armadillo core (src/exports.cpp,
     ## NormalBlockVarUnknownClusters_fit); see inst/normal_block_models.qmd §3/§4.
     EM_optimize = function(control) {
-      init <- private$EM_initialize()
+      init <- private$optim_initialize()
       res  <- NormalBlockVarUnknownClusters_fit(
         Y = self$data$Y, X = self$data$X,
         B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,

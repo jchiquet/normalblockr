@@ -18,7 +18,7 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ## same initial parameters, both unpenalized (sparsity = 0, plain inversion)
 ## and penalized (sparsity > 0, graphical lasso via glassoFast, called back
 ## from C++, see src/omega_estimation.h). The R6 heuristic initialization
-## (private method EM_initialize) is reached into via R6's `.__enclos_env__`
+## (private method optim_initialize) is reached into via R6's `.__enclos_env__`
 ## so that both implementations start from the very same point.
 
 test_that("NormalBlockVarKnownClusters_fit matches NormalBlockVarKnownClusters (diagonal/spherical, unpenalized/sparse)", {
@@ -28,7 +28,7 @@ test_that("NormalBlockVarKnownClusters_fit matches NormalBlockVarKnownClusters (
     for (sparsity in c(0, 0.05)) {
       model <- NormalBlockVarKnownClusters$new(data, C, sparsity = sparsity,
                                     control = NB_control(noise_covariance = nc, verbose = FALSE))
-      init <- model$.__enclos_env__$private$EM_initialize()
+      init <- model$.__enclos_env__$private$optim_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       res <- NormalBlockVarKnownClusters_fit(Y = data$Y, X = data$X, C = C,
@@ -53,7 +53,7 @@ test_that("NormalBlockVarUnknownClusters_fit matches NormalBlockVarUnknownCluste
     for (sparsity in c(0, 0.05)) {
       model <- NormalBlockVarUnknownClusters$new(data, q, sparsity = sparsity,
                               control = NB_control(noise_covariance = nc, verbose = FALSE))
-      init <- model$.__enclos_env__$private$EM_initialize()
+      init <- model$.__enclos_env__$private$optim_initialize()
       model$optimize(control = list(niter = niter, threshold = threshold))
 
       res <- NormalBlockVarUnknownClusters_fit(Y = data$Y, X = data$X,

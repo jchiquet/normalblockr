@@ -254,7 +254,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
     entropy    = function() -sum(xlogx(private$C)),
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
-    {paste("normal-block-mean model with unknown blocks")}
+    {paste(private$res_covariance, "normal-block-mean model with", self$q, "unknown blocks")}
   )
 )
 
