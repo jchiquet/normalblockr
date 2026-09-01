@@ -1,0 +1,258 @@
+---
+title: "Mean-Block models: clustering variables by their response to covariates"
+author: "Julien Chiquet & Jeanne Tous"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 4
+bibliography: references.bib
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Mean-Block models: clustering variables by their response to covariates}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Preliminaries
+
+This vignette introduces the **Mean-Block** model (`model = "mean"`), the second
+model family shipped with `normalblockr`. Where the Normal-Block model of the
+`normal-block` vignette puts the clustering in the *latent covariance*, this one
+puts it in the *mean*: variables are grouped by how their expected value responds
+to the covariates.
+
+We use the same dataset as the `breast-cancer-proteomics` vignette (`?brca_rppa`)
+on purpose, so that the two families can be read side by side on data you have
+already seen: 163 proteins measured on 346 breast-cancer tumor samples, with each
+sample's PAM50 molecular subtype as the covariate.
+
+```{r, set-up}
+library(normalblockr)
+```
+
+# Mathematical background
+
+Write $Z \in \mathbb{R}^{n \times p}$ for the (log-)responses and
+$X \in \mathbb{R}^{n \times d}$ for the design matrix. Each observation is
+Gaussian, with a mean built from a *clustering of the variables*:
+
+$$Z_i \sim \mathcal{N}(\mu_i, \Sigma), \qquad \mu_i = C B^\top X_i$$
+
+where
+
+- $B \in \mathbb{R}^{d \times q}$ holds one regression profile **per cluster**,
+  so $B^\top X_i \in \mathbb{R}^q$ is the linear predictor of each of the $q$
+  clusters for observation $i$;
+- $C \in \{0,1\}^{p \times q}$ assigns every variable to exactly one cluster, and
+  maps those $q$ cluster-level predictors back onto the $p$ variables;
+- $\Sigma \in \mathbb{R}^{p \times p}$ is the residual covariance between
+  variables.
+
+The modelling assumption is that **all variables in a cluster share the same
+regression profile**. This is what makes the model parsimonious: the regression
+part costs $d \times q$ parameters instead of the $d \times p$ of an
+unconstrained multivariate regression, with $q \ll p$.
+
+Contrast this with the Normal-Block model of the other vignettes, where $C$
+structures $\mathrm{Var}(Z_i)$ and the covariates only enter through a
+variable-wise $B^\top X_i$: there, two variables are in the same cluster when
+they *covary* the same way; here, when they *respond* the same way. The two
+answer different questions and generally return different groupings.
+
+### Known versus unknown clustering
+
+When $C$ is known, $(B, \Sigma)$ are obtained by a plain EM alternating
+
+$$\widehat B = (X^\top X)^{-1}(X^\top Z)\,\Sigma^{-1} C \,(C^\top \Sigma^{-1} C)^{-1},
+\qquad \widehat\Sigma = \tfrac{1}{n} \widehat R^\top \widehat R,$$
+
+with $\widehat R = Z - X \widehat B C^\top$ the residuals. One recognizes a
+generalized-least-squares estimator: the unconstrained fit
+$(X^\top X)^{-1}X^\top Z$ projected onto the space of coefficients compatible
+with the clustering.
+
+When $C$ is unknown it becomes a latent variable, with
+$C_{j\bullet} \sim \mathcal{M}(1, \alpha)$. The observed likelihood then sums
+over $q^p$ configurations and is intractable, so the fit maximizes a variational
+lower bound (ELBO) under a mean-field approximation
+$Q(C) = \prod_j Q_j(C_{j\bullet})$, parametrized by
+$\tau \in [0,1]^{p \times q}$, $\tau_{jk} = \mathbb{E}_Q[C_{jk}]$:
+
+$$J(\theta) = -\frac{np}{2}\log(2\pi) + \frac{n}{2}\log|\Sigma^{-1}|
+ + \sum_{j,k} \tau_{jk}\log\alpha_k - \sum_{j,k}\tau_{jk}\log\tau_{jk}
+ - \frac{1}{2}\Big[\mathrm{Tr}(R\Sigma^{-1}R^\top) + \mathrm{Tr}(\Phi B^\top X^\top X B)\Big]$$
+
+with $R = Z - XB\tau^\top$ and $\Phi$ a correction term accounting for the
+uncertainty on the assignments (it vanishes as $\tau$ becomes binary). The
+variational E-step updates $\tau$ one variable at a time: with the other rows
+held fixed the ELBO is linear in $\tau_{j\bullet}$ up to its entropy, so each
+row's softmax is an *exact* maximization and a sweep can never decrease the
+ELBO.
+
+See @tous2026 for the Normal-Block model itself; the mean-block derivations
+follow the same variational recipe.
+
+# The data
+
+```{r, data-load}
+data(brca_rppa)
+Y <- as.matrix(brca_rppa$expr)
+X <- model.matrix(~ 0 + PAM50_SUBTYPE, data = brca_rppa$covariates)
+nb_data <- NormalBlockData$new(Y, X)
+dim(Y)
+table(brca_rppa$covariates$PAM50_SUBTYPE)
+```
+
+`X` has one indicator column per PAM50 subtype, so each cluster's profile
+$B_{\bullet k} \in \mathbb{R}^5$ is simply its mean expression level in each of
+the five subtypes. Clustering the proteins therefore amounts to grouping them by
+*subtype signature*.
+
+# A known clustering
+
+The dataset ships a Gene Ontology annotation (one biological-process term per
+protein), which gives a clustering built with no reference to the model at all.
+Handing it to `normal_block()` as a matrix fixes $C$: only $(B, \Sigma)$ are
+estimated.
+
+```{r, known-clustering}
+go_term  <- factor(brca_rppa$gene_annotation$go_bp_term)
+C_go     <- model.matrix(~ 0 + go_term)
+NB_go    <- normal_block(nb_data, blocks = C_go, model = "mean",
+                         control = NB_control(verbose = FALSE))
+NB_go
+```
+
+The fitted `B` is a $5 \times q$ matrix of subtype profiles, one column per GO
+term, and `fitted()` maps them back onto the proteins:
+
+```{r, known-clustering-fitted, fig.width=6, fig.height=4}
+dim(coef(NB_go))
+plot(Y, fitted(NB_go), pch = ".", xlab = "observed", ylab = "fitted")
+abline(0, 1, col = "red")
+```
+
+# Letting the model infer the clustering
+
+## A collection over the number of clusters
+
+With `blocks` a range of values, `normal_block()` returns one fitted model per
+$q$. The initial clustering of each is derived from every protein's own fitted
+profile $X\widehat B_{\bullet j}$ (see `NB_control(clustering_init = )`; `kmeans`
+is this family's default).
+
+```{r, collection}
+NB_means <- normal_block(nb_data, blocks = 1:15, model = "mean",
+                         control = NB_control(verbose = FALSE))
+```
+
+```{r, collection-criteria, fig.width=7, fig.height=4}
+NB_means$plot(c("deviance", "BIC", "ICL"))
+```
+
+```{r, collection-selection}
+selected <- NB_means$get_best_model("ICL")
+paste0("ICL selects ", selected$q, " clusters.")
+```
+
+## Refining the collection
+
+Every model above was fitted independently from its own cold start. `refine()`
+tries, for each $q$, a short split-and-reoptimize seeded from the fitted $q-1$
+neighbour and a merge-and-reoptimize seeded from the $q+1$ one, keeping a
+candidate only if it strictly lowers the deviance -- so it can only improve (or
+leave unchanged) each model it touches.
+
+```{r, refine}
+NB_means$refine(verbose = FALSE)
+selected <- NB_means$get_best_model("ICL")
+paste0("After refine(), ICL selects ", selected$q, " clusters.")
+```
+
+```{r, refine-criteria, fig.width=7, fig.height=4}
+NB_means$plot(c("deviance", "BIC", "ICL"))
+```
+
+## Reading the clusters
+
+```{r, clusters}
+table(selected$clustering)
+```
+
+Each cluster's profile across the five subtypes is a column of `coef()`; a
+heatmap of that matrix is the most direct summary of what the model found.
+
+```{r, cluster-profiles, fig.width=7, fig.height=4}
+profiles <- coef(selected)
+rownames(profiles) <- levels(brca_rppa$covariates$PAM50_SUBTYPE)
+colnames(profiles) <- paste0("cluster ", seq_len(ncol(profiles)))
+image(seq_len(nrow(profiles)), seq_len(ncol(profiles)), profiles,
+      axes = FALSE, xlab = "", ylab = "", col = hcl.colors(20, "RdBu", rev = TRUE))
+axis(1, seq_len(nrow(profiles)), rownames(profiles), las = 2, cex.axis = .7)
+axis(2, seq_len(ncol(profiles)), colnames(profiles), las = 2, cex.axis = .7)
+```
+
+# Choosing the shape of the residual covariance
+
+$\Sigma$ is a full $p \times p$ matrix by default, which costs $p(p+1)/2$
+parameters and requires $n > p$. Two cheaper shapes are available through
+`NB_control(noise_covariance = )`, mirroring the option of the variance-block
+family: `"diagonal"` (one variance per variable) and `"spherical"` (a single
+variance). Neither inverts anything, so both also lift the $n > p$ requirement --
+useful when variables outnumber observations.
+
+```{r, covariance-shapes}
+shapes <- c("full", "diagonal", "spherical")
+fits   <- lapply(shapes, function(s)
+  normal_block(nb_data, blocks = selected$q, model = "mean",
+               control = NB_control(verbose = FALSE, noise_covariance = s)))
+data.frame(
+  covariance = shapes,
+  nb_param   = sapply(fits, `[[`, "nb_param"),
+  loglik     = round(sapply(fits, `[[`, "loglik"), 1),
+  BIC        = round(sapply(fits, `[[`, "BIC"), 1)
+)
+```
+
+On this dataset BIC prefers the diagonal residual covariance: the full one buys
+likelihood, but not enough to pay for its $p(p+1)/2 \approx 13{,}000$ parameters
+estimated from 346 observations. Worth checking rather than assuming, and worth
+keeping in mind that the three shapes answer different questions -- a diagonal
+$\Sigma$ says nothing about how proteins co-vary once the subtype and the
+cluster structure are accounted for, which is exactly what the next section
+looks at.
+
+# Sparsifying the residual covariance
+
+If the residual associations *are* the object of interest, the full $\Sigma$ is
+required -- but a dense $163 \times 163$ precision matrix is unreadable, and
+poorly determined from 346 observations. Keeping the selected clustering fixed,
+a graphical-lasso penalty on $\Sigma^{-1}$ addresses both at once, turning it
+into a network of *conditional* associations between proteins, given the subtype
+and the cluster structure.
+
+```{r, sparse-fit}
+C_selected <- model.matrix(~ 0 + factor(selected$clustering))
+NB_sparse  <- normal_block(nb_data, blocks = C_selected, sparsity = 0.4,
+                           model = "mean", control = NB_control(verbose = FALSE))
+paste0(NB_sparse$n_edges, " edges out of ", choose(ncol(Y), 2), " possible ones.")
+```
+
+```{r, sparse-network, fig.width=6, fig.height=6}
+NB_sparse$plot_network(output = "corrplot")
+```
+
+Passing `sparsity = TRUE` instead of a single value explores a whole path of
+penalties and returns a collection, selected by BIC or EBIC as usual. Be aware
+that each penalty triggers a graphical lasso on a $p \times p$ matrix at *every*
+EM iteration: on this dataset a full path costs a couple of orders of magnitude
+more than the single fit above, which is why a fixed penalty is used here.
+
+# References
