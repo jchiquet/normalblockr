@@ -27,9 +27,7 @@ a vector of integers to explore, or a p x q indicator matrix}
 
 \item{zero_inflation}{whether Y carries structural zeros. Both stages are
 then zero-inflated, sharing the same mask: the second one would otherwise
-re-derive it from residuals, which are never exactly zero. The mean-block
-stage then only accepts a single q or a known clustering (see
-[normal_block()]).}
+re-derive it from residuals, which are never exactly zero.}
 
 \item{control_mean}{control list for the mean-block stage, see [NB_control()]}
 

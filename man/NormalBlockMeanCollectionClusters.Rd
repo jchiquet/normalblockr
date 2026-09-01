@@ -59,6 +59,7 @@ models$get_best_model()
     \preformatted{NormalBlockMeanCollectionClusters$new(
   mydata,
   q_list,
+  zero_inflation = FALSE,
   sparsity = 0,
   control = NB_control()
 )}
@@ -69,6 +70,9 @@ models$get_best_model()
     \describe{
       \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
       \item{\code{q_list}}{list of q values (number of groups) in the collection}
+      \item{\code{zero_inflation}}{whether Y carries structural zeros; every model in
+the collection is then zero-inflated (Sigma diagonal or spherical only,
+see [NormalBlockMeanBase])}
       \item{\code{sparsity}}{sparsity penalty on the network density}
       \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
     }

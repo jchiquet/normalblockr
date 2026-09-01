@@ -34,7 +34,24 @@ test_that("fixed_tau leaves the clustering untouched", {
   expect_equal(fit$clustering, truth)
 })
 
-test_that("collections are refused for now", {
-  expect_error(normal_block(datazi, 2:4, model = "mean", zero_inflation = TRUE, control = ctrl),
-               "collection")
+test_that("a sparsity path is refused: it would need a full Sigma", {
+  expect_error(normal_block(datazi, 3, sparsity = TRUE, model = "mean",
+                            zero_inflation = TRUE, control = ctrl),
+               "full Sigma")
+})
+
+test_that("a collection over a range of q runs, selects and refines", {
+  coll <- normal_block(datazi, 2:5, model = "mean", zero_inflation = TRUE, control = ctrl)
+  expect_s3_class(coll, "NormalBlockMeanCollectionClusters")
+  expect_true(all(map_lgl(coll$models, inherits, "ZINormalBlockMeanUnknownClusters")))
+  expect_equal(nrow(coll$criteria), 4L)
+  expect_true(all(is.finite(coll$criteria$BIC)))
+  expect_equal(coll$get_best_model("ICL")$q, 3L)
+
+  ## deviance is non-increasing in q for nested models: a violation would
+  ## measure an optimization failure, not a modelling one
+  expect_true(all(diff(coll$criteria$deviance) <= 1e-6))
+
+  coll$refine(verbose = FALSE)
+  expect_true(all(is.finite(coll$criteria$BIC)))
 })

@@ -35,10 +35,10 @@ one ([NormalBlockMeanCollectionClusters],
 [NormalBlockMeanCollectionSparsity] and their crossing,
 [NormalBlockMeanCollectionClustersSparsity]) -- each q simply fit
 independently, without the variance-block family's SBM-path shortcut.
-Zero-inflation is supported for a single q or a known clustering
-([ZINormalBlockMeanKnownClusters],
-[ZINormalBlockMeanUnknownClusters]), with a diagonal or spherical Sigma
-only -- see [NormalBlockMeanBase].}
+Zero-inflation is supported ([ZINormalBlockMeanKnownClusters],
+[ZINormalBlockMeanUnknownClusters], and collections of those over a range
+of q), with a diagonal or spherical Sigma only, hence not along a sparsity
+path -- see [NormalBlockMeanBase].}
 }
 \value{
 an R6 object with one of the model classes (or a collection of model objects).

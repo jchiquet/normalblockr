@@ -31,10 +31,14 @@ NormalBlockMeanCollectionClusters <- R6::R6Class(
     #' @description Create a new [`NormalBlockMeanCollectionClusters`] object.
     #' @param mydata object of NormalBlockData class, with responses and design matrix
     #' @param q_list list of q values (number of groups) in the collection
+    #' @param zero_inflation whether Y carries structural zeros; every model in
+    #' the collection is then zero-inflated (Sigma diagonal or spherical only,
+    #' see [NormalBlockMeanBase])
     #' @param sparsity sparsity penalty on the network density
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`NormalBlockMeanCollectionClusters`] object
-    initialize = function(mydata, q_list, sparsity = 0, control = NB_control()) {
+    initialize = function(mydata, q_list, zero_inflation = FALSE, sparsity = 0,
+                          control = NB_control()) {
       stopifnot("each nb_blocks value can only be present once in nb_blocks" =
                   length(q_list) == length(unique(q_list)))
       stopifnot("There cannot be more blocks than there are entities to cluster." =
@@ -51,6 +55,7 @@ NormalBlockMeanCollectionClusters <- R6::R6Class(
               if (is.list(control$clustering_init)) control$clustering_init[[r]]
               else control$clustering_init
             get_model(mydata, q_list[r], sparsity = sparsity,
+                     zero_inflation = zero_inflation,
                      model = "mean", control = this_control)
         })
       private$progress_field <- "q"

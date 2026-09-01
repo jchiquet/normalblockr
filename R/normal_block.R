@@ -15,10 +15,10 @@
 #' [NormalBlockMeanCollectionSparsity] and their crossing,
 #' [NormalBlockMeanCollectionClustersSparsity]) -- each q simply fit
 #' independently, without the variance-block family's SBM-path shortcut.
-#' Zero-inflation is supported for a single q or a known clustering
-#' ([ZINormalBlockMeanKnownClusters],
-#' [ZINormalBlockMeanUnknownClusters]), with a diagonal or spherical Sigma
-#' only -- see [NormalBlockMeanBase].
+#' Zero-inflation is supported ([ZINormalBlockMeanKnownClusters],
+#' [ZINormalBlockMeanUnknownClusters], and collections of those over a range
+#' of q), with a diagonal or spherical Sigma only, hence not along a sparsity
+#' path -- see [NormalBlockMeanBase].
 #' @param control a list-like structure for detailed control on parameters should be
 #' generated with NB_control().
 #' @return an R6 object with one of the model classes (or a collection of model objects).
@@ -220,8 +220,8 @@ get_model <- function(data,
 
   if (model == "mean") {
     stopifnot(
-      "zero-inflated mean-block models are only available for a single q or a known clustering, not for a collection" =
-        !(zero_inflation && (changing_sparsity || unknown_q_list))
+      "zero-inflation is not available for a mean-block sparsity path: it needs a full Sigma, which zero-inflated mean-block models do not carry" =
+        !(zero_inflation && changing_sparsity)
     )
     if (changing_sparsity) {
       return(if (unknown_q_list)
@@ -230,7 +230,8 @@ get_model <- function(data,
                NormalBlockMeanCollectionSparsity$new(data, blocks, control = control))
     }
     if (unknown_q_list) {
-      return(NormalBlockMeanCollectionClusters$new(data, blocks, sparsity = sparsity, control = control))
+      return(NormalBlockMeanCollectionClusters$new(data, blocks, zero_inflation,
+                                                   sparsity = sparsity, control = control))
     }
     class_name <- if (is.matrix(blocks)) "NormalBlockMeanKnownClusters" else "NormalBlockMeanUnknownClusters"
     if (zero_inflation) class_name <- paste0("ZI", class_name)
