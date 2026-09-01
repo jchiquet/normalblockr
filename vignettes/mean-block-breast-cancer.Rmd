@@ -39,65 +39,38 @@ library(normalblockr)
 
 # Mathematical background
 
-Write $Z \in \mathbb{R}^{n \times p}$ for the (log-)responses and
-$X \in \mathbb{R}^{n \times d}$ for the design matrix. Each observation is
-Gaussian, with a mean built from a *clustering of the variables*:
+The mean-block model is a Gaussian regression model for a table of observations
+$Y \in \mathbb{R}^{n \times p}$ (here, $n$ tumor samples and $p$ proteins) on
+covariates $X \in \mathbb{R}^{n \times d}$ (here, the PAM50 subtype), in which
+the regression coefficients are *shared within clusters of variables*:
 
-$$Z_i \sim \mathcal{N}(\mu_i, \Sigma), \qquad \mu_i = C B^\top X_i$$
+$$Y_i \sim \mathcal{N}(\mu_i, \Sigma), \qquad \mu_i = C B^\top X_i$$
 
-where
-
-- $B \in \mathbb{R}^{d \times q}$ holds one regression profile **per cluster**,
-  so $B^\top X_i \in \mathbb{R}^q$ is the linear predictor of each of the $q$
-  clusters for observation $i$;
-- $C \in \{0,1\}^{p \times q}$ assigns every variable to exactly one cluster, and
-  maps those $q$ cluster-level predictors back onto the $p$ variables;
-- $\Sigma \in \mathbb{R}^{p \times p}$ is the residual covariance between
-  variables.
-
-The modelling assumption is that **all variables in a cluster share the same
-regression profile**. This is what makes the model parsimonious: the regression
-part costs $d \times q$ parameters instead of the $d \times p$ of an
-unconstrained multivariate regression, with $q \ll p$.
+$C \in \{0,1\}^{p \times q}$ assigns every protein to exactly one of the $q$
+clusters; it is either given (known clustering, e.g. from an independent source)
+or itself unknown and inferred jointly with everything else, in which case the
+model carries a variational posterior distribution over $C$ rather than a single
+point estimate. $B \in \mathbb{R}^{d \times q}$ holds one regression profile
+**per cluster**, so $B^\top X_i \in \mathbb{R}^q$ is the linear predictor of each
+cluster for observation $i$, which $C$ maps back onto the $p$ proteins.
+$\Sigma \in \mathbb{R}^{p \times p}$ is the residual covariance between
+proteins; its shape is a modelling choice in its own right, and a section below
+is devoted to it. The key structural assumption is that all proteins in a
+cluster share the *same* regression profile: the regression part costs
+$d \times q$ parameters instead of the $d \times p$ of an unconstrained
+multivariate regression, with $q \ll p$.
 
 Contrast this with the Normal-Block model of the other vignettes, where $C$
-structures $\mathrm{Var}(Z_i)$ and the covariates only enter through a
-variable-wise $B^\top X_i$: there, two variables are in the same cluster when
+structures $\mathrm{Var}(Y_i)$ and the covariates only enter through a
+variable-wise $B^\top X_i$: there, two proteins are in the same cluster when
 they *covary* the same way; here, when they *respond* the same way. The two
-answer different questions and generally return different groupings.
+answer different questions and generally return different groupings -- on this
+dataset they are essentially unrelated, which is a result rather than a defect.
 
-### Known versus unknown clustering
-
-When $C$ is known, $(B, \Sigma)$ are obtained by a plain EM alternating
-
-$$\widehat B = (X^\top X)^{-1}(X^\top Z)\,\Sigma^{-1} C \,(C^\top \Sigma^{-1} C)^{-1},
-\qquad \widehat\Sigma = \tfrac{1}{n} \widehat R^\top \widehat R,$$
-
-with $\widehat R = Z - X \widehat B C^\top$ the residuals. One recognizes a
-generalized-least-squares estimator: the unconstrained fit
-$(X^\top X)^{-1}X^\top Z$ projected onto the space of coefficients compatible
-with the clustering.
-
-When $C$ is unknown it becomes a latent variable, with
-$C_{j\bullet} \sim \mathcal{M}(1, \alpha)$. The observed likelihood then sums
-over $q^p$ configurations and is intractable, so the fit maximizes a variational
-lower bound (ELBO) under a mean-field approximation
-$Q(C) = \prod_j Q_j(C_{j\bullet})$, parametrized by
-$\tau \in [0,1]^{p \times q}$, $\tau_{jk} = \mathbb{E}_Q[C_{jk}]$:
-
-$$J(\theta) = -\frac{np}{2}\log(2\pi) + \frac{n}{2}\log|\Sigma^{-1}|
- + \sum_{j,k} \tau_{jk}\log\alpha_k - \sum_{j,k}\tau_{jk}\log\tau_{jk}
- - \frac{1}{2}\Big[\mathrm{Tr}(R\Sigma^{-1}R^\top) + \mathrm{Tr}(\Phi B^\top X^\top X B)\Big]$$
-
-with $R = Z - XB\tau^\top$ and $\Phi$ a correction term accounting for the
-uncertainty on the assignments (it vanishes as $\tau$ becomes binary). The
-variational E-step updates $\tau$ one variable at a time: with the other rows
-held fixed the ELBO is linear in $\tau_{j\bullet}$ up to its entropy, so each
-row's softmax is an *exact* maximization and a sweep can never decrease the
-ELBO.
-
-See @tous2026 for the Normal-Block model itself; the mean-block derivations
-follow the same variational recipe.
+See @tous2026 for the Normal-Block model itself, and
+`inst/normal_block_models.qmd` (the package's reference card) for the mean-block
+family's estimation details: the closed-form updates when $C$ is known, and the
+variational lower bound maximized when it is not.
 
 # The data
 
@@ -145,7 +118,8 @@ abline(0, 1, col = "red")
 
 With `blocks` a range of values, `normal_block()` returns one fitted model per
 $q$. The initial clustering of each is derived from every protein's own fitted
-profile $X\widehat B_{\bullet j}$ (see `NB_control(clustering_init = )`; `kmeans`
+profile -- the ordinary least-squares fit of that protein on $X$ alone,
+unconstrained by any clustering (see `NB_control(clustering_init = )`; `kmeans`
 is this family's default).
 
 ```{r, collection}
