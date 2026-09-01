@@ -47,7 +47,6 @@ NormalBlockVarBase <- R6::R6Class(
       private$weights <- weights
       ## variant (either diagonal or spherical residuals covariance)
       private$res_covariance <- control$noise_covariance
-
     },
 
     #' @description Seed this model's starting parameters from another,
