@@ -42,7 +42,9 @@ test_that("get_best_model()/plot() work on the mean-block sparsity path", {
 test_that("mean-block models require n > p unless the penalty regularizes Omega", {
   narrow <- NormalBlockData$new(Y[1:(ncol(Y) - 2), , drop = FALSE],
                                 X[1:(ncol(Y) - 2), , drop = FALSE])
-  expect_error(normal_block(narrow, blocks = q, model = "mean", control = fast),
+  full <- NB_control(verbose = FALSE, n_sparsity_penalties = 5, niter = 20,
+                     noise_covariance = "full")
+  expect_error(normal_block(narrow, blocks = q, model = "mean", control = full),
                "need n > p", fixed = TRUE)
   expect_no_error(
     normal_block(narrow, blocks = q, sparsity = TRUE, model = "mean", control = fast))
@@ -65,4 +67,21 @@ test_that("q and sparsity can be crossed for mean-block models", {
   expect_s3_class(coll$get_model(2), "NormalBlockMeanCollectionSparsity")
   expect_s3_class(coll$get_best_model("BIC"), "NormalBlockMeanBase")
   expect_s3_class(coll$plot("BIC"), "ggplot")
+})
+
+test_that("sparsity implies a full Sigma unless one is named explicitly", {
+  shape <- function(m) m$.__enclos_env__$private$res_covariance
+
+  expect_equal(shape(normal_block(data, blocks = q, model = "mean", control = fast)),
+               "diagonal")
+  expect_equal(shape(normal_block(data, blocks = q, sparsity = 0.3, model = "mean",
+                                  control = fast)), "full")
+  coll <- normal_block(data, blocks = q, sparsity = TRUE, model = "mean", control = fast)
+  expect_true(all(sapply(coll$models, shape) == "full"))
+
+  ## asking for both explicitly is contradictory, and says so
+  expect_error(
+    normal_block(data, blocks = q, sparsity = 0.3, model = "mean",
+                 control = NB_control(verbose = FALSE, noise_covariance = "diagonal")),
+    "needs noise_covariance = 'full'", fixed = TRUE)
 })

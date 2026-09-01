@@ -149,9 +149,14 @@ profile $X\widehat B_{\bullet j}$ (see `NB_control(clustering_init = )`; `kmeans
 is this family's default).
 
 ```{r, collection}
-NB_means <- normal_block(nb_data, blocks = 1:15, model = "mean",
+NB_means <- normal_block(nb_data, blocks = seq(5, 120, by = 5), model = "mean",
                          control = NB_control(verbose = FALSE))
 ```
+
+The grid is deliberately wide and coarse. With the default diagonal $\Sigma$
+an extra cluster costs only $d = 5$ parameters, so the criteria stay hungry
+for a long time: on a narrow range such as `1:15` they would still be
+decreasing at the upper end, and "selecting" its boundary would mean nothing.
 
 ```{r, collection-criteria, fig.width=7, fig.height=4}
 NB_means$plot(c("deviance", "BIC"))
@@ -162,23 +167,18 @@ selected <- NB_means$get_best_model("ICL")
 paste0("ICL selects ", selected$q, " clusters.")
 ```
 
-## Refining the collection
+That answer deserves a comment: the model groups 163 proteins into a few dozen
+clusters, i.e. only a handful of proteins per cluster. It is saying that
+subtype signatures are largely protein-specific here, with limited sharing --
+a substantive finding about this dataset, not a failure of the fit. The
+criteria do turn: they reach an interior minimum and rise again afterwards,
+which is what makes the selection meaningful.
 
-Every model above was fitted independently from its own cold start. `refine()`
-tries, for each $q$, a short split-and-reoptimize seeded from the fitted $q-1$
-neighbour and a merge-and-reoptimize seeded from the $q+1$ one, keeping a
-candidate only if it strictly lowers the deviance -- so it can only improve (or
-leave unchanged) each model it touches.
-
-```{r, refine}
-NB_means$refine(verbose = FALSE)
-selected <- NB_means$get_best_model("ICL")
-paste0("After refine(), ICL selects ", selected$q, " clusters.")
-```
-
-```{r, refine-criteria, fig.width=7, fig.height=4}
-NB_means$plot(c("deviance", "BIC", "ICL"))
-```
+`refine()` is available to polish a collection, trying for each $q$ a short
+split-and-reoptimize seeded from its $q-1$ neighbour and a merge from its
+$q+1$ one, keeping a candidate only if it strictly lowers the deviance. It is
+most useful on a contiguous range; on the coarse grid above there are no
+adjacent $q$ to seed from, so it is skipped here.
 
 ## Reading the clusters
 
@@ -201,15 +201,22 @@ axis(2, seq_len(ncol(profiles)), colnames(profiles), las = 2, cex.axis = .7)
 
 # Choosing the shape of the residual covariance
 
-$\Sigma$ is a full $p \times p$ matrix by default, which costs $p(p+1)/2$
-parameters and requires $n > p$. Two cheaper shapes are available through
-`NB_control(noise_covariance = )`, mirroring the option of the variance-block
-family: `"diagonal"` (one variance per variable) and `"spherical"` (a single
-variance). Neither inverts anything, so both also lift the $n > p$ requirement --
-useful when variables outnumber observations.
+Everything above used the default residual covariance, `"diagonal"` (one
+variance per variable). Two other shapes are available through
+`NB_control(noise_covariance = )`: `"spherical"` (a single variance) and
+`"full"` (the unconstrained $p \times p$ matrix). Only the last one has to be
+inverted, so it alone requires $n > p$.
+
+The default is deliberate. A full $\Sigma$ costs $p(p+1)/2 \approx 13{,}000$
+parameters here, which drown the handful of mean parameters that BIC and ICL
+are trying to weigh -- in a simulation study over 12 replicates, selecting $q$
+by BIC was correct 10/12 times with a diagonal $\Sigma$ against 6/12 with a
+full one at $n/p \approx 1.3$, *even when the data were generated with a full
+$\Sigma$*. The quality of the clustering at a fixed $q$ was the same either
+way; it is the choice of $q$ that suffers.
 
 ```{r, covariance-shapes}
-shapes <- c("full", "diagonal", "spherical")
+shapes <- c("diagonal", "spherical", "full")
 fits   <- lapply(shapes, function(s)
   normal_block(nb_data, blocks = selected$q, model = "mean",
                control = NB_control(verbose = FALSE, noise_covariance = s)))
@@ -221,19 +228,19 @@ data.frame(
 )
 ```
 
-On this dataset BIC prefers the diagonal residual covariance: the full one buys
-likelihood, but not enough to pay for its $p(p+1)/2 \approx 13{,}000$ parameters
-estimated from 346 observations. Worth checking rather than assuming, and worth
-keeping in mind that the three shapes answer different questions -- a diagonal
-$\Sigma$ says nothing about how proteins co-vary once the subtype and the
-cluster structure are accounted for, which is exactly what the next section
-looks at.
+BIC agrees with the default here. That is not a reason to forget the full
+$\Sigma$ though: the three shapes answer different questions, and a diagonal
+one says nothing about how proteins co-vary once the subtype and the cluster
+structure are accounted for -- which is exactly what the next section looks
+at.
 
 # Sparsifying the residual covariance
 
 If the residual associations *are* the object of interest, the full $\Sigma$ is
-required -- but a dense $163 \times 163$ precision matrix is unreadable, and
-poorly determined from 346 observations. Keeping the selected clustering fixed,
+required -- and asking for `sparsity > 0` selects it automatically, since a
+penalty on a diagonal precision matrix would have nothing to act on. A dense
+$163 \times 163$ precision matrix is unreadable though, and poorly determined
+from 346 observations. Keeping the selected clustering fixed,
 a graphical-lasso penalty on $\Sigma^{-1}$ addresses both at once, turning it
 into a network of *conditional* associations between proteins, given the subtype
 and the cluster structure.
@@ -242,6 +249,7 @@ and the cluster structure.
 C_selected <- model.matrix(~ 0 + factor(selected$clustering))
 NB_sparse  <- normal_block(nb_data, blocks = C_selected, sparsity = 0.4,
                            model = "mean", control = NB_control(verbose = FALSE))
+NB_sparse$model_par$Omega |> dim()
 paste0(NB_sparse$n_edges, " edges out of ", choose(ncol(Y), 2), " possible ones.")
 ```
 

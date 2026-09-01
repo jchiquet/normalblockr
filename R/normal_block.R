@@ -114,11 +114,15 @@ normal_block <- function(data,
 #' @param noise_covariance shape of the residual covariance. Variance-block
 #' models accept "diagonal" (variable-specific) or "spherical" (common);
 #' mean-block models, whose Sigma is the full p x p residual covariance, also
-#' accept "full". Default `NULL`, resolved per model family at fit time:
-#' "diagonal" for variance-block models, "full" for mean-block ones. The
-#' mean-block "diagonal"/"spherical" variants need no matrix inversion, hence
-#' no `n > p` requirement, but leave no off-diagonal coefficient for the
-#' graphical lasso to penalize (`sparsity > 0` is rejected with them).
+#' accept "full". Default `NULL`, resolved per model family at fit time to
+#' "diagonal" -- except for a mean-block model with `sparsity > 0`, which
+#' implies "full" since a penalty on a diagonal precision matrix would have
+#' nothing to act on (explicitly asking for both is an error). The mean-block
+#' "diagonal"/"spherical" variants need no matrix inversion, hence no
+#' `n > p` requirement, and they select the number of clusters markedly
+#' better than a full Sigma once p approaches n: the p(p+1)/2 covariance
+#' parameters otherwise drown the mean structure BIC/ICL are weighing. Use
+#' "full" when the residual associations are themselves of interest.
 #' @param heuristic whether to use the heuristic approach (moment-based, no (V)EM
 #' recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no
 #' likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`, `ICL` and `EBIC`

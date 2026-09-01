@@ -34,9 +34,10 @@ test_that("NormalBlockMeanKnownClusters_fit matches the R recursion (unpenalized
   data <- NormalBlockData$new(Y, X)
 
   for (sparsity in c(0, 0.05)) {
-    model <- NormalBlockMeanKnownClusters$new(data, C, sparsity = sparsity,
-                                              control = NB_control(verbose = FALSE))
     nc <- "full"
+    model <- NormalBlockMeanKnownClusters$new(data, C, sparsity = sparsity,
+                                              control = NB_control(verbose = FALSE,
+                                                                   noise_covariance = nc))
     init <- model$.__enclos_env__$private$optim_initialize()
     ref  <- model$.__enclos_env__$private$EM_optimize_R(
       list(niter = niter, threshold = threshold))
@@ -57,8 +58,9 @@ test_that("NormalBlockMeanUnknownClusters_fit matches the R recursion (unpenaliz
   fixed_point_niter <- 5
 
   for (sparsity in c(0, 0.05)) {
-    ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C))
     nc <- "full"
+    ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C),
+                       noise_covariance = nc)
     model_R   <- NormalBlockMeanUnknownClusters$new(data, q, sparsity = sparsity, control = ctrl)
     model_cpp <- NormalBlockMeanUnknownClusters$new(data, q, sparsity = sparsity, control = ctrl)
 
@@ -92,7 +94,8 @@ test_that("the ELBO trace of the C++ core is non-decreasing", {
 
 test_that("the SQUAREM extrapolation reaches at least the plain recursion's ELBO", {
   data <- NormalBlockData$new(Y, X)
-  ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C))
+  ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C),
+                     noise_covariance = "full")
   init <- NormalBlockMeanUnknownClusters$new(data, q, control = ctrl
             )$.__enclos_env__$private$optim_initialize()
 
@@ -141,8 +144,12 @@ test_that("the diagonal/spherical Sigma variants also match the R recursion", {
 test_that("a diagonal Sigma lifts the n > p requirement", {
   narrow <- NormalBlockData$new(Y[1:(ncol(Y) - 10), , drop = FALSE],
                                 X[1:(ncol(Y) - 10), , drop = FALSE])
+  ## only a full Sigma has to be inverted, and it is no longer the default
   expect_error(normal_block(narrow, blocks = q, model = "mean",
-                            control = NB_control(verbose = FALSE)), "need n > p", fixed = TRUE)
+                            control = NB_control(verbose = FALSE, noise_covariance = "full")),
+               "need n > p", fixed = TRUE)
+  expect_no_error(normal_block(narrow, blocks = q, model = "mean",
+                               control = NB_control(verbose = FALSE)))
   for (nc in c("diagonal", "spherical"))
     expect_no_error(normal_block(narrow, blocks = q, model = "mean",
                                  control = NB_control(verbose = FALSE, noise_covariance = nc)))
