@@ -227,8 +227,7 @@ NormalBlockVarBase <- R6::R6Class(
       Omega <- if (private$sparsity_ == 0) {
         chol2inv(chol(Sigma_hat))
       } else {
-        glasso_out <- glassoFast::glassoFast(Sigma_hat, rho = private$sparsity_ * weights)
-        if (anyNA(glasso_out$wi)) chol2inv(chol(Sigma_hat)) else Matrix::symmpart(glasso_out$wi)
+        glasso_omega(Sigma_hat, private$sparsity_ * weights)
       }
       ensure_pd(Omega)
     },

@@ -17,7 +17,7 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ## R6 wrapper (ZINormalBlockVarKnownClusters / ZINormalBlockVarUnknownClusters) gets by calling the very
 ## same functions through EM_optimize(), starting from the same initial
 ## parameters, both unpenalized (sparsity = 0) and penalized (sparsity > 0,
-## graphical lasso via glassoFast). The B-update (and, for unknown clusters,
+## in-package graphical lasso). The B-update (and, for unknown clusters,
 ## the M-update) is exactly quadratic despite the zero-inflation mask, so the
 ## C++ side solves it directly (see src/zi_closed_form_solvers.h) instead of
 ## going through an iterative optimizer -- hence the comparable tolerance to

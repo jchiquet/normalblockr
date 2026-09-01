@@ -17,7 +17,7 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ## EM/VEM recursion implemented in R (private$EM_optimize_R, kept in
 ## R/NormalBlockMean*Clusters.R while the port is validated), starting from
 ## the same initial parameters, both unpenalized (sparsity = 0, plain
-## inversion) and penalized (sparsity > 0, graphical lasso via glassoFast,
+## inversion) and penalized (sparsity > 0, in-package graphical lasso,
 ## called back from C++, see src/omega_estimation.h).
 ##
 ## The comparison runs with accelerate = FALSE: the SQUAREM extrapolation

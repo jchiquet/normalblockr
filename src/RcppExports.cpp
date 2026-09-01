@@ -194,6 +194,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// graphical_lasso_fit
+Rcpp::List graphical_lasso_fit(const arma::mat& S, const Rcpp::NumericVector& rho, double thr, int maxIt, Rcpp::Nullable<Rcpp::NumericMatrix> w_init, Rcpp::Nullable<Rcpp::NumericMatrix> wi_init);
+RcppExport SEXP _normalblockr_graphical_lasso_fit(SEXP SSEXP, SEXP rhoSEXP, SEXP thrSEXP, SEXP maxItSEXP, SEXP w_initSEXP, SEXP wi_initSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< double >::type thr(thrSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIt(maxItSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericMatrix> >::type w_init(w_initSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericMatrix> >::type wi_init(wi_initSEXP);
+    rcpp_result_gen = Rcpp::wrap(graphical_lasso_fit(S, rho, thr, maxIt, w_init, wi_init));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_normalblockr_NormalBlockVarKnownClusters_fit", (DL_FUNC) &_normalblockr_NormalBlockVarKnownClusters_fit, 11},
@@ -204,6 +220,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_normalblockr_NormalBlockMeanUnknownClusters_fit", (DL_FUNC) &_normalblockr_NormalBlockMeanUnknownClusters_fit, 13},
     {"_normalblockr_ZINormalBlockMeanKnownClusters_fit", (DL_FUNC) &_normalblockr_ZINormalBlockMeanKnownClusters_fit, 11},
     {"_normalblockr_ZINormalBlockMeanUnknownClusters_fit", (DL_FUNC) &_normalblockr_ZINormalBlockMeanUnknownClusters_fit, 12},
+    {"_normalblockr_graphical_lasso_fit", (DL_FUNC) &_normalblockr_graphical_lasso_fit, 6},
     {NULL, NULL, 0}
 };
 

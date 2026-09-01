@@ -518,20 +518,10 @@ NormalBlockBase <- R6::R6Class(
 
     get_Omega = function(Sigma) {
       if (private$sparsity_ == 0) {
-        Omega <- chol2inv(chol(Sigma))
+        chol2inv(chol(Sigma))
       } else {
-        glasso_out <- glassoFast::glassoFast(Sigma, rho = private$sparsity_ * self$sparsity_weights)
-        if (anyNA(glasso_out$wi)) {
-          warning(
-            "GLasso fails, the penalty is probably too small and the system badly conditionned \n reciprocal condition number =",
-            rcond(Sigma), "\n We send back the original matrix and its inverse (unpenalized)."
-          )
-          Omega <- chol2inv(chol(Sigma))
-        } else {
-          Omega <- Matrix::symmpart(glasso_out$wi)
-        }
+        glasso_omega(Sigma, private$sparsity_ * self$sparsity_weights)
       }
-      Omega
     },
 
 

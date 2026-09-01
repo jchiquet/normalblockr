@@ -7,6 +7,7 @@
 #include "zi_normal_block_data.h"
 #include "zi_normal_block_var_types.h"
 #include "zi_normal_block_mean_types.h"
+#include "graphical_lasso.h"
 
 namespace {
 
@@ -88,7 +89,7 @@ Rcpp::List ZINormalBlockVarUnknownClusters_result(const Model& model) {
 //' @param dm1_0 initial inverse variance per variable (length p)
 //' @param Omega0 initial precision matrix of the blocks (q x q)
 //' @param sparsity sparsity penalty applied to Omega through the graphical
-//' lasso (glassoFast); 0 means an unpenalized inversion
+//' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 //' @param sparsity_weights q x q matrix of per-pair penalty weights (see
 //' R/NormalBlockVarBase.R, `sparsity_weights`); only used when sparsity > 0
 //' @param noise_covariance either "diagonal" or "spherical"
@@ -173,7 +174,7 @@ Rcpp::List NormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat
 //' @param dm1_0 initial inverse variance per variable (length p)
 //' @param Omega0 initial precision matrix of the blocks (q x q)
 //' @param sparsity sparsity penalty applied to Omega through the graphical
-//' lasso (glassoFast); 0 means an unpenalized inversion
+//' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 //' @param sparsity_weights q x q matrix of per-pair penalty weights
 //' @param noise_covariance either "diagonal" or "spherical"
 //' @param niter maximum number of EM iterations
@@ -257,7 +258,7 @@ Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::m
 //' @param B0 initial regression coefficients (d x q)
 //' @param Omega0 initial precision matrix of the variables (p x p)
 //' @param sparsity sparsity penalty applied to Omega through the graphical
-//' lasso (glassoFast); 0 means an unpenalized inversion
+//' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 //' @param sparsity_weights p x p matrix of per-pair penalty weights
 //' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
 //' @param niter maximum number of EM iterations
@@ -297,7 +298,7 @@ Rcpp::List NormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat&
 //' @param Omega0 initial precision matrix of the variables (p x p)
 //' @param tau0 initial variational membership probabilities (p x q)
 //' @param sparsity sparsity penalty applied to Omega through the graphical
-//' lasso (glassoFast); 0 means an unpenalized inversion
+//' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 //' @param sparsity_weights p x p matrix of per-pair penalty weights
 //' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
 //' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
@@ -409,5 +410,49 @@ Rcpp::List ZINormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::
     Rcpp::Named("alpha")     = to_rvector(model.alpha()),
     Rcpp::Named("objective") = Rcpp::wrap(model.objective_trace()),
     Rcpp::Named("niter")     = model.niter()
+  );
+}
+
+//' Graphical lasso (Rcpp/Armadillo core)
+//'
+//' In-package replacement for `glassoFast::glassoFast()`; see
+//' src/graphical_lasso.h for the algorithm and the two deliberate departures
+//' from the Fortran it ports.
+//'
+//' @param S empirical covariance matrix (n x n)
+//' @param rho penalty, either a scalar or an n x n matrix of per-pair weights
+//' @param thr convergence threshold on the sweep-to-sweep change in W
+//' @param maxIt maximum number of whole-matrix sweeps
+//' @param w_init,wi_init optional warm start: a previous solve's `w`/`wi`.
+//' Both must be given, and have S's dimensions, to be used.
+//' @return a list with `w` (covariance estimate), `wi` (precision estimate),
+//' `niter` and `converged`
+//' @noRd
+// [[Rcpp::export]]
+Rcpp::List graphical_lasso_fit(const arma::mat& S, const Rcpp::NumericVector& rho,
+                               double thr = 1e-4, int maxIt = 10000,
+                               Rcpp::Nullable<Rcpp::NumericMatrix> w_init = R_NilValue,
+                               Rcpp::Nullable<Rcpp::NumericMatrix> wi_init = R_NilValue) {
+  arma::mat L;
+  if (rho.size() == 1) {
+    L.set_size(S.n_rows, S.n_cols);
+    L.fill(rho[0]);
+  } else {
+    L = Rcpp::as<arma::mat>(Rcpp::wrap(rho));
+    if (L.n_rows != S.n_rows || L.n_cols != S.n_cols)
+      Rcpp::stop("`rho`, when a matrix, must have the same dimensions as `S`");
+  }
+  nb_glasso::State warm;
+  if (w_init.isNotNull() && wi_init.isNotNull()) {
+    warm.W = Rcpp::as<arma::mat>(w_init.get());
+    warm.X = Rcpp::as<arma::mat>(wi_init.get());
+    warm.filled = true;
+  }
+  nb_glasso::Result res = nb_glasso::solve(S, L, thr, maxIt, warm.filled ? &warm : nullptr);
+  return Rcpp::List::create(
+    Rcpp::Named("w")         = res.W,
+    Rcpp::Named("wi")        = res.X,
+    Rcpp::Named("niter")     = res.niter,
+    Rcpp::Named("converged") = res.converged
   );
 }

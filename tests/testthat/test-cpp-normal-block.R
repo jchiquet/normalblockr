@@ -16,8 +16,8 @@ threshold <- -1 # never trigger early stopping: forces exactly `niter` iteration
 ## reproduces *exactly* (up to numerical precision) the EM/VEM recursion
 ## already implemented in R (NormalBlockVarKnownClusters / NormalBlockVarUnknownClusters), starting from the
 ## same initial parameters, both unpenalized (sparsity = 0, plain inversion)
-## and penalized (sparsity > 0, graphical lasso via glassoFast, called back
-## from C++, see src/omega_estimation.h). The R6 heuristic initialization
+## and penalized (sparsity > 0, in-package graphical lasso, see
+## src/omega_estimation.h and src/graphical_lasso.h). The R6 heuristic initialization
 ## (private method optim_initialize) is reached into via R6's `.__enclos_env__`
 ## so that both implementations start from the very same point.
 

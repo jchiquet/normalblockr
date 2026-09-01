@@ -41,6 +41,24 @@ ensure_pd <- function(M, floor = 1e-6) {
   eig$vectors %*% diag(pmax(eig$values, floor), nrow(M)) %*% t(eig$vectors)
 }
 
+# Graphical-lasso estimate of a precision matrix from its covariance estimate,
+# with a plain inversion as the fallback when the solver can't produce a finite
+# answer. Wraps the in-package solver (src/graphical_lasso.h) so that the R
+# reference implementations and the C++ (V)EM cores run the very same code --
+# tests/testthat/test-cpp-*.R compare the two at 1e-8, which only holds if they
+# share this step exactly.
+glasso_omega <- function(Sigma, rho) {
+  glasso_out <- graphical_lasso_fit(Sigma, rho)
+  if (anyNA(glasso_out$wi)) {
+    warning("GLasso fails, the penalty is probably too small and the system badly ",
+            "conditionned \n reciprocal condition number =", rcond(Sigma),
+            "\n We send back the original matrix and its inverse (unpenalized).",
+            call. = FALSE)
+    return(chol2inv(chol(Sigma)))
+  }
+  Matrix::symmpart(glasso_out$wi)
+}
+
 # computes xlogx, setting it to 0 if x = 0
 xlogx <- function(x) ifelse(x < .Machine$double.eps, 0, x * log(x))
 

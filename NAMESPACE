@@ -49,7 +49,6 @@ importFrom(Matrix,
 importFrom(R6,R6Class)
 importFrom(Rcpp,sourceCpp)
 importFrom(corrplot,corrplot)
-importFrom(glassoFast,glassoFast)
 importFrom(igraph,
   as_adjacency_matrix,
   sample_gnp,

@@ -2,16 +2,15 @@
 #define NORMALBLOCKR_OMEGA_ESTIMATION_H
 
 #include <RcppArmadillo.h>
+#include "graphical_lasso.h"
 
-// Equivalent of the shared private method `NormalBlocVarkBase$get_Omega` (R/NormalBlockVarBase.R),
+// Equivalent of the shared private method `NormalBlockVarBase$get_Omega` (R/NormalBlockVarBase.R),
 // used identically by the M-step of both NormalBlockVarKnownClusters and NormalBlockVarUnknownClusters:
 // estimate the precision matrix of the blocks from its covariance estimate
 // Sigma_hat (q x q). When `sparsity <= 0`, this is a plain matrix inversion;
-// otherwise it calls back into R's glassoFast::glassoFast() (graphical
-// lasso). There is no Armadillo reimplementation of glasso in this package,
-// and since q (the number of clusters) is small, the R round-trip cost is
-// negligible compared to the O(n x p) work done in the rest of the (V)EM
-// step.
+// otherwise it runs the in-package graphical lasso (src/graphical_lasso.h).
+// That solver used to be glassoFast, reached by calling back into R from
+// inside this loop -- see graphical_lasso.h for why it isn't any more.
 namespace nb_omega {
 
 // Armadillo equivalent of ensure_pd() (R/utils.R): the graphical lasso can
@@ -35,24 +34,16 @@ inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity, const arm
     return arma::inv_sympd(Sigma_hat);
   }
 
-  // Looked up on every call, deliberately: caching it in a `static` keeps an
-  // R object alive outside R's protection discipline, across garbage
-  // collections and namespace reloads. A stale SEXP then corrupts memory
-  // non-deterministically -- heap corruption or a segfault, depending on the
-  // run. The lookup is negligible next to the graphical lasso itself.
-  Rcpp::Function glassoFast(Rcpp::Environment::namespace_env("glassoFast")["glassoFast"]);
+  nb_glasso::Result glasso_out = nb_glasso::solve(Sigma_hat, sparsity * sparsity_weights);
 
-  Rcpp::List glasso_out = glassoFast(Rcpp::wrap(Sigma_hat), Rcpp::wrap(sparsity * sparsity_weights));
-  arma::mat Wi = Rcpp::as<arma::mat>(glasso_out["wi"]);
-
-  if (Wi.has_nan()) {
+  if (glasso_out.X.has_nan()) {
     Rcpp::warning("GLasso fails, the penalty is probably too small and the system badly "
                   "conditionned (reciprocal condition number = %f). "
                   "Sending back the original matrix and its inverse (unpenalized).",
                   arma::rcond(Sigma_hat));
     return arma::inv_sympd(Sigma_hat);
   }
-  return ensure_pd(Wi); // symmpart(), plus a guard against a non-PD glasso output
+  return ensure_pd(glasso_out.X); // symmpart(), plus a guard against a non-PD glasso output
 }
 
 } // namespace nb_omega

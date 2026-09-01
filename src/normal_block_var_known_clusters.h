@@ -81,7 +81,8 @@ public:
     Gamma_ = o.Gamma_;
     Mu_ = o.Mu_;
   }
-  // Excludes sparsity_ > 0: glassoFast is an approximate iterative solver,
+  // Excludes sparsity_ > 0: the graphical lasso is an approximate iterative
+  // solver,
   // so even plain EM's M-step isn't a guaranteed ascent step there, and
   // SQUAREM's larger jumps amplify that instability for a smaller speedup
   // than the unpenalized case. See inst/normal_block_models.qmd ("SQUAREM").

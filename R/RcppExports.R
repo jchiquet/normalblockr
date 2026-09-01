@@ -14,7 +14,7 @@
 #' @param dm1_0 initial inverse variance per variable (length p)
 #' @param Omega0 initial precision matrix of the blocks (q x q)
 #' @param sparsity sparsity penalty applied to Omega through the graphical
-#' lasso (glassoFast); 0 means an unpenalized inversion
+#' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 #' @param sparsity_weights q x q matrix of per-pair penalty weights (see
 #' R/NormalBlockVarBase.R, `sparsity_weights`); only used when sparsity > 0
 #' @param noise_covariance either "diagonal" or "spherical"
@@ -64,7 +64,7 @@ NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omega0, C0, alpha
 #' @param dm1_0 initial inverse variance per variable (length p)
 #' @param Omega0 initial precision matrix of the blocks (q x q)
 #' @param sparsity sparsity penalty applied to Omega through the graphical
-#' lasso (glassoFast); 0 means an unpenalized inversion
+#' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 #' @param sparsity_weights q x q matrix of per-pair penalty weights
 #' @param noise_covariance either "diagonal" or "spherical"
 #' @param niter maximum number of EM iterations
@@ -111,7 +111,7 @@ ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B
 #' @param B0 initial regression coefficients (d x q)
 #' @param Omega0 initial precision matrix of the variables (p x p)
 #' @param sparsity sparsity penalty applied to Omega through the graphical
-#' lasso (glassoFast); 0 means an unpenalized inversion
+#' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 #' @param sparsity_weights p x p matrix of per-pair penalty weights
 #' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
 #' @param niter maximum number of EM iterations
@@ -137,7 +137,7 @@ NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, spar
 #' @param Omega0 initial precision matrix of the variables (p x p)
 #' @param tau0 initial variational membership probabilities (p x q)
 #' @param sparsity sparsity penalty applied to Omega through the graphical
-#' lasso (glassoFast); 0 means an unpenalized inversion
+#' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 #' @param sparsity_weights p x p matrix of per-pair penalty weights
 #' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
 #' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
@@ -195,5 +195,24 @@ ZINormalBlockMeanKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C,
 #' @noRd
 ZINormalBlockMeanUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B0, Omega0, tau0, noise_covariance, niter, threshold, accelerate = TRUE, fixed_tau = FALSE) {
     .Call(`_normalblockr_ZINormalBlockMeanUnknownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, B0, Omega0, tau0, noise_covariance, niter, threshold, accelerate, fixed_tau)
+}
+
+#' Graphical lasso (Rcpp/Armadillo core)
+#'
+#' In-package replacement for `glassoFast::glassoFast()`; see
+#' src/graphical_lasso.h for the algorithm and the two deliberate departures
+#' from the Fortran it ports.
+#'
+#' @param S empirical covariance matrix (n x n)
+#' @param rho penalty, either a scalar or an n x n matrix of per-pair weights
+#' @param thr convergence threshold on the sweep-to-sweep change in W
+#' @param maxIt maximum number of whole-matrix sweeps
+#' @param w_init,wi_init optional warm start: a previous solve's `w`/`wi`.
+#' Both must be given, and have S's dimensions, to be used.
+#' @return a list with `w` (covariance estimate), `wi` (precision estimate),
+#' `niter` and `converged`
+#' @noRd
+graphical_lasso_fit <- function(S, rho, thr = 1e-4, maxIt = 10000L, w_init = NULL, wi_init = NULL) {
+    .Call(`_normalblockr_graphical_lasso_fit`, S, rho, thr, maxIt, w_init, wi_init)
 }
 
