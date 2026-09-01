@@ -141,6 +141,17 @@ NormalBlockData <- R6::R6Class(
       private$ols_cache
     },
 
+    #' @description Masked counterpart of `ols_fit()`: a per-variable weighted
+    #' least-squares fit of B under the zero-inflation mask, with its inverse
+    #' residual variances and residuals (see `zi_weighted_fit()`). Memoized for
+    #' the same reason -- every zero-inflated model in a collection over q used
+    #' to redo the same IRLS.
+    #' @return a list with `B` (d x p), `dm1` (p) and `R` (n x p masked residuals)
+    zi_ols_fit = function() {
+      if (is.null(private$zi_ols_cache)) private$zi_ols_cache <- zi_weighted_fit(self)
+      private$zi_ols_cache
+    },
+
     #' @description Zero-inflation component: `p` independent logistic
     #' regressions of each variable's zero pattern on `X0`, and the fixed
     #' contribution they make to the log-likelihood. The (V)EM never revisits
@@ -189,7 +200,8 @@ NormalBlockData <- R6::R6Class(
   private = list(
     ## memoized by ols_fit()/zi_fit(); both are pure functions of the fields
     ## set in initialize(), none of which change afterwards
-    ols_cache = NULL,
-    zi_cache  = NULL
+    ols_cache     = NULL,
+    zi_ols_cache  = NULL,
+    zi_cache      = NULL
   )
 )

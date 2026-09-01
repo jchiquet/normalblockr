@@ -44,6 +44,18 @@ test_that("zi_fit() is memoized and matches the per-variable logistic fits", {
                sum(normalblockr:::xlogy(d$zeros_bar, 1 - zi$kappa)))
 })
 
+test_that("zi_ols_fit() is memoized and matches the free function", {
+  set.seed(21)
+  ex <- generate_normal_block_var_data(n = 70, p = 12, d = 1, q = 2, kappa = rep(0.3, 12))
+  d  <- NormalBlockData$new(ex$Y, ex$X)
+  fit <- d$zi_ols_fit()
+  expect_named(fit, c("B", "dm1", "R"))
+  expect_equal(fit, normalblockr:::zi_weighted_fit(d))
+  expect_identical(d$zi_ols_fit(), fit)
+  ## the masked residuals every zero-inflated heuristic starts from
+  expect_equal(normalblockr:::zi_residuals(d), fit$R)
+})
+
 test_that("every model in a collection shares one data object, hence one fit", {
   set.seed(3)
   ex <- generate_normal_block_var_data(n = 60, p = 15, d = 1, q = 2, kappa = rep(0.3, 15))
@@ -70,9 +82,11 @@ test_that("a q-range collection shares the q-independent part of its heuristic",
     expect_equal(path[[i]], cutree(normalblockr:::ward2_tree(R), q_list[i]))
   }
 
-  ## nothing is shareable for kmeans (it depends on q entirely) or for the
-  ## model's own best_of_inits search
-  expect_null(normalblockr:::clustering_path_for_collection(R, q_list, "kmeans"))
+  ## kmeans shares its lossless row compression, but not Lloyd's algorithm
+  km <- normalblockr:::clustering_path_for_collection(R, q_list, "kmeans")
+  for (i in seq_along(q_list)) expect_equal(length(unique(km[[i]])), q_list[i])
+
+  ## nothing is shareable for the model's own best_of_inits search
   expect_null(normalblockr:::clustering_path_for_collection(R, q_list, "best_of_inits"))
   expect_null(normalblockr:::clustering_path_for_collection(R, q_list, c("ward2", "kmeans")))
 })
@@ -140,4 +154,52 @@ test_that("B0 keeps its d0 x p orientation in the degenerate all-nonzero case", 
   expect_equal(dim(d$zi_fit()$B0), c(2L, 6L))
   expect_true(all(is.infinite(d$zi_fit()$B0)))
   expect_true(all(d$zi_fit()$kappa == 0))
+})
+
+test_that("compress_columns() preserves the geometry kmeans actually sees", {
+  set.seed(41)
+  ## a tall, low-rank embedding, as the mean-block family produces (X %*% B)
+  X <- matrix(rnorm(200 * 3), 200, 3)
+  B <- matrix(rnorm(3 * 40), 3, 40)
+  R <- X %*% B
+
+  Rc <- normalblockr:::compress_columns(R)
+  expect_equal(nrow(Rc), 3L)                       # down to the true rank
+  expect_equal(ncol(Rc), ncol(R))
+  expect_equal(as.matrix(dist(t(Rc))), as.matrix(dist(t(R))))
+
+  ## and therefore the same clustering, starts included
+  for (q in 2:5) {
+    set.seed(7); a <- kmeans(t(R),  q, nstart = 30, iter.max = 50)$cluster
+    set.seed(7); b <- kmeans(t(Rc), q, nstart = 30, iter.max = 50)$cluster
+    expect_equal(aricode::ARI(a, b), 1)
+  }
+})
+
+test_that("compress_columns() leaves a full-rank matrix alone", {
+  set.seed(42)
+  R <- matrix(rnorm(30), 5, 6)             # 5 rows, rank 5: nothing to gain
+  expect_identical(normalblockr:::compress_columns(R), R)
+  expect_identical(normalblockr:::compress_columns(matrix(1:4, 1, 4)),
+                   matrix(1:4, 1, 4))      # a single row is already minimal
+})
+
+test_that("the mean-block collection shares its heuristic across q", {
+  set.seed(43)
+  ex <- generate_normal_block_mean_data(n = 120, p = 30, d = 2, q = 3)
+  d  <- NormalBlockData$new(ex$Y, ex$X)
+  q_list <- 2:5
+
+  path <- normalblockr:::clustering_path_for_family(d, q_list, "mean", FALSE,
+                                                    NB_control(verbose = FALSE))
+  expect_equal(length(path), length(q_list))       # kmeans is now shareable too
+  for (i in seq_along(q_list)) expect_equal(length(unique(path[[i]])), q_list[i])
+
+  ## the family default resolves to kmeans (kmeans draws its starts, so the
+  ## two calls only agree from the same RNG state)
+  set.seed(44); a <- normalblockr:::clustering_path_for_family(
+    d, q_list, "mean", FALSE, NB_control(verbose = FALSE))
+  set.seed(44); b <- normalblockr:::clustering_path_for_family(
+    d, q_list, "mean", FALSE, NB_control(verbose = FALSE, clustering_init = "kmeans"))
+  expect_equal(a, b)
 })

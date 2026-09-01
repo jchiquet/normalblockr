@@ -46,13 +46,23 @@ NormalBlockMeanCollectionClusters <- R6::R6Class(
 
       self$control <- control
 
+      ## Whatever part of the requested heuristic doesn't depend on q, computed
+      ## once instead of once per model -- for this family's default (kmeans)
+      ## that is the lossless row compression of the mean trajectory, whose
+      ## rank is only d. See clustering_path_for_family() in R/utils.R.
+      clustering_path <- clustering_path_for_family(mydata, q_list, "mean",
+                                                    zero_inflation, control)
+
       this_control <- control
       self$models <- map(rank(q_list),
           function(r) {
             ## a list means one explicit clustering per q; anything else
             ## (a heuristic name, or NULL) applies identically to every q
             this_control$clustering_init <-
-              if (is.list(control$clustering_init)) control$clustering_init[[r]]
+              if (!is.null(clustering_path)) clustering_path[[as.character(q_list[r])]]
+              ## a list means one explicit clustering per q; anything else
+              ## (a heuristic name, or NULL) applies identically to every q
+              else if (is.list(control$clustering_init)) control$clustering_init[[r]]
               else control$clustering_init
             get_model(mydata, q_list[r], sparsity = sparsity,
                      zero_inflation = zero_inflation,

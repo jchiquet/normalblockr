@@ -37,10 +37,10 @@ NormalBlockVarCollectionClusters <- R6::R6Class(
       ## q is computed once here instead of once per model: a single wide SBM
       ## exploration covers every intermediate block count, one hierarchical
       ## tree is cut at each q, one eigendecomposition serves every spectral
-      ## cut. See sbm_path_for_collection() in R/utils.R; NULL when nothing is
+      ## cut. See clustering_path_for_family() in R/utils.R; NULL when nothing is
       ## shareable ("kmeans", "best_of_inits", an explicit clustering), and
       ## every model then runs its own heuristic_clustering() as before.
-      clustering_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
+      clustering_path <- clustering_path_for_family(mydata, q_list, "var", zero_inflation, control)
 
       # instantiates an NormalBlockVarUnknownClusters model for each q in nb_blocks
       this_control <- control

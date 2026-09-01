@@ -253,7 +253,7 @@ NormalBlockVarBase <- R6::R6Class(
     ## (the weighted-least-squares fit itself lives in zi_weighted_fit(),
     ## R/utils.R, shared with the collection-level zi_residuals())
     zi_diag_normal_inference = function(){
-      fit <- zi_weighted_fit(self$data)
+      fit <- self$data$zi_ols_fit()
       list(B = fit$B, dm1 = fit$dm1, kappa = private$kappa, R = fit$R)
     },
 

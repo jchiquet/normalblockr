@@ -538,7 +538,9 @@ NormalBlockBase <- R6::R6Class(
     ## row normalization it is mediocre everywhere; with it, it is
     ## competitive on university webpages at a fraction of sbm's cost.
     clustering_methods = list(
-      kmeans   = function(R, q) kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster,
+      ## compress_columns() is exact here: kmeans sees only the distances
+      ## between R's columns, which it preserves (R/utils.R)
+      kmeans   = function(R, q) kmeans_columns(compress_columns(R), q),
       ## ward2_tree() (R/utils.R) also backs sbm_clustering_path()'s own
       ## fallback -- same computation, shared rather than duplicated.
       ward2    = function(R, q) cutree(ward2_tree(R), q),

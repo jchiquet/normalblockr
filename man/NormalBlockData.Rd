@@ -50,6 +50,7 @@ normal-block model.
   \itemize{
     \item \href{#method-NormalBlockData-initialize}{\code{NormalBlockData$new()}}
     \item \href{#method-NormalBlockData-ols_fit}{\code{NormalBlockData$ols_fit()}}
+    \item \href{#method-NormalBlockData-zi_ols_fit}{\code{NormalBlockData$zi_ols_fit()}}
     \item \href{#method-NormalBlockData-zi_fit}{\code{NormalBlockData$zi_fit()}}
     \item \href{#method-NormalBlockData-clone}{\code{NormalBlockData$clone()}}
   }
@@ -104,6 +105,25 @@ the data, yet every model in a collection over q used to recompute it
   \subsection{Returns}{
     a list with `B` (d x p), `R` (n x p residuals) and `Sigma`
 (p x p residual covariance)
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockData-zi_ols_fit"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockData-zi_ols_fit}{}}}
+\subsection{\code{NormalBlockData$zi_ols_fit()}}{
+  Masked counterpart of `ols_fit()`: a per-variable weighted
+least-squares fit of B under the zero-inflation mask, with its inverse
+residual variances and residuals (see `zi_weighted_fit()`). Memoized for
+the same reason -- every zero-inflated model in a collection over q used
+to redo the same IRLS.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockData$zi_ols_fit()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a list with `B` (d x p), `dm1` (p) and `R` (n x p masked residuals)
   }
 }
 

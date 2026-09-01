@@ -203,7 +203,7 @@ NormalBlockMeanBase <- R6::R6Class(
     ## zero-inflation mask (R/utils.R), whose dm1 is already the diagonal
     ## precision the model carries.
     zi_mean_inference = function() {
-      fit <- zi_weighted_fit(self$data)
+      fit <- self$data$zi_ols_fit()
       list(B = fit$B, Omega = private$omega_from_sigma(diag(1 / fit$dm1, self$p)), R = fit$R)
     },
 

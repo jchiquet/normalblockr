@@ -31,7 +31,7 @@ NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
 
       ## One wide SBM exploration over q_list replaces one independent
       ## exploration per q (see sbm_clustering_path()).
-      sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
+      sbm_path <- clustering_path_for_family(mydata, q_list, "var", zero_inflation, control)
 
       self$models <- purrr::map(seq_along(q_list), function(rank) {
         if (!is.null(sbm_path))

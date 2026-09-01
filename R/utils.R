@@ -125,7 +125,7 @@ zi_weighted_fit <- function(data) {
 
 # Zero-inflation analogue of ols_residuals(): kappa isn't computed here since
 # the residual only depends on the weighted fit of B, not on kappa.
-zi_residuals <- function(data) zi_weighted_fit(data)$R
+zi_residuals <- function(data) data$zi_ols_fit()$R
 
 # Ward.D2 clustering tree of the p columns of R by pairwise correlation
 # distance (1 - cor); shared by the "ward2" heuristic, its fallback for any
@@ -164,6 +164,35 @@ sbm_clustering_path <- function(R, q_list) {
   )
 }
 
+# Rewrites R (n x p) with fewer rows but the *same* Euclidean distances
+# between its columns, which is all a distance-based clustering of those
+# columns can see. R = U D V' with U orthonormal gives
+# ||R e_j - R e_k|| = ||D V' (e_j - e_k)||, so D V' (rank(R) x p) is an exact
+# stand-in. Worth it because the matrix handed to the heuristics is often a
+# tall, low-rank embedding: the mean-block family clusters X %*% B, whose rank
+# is d (measured 200 x 60 -> 1 x 60 at d = 1), and OLS residuals still drop
+# from n to p rows. Correlation-based heuristics cannot use this -- cor() over
+# rank(R) rows is a different quantity -- so it is applied inside the kmeans
+# method rather than to every heuristic.
+compress_columns <- function(R, tol = 1e-10) {
+  if (nrow(R) <= 1) return(R)
+  s <- svd(R, nu = 0)
+  keep <- s$d > tol * max(s$d, 1)
+  if (sum(keep) >= nrow(R)) return(R)
+  t(s$v[, keep, drop = FALSE] %*% diag(s$d[keep], sum(keep)))
+}
+
+kmeans_columns <- function(R, q) {
+  stats::kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster
+}
+
+# Clusters R into every q in q_list with kmeans. Only the lossless row
+# compression is shared -- Lloyd's algorithm itself depends on q throughout.
+kmeans_clustering_path <- function(R, q_list) {
+  Rc <- compress_columns(R)
+  stats::setNames(lapply(q_list, function(q) kmeans_columns(Rc, q)), q_list)
+}
+
 # Clusters R into every q in q_list by cutting a SINGLE hierarchical tree,
 # rather than rebuilding it once per q. The tree (cor + dist + hclust) does
 # not depend on q at all -- only the cut does -- so a collection over 30 q
@@ -192,10 +221,9 @@ spectral_clustering_path <- function(R, q_list) {
 
 # Precomputes, for a collection over q_list, whatever part of the requested
 # clustering heuristic is shared across q, and returns one clustering per q
-# (named by q). Returns NULL when nothing can be shared -- "kmeans" depends on
-# q entirely, "best_of_inits" is the model's own business, and an explicit
-# clustering needs no help -- and every model then runs its own
-# heuristic_clustering() as before.
+# (named by q). Returns NULL when nothing can be shared -- "best_of_inits" is
+# the model's own business, and an explicit clustering needs no help -- and
+# every model then runs its own heuristic_clustering() as before.
 #
 # `R` is the matrix the family hands to its clustering heuristics: the
 # residuals for variance-block models, the fitted mean trajectory for
@@ -208,6 +236,7 @@ clustering_path_for_collection <- function(R, q_list, method) {
                  "sbm"      = sbm_clustering_path(R, q_list),
                  "ward2"    = ward2_clustering_path(R, q_list),
                  "spectral" = spectral_clustering_path(R, q_list),
+                 "kmeans"   = kmeans_clustering_path(R, q_list),
                  NULL)
   if (is.null(path)) return(NULL)
   lapply(stats::setNames(seq_along(q_list), q_list), function(i) {
@@ -216,14 +245,26 @@ clustering_path_for_collection <- function(R, q_list, method) {
   })
 }
 
-# Backwards-compatible entry point for the variance-block collection, which
-# knows its own residual convention.
-sbm_path_for_collection <- function(mydata, q_list, zero_inflation, control) {
+# Entry point for a collection: resolves the family's default heuristic when
+# none was named, and hands clustering_path_for_collection() the matrix that
+# family's models cluster -- the residuals for variance-block models, the
+# fitted mean trajectory X %*% B for mean-block ones (see the call sites in
+# NormalBlockVarUnknownClusters/NormalBlockMeanUnknownClusters, which must
+# stay in step with this).
+clustering_path_for_family <- function(mydata, q_list, family = c("var", "mean"),
+                                       zero_inflation = FALSE, control = NB_control()) {
+  family <- match.arg(family)
   method <- control$clustering_init
-  if (is.null(method)) method <- "ward2" # the variance-block family default
+  if (is.null(method)) method <- if (family == "var") "ward2" else "kmeans"
   if (!is.character(method) || length(method) != 1) return(NULL)
-  if (!method %in% c("sbm", "ward2", "spectral")) return(NULL)
-  R <- if (zero_inflation) zi_residuals(mydata) else ols_residuals(mydata)
+  if (!method %in% c("sbm", "ward2", "spectral", "kmeans")) return(NULL)
+
+  R <- if (family == "var") {
+    if (zero_inflation) zi_residuals(mydata) else ols_residuals(mydata)
+  } else {
+    B <- if (zero_inflation) mydata$zi_ols_fit()$B else mydata$ols_fit()$B
+    mydata$X %*% B
+  }
   clustering_path_for_collection(R, q_list, method)
 }
 
