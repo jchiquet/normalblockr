@@ -1,11 +1,18 @@
 ###############################################################################
-## Work that a collection over q used to repeat once per model, even though it
-## does not depend on q: the OLS fit, the zero-inflation logistic regressions,
-## and the q-independent part of a clustering heuristic.
+## Work a collection over q used to repeat once per model although it does not
+## depend on q: the OLS fit, the zero-inflation logistic regressions, and
+## whatever part of a clustering heuristic is shared (one hierarchical tree cut
+## at each q, one eigendecomposition, one lossless row compression, one wide
+## SBM exploration).
 ##
-## These are pure removals of redundant computation -- the fits they feed must
-## come out unchanged, which is what most of these tests check.
+## These are removals of redundant computation, so most of what follows checks
+## that the fits they feed come out unchanged. The heuristics themselves live
+## in test-clustering-heuristics.R.
 ###############################################################################
+set.seed(99)
+sbm_ex   <- generate_normal_block_var_data(n = 60, p = 24, d = 1, q = 4)
+sbm_data <- NormalBlockData$new(sbm_ex$Y, sbm_ex$X)
+sbm_R    <- ols_residuals(sbm_data)
 
 test_that("ols_fit() is memoized and matches a fresh computation", {
   set.seed(1)
@@ -126,36 +133,6 @@ test_that("a heuristic that collapses below q falls back to the model's own", {
   }
 })
 
-test_that("zero-inflation works with more than one zero-inflation covariate", {
-  ## B0 used to be built as t(sapply(...)), which is d0 x p only because
-  ## sapply collapses to a vector when d0 == 1; with d0 > 1 it came out
-  ## transposed and X0 %*% B0 failed with "non-conformable arguments".
-  set.seed(31)
-  ex <- generate_normal_block_var_data(n = 90, p = 8, d = 1, q = 2, kappa = rep(0.3, 8))
-  d  <- NormalBlockData$new(ex$Y, ex$X, X0 = cbind(1, rnorm(90)))
-  expect_equal(d$d0, 2)
-  expect_equal(dim(d$zi_fit()$B0), c(2L, 8L))
-  expect_equal(dim(d$zi_fit()$kappa), c(90L, 8L))
-
-  fit <- normal_block(d, blocks = 2, zero_inflation = TRUE,
-                      control = NB_control(verbose = FALSE))
-  expect_true(is.finite(fit$loglik))
-  ## kappa costs p * d0 parameters, so a second ZI covariate is counted
-  d1  <- NormalBlockData$new(ex$Y, ex$X)
-  fit1 <- normal_block(d1, blocks = 2, zero_inflation = TRUE,
-                       control = NB_control(verbose = FALSE))
-  expect_equal(fit$nb_param - fit1$nb_param, 8L)
-})
-
-test_that("B0 keeps its d0 x p orientation in the degenerate all-nonzero case", {
-  set.seed(32)
-  ex <- generate_normal_block_var_data(n = 50, p = 6, d = 1, q = 2) # no zeros at all
-  d  <- NormalBlockData$new(ex$Y, ex$X, X0 = cbind(1, rnorm(50)))
-  expect_equal(dim(d$zi_fit()$B0), c(2L, 6L))
-  expect_true(all(is.infinite(d$zi_fit()$B0)))
-  expect_true(all(d$zi_fit()$kappa == 0))
-})
-
 test_that("compress_columns() preserves the geometry kmeans actually sees", {
   set.seed(41)
   ## a tall, low-rank embedding, as the mean-block family produces (X %*% B)
@@ -202,4 +179,85 @@ test_that("the mean-block collection shares its heuristic across q", {
   set.seed(44); b <- normalblockr:::clustering_path_for_family(
     d, q_list, "mean", FALSE, NB_control(verbose = FALSE, clustering_init = "kmeans"))
   expect_equal(a, b)
+})
+
+test_that("sbm_clustering_path() returns one valid membership vector per q, named by q, never NULL", {
+  q_list <- c(2, 3, 4, 5)
+  path <- sbm_clustering_path(sbm_R, q_list)
+
+  expect_equal(names(path), as.character(q_list))
+  for (q in q_list) {
+    membership <- path[[as.character(q)]]
+    expect_false(is.null(membership))
+    expect_length(membership, sbm_data$p)
+    expect_equal(length(unique(membership)), q)
+  }
+})
+
+test_that("sbm_clustering_path() falls back to a cheap ward2 clustering for q's the SBM exploration doesn't reach", {
+  ## A q_list reaching far beyond what a tiny dataset's SBM exploration will
+  ## ever cover forces the fallback path for the largest values -- regression
+  ## test for the cost blow-up found on a real dataset where SBM's own model
+  ## selection stopped early (re-running a dedicated SBM call per missing q
+  ## reintroduced the cost this function exists to avoid).
+  q_list <- 2:20
+  path <- sbm_clustering_path(sbm_R, q_list)
+  expect_true(all(!sapply(path, is.null)))
+  for (q in q_list) expect_equal(length(unique(path[[as.character(q)]])), q)
+})
+
+test_that("NormalBlockVarCollectionClusters with clustering_init = 'sbm' eagerly resolves it from the shared path", {
+  coll <- NormalBlockVarCollectionClusters$new(sbm_data, 2:5, control = NB_control(verbose = FALSE, clustering_init = "sbm"))
+
+  for (model in coll$models) {
+    ## every model converges to a valid q-cluster initialization once
+    ## actually initialized, whether served by the shared path or (for q's it
+    ## didn't cover) by the per-q heuristic fallback
+    init <- model$.__enclos_env__$private$optim_initialize()
+    expect_equal(length(unique(get_clusters(init$C))), model$q)
+  }
+  expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
+})
+
+test_that("an explicit clustering_init is never overridden by the sbm path", {
+  cl_init <- list(rep(1:2, length.out = sbm_data$p), rep(1:3, length.out = sbm_data$p))
+  coll <- NormalBlockVarCollectionClusters$new(sbm_data, c(2, 3), control = NB_control(
+    verbose = FALSE, clustering_init = cl_init
+  ))
+
+  for (i in seq_along(coll$models)) {
+    C0 <- coll$models[[i]]$.__enclos_env__$private$C
+    expect_equal(get_clusters(C0), cl_init[[i]])
+  }
+})
+
+test_that("NormalBlockVarCollectionClustersSparsity also uses the shared sbm path", {
+  coll <- NormalBlockVarCollectionClustersSparsity$new(sbm_data, c(2, 3), control = NB_control(
+    verbose = FALSE, clustering_init = "sbm", n_sparsity_penalties = 3
+  ))
+  expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
+})
+
+test_that("sbm_clustering_path()'s ward2 fallback does not error on a (near-)constant column", {
+  sbm_R_const <- sbm_R
+  sbm_R_const[, 1] <- 0; sbm_R_const[1, 1] <- 5 # a single non-zero residual for variable 1
+  expect_no_warning(path <- sbm_clustering_path(sbm_R_const, 2:20))
+  for (q in 2:20) expect_equal(length(unique(path[[as.character(q)]])), q)
+})
+
+test_that("zero-inflated collections also use the shared sbm path, clustering on zi_residuals() instead of ols_residuals()", {
+  exzi   <- generate_normal_block_var_data(n = 60, p = 24, d = 1, q = 4, kappa = rep(0.3, 24))
+  datazi <- NormalBlockData$new(exzi$Y, exzi$X, X0 = matrix(1, nrow(exzi$Y), 1))
+
+  coll <- NormalBlockVarCollectionClusters$new(datazi, 2:3, zero_inflation = TRUE,
+                                  control = NB_control(verbose = FALSE, clustering_init = "sbm"))
+  ## clustering_init is now eagerly injected from the shared path, just like
+  ## for non-ZI collections -- private$C is already a valid q-cluster
+  ## indicator matrix before optimize()/optim_initialize() ever runs
+  for (model in coll$models) {
+    C0 <- model$.__enclos_env__$private$C
+    expect_false(anyNA(C0))
+    expect_equal(length(unique(get_clusters(C0))), model$q)
+  }
+  expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
 })
