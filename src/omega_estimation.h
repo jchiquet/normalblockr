@@ -14,7 +14,10 @@
 namespace nb_omega {
 
 // Tighter than glassoFast's 1e-4 default, which a warm start pays for in
-// accuracy rather than time -- see estimate() below.
+// accuracy rather than time -- see estimate() below. MUST match
+// NB_GLASSO_THRESHOLD (R/utils.R), which the R reference recursion uses:
+// the two are compared trace-for-trace at 1e-8 in test-cpp-normal-block-mean.R,
+// so drift between them fails there rather than silently.
 constexpr double kGlassoThreshold = 1e-6;
 
 // Armadillo equivalent of ensure_pd() (R/utils.R): the graphical lasso can

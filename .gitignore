@@ -72,3 +72,6 @@ inst/doc
 snowflake.log
 inst/*.pdf
 inst/normalblockmean/
+
+# knitr byproducts from knitting a vignette outside the package build
+figure/
