@@ -49,6 +49,8 @@ normal-block model.
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockData-initialize}{\code{NormalBlockData$new()}}
+    \item \href{#method-NormalBlockData-ols_fit}{\code{NormalBlockData$ols_fit()}}
+    \item \href{#method-NormalBlockData-zi_fit}{\code{NormalBlockData$zi_fit()}}
     \item \href{#method-NormalBlockData-clone}{\code{NormalBlockData$clone()}}
   }
 }
@@ -83,6 +85,47 @@ documentation for the rationale and its limits.}
 default `Y == 0`.}
     }
     \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockData-ols_fit"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockData-ols_fit}{}}}
+\subsection{\code{NormalBlockData$ols_fit()}}{
+  Ordinary-least-squares fit of Y on X, with its residuals
+and their covariance. Computed once and memoized: it depends only on
+the data, yet every model in a collection over q used to recompute it
+(measured at 9% of a q = 1:30 variance-block collection on `brca_rppa`).
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockData$ols_fit()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a list with `B` (d x p), `R` (n x p residuals) and `Sigma`
+(p x p residual covariance)
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockData-zi_fit"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockData-zi_fit}{}}}
+\subsection{\code{NormalBlockData$zi_fit()}}{
+  Zero-inflation component: `p` independent logistic
+regressions of each variable's zero pattern on `X0`, and the fixed
+contribution they make to the log-likelihood. The (V)EM never revisits
+these, so they are a property of the data rather than of a model --
+hence computed once and memoized here. Every model in a collection over
+q used to refit all `p` regressions (measured at 53% of a q = 2:8
+zero-inflated mean-block collection).
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockData$zi_fit()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a list with `B0` (d0 x p), `kappa` (n x p zero-inflation
+probabilities) and `ZI_cond_mean` (a scalar)
   }
 }
 

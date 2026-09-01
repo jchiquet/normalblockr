@@ -164,13 +164,67 @@ sbm_clustering_path <- function(R, q_list) {
   )
 }
 
-# Builds the shared sbm_clustering_path() for a collection over q_list, or
-# NULL if clustering_init isn't "sbm" applied uniformly (every model then
-# falls back to its own per-q heuristic_clustering()).
+# Clusters R into every q in q_list by cutting a SINGLE hierarchical tree,
+# rather than rebuilding it once per q. The tree (cor + dist + hclust) does
+# not depend on q at all -- only the cut does -- so a collection over 30 q
+# values used to throw 29 identical trees away (9% of a q = 1:30 collection on
+# `brca_rppa`). cutree() can return fewer than q groups on exactly tied merge
+# heights; that q is left to the model's own heuristic_clustering().
+ward2_clustering_path <- function(R, q_list) {
+  tree <- ward2_tree(R)
+  stats::setNames(lapply(q_list, function(q) stats::cutree(tree, q)), q_list)
+}
+
+# Same idea for the spectral heuristic: the eigendecomposition of cov(R) is
+# q-independent, only the number of leading vectors kept and the kmeans that
+# follows are not.
+spectral_clustering_path <- function(R, q_list) {
+  U_all <- eigen(stats::cov(R), symmetric = TRUE)$vectors
+  stats::setNames(
+    lapply(q_list, function(q) {
+      U <- U_all[, seq_len(q), drop = FALSE]
+      U <- U / pmax(sqrt(rowSums(U^2)), 1e-10)
+      stats::kmeans(U, q, nstart = 30, iter.max = 50)$cluster
+    }),
+    q_list
+  )
+}
+
+# Precomputes, for a collection over q_list, whatever part of the requested
+# clustering heuristic is shared across q, and returns one clustering per q
+# (named by q). Returns NULL when nothing can be shared -- "kmeans" depends on
+# q entirely, "best_of_inits" is the model's own business, and an explicit
+# clustering needs no help -- and every model then runs its own
+# heuristic_clustering() as before.
+#
+# `R` is the matrix the family hands to its clustering heuristics: the
+# residuals for variance-block models, the fitted mean trajectory for
+# mean-block ones. Any q whose shared computation fails to produce exactly q
+# groups is dropped back to the heuristic's name, preserving the per-model
+# fallback in heuristic_clustering().
+clustering_path_for_collection <- function(R, q_list, method) {
+  if (!is.character(method) || length(method) != 1) return(NULL)
+  path <- switch(method,
+                 "sbm"      = sbm_clustering_path(R, q_list),
+                 "ward2"    = ward2_clustering_path(R, q_list),
+                 "spectral" = spectral_clustering_path(R, q_list),
+                 NULL)
+  if (is.null(path)) return(NULL)
+  lapply(stats::setNames(seq_along(q_list), q_list), function(i) {
+    cl <- path[[i]]
+    if (length(unique(cl)) == q_list[i]) cl else method
+  })
+}
+
+# Backwards-compatible entry point for the variance-block collection, which
+# knows its own residual convention.
 sbm_path_for_collection <- function(mydata, q_list, zero_inflation, control) {
-  if (!identical(control$clustering_init, "sbm")) return(NULL)
+  method <- control$clustering_init
+  if (is.null(method)) method <- "ward2" # the variance-block family default
+  if (!is.character(method) || length(method) != 1) return(NULL)
+  if (!method %in% c("sbm", "ward2", "spectral")) return(NULL)
   R <- if (zero_inflation) zi_residuals(mydata) else ols_residuals(mydata)
-  sbm_clustering_path(R, q_list)
+  clustering_path_for_collection(R, q_list, method)
 }
 
 # Whether NB_control(clustering_init = "best_of_inits") was requested (see

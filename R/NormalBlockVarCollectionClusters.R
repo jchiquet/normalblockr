@@ -33,20 +33,21 @@ NormalBlockVarCollectionClusters <- R6::R6Class(
       self$control <- control
       self$control$zero_inflation <- zero_inflation
 
-      ## A single wide SBM exploration over the whole q_list range visits
-      ## every intermediate block count on its way there, so it gives a
-      ## clustering for every q in q_list at a fraction of the cost of letting
-      ## each model run its own independent exploration (clustering_init =
-      ## "sbm" otherwise repeats the explore step once per q -- see
-      ## sbm_path_for_collection()/sbm_clustering_path() in R/utils.R).
-      sbm_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
+      ## Whatever part of the requested clustering heuristic doesn't depend on
+      ## q is computed once here instead of once per model: a single wide SBM
+      ## exploration covers every intermediate block count, one hierarchical
+      ## tree is cut at each q, one eigendecomposition serves every spectral
+      ## cut. See sbm_path_for_collection() in R/utils.R; NULL when nothing is
+      ## shareable ("kmeans", "best_of_inits", an explicit clustering), and
+      ## every model then runs its own heuristic_clustering() as before.
+      clustering_path <- sbm_path_for_collection(mydata, q_list, zero_inflation, control)
 
       # instantiates an NormalBlockVarUnknownClusters model for each q in nb_blocks
       this_control <- control
       self$models <- map(rank(q_list),
           function(r) {
             this_control$clustering_init <-
-              if (!is.null(sbm_path)) sbm_path[[as.character(q_list[r])]]
+              if (!is.null(clustering_path)) clustering_path[[as.character(q_list[r])]]
               ## a list means one explicit clustering per q; anything else
               ## (a heuristic name, or NULL) applies identically to every q
               else if (is.list(control$clustering_init)) control$clustering_init[[r]]

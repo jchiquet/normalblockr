@@ -124,6 +124,59 @@ NormalBlockData <- R6::R6Class(
       self$zeros_bar <- 1 - self$zeros
       self$npY       <- sum(self$zeros_bar)
       self$nY        <- colSums(self$zeros_bar)
+    },
+
+    #' @description Ordinary-least-squares fit of Y on X, with its residuals
+    #' and their covariance. Computed once and memoized: it depends only on
+    #' the data, yet every model in a collection over q used to recompute it
+    #' (measured at 9% of a q = 1:30 variance-block collection on `brca_rppa`).
+    #' @return a list with `B` (d x p), `R` (n x p residuals) and `Sigma`
+    #' (p x p residual covariance)
+    ols_fit = function() {
+      if (is.null(private$ols_cache)) {
+        B <- self$XtXm1 %*% self$XtY
+        R <- self$Y - self$X %*% B
+        private$ols_cache <- list(B = B, R = R, Sigma = cov(R))
+      }
+      private$ols_cache
+    },
+
+    #' @description Zero-inflation component: `p` independent logistic
+    #' regressions of each variable's zero pattern on `X0`, and the fixed
+    #' contribution they make to the log-likelihood. The (V)EM never revisits
+    #' these, so they are a property of the data rather than of a model --
+    #' hence computed once and memoized here. Every model in a collection over
+    #' q used to refit all `p` regressions (measured at 53% of a q = 2:8
+    #' zero-inflated mean-block collection).
+    #' @return a list with `B0` (d0 x p), `kappa` (n x p zero-inflation
+    #' probabilities) and `ZI_cond_mean` (a scalar)
+    zi_fit = function() {
+      if (is.null(private$zi_cache)) {
+        B0 <- if (self$npY < self$n * self$p) {
+          t(sapply(lapply(1:self$p, function(j) {
+            df <- data.frame("zeros" = self$zeros[, j], self$X0)
+            glm(zeros ~ 0 + ., family = binomial(link = "logit"), data = df)$coefficients
+          }), unlist))
+        } else {
+          matrix(rep(-Inf, self$p * self$d0), nrow = self$d0)
+        }
+        kappa <- apply(self$X0 %*% B0, MARGIN = c(1, 2), FUN = sigmoid)
+        private$zi_cache <- list(
+          B0 = B0, kappa = kappa,
+          ZI_cond_mean = sum(xlogy(self$zeros, kappa)) +
+                         sum(xlogy(self$zeros_bar, 1 - kappa)))
+      }
+      private$zi_cache
     }
+  ),
+
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ## PRIVATE MEMBERS ----
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  private = list(
+    ## memoized by ols_fit()/zi_fit(); both are pure functions of the fields
+    ## set in initialize(), none of which change afterwards
+    ols_cache = NULL,
+    zi_cache  = NULL
   )
 )

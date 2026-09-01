@@ -473,24 +473,16 @@ NormalBlockBase <- R6::R6Class(
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## Zero-inflation probabilities, fitted once from X0 by p independent
-    ## logistic regressions and never revisited by the (V)EM: only their fixed
-    ## log-likelihood contribution (ZI_cond_mean) reaches the recursion. Shared
-    ## by both model families.
+    ## Zero-inflation probabilities, never revisited by the (V)EM: only their
+    ## fixed log-likelihood contribution (ZI_cond_mean) reaches the recursion.
+    ## They depend on nothing but the data, so the fit itself lives on (and is
+    ## memoized by) NormalBlockData -- every model in a collection over q would
+    ## otherwise refit the same p logistic regressions.
     fit_zi_component = function() {
-      if (self$data$npY < self$n * self$p) {
-        B0_list <- lapply(1:self$data$p, function(j) {
-          df <- data.frame("zeros" = self$data$zeros[, j], self$data$X0)
-          glm(zeros ~ 0 + ., family = binomial(link = "logit"), data = df)$coefficients
-        })
-        private$B0 <- t(sapply(B0_list, unlist))
-      } else {
-        private$B0 <- matrix(rep(-Inf, self$data$p * self$data$d0), nrow = self$data$d0)
-      }
-      private$kappa <- apply(self$data$X0 %*% private$B0, MARGIN = c(1, 2), FUN = sigmoid)
-      private$ZI_cond_mean <-
-        sum(xlogy(self$data$zeros, private$kappa)) +
-        sum(xlogy(self$data$zeros_bar, 1 - private$kappa))
+      zi <- self$data$zi_fit()
+      private$B0           <- zi$B0
+      private$kappa        <- zi$kappa
+      private$ZI_cond_mean <- zi$ZI_cond_mean
     },
 
     ## Methods for integrated (V)EM inference --------------
@@ -499,12 +491,7 @@ NormalBlockBase <- R6::R6Class(
     ## inst/normal_block_models.qmd); optim_initialize() (heuristic
     ## initialization) stays in R and supplies the starting values.
     ## MLE of MV Normal distribution
-    multivariate_normal_inference = function(){
-      B     <- self$data$XtXm1 %*% self$data$XtY
-      R     <- ols_residuals(self$data)
-      Sigma <- cov(R)
-      list(B = B, R = R, Sigma = Sigma)
-    },
+    multivariate_normal_inference = function() self$data$ols_fit(),
 
     optim_initialize = function() {},
 
