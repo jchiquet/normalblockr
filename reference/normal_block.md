@@ -58,13 +58,11 @@ my_normal_block <- normal_block(data, blocks = 1:6)
 #> Fitting a diagonal normal-block model with unknown q 
 #>   number of blocks = 1                number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6           
 #> DONE
+if (FALSE) { # \dontrun{
 my_normal_block$plot(c("deviance", "BIC", "ICL"))
-
 Y_hat <- my_normal_block$get_best_model()$fitted
 plot(data$Y, Y_hat, log = "xy"); abline(0,1)
-#> Warning: 430 x values <= 0 omitted from logarithmic plot
-#> Warning: 399 y values <= 0 omitted from logarithmic plot
-
+} # }
 ## Normal Data with Zero Inflation
 ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
 zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)

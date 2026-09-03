@@ -10,7 +10,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/jchiquet/normalblockr/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/jchiquet/normalblockr/blob/v0.2.1/inst/CITATION)
 
 Tous, J., & Chiquet, J. (2026). An integrated method for clustering and
 association network inference. Computational Statistics & Data Analysis,
