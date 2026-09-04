@@ -32,6 +32,12 @@ as `mu_i = C B' X_i` with one regression profile per cluster.
 
 ## The graphical lasso is now in-package
 
+This also fixes the segfault CRAN reported on
+`r-devel-linux-x86_64-fedora-gcc` when re-building
+`breast-cancer-proteomics.Rmd` (`address 0x580, cause 'memory not mapped'`),
+which our own CI had been hitting intermittently on Linux.
+
+
 * `glassoFast` is no longer a dependency. The C++ (V)EM used to call back into
   R once per M-step to reach it -- thousands of round trips from inside a
   single `.Call` for one sparsity path, and a recurring source of intermittent
