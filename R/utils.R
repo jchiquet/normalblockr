@@ -33,12 +33,36 @@ clip_probabilities <- function(x, zero = .Machine$double.eps) {
 }
 
 # Projects a symmetric matrix onto the PD cone by flooring its eigenvalues.
-# Used by split()/merge()'s new_Omegaq, hand-edited from an existing
+# Used by split()/merge()'s new_Omega, hand-edited from an existing
 # precision matrix with no general guarantee of staying PD.
 ensure_pd <- function(M, floor = 1e-6) {
   M <- (M + t(M)) / 2
   eig <- eigen(M, symmetric = TRUE)
   eig$vectors %*% diag(pmax(eig$values, floor), nrow(M)) %*% t(eig$vectors)
+}
+
+# Graphical-lasso estimate of a precision matrix from its covariance estimate,
+# with a plain inversion as the fallback when the solver can't produce a finite
+# answer. Wraps the in-package solver (src/graphical_lasso.h) so that the R
+# reference implementations and the C++ (V)EM cores run the very same code --
+# tests/testthat/test-cpp-*.R compare the two at 1e-8, which only holds if they
+# share this step exactly.
+# Convergence threshold the (V)EM's M-step uses for the graphical lasso.
+# MUST match nb_omega::kGlassoThreshold (src/omega_estimation.h): the two
+# recursions are compared trace-for-trace at 1e-8 in test-cpp-*.R, so any
+# drift between them shows up there rather than silently.
+NB_GLASSO_THRESHOLD <- 1e-6
+
+glasso_omega <- function(Sigma, rho) {
+  glasso_out <- graphical_lasso_fit(Sigma, rho)
+  if (anyNA(glasso_out$wi)) {
+    warning("GLasso fails, the penalty is probably too small and the system badly ",
+            "conditionned \n reciprocal condition number =", rcond(Sigma),
+            "\n We send back the original matrix and its inverse (unpenalized).",
+            call. = FALSE)
+    return(chol2inv(chol(Sigma)))
+  }
+  Matrix::symmpart(glasso_out$wi)
 }
 
 # computes xlogx, setting it to 0 if x = 0
@@ -107,7 +131,7 @@ zi_weighted_fit <- function(data) {
 
 # Zero-inflation analogue of ols_residuals(): kappa isn't computed here since
 # the residual only depends on the weighted fit of B, not on kappa.
-zi_residuals <- function(data) zi_weighted_fit(data)$R
+zi_residuals <- function(data) data$zi_ols_fit()$R
 
 # Ward.D2 clustering tree of the p columns of R by pairwise correlation
 # distance (1 - cor); shared by the "ward2" heuristic, its fallback for any
@@ -146,13 +170,108 @@ sbm_clustering_path <- function(R, q_list) {
   )
 }
 
-# Builds the shared sbm_clustering_path() for a collection over q_list, or
-# NULL if clustering_init isn't "sbm" applied uniformly (every model then
-# falls back to its own per-q heuristic_clustering()).
-sbm_path_for_collection <- function(mydata, q_list, zero_inflation, control) {
-  if (!identical(control$clustering_init, "sbm")) return(NULL)
-  R <- if (zero_inflation) zi_residuals(mydata) else ols_residuals(mydata)
-  sbm_clustering_path(R, q_list)
+# Rewrites R (n x p) with fewer rows but the *same* Euclidean distances
+# between its columns, which is all a distance-based clustering of those
+# columns can see. R = U D V' with U orthonormal gives
+# ||R e_j - R e_k|| = ||D V' (e_j - e_k)||, so D V' (rank(R) x p) is an exact
+# stand-in. Worth it because the matrix handed to the heuristics is often a
+# tall, low-rank embedding: the mean-block family clusters X %*% B, whose rank
+# is d (measured 200 x 60 -> 1 x 60 at d = 1), and OLS residuals still drop
+# from n to p rows. Correlation-based heuristics cannot use this -- cor() over
+# rank(R) rows is a different quantity -- so it is applied inside the kmeans
+# method rather than to every heuristic.
+compress_columns <- function(R, tol = 1e-10) {
+  if (nrow(R) <= 1) return(R)
+  s <- svd(R, nu = 0)
+  keep <- s$d > tol * max(s$d, 1)
+  if (sum(keep) >= nrow(R)) return(R)
+  t(s$v[, keep, drop = FALSE] %*% diag(s$d[keep], sum(keep)))
+}
+
+kmeans_columns <- function(R, q) {
+  stats::kmeans(t(R), q, nstart = 30, iter.max = 50)$cluster
+}
+
+# Clusters R into every q in q_list with kmeans. Only the lossless row
+# compression is shared -- Lloyd's algorithm itself depends on q throughout.
+kmeans_clustering_path <- function(R, q_list) {
+  Rc <- compress_columns(R)
+  stats::setNames(lapply(q_list, function(q) kmeans_columns(Rc, q)), q_list)
+}
+
+# Clusters R into every q in q_list by cutting a SINGLE hierarchical tree,
+# rather than rebuilding it once per q. The tree (cor + dist + hclust) does
+# not depend on q at all -- only the cut does -- so a collection over 30 q
+# values used to throw 29 identical trees away (9% of a q = 1:30 collection on
+# `brca_rppa`). cutree() can return fewer than q groups on exactly tied merge
+# heights; that q is left to the model's own heuristic_clustering().
+ward2_clustering_path <- function(R, q_list) {
+  tree <- ward2_tree(R)
+  stats::setNames(lapply(q_list, function(q) stats::cutree(tree, q)), q_list)
+}
+
+# Same idea for the spectral heuristic: the eigendecomposition of cov(R) is
+# q-independent, only the number of leading vectors kept and the kmeans that
+# follows are not.
+spectral_clustering_path <- function(R, q_list) {
+  U_all <- eigen(stats::cov(R), symmetric = TRUE)$vectors
+  stats::setNames(
+    lapply(q_list, function(q) {
+      U <- U_all[, seq_len(q), drop = FALSE]
+      U <- U / pmax(sqrt(rowSums(U^2)), 1e-10)
+      stats::kmeans(U, q, nstart = 30, iter.max = 50)$cluster
+    }),
+    q_list
+  )
+}
+
+# Precomputes, for a collection over q_list, whatever part of the requested
+# clustering heuristic is shared across q, and returns one clustering per q
+# (named by q). Returns NULL when nothing can be shared -- "best_of_inits" is
+# the model's own business, and an explicit clustering needs no help -- and
+# every model then runs its own heuristic_clustering() as before.
+#
+# `R` is the matrix the family hands to its clustering heuristics: the
+# residuals for variance-block models, the fitted mean trajectory for
+# mean-block ones. Any q whose shared computation fails to produce exactly q
+# groups is dropped back to the heuristic's name, preserving the per-model
+# fallback in heuristic_clustering().
+clustering_path_for_collection <- function(R, q_list, method) {
+  if (!is.character(method) || length(method) != 1) return(NULL)
+  path <- switch(method,
+                 "sbm"      = sbm_clustering_path(R, q_list),
+                 "ward2"    = ward2_clustering_path(R, q_list),
+                 "spectral" = spectral_clustering_path(R, q_list),
+                 "kmeans"   = kmeans_clustering_path(R, q_list),
+                 NULL)
+  if (is.null(path)) return(NULL)
+  lapply(stats::setNames(seq_along(q_list), q_list), function(i) {
+    cl <- path[[i]]
+    if (length(unique(cl)) == q_list[i]) cl else method
+  })
+}
+
+# Entry point for a collection: resolves the family's default heuristic when
+# none was named, and hands clustering_path_for_collection() the matrix that
+# family's models cluster -- the residuals for variance-block models, the
+# fitted mean trajectory X %*% B for mean-block ones (see the call sites in
+# NormalBlockVarUnknownClusters/NormalBlockMeanUnknownClusters, which must
+# stay in step with this).
+clustering_path_for_family <- function(mydata, q_list, family = c("var", "mean"),
+                                       zero_inflation = FALSE, control = NB_control()) {
+  family <- match.arg(family)
+  method <- control$clustering_init
+  if (is.null(method)) method <- if (family == "var") "ward2" else "kmeans"
+  if (!is.character(method) || length(method) != 1) return(NULL)
+  if (!method %in% c("sbm", "ward2", "spectral", "kmeans")) return(NULL)
+
+  R <- if (family == "var") {
+    if (zero_inflation) zi_residuals(mydata) else ols_residuals(mydata)
+  } else {
+    B <- if (zero_inflation) mydata$zi_ols_fit()$B else mydata$ols_fit()$B
+    mydata$X %*% B
+  }
+  clustering_path_for_collection(R, q_list, method)
 }
 
 # Whether NB_control(clustering_init = "best_of_inits") was requested (see

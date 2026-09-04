@@ -9,7 +9,8 @@ normal_block(
   blocks,
   sparsity = 0,
   zero_inflation = FALSE,
-  control = NB_control()
+  control = NB_control(),
+  model = c("var", "mean")
 )
 }
 \arguments{
@@ -25,6 +26,19 @@ OR float to run model with a single sparsity penalty value}
 
 \item{control}{a list-like structure for detailed control on parameters should be
 generated with NB_control().}
+
+\item{model}{which model family to fit: "var" (the default) structures the
+clustering in the latent covariance (see [NormalBlockVarBase]), "mean"
+structures it in the mean (mu_i = C B' X_i, see [NormalBlockMeanBase]).
+The mean-block family covers the same collections as the variance-block
+one ([NormalBlockMeanCollectionClusters],
+[NormalBlockMeanCollectionSparsity] and their crossing,
+[NormalBlockMeanCollectionClustersSparsity]) -- each q simply fit
+independently, without the variance-block family's SBM-path shortcut.
+Zero-inflation is supported ([ZINormalBlockMeanKnownClusters],
+[ZINormalBlockMeanUnknownClusters], and collections of those over a range
+of q), with a diagonal or spherical Sigma only, hence not along a sparsity
+path -- see [NormalBlockMeanBase].}
 }
 \value{
 an R6 object with one of the model classes (or a collection of model objects).
@@ -34,7 +48,7 @@ Fit a normal-block model with a variational or heuristic algorithm
 }
 \examples{
 ## Normal Data
-ex_data <- generate_normal_block_var_data(n=50, p=50, d=1, q=3)
+ex_data <- generate_normal_block_var_data(n=100, p=30, d=1, q=3)
 data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 my_normal_block <- normal_block(data, blocks = 1:6)
 my_normal_block$plot(c("deviance", "BIC", "ICL"))
@@ -44,5 +58,9 @@ plot(data$Y, Y_hat, log = "xy"); abline(0,1)
 ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
 zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)
 my_normal_block <- normal_block(zidata, blocks = 1:6, zero_inflation = TRUE)
+## Mean-Block model (clustering in the mean rather than the covariance)
+ex_mean <- generate_normal_block_mean_data(n=50, p=20, d=1, q=3)
+mean_data <- NormalBlockData$new(ex_mean$Y, ex_mean$X)
+my_mean_block <- normal_block(mean_data, blocks = 3, model = "mean")
 
 }

@@ -7,6 +7,11 @@
 R6 class holding the responses and design matrix used to fit a
 normal-block model.
 }
+\examples{
+ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+c(n = data$n, p = data$p, d = data$d)
+}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{
@@ -29,6 +34,8 @@ normal-block model.
 
     \item{\code{p}}{number of variables}
 
+    \item{\code{XtX}}{useful for inference in some cases}
+
     \item{\code{XtXm1}}{inverse of XtX, useful for inference}
 
     \item{\code{XtY}}{useful for inference}
@@ -47,6 +54,9 @@ normal-block model.
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockData-initialize}{\code{NormalBlockData$new()}}
+    \item \href{#method-NormalBlockData-ols_fit}{\code{NormalBlockData$ols_fit()}}
+    \item \href{#method-NormalBlockData-zi_ols_fit}{\code{NormalBlockData$zi_ols_fit()}}
+    \item \href{#method-NormalBlockData-zi_fit}{\code{NormalBlockData$zi_fit()}}
     \item \href{#method-NormalBlockData-clone}{\code{NormalBlockData$clone()}}
   }
 }
@@ -57,7 +67,14 @@ normal-block model.
   Create a new [`NormalBlockData`] object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockData$new(Y, X, X0 = NULL, formula = NULL, scale = TRUE)}
+    \preformatted{NormalBlockData$new(
+  Y,
+  X,
+  X0 = NULL,
+  formula = NULL,
+  scale = TRUE,
+  zeros = NULL
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -70,8 +87,70 @@ normal-block model.
       \item{\code{scale}}{whether to rescale each column of Y by its own standard
 deviation (no centering). Default TRUE -- see the class-level
 documentation for the rationale and its limits.}
+      \item{\code{zeros}}{an optional 0/1 matrix of structural zeros, overriding the
+default `Y == 0`.}
     }
     \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockData-ols_fit"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockData-ols_fit}{}}}
+\subsection{\code{NormalBlockData$ols_fit()}}{
+  Ordinary-least-squares fit of Y on X, with its residuals
+and their covariance. Computed once and memoized: it depends only on
+the data, yet every model in a collection over q used to recompute it
+(measured at 9% of a q = 1:30 variance-block collection on `brca_rppa`).
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockData$ols_fit()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a list with `B` (d x p), `R` (n x p residuals) and `Sigma`
+(p x p residual covariance)
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockData-zi_ols_fit"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockData-zi_ols_fit}{}}}
+\subsection{\code{NormalBlockData$zi_ols_fit()}}{
+  Masked counterpart of `ols_fit()`: a per-variable weighted
+least-squares fit of B under the zero-inflation mask, with its inverse
+residual variances and residuals (see `zi_weighted_fit()`). Memoized for
+the same reason -- every zero-inflated model in a collection over q used
+to redo the same IRLS.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockData$zi_ols_fit()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a list with `B` (d x p), `dm1` (p) and `R` (n x p masked residuals)
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockData-zi_fit"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockData-zi_fit}{}}}
+\subsection{\code{NormalBlockData$zi_fit()}}{
+  Zero-inflation component: `p` independent logistic
+regressions of each variable's zero pattern on `X0`, and the fixed
+contribution they make to the log-likelihood. The (V)EM never revisits
+these, so they are a property of the data rather than of a model --
+hence computed once and memoized here. Every model in a collection over
+q used to refit all `p` regressions (measured at 53% of a q = 2:8
+zero-inflated mean-block collection).
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockData$zi_fit()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a list with `B0` (d0 x p), `kappa` (n x p zero-inflation
+probabilities) and `ZI_cond_mean` (a scalar)
   }
 }
 

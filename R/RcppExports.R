@@ -12,19 +12,19 @@
 #' @param C fixed cluster-indicator matrix (p x q)
 #' @param B0 initial regression coefficients (d x p)
 #' @param dm1_0 initial inverse variance per variable (length p)
-#' @param Omegaq0 initial precision matrix of the blocks (q x q)
-#' @param sparsity sparsity penalty applied to Omegaq through the graphical
-#' lasso (glassoFast); 0 means an unpenalized inversion
+#' @param Omega0 initial precision matrix of the blocks (q x q)
+#' @param sparsity sparsity penalty applied to Omega through the graphical
+#' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 #' @param sparsity_weights q x q matrix of per-pair penalty weights (see
 #' R/NormalBlockVarBase.R, `sparsity_weights`); only used when sparsity > 0
 #' @param noise_covariance either "diagonal" or "spherical"
 #' @param niter maximum number of EM iterations
 #' @param threshold convergence threshold on the objective increment
-#' @return a list with the fitted parameters (B, dm1, Omegaq, gamma, mu), the
+#' @return a list with the fitted parameters (B, dm1, Omega, gamma, mu), the
 #' objective (log-likelihood) trace and the number of iterations performed
 #' @noRd
-NormalBlockVarKnownClusters_fit <- function(Y, X, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold) {
-    .Call(`_normalblockr_NormalBlockVarKnownClusters_fit`, Y, X, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold)
+NormalBlockVarKnownClusters_fit <- function(Y, X, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold) {
+    .Call(`_normalblockr_NormalBlockVarKnownClusters_fit`, Y, X, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold)
 }
 
 #' Fit a normal-block model with unknown clusters (Rcpp/Armadillo core, VEM)
@@ -40,11 +40,11 @@ NormalBlockVarKnownClusters_fit <- function(Y, X, C, B0, dm1_0, Omegaq0, sparsit
 #' @param S0 initial variational variance of the cluster effects (length q)
 #' @param fixed_tau if TRUE, the variational membership probabilities are not
 #' re-estimated (useful for stability selection)
-#' @return a list with the fitted parameters (B, dm1, Omegaq, C, alpha, M, S),
+#' @return a list with the fitted parameters (B, dm1, Omega, C, alpha, M, S),
 #' the ELBO trace and the number of iterations performed
 #' @noRd
-NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {
-    .Call(`_normalblockr_NormalBlockVarUnknownClusters_fit`, Y, X, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold)
+NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {
+    .Call(`_normalblockr_NormalBlockVarUnknownClusters_fit`, Y, X, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold)
 }
 
 #' Fit a zero-inflated normal-block model with known clusters (Rcpp/Armadillo core)
@@ -62,19 +62,19 @@ NormalBlockVarUnknownClusters_fit <- function(Y, X, B0, dm1_0, Omegaq0, C0, alph
 #' @param C fixed cluster-indicator matrix (p x q)
 #' @param B0 initial regression coefficients (d x p)
 #' @param dm1_0 initial inverse variance per variable (length p)
-#' @param Omegaq0 initial precision matrix of the blocks (q x q)
-#' @param sparsity sparsity penalty applied to Omegaq through the graphical
-#' lasso (glassoFast); 0 means an unpenalized inversion
+#' @param Omega0 initial precision matrix of the blocks (q x q)
+#' @param sparsity sparsity penalty applied to Omega through the graphical
+#' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
 #' @param sparsity_weights q x q matrix of per-pair penalty weights
 #' @param noise_covariance either "diagonal" or "spherical"
 #' @param niter maximum number of EM iterations
 #' @param threshold convergence threshold on the objective increment
-#' @return a list with the fitted parameters (B, dm1, Omegaq, gamma, mu -- gamma
+#' @return a list with the fitted parameters (B, dm1, Omega, gamma, mu -- gamma
 #' is a q x q x n array, one posterior covariance matrix per row), the
 #' log-likelihood trace and the number of iterations performed
 #' @noRd
-ZINormalBlockVarKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold) {
-    .Call(`_normalblockr_ZINormalBlockVarKnownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold)
+ZINormalBlockVarKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold) {
+    .Call(`_normalblockr_ZINormalBlockVarKnownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold)
 }
 
 #' Fit a zero-inflated normal-block model with unknown clusters (Rcpp/Armadillo core, VEM)
@@ -92,10 +92,127 @@ ZINormalBlockVarKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, 
 #' row-dependent because of the zero-inflation mask)
 #' @param fixed_tau if TRUE, the variational membership probabilities are not
 #' re-estimated (useful for stability selection)
-#' @return a list with the fitted parameters (B, dm1, Omegaq, C, alpha, M, S),
+#' @return a list with the fitted parameters (B, dm1, Omega, C, alpha, M, S),
 #' the ELBO trace and the number of iterations performed
 #' @noRd
-ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {
-    .Call(`_normalblockr_ZINormalBlockVarUnknownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold)
+ZINormalBlockVarUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold) {
+    .Call(`_normalblockr_ZINormalBlockVarUnknownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold)
+}
+
+#' Fit a mean-block model with known clusters (Rcpp/Armadillo core)
+#'
+#' Equivalent of R6's NormalBlockMeanKnownClusters
+#' (R/NormalBlockMeanKnownClusters.R); runs the EM recursion from parameters
+#' already initialized on the R side.
+#'
+#' @param Y response matrix (n x p)
+#' @param X design matrix (n x d)
+#' @param C fixed cluster-indicator matrix (p x q)
+#' @param B0 initial regression coefficients (d x q)
+#' @param Omega0 initial precision matrix of the variables (p x p)
+#' @param sparsity sparsity penalty applied to Omega through the graphical
+#' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
+#' @param sparsity_weights p x p matrix of per-pair penalty weights
+#' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
+#' @param niter maximum number of EM iterations
+#' @param threshold convergence threshold on the objective increment
+#' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+#' plain EM (ignored when sparsity > 0)
+#' @return a list with the fitted parameters (B, Omega), the log-likelihood
+#' trace and the number of iterations performed
+#' @noRd
+NormalBlockMeanKnownClusters_fit <- function(Y, X, C, B0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold, accelerate = TRUE) {
+    .Call(`_normalblockr_NormalBlockMeanKnownClusters_fit`, Y, X, C, B0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold, accelerate)
+}
+
+#' Fit a mean-block model with unknown clusters (Rcpp/Armadillo core, VEM)
+#'
+#' Equivalent of R6's NormalBlockMeanUnknownClusters
+#' (R/NormalBlockMeanUnknownClusters.R); runs the variational EM recursion
+#' from parameters already initialized on the R side.
+#'
+#' @param Y response matrix (n x p)
+#' @param X design matrix (n x d)
+#' @param B0 initial regression coefficients (d x q)
+#' @param Omega0 initial precision matrix of the variables (p x p)
+#' @param tau0 initial variational membership probabilities (p x q)
+#' @param sparsity sparsity penalty applied to Omega through the graphical
+#' lasso (src/graphical_lasso.h); 0 means an unpenalized inversion
+#' @param sparsity_weights p x p matrix of per-pair penalty weights
+#' @param noise_covariance shape of Sigma: "full", "diagonal" or "spherical"
+#' @param fixed_point_niter number of Gauss-Seidel sweeps per VE-step
+#' @param fixed_tau if TRUE, the variational membership probabilities are not
+#' re-estimated (useful for stability selection)
+#' @param niter maximum number of VEM iterations
+#' @param threshold convergence threshold on the ELBO increment
+#' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+#' plain VEM (ignored when sparsity > 0)
+#' @return a list with the fitted parameters (B, Omega, C, alpha, Psi, Phi,
+#' Lambda), the ELBO trace and the number of iterations performed
+#' @noRd
+NormalBlockMeanUnknownClusters_fit <- function(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, noise_covariance, fixed_point_niter, niter, threshold, accelerate = TRUE, fixed_tau = FALSE) {
+    .Call(`_normalblockr_NormalBlockMeanUnknownClusters_fit`, Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, noise_covariance, fixed_point_niter, niter, threshold, accelerate, fixed_tau)
+}
+
+#' Fit a zero-inflated mean-block model with known clusters (Rcpp/Armadillo core)
+#'
+#' Equivalent of R6's ZINormalBlockMeanKnownClusters
+#' (R/ZINormalBlockMeanKnownClusters.R); runs the EM recursion from parameters
+#' already initialized on the R side.
+#'
+#' @param Y response matrix (n x p)
+#' @param X design matrix (n x d)
+#' @param zeros_bar zero-inflation mask (n x p), 1 where Y is observed
+#' @param zi_cond_mean fixed log-likelihood contribution of the (pre-estimated)
+#' zero-inflation component (private$ZI_cond_mean in R/NormalBlockBase.R)
+#' @param C fixed cluster-indicator matrix (p x q)
+#' @param B0 initial regression coefficients (d x q)
+#' @param Omega0 initial (diagonal) precision matrix of the variables (p x p)
+#' @param noise_covariance shape of Sigma: "diagonal" or "spherical"
+#' @param niter maximum number of EM iterations
+#' @param threshold convergence threshold on the objective increment
+#' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+#' plain EM
+#' @return a list with the fitted parameters (B, Omega), the log-likelihood
+#' trace and the number of iterations performed
+#' @noRd
+ZINormalBlockMeanKnownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, C, B0, Omega0, noise_covariance, niter, threshold, accelerate = TRUE) {
+    .Call(`_normalblockr_ZINormalBlockMeanKnownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, C, B0, Omega0, noise_covariance, niter, threshold, accelerate)
+}
+
+#' Fit a zero-inflated mean-block model with unknown clusters (Rcpp/Armadillo core, VEM)
+#'
+#' Equivalent of R6's ZINormalBlockMeanUnknownClusters
+#' (R/ZINormalBlockMeanUnknownClusters.R); runs the variational EM recursion
+#' from parameters already initialized on the R side.
+#'
+#' @inheritParams ZINormalBlockMeanKnownClusters_fit
+#' @param tau0 initial variational membership probabilities (p x q)
+#' @param fixed_tau if TRUE, the variational membership probabilities are not
+#' re-estimated (useful for stability selection)
+#' @return a list with the fitted parameters (B, Omega, C, alpha), the ELBO
+#' trace and the number of iterations performed
+#' @noRd
+ZINormalBlockMeanUnknownClusters_fit <- function(Y, X, zeros_bar, zi_cond_mean, B0, Omega0, tau0, noise_covariance, niter, threshold, accelerate = TRUE, fixed_tau = FALSE) {
+    .Call(`_normalblockr_ZINormalBlockMeanUnknownClusters_fit`, Y, X, zeros_bar, zi_cond_mean, B0, Omega0, tau0, noise_covariance, niter, threshold, accelerate, fixed_tau)
+}
+
+#' Graphical lasso (Rcpp/Armadillo core)
+#'
+#' In-package replacement for `glassoFast::glassoFast()`; see
+#' src/graphical_lasso.h for the algorithm and the two deliberate departures
+#' from the Fortran it ports.
+#'
+#' @param S empirical covariance matrix (n x n)
+#' @param rho penalty, either a scalar or an n x n matrix of per-pair weights
+#' @param thr convergence threshold on the sweep-to-sweep change in W
+#' @param maxIt maximum number of whole-matrix sweeps
+#' @param w_init,wi_init optional warm start: a previous solve's `w`/`wi`.
+#' Both must be given, and have S's dimensions, to be used.
+#' @return a list with `w` (covariance estimate), `wi` (precision estimate),
+#' `niter` and `converged`
+#' @noRd
+graphical_lasso_fit <- function(S, rho, thr = 1e-4, maxIt = 10000L, w_init = NULL, wi_init = NULL) {
+    .Call(`_normalblockr_graphical_lasso_fit`, S, rho, thr, maxIt, w_init, wi_init)
 }
 

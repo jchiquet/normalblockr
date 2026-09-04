@@ -5,6 +5,11 @@
 #' Normal-Block Model with Known Clustering
 #'
 #' R6 class for a normal-block model with known clustering.
+#' @examples
+#' ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex$Y, ex$X)
+#' model <- normal_block(data, blocks = ex$parameters$C, control = NB_control(verbose = FALSE))
+#' model$clustering
 #' @export
 NormalBlockVarKnownClusters <- R6::R6Class(
   classname = "NormalBlockVarKnownClusters",
@@ -36,13 +41,13 @@ NormalBlockVarKnownClusters <- R6::R6Class(
       reg_res   <- private$multivariate_normal_inference()
       dm1       <- private$dm1_from_residuals(reg_res$R)
       Sigmaq    <- private$heuristic_Sigmaq_from_Sigma(reg_res$Sigma)
-      Omegaq    <- private$get_Omegaq(Sigmaq)
-      list(B = reg_res$B, dm1 = dm1, Omegaq = Omegaq)
+      Omega    <- private$get_Omega(Sigmaq)
+      list(B = reg_res$B, dm1 = dm1, Omega = Omega)
     },
 
-    EM_initialize = function() {
+    optim_initialize = function() {
       if (private$warm_started) {
-        list(B = private$B, dm1 = private$dm1, Omegaq = private$Omegaq,
+        list(B = private$B, dm1 = private$dm1, Omega = private$Omega,
              gamma = private$gamma, mu = private$mu)
       } else c(private$get_heuristic_parameters(),  list(
         gamma = diag(1, self$q, self$q),
@@ -54,16 +59,16 @@ NormalBlockVarKnownClusters <- R6::R6Class(
     ## Runs the EM recursion via the Rcpp/Armadillo core (src/exports.cpp,
     ## NormalBlockVarKnownClusters_fit); see inst/normal_block_models.qmd §1/§2.
     EM_optimize = function(control) {
-      init <- private$EM_initialize()
+      init <- private$optim_initialize()
       res  <- NormalBlockVarKnownClusters_fit(
         Y = self$data$Y, X = self$data$X, C = private$C,
-        B0 = init$B, dm1_0 = init$dm1, Omegaq0 = init$Omegaq,
+        B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
         noise_covariance = private$res_covariance,
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter
-      list(B = res$B, dm1 = res$dm1, Omegaq = res$Omegaq,
+      list(B = res$B, dm1 = res$dm1, Omega = res$Omega,
            gamma = res$gamma, mu = res$mu, ll_list = res$objective)
     }
 
@@ -94,7 +99,7 @@ NormalBlockVarKnownClusters <- R6::R6Class(
     },
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
-      {paste(private$res_covariance, "normal-block model with fixed blocks")}
+      {paste(private$res_covariance, "normal-block-var model with fixed blocks")}
   )
 )
 

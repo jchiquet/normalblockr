@@ -37,8 +37,16 @@ class ZINormalBlockVarKnownClusters : public NormalBlockVarBase {
     arma::mat dm1C = dm1_mat_ * C_;             // n x q
     arma::mat Rdm1C = (R_ % dm1_mat_) * C_;     // n x q
 
+    // Same shape as solve_M_ridge()'s loop (zi_closed_form_solvers.h): one
+    // q x q system per row, Omega fixed, only its diagonal moving. The full
+    // inverse is genuinely needed here -- M_step() reads both each slice's
+    // diagonal and their sum -- but the two temporaries the naive form
+    // allocated per row are not.
+    const arma::vec omega_diag = Omega_.diag();
+    arma::mat A = Omega_;
     for (arma::uword i = 0; i < zi_data_.n; ++i) {
-      Gamma_.slice(i) = arma::inv_sympd(Omegaq_ + arma::diagmat(dm1C.row(i).t()));
+      A.diag() = omega_diag + dm1C.row(i).t();
+      Gamma_.slice(i) = arma::inv_sympd(A);
       Mu_.row(i) = Rdm1C.row(i) * Gamma_.slice(i);
     }
   }
@@ -57,20 +65,20 @@ class ZINormalBlockVarKnownClusters : public NormalBlockVarBase {
     dm1_ = NoisePolicy::update_dm1(weighted_ssq, zi_data_.nY, zi_data_.npY);
 
     arma::mat Sigma_hat = (Mu_.t() * Mu_ + sum_slices()) / zi_data_.n;
-    Omegaq_ = estimate_omega(Sigma_hat);
+    Omega_ = estimate_omega(Sigma_hat);
   }
 
 public:
   ZINormalBlockVarKnownClusters(const ZINormalBlockData& data, const arma::mat& C,
-                              const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omegaq0,
+                              const arma::mat& B0, const arma::vec& dm1_0, const arma::mat& Omega0,
                               double sparsity, const arma::mat& sparsity_weights) :
-    NormalBlockVarBase(data, C.n_cols, B0, dm1_0, Omegaq0, sparsity, sparsity_weights),
+    NormalBlockVarBase(data, C.n_cols, B0, dm1_0, Omega0, sparsity, sparsity_weights),
     zi_data_(data), C_(C), Gamma_(C.n_cols, C.n_cols, data.n), Mu_(arma::zeros(data.n, C.n_cols)) {
     for (arma::uword i = 0; i < data.n; ++i) Gamma_.slice(i) = arma::eye(C.n_cols, C.n_cols);
   }
 
   // General (non-profiled) marginal log-likelihood given the fixed ZI mask,
-  // valid at any (B_, dm1_, Omegaq_); same Woodbury/determinant-lemma trick
+  // valid at any (B_, dm1_, Omega_); same Woodbury/determinant-lemma trick
   // as NormalBlockVarKnownClusters::objective(), applied per row since the
   // ZI mask makes each row's marginal (and posterior precision Gamma^{(i)})
   // distinct. See inst/normal_block_models.qmd §6/§7.
@@ -83,20 +91,20 @@ public:
     double sum_log_Gamma_inv = 0.0;
     double quad_mu = 0.0;
     for (arma::uword i = 0; i < zi_data_.n; ++i) {
-      arma::mat Gamma_inv_i = Omegaq_ + arma::diagmat(dm1C.row(i).t());
+      arma::mat Gamma_inv_i = Omega_ + arma::diagmat(dm1C.row(i).t());
       auto Gamma_fresh_i = nb_utils::inv_and_log_det_sympd(Gamma_inv_i);
       sum_log_Gamma_inv += Gamma_fresh_i.log_det;
       arma::vec mu_i = (Rdm1C.row(i) * Gamma_fresh_i.inv).t();
       quad_mu += arma::as_scalar(mu_i.t() * Gamma_inv_i * mu_i);
     }
 
-    double log_det_Omegaq = arma::log_det_sympd(Omegaq_);
+    double log_det_Omega = arma::log_det_sympd(Omega_);
     double weighted_sum_log_dm1 = arma::accu(zi_data_.nY % arma::log(dm1_));
     double SSQ_w = arma::accu(dm1_mat % arma::square(R));
 
     double J = -0.5 * zi_data_.npY * std::log(2.0 * arma::datum::pi);
     J += 0.5 * weighted_sum_log_dm1;
-    J += 0.5 * zi_data_.n * log_det_Omegaq;
+    J += 0.5 * zi_data_.n * log_det_Omega;
     J -= 0.5 * sum_log_Gamma_inv; // -log|Gamma^{-1}| = +log|Gamma|, summed over rows
     J -= 0.5 * (SSQ_w - quad_mu);
     J += zi_data_.zi_cond_mean;
@@ -106,12 +114,12 @@ public:
   const arma::cube& Gamma() const { return Gamma_; }
   const arma::mat& Mu() const { return Mu_; }
 
-  std::unique_ptr<NormalBlockVarBase> clone() const override {
+  std::unique_ptr<NormalBlockEMBase> clone() const override {
     return std::make_unique<ZINormalBlockVarKnownClusters<NoisePolicy>>(*this);
   }
-  void restore_from(const NormalBlockVarBase& other) override {
-    copy_tracked_state_from(other);
+  void restore_from(const NormalBlockEMBase& other) override {
     const auto& o = static_cast<const ZINormalBlockVarKnownClusters<NoisePolicy>&>(other);
+    copy_tracked_state_from(o);
     Gamma_ = o.Gamma_;
     Mu_ = o.Mu_;
     R_ = o.R_;

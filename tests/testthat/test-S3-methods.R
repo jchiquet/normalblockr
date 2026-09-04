@@ -1,6 +1,6 @@
 ###############################################################################
 ## Exercises the S3 methods defined on NormalBlockVarBase (print, summary,
-## plot, logLik, BIC) and on NormalBlockVarCollection (print, summary,
+## plot, logLik, BIC) and on NormalBlockCollection (print, summary,
 ## logLik, BIC).
 testdata <- readRDS("testdata/testdata_normal.RDS")
 Y <- testdata$Y
@@ -39,7 +39,7 @@ test_that("print.NormalBlockVarBase() reports the model type and criteria", {
 
 test_that("summary.NormalBlockVarBase() returns cluster sizes, edges and density", {
   s <- summary(model)
-  expect_s3_class(s, "summary.NormalBlockVarBase")
+  expect_s3_class(s, "summary.NormalBlockBase")
   expect_equal(s$who_am_I, model$who_am_I)
   expect_equal(s$criteria, model$criteria)
   expect_equal(s$cluster_sizes, model$cluster_sizes)
@@ -54,7 +54,7 @@ test_that("plot.NormalBlockVarBase() returns the underlying ggplot object", {
   expect_s3_class(p, "ggplot")
 })
 
-test_that("logLik.NormalBlockVarCollection() and BIC.NormalBlockVarCollection() return one value per model", {
+test_that("logLik.NormalBlockCollection() and BIC.NormalBlockCollection() return one value per model", {
   ll  <- logLik(collection)
   bic <- BIC(collection)
   expect_length(ll, length(collection$models))
@@ -68,16 +68,16 @@ test_that("collection$loglik raises an informative error instead of silently ret
   expect_error(collection$loglik, "logLik", fixed = TRUE)
 })
 
-test_that("print.NormalBlockVarCollection() reports the model type and the q range explored", {
+test_that("print.NormalBlockCollection() reports the model type and the q range explored", {
   expect_output(print(collection), collection$who_am_I, fixed = TRUE)
   expect_output(print(collection), "model(s) explored", fixed = TRUE)
   expect_output(print(collection), "q ranging from 2 to 4")
   expect_invisible(print(collection))
 })
 
-test_that("summary.NormalBlockVarCollection() returns the full criteria table and q range", {
+test_that("summary.NormalBlockCollection() returns the full criteria table and q range", {
   s <- summary(collection)
-  expect_s3_class(s, "summary.NormalBlockVarCollection")
+  expect_s3_class(s, "summary.NormalBlockCollection")
   expect_equal(s$who_am_I, collection$who_am_I)
   expect_equal(s$criteria, collection$criteria)
   expect_equal(s$q_range, range(collection$criteria$q))

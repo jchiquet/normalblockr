@@ -9,7 +9,8 @@ get_model(
   blocks,
   sparsity = 0,
   zero_inflation = FALSE,
-  control = NB_control()
+  control = NB_control(),
+  model = c("var", "mean")
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ OR float to run model with a single penalty value}
 
 \item{control}{a list-like structure for detailed control on parameters should be
 generated with NB_control() for collections of sparse models}
+
+\item{model}{which model family to fit, "var" (the default) or "mean" --
+see [normal_block()]}
 }
 \description{
 Creates the appropriate normal-block model (or collection of models)

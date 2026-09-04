@@ -47,10 +47,32 @@ Any combination of these is reached through the same `normal_block()`
 function – known or unknown clustering, sparse or not, zero-inflated or
 not are independent choices, not separate model classes to learn.
 
+Since version 0.3.0 the package also fits a second, complementary
+family, reached with `normal_block(..., model = "mean")`:
+
+- **Mean-block models**: variables are clustered by how they *respond*
+  to the covariates rather than by how they *covary*. All variables in a
+  cluster share one regression profile, so the mean is
+  $\mu_i = C B^\top X_i$ with $B$ of size $d \times q$ instead of
+  $d \times p$. Known or unknown clustering, zero-inflated or not, with
+  the residual covariance taken diagonal (the default), spherical, or
+  full.
+
+The two families answer different questions and generally return
+different groupings; `normal_block_sequential()` runs one after the
+other when both are of interest. See the [mean-block
+vignette](https://jchiquet.github.io/normalblockr/articles/mean-block-breast-cancer.html).
+
 ## Installation
 
-**normalblockr** is not (yet) on CRAN; install the development version
-from [GitHub](https://github.com/jchiquet/normalblockr):
+Install the released version from CRAN:
+
+``` r
+install.packages("normalblockr")
+```
+
+or the development version from
+[GitHub](https://github.com/jchiquet/normalblockr):
 
 ``` r
 # install.packages("pak")
@@ -254,9 +276,13 @@ m_zi$get_best_model("ICL")
   (`vignette("breast-cancer-proteomics")`): a full worked example on
   `brca_rppa` – known vs. inferred clustering, model selection, the
   post-hoc `refine()` step, sparsifying the selected network.
+- [`mean-block-breast-cancer`](https://jchiquet.github.io/normalblockr/articles/mean-block-breast-cancer.html)
+  (`vignette("mean-block-breast-cancer")`): the mean-block family on
+  `brca_rppa` – clustering proteins by their subtype signature, choosing
+  the shape of the residual covariance, sparsifying it.
 - `inst/normal_block_models.qmd` in the package sources: a reference
-  card with every model variant’s exact criterion and E/M (or VE/M)
-  updates, as implemented in `src/`.
+  card in two parts, the models (both families, with their criteria and
+  E/M or VE/M updates) and the implementation notes.
 
 ## References
 

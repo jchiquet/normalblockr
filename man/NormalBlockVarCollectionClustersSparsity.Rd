@@ -7,16 +7,19 @@
 R6 class for a collection of normal-block models with different number of
 clusters (q) and different sparsity levels.
 }
-\section{Super class}{
-\code{\link[normalblockr:NormalBlockVarCollection]{NormalBlockVarCollection}} -> \code{NormalBlockVarCollectionClustersSparsity}
+\examples{
+ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+models <- normal_block(data, blocks = 2:3, sparsity = TRUE,
+                       control = NB_control(verbose = FALSE, n_sparsity_penalties = 3))
+models$get_best_model("BIC")$q
+}
+\section{Super classes}{
+\code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{\link[normalblockr:NormalBlockCollectionClustersSparsity]{NormalBlockCollectionClustersSparsity}} -> \code{NormalBlockVarCollectionClustersSparsity}
 }
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{q_list}}{number of blocks}
-
-    \item{\code{sparsity}}{list of penalties used for each q}
-
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }
   \if{html}{\out{</div>}}
@@ -25,17 +28,17 @@ clusters (q) and different sparsity levels.
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockVarCollectionClustersSparsity-initialize}{\code{NormalBlockVarCollectionClustersSparsity$new()}}
-    \item \href{#method-NormalBlockVarCollectionClustersSparsity-get_model}{\code{NormalBlockVarCollectionClustersSparsity$get_model()}}
-    \item \href{#method-NormalBlockVarCollectionClustersSparsity-get_best_model}{\code{NormalBlockVarCollectionClustersSparsity$get_best_model()}}
-    \item \href{#method-NormalBlockVarCollectionClustersSparsity-plot}{\code{NormalBlockVarCollectionClustersSparsity$plot()}}
     \item \href{#method-NormalBlockVarCollectionClustersSparsity-clone}{\code{NormalBlockVarCollectionClustersSparsity$clone()}}
   }
 }
-\if{html}{\out{<details open><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="optimize"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-optimize'><code>NormalBlockVarCollection$optimize()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-print'><code>NormalBlockVarCollection$print()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockVarCollection.html#method-NormalBlockVarCollection-summary'><code>NormalBlockVarCollection$summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-optimize'><code>NormalBlockCollection$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClustersSparsity" data-id="get_best_model"><a href='../../normalblockr/html/NormalBlockCollectionClustersSparsity.html#method-NormalBlockCollectionClustersSparsity-get_best_model'><code>NormalBlockCollectionClustersSparsity$get_best_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClustersSparsity" data-id="get_model"><a href='../../normalblockr/html/NormalBlockCollectionClustersSparsity.html#method-NormalBlockCollectionClustersSparsity-get_model'><code>NormalBlockCollectionClustersSparsity$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClustersSparsity" data-id="plot"><a href='../../normalblockr/html/NormalBlockCollectionClustersSparsity.html#method-NormalBlockCollectionClustersSparsity-plot'><code>NormalBlockCollectionClustersSparsity$plot()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
@@ -65,81 +68,6 @@ clusters (q) and different sparsity levels.
   }
   \subsection{Returns}{
     A new [`NormalBlockVarCollectionClustersSparsity`] object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionClustersSparsity-get_model"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClustersSparsity-get_model}{}}}
-\subsection{\code{NormalBlockVarCollectionClustersSparsity$get_model()}}{
-  returns a collection of models corresponding to given q
-or one single model if penalty is also given
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionClustersSparsity$get_model(q, sparsity = NA)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{q}}{number of blocks asked by user.}
-      \item{\code{sparsity}}{sparsity penalty asked by user}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    either a NormalBlockVarCollectionSparsity or a NormalBlockVarUnknownClusters object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionClustersSparsity-get_best_model"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClustersSparsity-get_best_model}{}}}
-\subsection{\code{NormalBlockVarCollectionClustersSparsity$get_best_model()}}{
-  Extract best model in the collection
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionClustersSparsity$get_best_model(
-  crit = c("ICL", "BIC", "EBIC")
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{crit}}{a character for the criterion used to performed the selection.
-Either "BIC", "EBIC" or "ICL". "ICL" is the default criterion}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    a [`NormalBlockVarUnknownClusters`] object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionClustersSparsity-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClustersSparsity-plot}{}}}
-\subsection{\code{NormalBlockVarCollectionClustersSparsity$plot()}}{
-  Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionClustersSparsity$plot(
-  criterion = c("deviance", "ICL", "BIC", "EBIC"),
-  n_intervals = NULL
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{criterion}}{The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults deviance.}
-      \item{\code{n_intervals}}{number of intervals into which the penalties range should be split}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    a [`ggplot`] heatmap
   }
 }
 

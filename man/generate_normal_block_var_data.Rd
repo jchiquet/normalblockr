@@ -2,7 +2,7 @@
 % Please edit documentation in R/normal_block_data_generation.R
 \name{generate_normal_block_var_data}
 \alias{generate_normal_block_var_data}
-\title{Generate Normal Block Data}
+\title{Generate Normal Block Var Data}
 \usage{
 generate_normal_block_var_data(
   n = 100,

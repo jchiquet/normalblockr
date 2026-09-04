@@ -13,16 +13,17 @@ public:
   int n;            // number of samples
   int p;            // number of variables
   int d;            // number of covariates
+  arma::mat XtX;    // d x d, reused by the mean-block M-step (M = B' XtX B)
   arma::mat XtXm1;  // d x d, inverse of X^T X, reused at every M-step
   arma::mat XtY;    // d x p, X^T Y -- mirrors the R6 field of the same name
-                    // (R/NormalBlockData.R), used there for the OLS heuristic
-                    // initialization of B; the (V)EM step itself always needs
-                    // X^T(Y - latent contribution) instead of the plain X^T Y,
-                    // so this field is otherwise unread on the C++ side
+                    // (R/NormalBlockData.R). Unread by the variance-block
+                    // (V)EM step, which always needs X^T(Y - latent
+                    // contribution) instead; used by the mean-block one.
 
   NormalBlockData(const arma::mat& Y_, const arma::mat& X_) :
     Y(Y_), X(X_), n(Y_.n_rows), p(Y_.n_cols), d(X_.n_cols) {
-    XtXm1 = arma::inv_sympd(X.t() * X);
+    XtX   = X.t() * X;
+    XtXm1 = arma::inv_sympd(XtX);
     XtY   = X.t() * Y;
   }
 };

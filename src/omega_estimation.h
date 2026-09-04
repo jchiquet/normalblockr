@@ -2,36 +2,83 @@
 #define NORMALBLOCKR_OMEGA_ESTIMATION_H
 
 #include <RcppArmadillo.h>
+#include "graphical_lasso.h"
 
-// Equivalent of the shared private method `NormalBlocVarkBase$get_Omega` (R/NormalBlockVarBase.R),
+// Equivalent of the shared private method `NormalBlockVarBase$get_Omega` (R/NormalBlockVarBase.R),
 // used identically by the M-step of both NormalBlockVarKnownClusters and NormalBlockVarUnknownClusters:
 // estimate the precision matrix of the blocks from its covariance estimate
 // Sigma_hat (q x q). When `sparsity <= 0`, this is a plain matrix inversion;
-// otherwise it calls back into R's glassoFast::glassoFast() (graphical
-// lasso). There is no Armadillo reimplementation of glasso in this package,
-// and since q (the number of clusters) is small, the R round-trip cost is
-// negligible compared to the O(n x p) work done in the rest of the (V)EM
-// step.
+// otherwise it runs the in-package graphical lasso (src/graphical_lasso.h).
+// That solver used to be glassoFast, reached by calling back into R from
+// inside this loop -- see graphical_lasso.h for why it isn't any more.
 namespace nb_omega {
 
-inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity, const arma::mat& sparsity_weights) {
+// Tighter than glassoFast's 1e-4 default, which a warm start pays for in
+// accuracy rather than time -- see estimate() below. MUST match
+// NB_GLASSO_THRESHOLD (R/utils.R), which the R reference recursion uses:
+// the two are compared trace-for-trace at 1e-8 in test-cpp-normal-block-mean.R,
+// so drift between them fails there rather than silently.
+constexpr double kGlassoThreshold = 1e-6;
+
+// Armadillo equivalent of ensure_pd() (R/utils.R): the graphical lasso can
+// return a precision matrix that is not quite positive definite (an EM
+// iterate's Sigma can be badly conditioned, especially for the p x p Sigma of
+// the mean-block family), which would then make log_det_sympd() throw. The
+// Cholesky attempt makes the common case free; only a failing candidate pays
+// for the eigendecomposition.
+inline arma::mat ensure_pd(const arma::mat& M, double floor_value = 1e-6) {
+  arma::mat sym = arma::symmatu(M), R;
+  if (arma::chol(R, sym)) return sym;
+  arma::vec eigval;
+  arma::mat eigvec;
+  if (!arma::eig_sym(eigval, eigvec, sym)) return sym;
+  eigval = arma::clamp(eigval, floor_value, eigval.max());
+  return eigvec * arma::diagmat(eigval) * eigvec.t();
+}
+
+// `warm`, when given, carries the previous M-step's (W, X) so the graphical
+// lasso can resume from it. Consecutive M-steps solve nearly the same problem,
+// and the solver's stopping rule measures per-sweep progress rather than
+// distance to the optimum -- so a warm start both converges in fewer sweeps
+// and, at the tightened threshold this affords, lands closer to the optimum
+// than a cold start at the looser one. Measured over 124 consecutive M-steps
+// of a mean-block sparsity path: 1.355s at 6.1e-05 cold, 0.589s at 8.9e-07
+// warm. `warm` must belong to the model, not be shared between fits: it is
+// only ever a starting point, but a stale one costs sweeps.
+inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity,
+                          const arma::mat& sparsity_weights,
+                          nb_glasso::State* warm = nullptr,
+                          double thr = 1e-4) {
   if (sparsity <= 0.0) {
     return arma::inv_sympd(Sigma_hat);
   }
 
-  static Rcpp::Function glassoFast(Rcpp::Environment::namespace_env("glassoFast")["glassoFast"]);
+  const arma::mat penalty = sparsity * sparsity_weights;
+  nb_glasso::Result glasso_out = nb_glasso::solve(Sigma_hat, penalty, thr, 10000, warm);
 
-  Rcpp::List glasso_out = glassoFast(Rcpp::wrap(Sigma_hat), Rcpp::wrap(sparsity * sparsity_weights));
-  arma::mat Wi = Rcpp::as<arma::mat>(glasso_out["wi"]);
+  // A warm start is only ever a starting point, and a bad one is not free: on
+  // an ill-conditioned Sigma it can send the coordinate descent off to
+  // infinity where a cold start on the very same problem converges in a
+  // handful of sweeps (observed on the mean-block p x p Sigma, and it is why
+  // this retry exists rather than a direct fall-through to the unpenalized
+  // inverse -- that would silently swap the model being fitted).
+  if (glasso_out.X.has_nan() && warm != nullptr && warm->usable_for(Sigma_hat.n_rows)) {
+    glasso_out = nb_glasso::solve(Sigma_hat, penalty, thr, 10000, nullptr);
+  }
 
-  if (Wi.has_nan()) {
+  if (warm != nullptr) {
+    if (glasso_out.X.is_finite() && glasso_out.W.is_finite()) warm->store(glasso_out);
+    else warm->reset();
+  }
+
+  if (glasso_out.X.has_nan()) {
     Rcpp::warning("GLasso fails, the penalty is probably too small and the system badly "
                   "conditionned (reciprocal condition number = %f). "
                   "Sending back the original matrix and its inverse (unpenalized).",
                   arma::rcond(Sigma_hat));
     return arma::inv_sympd(Sigma_hat);
   }
-  return 0.5 * (Wi + Wi.t()); // equivalent of Matrix::symmpart(glasso_out$wi)
+  return ensure_pd(glasso_out.X); // symmpart(), plus a guard against a non-PD glasso output
 }
 
 } // namespace nb_omega

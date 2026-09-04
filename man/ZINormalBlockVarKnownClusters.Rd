@@ -6,8 +6,15 @@
 \description{
 R6 class for a zero-inflated normal-block model with a known clustering.
 }
-\section{Super class}{
-\code{\link[normalblockr:NormalBlockVarBase]{NormalBlockVarBase}} -> \code{ZINormalBlockVarKnownClusters}
+\examples{
+ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3, kappa = rep(0.3, 20))
+data <- NormalBlockData$new(ex$Y, ex$X)
+model <- normal_block(data, blocks = ex$parameters$C, zero_inflation = TRUE,
+                      control = NB_control(verbose = FALSE))
+model$clustering
+}
+\section{Super classes}{
+\code{\link[normalblockr:NormalBlockBase]{NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockVarBase]{NormalBlockVarBase}} -> \code{ZINormalBlockVarKnownClusters}
 }
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
@@ -18,7 +25,7 @@ R6 class for a zero-inflated normal-block model with a known clustering.
 
     \item{\code{nb_param}}{number of parameters in the model}
 
-    \item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omegaq (groups precision matrix), kappa (zero-inflation probabilities)}
+    \item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix), kappa (zero-inflation probabilities)}
 
     \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 
@@ -35,19 +42,19 @@ R6 class for a zero-inflated normal-block model with a known clustering.
 }
 \if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="best_of_inits"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-best_of_inits'><code>NormalBlockVarBase$best_of_inits()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="candidates_merge"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-candidates_merge'><code>NormalBlockVarBase$candidates_merge()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="candidates_split"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-candidates_split'><code>NormalBlockVarBase$candidates_split()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-latent_network'><code>NormalBlockVarBase$latent_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="best_of_inits"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-best_of_inits'><code>NormalBlockBase$best_of_inits()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="candidates_merge"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-candidates_merge'><code>NormalBlockBase$candidates_merge()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="candidates_split"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-candidates_split'><code>NormalBlockBase$candidates_split()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="latent_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-latent_network'><code>NormalBlockBase$latent_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="optimize"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-optimize'><code>NormalBlockBase$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot'><code>NormalBlockBase$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_loglik'><code>NormalBlockBase$plot_loglik()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>NormalBlockBase$plot_network()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="merge"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-merge'><code>NormalBlockVarBase$merge()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="optimize"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-optimize'><code>NormalBlockVarBase$optimize()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="plot"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-plot'><code>NormalBlockVarBase$plot()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="plot_loglik"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-plot_loglik'><code>NormalBlockVarBase$plot_loglik()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-plot_network'><code>NormalBlockVarBase$plot_network()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-predict'><code>NormalBlockVarBase$predict()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="print"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-print'><code>NormalBlockVarBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="split"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-split'><code>NormalBlockVarBase$split()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="update"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-update'><code>NormalBlockVarBase$update()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-warm_start_from'><code>NormalBlockVarBase$warm_start_from()</code></a></span></li>
 </ul>
 </details>}}

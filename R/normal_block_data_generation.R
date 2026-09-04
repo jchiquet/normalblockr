@@ -6,11 +6,13 @@ generate_X <- function(n, d, min_X = 0, max_X = 10){
   matrix(runif(n*d, min=min_X, max = max_X), n, d)
 }
 
-generate_B <- function(p, X, Sigma, SNR = 0.75){
+generate_B <- function(p, X, Sigma = NULL, SNR = NULL){
   d <- ncol(X)
   B <- matrix(runif(p*d), d, p)
-  correcting_factor <- SNR * var(as.vector(Sigma)) / (var(as.vector(X %*% B)))
-  B <- sqrt(correcting_factor) * B
+  if(!is.null(SNR)){
+    correcting_factor <- SNR * var(as.vector(Sigma)) / (var(as.vector(X %*% B)))
+    B <- sqrt(correcting_factor) * B
+  }
   B
 }
 
@@ -81,7 +83,7 @@ generate_precision_matrix <- function(q, graph_structure = "erdos-renyi", v = 0.
   as.matrix(omega)
 }
 
-# Generate normal block set of model parameters
+# Generate normal block var set of model parameters
 #
 generate_normal_block_var_param <- function(X = matrix(rnorm(100*p), 100, p),
                                             p = 40,
@@ -104,7 +106,7 @@ generate_normal_block_var_param <- function(X = matrix(rnorm(100*p), 100, p),
   )
 }
 
-#' Generate Normal Block Data
+#' Generate Normal Block Var Data
 #'
 #' A function to draw data from the normal block model (see details). The function returns both the generated data and the corresponding model parameters, in a list.
 #'
@@ -164,3 +166,95 @@ generate_normal_block_var_data <-
 
   list(Y = Y, X = X, parameters = param)
 }
+
+
+## Generate normal block mean set of model parameters (internal helper, not exported)
+generate_normal_block_mean_param <- function(X = matrix(rnorm(100*p), 100, p),
+                                             p = 40,
+                                             q = 3,
+                                             kappa = 0,
+                                             omega_structure="erdos-renyi",
+                                             alpha = rep(1/q, q),
+                                             SNR = 0.75,
+                                             u_v = c(0.3, 0.1)) {
+  n     <- nrow(X)
+  Omega <- generate_precision_matrix(p, omega_structure, v = u_v[1], u = u_v[2])
+  Sigma <- chol2inv(chol(Omega))
+  B     <- generate_B(q, X)
+  C     <- generate_blocks(p, q, alpha)
+
+  # Signal
+  signal <- X %*% B %*% t(C)
+  signal_norm_sq <- sum(signal^2)
+
+  # SNR = ||signal||_F^2 / E[||noise||_F^2] with E[||noise||_F^2] = n * trace(Sigma)
+  if (!is.null(SNR)) {
+    target_trace  <- signal_norm_sq / (n * SNR)
+    current_trace <- sum(diag(Sigma))
+    scale_factor  <- target_trace / current_trace
+    Sigma         <- scale_factor * Sigma
+  }
+
+  list(
+    B  = B,
+    C = C,
+    Omega = Omega,
+    Sigma = Sigma,
+    kappa = kappa
+  )
+}
+
+#' Generate Normal Block Mean Data
+#'
+#' A function to draw data from the normal block model (see details). The function returns both the generated data and the corresponding model parameters, in a list.
+#'
+#' @param n number of individuals. Default to 100.
+#' @param p number of variables. Default to 40.
+#' @param d number of covariates. Default to 1.
+#' @param q number of groups. Default to 3.
+#' @param kappa vector (or scalar) of variable-wise probability of zero inflation. Default to 0.
+#' @param omega_structure the structure of the graph on which the precision matrix between variables is built. Can be a symmetric matrix with p rows/columns or a character picked in "erdos-renyi", "preferential_attachment", "community" in which case a graph is drawn with sensible generation parameters. See generate_precision_matrix for details.
+#' @param range_X A 2-size vector defining the range of the uniform distribution used to draw values in X, the regressor matrix. Default is c(0, 10)
+#' @param u_v two-size vector of positive numbers v and u controlling the generation of the precision matrix Omega: v scales the off-diagonal elements of the precision matrix (magnitude of partial correlations), and u is a positive number added to the diagonal elements to ensure positive-definiteness. The default value is c(0.3, 0.1).
+#' @param alpha the q-size vector of group proportion. Default to rep(1/q, q)
+#' @param SNR Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desired SNR.
+#'
+#' @returns A named list with the following element
+#' - Y a matrix of responses
+#' - X a regressor/design matrix
+#' - a list of model parameters, encompassing
+#'    - B: matrix of regression coefficients
+#'    - C: matrix of group membership
+#'    - Omega: precision matrix of the variables
+#'    - Sigma: covariance matrix of the variables
+#'    - kappa: vector of ZI inflation probabilities (one per variable)
+#'
+#' @importFrom igraph sample_pa sample_sbm sample_gnp as_adjacency_matrix
+#' @importFrom stats rbinom rmultinom rnorm runif var
+#' @export
+generate_normal_block_mean_data <-
+  function(n = 100,
+           p = 40,
+           d = 1,
+           q = 3,
+           kappa = 0,
+           omega_structure="erdos-renyi",
+           u_v = c(0.3, 0.1),
+           SNR = 5,
+           alpha = rep(1/q, q),
+           range_X = c(0, 10)) {
+
+    X <- matrix(runif(n*d, min=range_X[1], max = range_X[2]), n, d)
+    param <- generate_normal_block_mean_param(X, p, q, kappa, omega_structure,
+                                              alpha, SNR, u_v)
+
+    Y <- X %*% param$B %*% t(param$C) + MASS::mvrnorm(n, rep(0, p), param$Sigma)
+
+    if(any(param$kappa > 0)) {
+      zero_location <- matrix(rbinom(n * p,  1, rep(param$kappa, each = n)), n, p)
+      zero_location[, colSums(zero_location) == n] <- 0
+      Y[zero_location == 1] <- 0
+    }
+
+    list(Y = Y, X = X, parameters = param)
+  }

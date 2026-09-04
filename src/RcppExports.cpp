@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // NormalBlockVarKnownClusters_fit
-Rcpp::List NormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& C, arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, int niter, double threshold);
-RcppExport SEXP _normalblockr_NormalBlockVarKnownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP CSEXP, SEXP B0SEXP, SEXP dm1_0SEXP, SEXP Omegaq0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP niterSEXP, SEXP thresholdSEXP) {
+Rcpp::List NormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& C, arma::mat B0, arma::vec dm1_0, arma::mat Omega0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, int niter, double threshold);
+RcppExport SEXP _normalblockr_NormalBlockVarKnownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP CSEXP, SEXP B0SEXP, SEXP dm1_0SEXP, SEXP Omega0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP niterSEXP, SEXP thresholdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -22,19 +22,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type C(CSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type dm1_0(dm1_0SEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Omegaq0(Omegaq0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
     Rcpp::traits::input_parameter< double >::type sparsity(sparsitySEXP);
     Rcpp::traits::input_parameter< arma::mat >::type sparsity_weights(sparsity_weightsSEXP);
     Rcpp::traits::input_parameter< std::string >::type noise_covariance(noise_covarianceSEXP);
     Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
-    rcpp_result_gen = Rcpp::wrap(NormalBlockVarKnownClusters_fit(Y, X, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold));
+    rcpp_result_gen = Rcpp::wrap(NormalBlockVarKnownClusters_fit(Y, X, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold));
     return rcpp_result_gen;
 END_RCPP
 }
 // NormalBlockVarUnknownClusters_fit
-Rcpp::List NormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat& X, arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0, arma::mat C0, arma::vec alpha0, arma::mat M0, arma::vec S0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, bool fixed_tau, int niter, double threshold);
-RcppExport SEXP _normalblockr_NormalBlockVarUnknownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP B0SEXP, SEXP dm1_0SEXP, SEXP Omegaq0SEXP, SEXP C0SEXP, SEXP alpha0SEXP, SEXP M0SEXP, SEXP S0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP fixed_tauSEXP, SEXP niterSEXP, SEXP thresholdSEXP) {
+Rcpp::List NormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat& X, arma::mat B0, arma::vec dm1_0, arma::mat Omega0, arma::mat C0, arma::vec alpha0, arma::mat M0, arma::vec S0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, bool fixed_tau, int niter, double threshold);
+RcppExport SEXP _normalblockr_NormalBlockVarUnknownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP B0SEXP, SEXP dm1_0SEXP, SEXP Omega0SEXP, SEXP C0SEXP, SEXP alpha0SEXP, SEXP M0SEXP, SEXP S0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP fixed_tauSEXP, SEXP niterSEXP, SEXP thresholdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -42,7 +42,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type dm1_0(dm1_0SEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Omegaq0(Omegaq0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type C0(C0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type alpha0(alpha0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type M0(M0SEXP);
@@ -53,13 +53,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type fixed_tau(fixed_tauSEXP);
     Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
-    rcpp_result_gen = Rcpp::wrap(NormalBlockVarUnknownClusters_fit(Y, X, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold));
+    rcpp_result_gen = Rcpp::wrap(NormalBlockVarUnknownClusters_fit(Y, X, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold));
     return rcpp_result_gen;
 END_RCPP
 }
 // ZINormalBlockVarKnownClusters_fit
-Rcpp::List ZINormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& zeros_bar, double zi_cond_mean, const arma::mat& C, arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, int niter, double threshold);
-RcppExport SEXP _normalblockr_ZINormalBlockVarKnownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP zeros_barSEXP, SEXP zi_cond_meanSEXP, SEXP CSEXP, SEXP B0SEXP, SEXP dm1_0SEXP, SEXP Omegaq0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP niterSEXP, SEXP thresholdSEXP) {
+Rcpp::List ZINormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& zeros_bar, double zi_cond_mean, const arma::mat& C, arma::mat B0, arma::vec dm1_0, arma::mat Omega0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, int niter, double threshold);
+RcppExport SEXP _normalblockr_ZINormalBlockVarKnownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP zeros_barSEXP, SEXP zi_cond_meanSEXP, SEXP CSEXP, SEXP B0SEXP, SEXP dm1_0SEXP, SEXP Omega0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP niterSEXP, SEXP thresholdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -70,19 +70,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type C(CSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type dm1_0(dm1_0SEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Omegaq0(Omegaq0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
     Rcpp::traits::input_parameter< double >::type sparsity(sparsitySEXP);
     Rcpp::traits::input_parameter< arma::mat >::type sparsity_weights(sparsity_weightsSEXP);
     Rcpp::traits::input_parameter< std::string >::type noise_covariance(noise_covarianceSEXP);
     Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
-    rcpp_result_gen = Rcpp::wrap(ZINormalBlockVarKnownClusters_fit(Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omegaq0, sparsity, sparsity_weights, noise_covariance, niter, threshold));
+    rcpp_result_gen = Rcpp::wrap(ZINormalBlockVarKnownClusters_fit(Y, X, zeros_bar, zi_cond_mean, C, B0, dm1_0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold));
     return rcpp_result_gen;
 END_RCPP
 }
 // ZINormalBlockVarUnknownClusters_fit
-Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& zeros_bar, double zi_cond_mean, arma::mat B0, arma::vec dm1_0, arma::mat Omegaq0, arma::mat C0, arma::vec alpha0, arma::mat M0, arma::mat S0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, bool fixed_tau, int niter, double threshold);
-RcppExport SEXP _normalblockr_ZINormalBlockVarUnknownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP zeros_barSEXP, SEXP zi_cond_meanSEXP, SEXP B0SEXP, SEXP dm1_0SEXP, SEXP Omegaq0SEXP, SEXP C0SEXP, SEXP alpha0SEXP, SEXP M0SEXP, SEXP S0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP fixed_tauSEXP, SEXP niterSEXP, SEXP thresholdSEXP) {
+Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& zeros_bar, double zi_cond_mean, arma::mat B0, arma::vec dm1_0, arma::mat Omega0, arma::mat C0, arma::vec alpha0, arma::mat M0, arma::mat S0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, bool fixed_tau, int niter, double threshold);
+RcppExport SEXP _normalblockr_ZINormalBlockVarUnknownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP zeros_barSEXP, SEXP zi_cond_meanSEXP, SEXP B0SEXP, SEXP dm1_0SEXP, SEXP Omega0SEXP, SEXP C0SEXP, SEXP alpha0SEXP, SEXP M0SEXP, SEXP S0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP fixed_tauSEXP, SEXP niterSEXP, SEXP thresholdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -92,7 +92,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type zi_cond_mean(zi_cond_meanSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type dm1_0(dm1_0SEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Omegaq0(Omegaq0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type C0(C0SEXP);
     Rcpp::traits::input_parameter< arma::vec >::type alpha0(alpha0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type M0(M0SEXP);
@@ -103,7 +103,110 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type fixed_tau(fixed_tauSEXP);
     Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
     Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
-    rcpp_result_gen = Rcpp::wrap(ZINormalBlockVarUnknownClusters_fit(Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omegaq0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold));
+    rcpp_result_gen = Rcpp::wrap(ZINormalBlockVarUnknownClusters_fit(Y, X, zeros_bar, zi_cond_mean, B0, dm1_0, Omega0, C0, alpha0, M0, S0, sparsity, sparsity_weights, noise_covariance, fixed_tau, niter, threshold));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NormalBlockMeanKnownClusters_fit
+Rcpp::List NormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& C, arma::mat B0, arma::mat Omega0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, int niter, double threshold, bool accelerate);
+RcppExport SEXP _normalblockr_NormalBlockMeanKnownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP CSEXP, SEXP B0SEXP, SEXP Omega0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP niterSEXP, SEXP thresholdSEXP, SEXP accelerateSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type C(CSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
+    Rcpp::traits::input_parameter< double >::type sparsity(sparsitySEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type sparsity_weights(sparsity_weightsSEXP);
+    Rcpp::traits::input_parameter< std::string >::type noise_covariance(noise_covarianceSEXP);
+    Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< bool >::type accelerate(accelerateSEXP);
+    rcpp_result_gen = Rcpp::wrap(NormalBlockMeanKnownClusters_fit(Y, X, C, B0, Omega0, sparsity, sparsity_weights, noise_covariance, niter, threshold, accelerate));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NormalBlockMeanUnknownClusters_fit
+Rcpp::List NormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::mat& X, arma::mat B0, arma::mat Omega0, arma::mat tau0, double sparsity, arma::mat sparsity_weights, std::string noise_covariance, int fixed_point_niter, int niter, double threshold, bool accelerate, bool fixed_tau);
+RcppExport SEXP _normalblockr_NormalBlockMeanUnknownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP B0SEXP, SEXP Omega0SEXP, SEXP tau0SEXP, SEXP sparsitySEXP, SEXP sparsity_weightsSEXP, SEXP noise_covarianceSEXP, SEXP fixed_point_niterSEXP, SEXP niterSEXP, SEXP thresholdSEXP, SEXP accelerateSEXP, SEXP fixed_tauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type tau0(tau0SEXP);
+    Rcpp::traits::input_parameter< double >::type sparsity(sparsitySEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type sparsity_weights(sparsity_weightsSEXP);
+    Rcpp::traits::input_parameter< std::string >::type noise_covariance(noise_covarianceSEXP);
+    Rcpp::traits::input_parameter< int >::type fixed_point_niter(fixed_point_niterSEXP);
+    Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< bool >::type accelerate(accelerateSEXP);
+    Rcpp::traits::input_parameter< bool >::type fixed_tau(fixed_tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(NormalBlockMeanUnknownClusters_fit(Y, X, B0, Omega0, tau0, sparsity, sparsity_weights, noise_covariance, fixed_point_niter, niter, threshold, accelerate, fixed_tau));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ZINormalBlockMeanKnownClusters_fit
+Rcpp::List ZINormalBlockMeanKnownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& zeros_bar, double zi_cond_mean, const arma::mat& C, arma::mat B0, arma::mat Omega0, std::string noise_covariance, int niter, double threshold, bool accelerate);
+RcppExport SEXP _normalblockr_ZINormalBlockMeanKnownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP zeros_barSEXP, SEXP zi_cond_meanSEXP, SEXP CSEXP, SEXP B0SEXP, SEXP Omega0SEXP, SEXP noise_covarianceSEXP, SEXP niterSEXP, SEXP thresholdSEXP, SEXP accelerateSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type zeros_bar(zeros_barSEXP);
+    Rcpp::traits::input_parameter< double >::type zi_cond_mean(zi_cond_meanSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type C(CSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
+    Rcpp::traits::input_parameter< std::string >::type noise_covariance(noise_covarianceSEXP);
+    Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< bool >::type accelerate(accelerateSEXP);
+    rcpp_result_gen = Rcpp::wrap(ZINormalBlockMeanKnownClusters_fit(Y, X, zeros_bar, zi_cond_mean, C, B0, Omega0, noise_covariance, niter, threshold, accelerate));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ZINormalBlockMeanUnknownClusters_fit
+Rcpp::List ZINormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::mat& X, const arma::mat& zeros_bar, double zi_cond_mean, arma::mat B0, arma::mat Omega0, arma::mat tau0, std::string noise_covariance, int niter, double threshold, bool accelerate, bool fixed_tau);
+RcppExport SEXP _normalblockr_ZINormalBlockMeanUnknownClusters_fit(SEXP YSEXP, SEXP XSEXP, SEXP zeros_barSEXP, SEXP zi_cond_meanSEXP, SEXP B0SEXP, SEXP Omega0SEXP, SEXP tau0SEXP, SEXP noise_covarianceSEXP, SEXP niterSEXP, SEXP thresholdSEXP, SEXP accelerateSEXP, SEXP fixed_tauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type zeros_bar(zeros_barSEXP);
+    Rcpp::traits::input_parameter< double >::type zi_cond_mean(zi_cond_meanSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type B0(B0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Omega0(Omega0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type tau0(tau0SEXP);
+    Rcpp::traits::input_parameter< std::string >::type noise_covariance(noise_covarianceSEXP);
+    Rcpp::traits::input_parameter< int >::type niter(niterSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< bool >::type accelerate(accelerateSEXP);
+    Rcpp::traits::input_parameter< bool >::type fixed_tau(fixed_tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(ZINormalBlockMeanUnknownClusters_fit(Y, X, zeros_bar, zi_cond_mean, B0, Omega0, tau0, noise_covariance, niter, threshold, accelerate, fixed_tau));
+    return rcpp_result_gen;
+END_RCPP
+}
+// graphical_lasso_fit
+Rcpp::List graphical_lasso_fit(const arma::mat& S, const Rcpp::NumericVector& rho, double thr, int maxIt, Rcpp::Nullable<Rcpp::NumericMatrix> w_init, Rcpp::Nullable<Rcpp::NumericMatrix> wi_init);
+RcppExport SEXP _normalblockr_graphical_lasso_fit(SEXP SSEXP, SEXP rhoSEXP, SEXP thrSEXP, SEXP maxItSEXP, SEXP w_initSEXP, SEXP wi_initSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< double >::type thr(thrSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIt(maxItSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericMatrix> >::type w_init(w_initSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericMatrix> >::type wi_init(wi_initSEXP);
+    rcpp_result_gen = Rcpp::wrap(graphical_lasso_fit(S, rho, thr, maxIt, w_init, wi_init));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -113,6 +216,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_normalblockr_NormalBlockVarUnknownClusters_fit", (DL_FUNC) &_normalblockr_NormalBlockVarUnknownClusters_fit, 15},
     {"_normalblockr_ZINormalBlockVarKnownClusters_fit", (DL_FUNC) &_normalblockr_ZINormalBlockVarKnownClusters_fit, 13},
     {"_normalblockr_ZINormalBlockVarUnknownClusters_fit", (DL_FUNC) &_normalblockr_ZINormalBlockVarUnknownClusters_fit, 17},
+    {"_normalblockr_NormalBlockMeanKnownClusters_fit", (DL_FUNC) &_normalblockr_NormalBlockMeanKnownClusters_fit, 11},
+    {"_normalblockr_NormalBlockMeanUnknownClusters_fit", (DL_FUNC) &_normalblockr_NormalBlockMeanUnknownClusters_fit, 13},
+    {"_normalblockr_ZINormalBlockMeanKnownClusters_fit", (DL_FUNC) &_normalblockr_ZINormalBlockMeanKnownClusters_fit, 11},
+    {"_normalblockr_ZINormalBlockMeanUnknownClusters_fit", (DL_FUNC) &_normalblockr_ZINormalBlockMeanUnknownClusters_fit, 12},
+    {"_normalblockr_graphical_lasso_fit", (DL_FUNC) &_normalblockr_graphical_lasso_fit, 6},
     {NULL, NULL, 0}
 };
 
