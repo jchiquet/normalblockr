@@ -37,7 +37,6 @@ This also fixes the segfault CRAN reported on
 `breast-cancer-proteomics.Rmd` (`address 0x580, cause 'memory not mapped'`),
 which our own CI had been hitting intermittently on Linux.
 
-
 * `glassoFast` is no longer a dependency. The C++ (V)EM used to call back into
   R once per M-step to reach it -- thousands of round trips from inside a
   single `.Call` for one sparsity path, and a recurring source of intermittent
@@ -59,17 +58,9 @@ which our own CI had been hitting intermittently on Linux.
   had no zeros at all. Both were unreachable before, so no working fit changes.
 * Fixed two crashes on the penalized path, one of them a long-standing
   memory-safety bug (an R object cached in a C++ `static`).
-* `predict()` on mean-block models returned the cluster-level predictor rather
-  than values on the variables' scale.
-* `NB_control(heuristic = TRUE)` and `fixed_tau` were silently ignored by the
-  mean-block family.
 
 ## Other changes
 
-* `NB_control(blas_threads = )` is removed. It worked around BLAS thread
-  overhead in an R-level loop that has since moved into C++, no longer has a
-  measurable effect, and could not work at all on the default BLAS of Windows
-  or macOS.
 * A collection over cluster counts no longer repeats work that does not depend
   on the cluster count: the OLS fit, the zero-inflation logistic regressions,
   and the shareable part of each clustering heuristic (one hierarchical tree
@@ -77,8 +68,6 @@ which our own CI had been hitting intermittently on Linux.
   computed once. Fitted values are unchanged.
 * Printed model descriptions now name the residual-covariance shape for every
   family, and the zero-inflated variance-block models name their family.
-* `inst/normal_block_models.qmd`, the reference card, is split into a
-  models part and an implementation part, and covers both families.
 
 # normalblockr 0.2.1
 
