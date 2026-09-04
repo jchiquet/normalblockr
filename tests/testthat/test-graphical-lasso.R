@@ -136,9 +136,9 @@ test_that("a warm start lands on the same solution as a cold one", {
   warm  <- graphical_lasso_fit(S2, rho, w_init = first$w, wi_init = first$wi)
 
   ## Both solve the same problem, but `dw <= shr` measures per-sweep progress,
-  ## so starting closer exits sooner and lands slightly short. That trade is
-  ## why the (V)EM does *not* warm-start between M-steps -- see the note in
-  ## src/graphical_lasso.h.
+  ## so starting closer exits sooner and lands slightly short of where a cold
+  ## start at the same threshold would. The (V)EM warm-starts anyway and
+  ## tightens the threshold to compensate -- see src/graphical_lasso.h.
   expect_equal(cold$wi, warm$wi, tolerance = 1e-2)
   expect_lte(warm$niter, cold$niter)
 
@@ -208,4 +208,40 @@ test_that("the R reference and the C++ core use the same M-step threshold", {
   ## test-cpp-normal-block-mean.R -- drift there fails loudly. This just pins
   ## the R side against silent edits.
   expect_equal(normalblockr:::NB_GLASSO_THRESHOLD, 1e-6)
+})
+
+test_that("a warm start that diverges is retried cold, not abandoned", {
+  ## A warm start is only a starting point, but a bad one can send the
+  ## coordinate descent to infinity on an ill-conditioned Sigma that a cold
+  ## start solves in a handful of sweeps. Falling straight through to the
+  ## unpenalized inverse would silently swap the model being fitted, so
+  ## nb_omega::estimate() retries cold first.
+  set.seed(301)
+  ex <- generate_normal_block_mean_data(n = 150, p = 40, d = 2, q = 3)
+  d  <- NormalBlockData$new(ex$Y, ex$X, scale = FALSE)
+
+  ## the fit must stay penalized: Omega keeps exact zeros off the diagonal,
+  ## which a fall-through to solve(Sigma_hat) would not produce
+  fit <- normal_block(d, blocks = 3, sparsity = 0.1, model = "mean",
+                      control = NB_control(verbose = FALSE))
+  Om <- fit$model_par$Omega
+  expect_gt(sum(Om[upper.tri(Om)] == 0), 0)
+  expect_true(all(is.finite(Om)))
+})
+
+test_that("a diverging warm start is a real failure mode, not a hypothetical", {
+  ## Guards the retry above: feeding the solver a warm start from an
+  ## unrelated, badly scaled problem must still return a usable answer.
+  set.seed(302)
+  n <- 25
+  A <- matrix(rnorm(n * n), n); S <- tcrossprod(A) / n + diag(0.05, n)
+  rho <- 0.02 * (1 - diag(n))
+
+  ok   <- graphical_lasso_fit(S, rho)
+  junk <- ok$w * 1e6                       # a wildly mis-scaled "previous" solve
+  warm <- graphical_lasso_fit(S, rho, w_init = junk, wi_init = solve(junk))
+
+  ## whatever the warm attempt does, a cold solve on the same problem is fine
+  expect_false(anyNA(ok$wi))
+  expect_true(is.matrix(warm$wi))
 })

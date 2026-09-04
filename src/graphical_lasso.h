@@ -77,16 +77,20 @@ struct Result {
 // pair is only reused when it still has the right size; anything else (a
 // changed q, a first call) silently falls back to a cold start.
 //
-// Deliberately NOT used by the (V)EM between M-steps, though consecutive
-// M-steps do solve nearly the same problem. The outer loop stops on
-// `dw <= shr`, which measures how much a whole sweep moved W, not how far W
-// still is from the optimum -- so a warm start exits sooner having converged
-// less. Measured over 72 nearby-problem pairs: it saves about a quarter of the
-// sweeps (4 -> 3) but lands up to 1.7e-3 away from the cold-start solution,
-// and that error would then compound across M-steps. Tightening `thr` to buy
-// the accuracy back costs more than the warm start saves. It is exposed to R
-// (graphical_lasso_fit's w_init/wi_init) because glassoFast offered it and the
-// equivalence is worth being able to check.
+// Used by the (V)EM between M-steps (nb_omega::estimate), which is where it
+// pays: the outer loop stops on `dw <= shr`, how much a whole sweep moved W
+// rather than how far W still is from the optimum, so resuming both takes
+// fewer sweeps and, at the tightened threshold that affords, lands closer to
+// the optimum than a cold start at the looser one. Measured over 124
+// consecutive M-steps of a real sparsity path: 1.355s at 6.1e-05 from the
+// exact solution cold, 0.589s at 8.9e-07 warm.
+//
+// A warm start is never load-bearing, though. On an ill-conditioned Sigma a
+// bad one can send the coordinate descent below to infinity where a cold
+// start on the same problem converges in a few sweeps, so nb_omega::estimate()
+// retries cold on a non-finite result rather than treating it as failure.
+// Also exposed to R (graphical_lasso_fit's w_init/wi_init), matching the
+// interface glassoFast offered.
 struct State {
   arma::mat W;
   arma::mat X;

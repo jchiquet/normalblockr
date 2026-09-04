@@ -53,8 +53,19 @@ inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity,
     return arma::inv_sympd(Sigma_hat);
   }
 
-  nb_glasso::Result glasso_out =
-    nb_glasso::solve(Sigma_hat, sparsity * sparsity_weights, thr, 10000, warm);
+  const arma::mat penalty = sparsity * sparsity_weights;
+  nb_glasso::Result glasso_out = nb_glasso::solve(Sigma_hat, penalty, thr, 10000, warm);
+
+  // A warm start is only ever a starting point, and a bad one is not free: on
+  // an ill-conditioned Sigma it can send the coordinate descent off to
+  // infinity where a cold start on the very same problem converges in a
+  // handful of sweeps (observed on the mean-block p x p Sigma, and it is why
+  // this retry exists rather than a direct fall-through to the unpenalized
+  // inverse -- that would silently swap the model being fitted).
+  if (glasso_out.X.has_nan() && warm != nullptr && warm->usable_for(Sigma_hat.n_rows)) {
+    glasso_out = nb_glasso::solve(Sigma_hat, penalty, thr, 10000, nullptr);
+  }
+
   if (warm != nullptr) {
     if (glasso_out.X.is_finite() && glasso_out.W.is_finite()) warm->store(glasso_out);
     else warm->reset();
