@@ -21,3 +21,4 @@ Rplots.pdf
 ^CRAN-SUBMISSION$
 ^inst/normalblockmean$
 ^inst/mean_block_analyses
+inst/normal_block_models.qmd
