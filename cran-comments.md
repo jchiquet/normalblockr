@@ -1,34 +1,39 @@
-This is a resubmission. It addresses the feedback from the previous round:
+This is a feature release. The main addition is a second, complementary model
+family (mean-block: variables clustered by their regression response to the
+covariates rather than by their covariance), with its zero-inflated
+counterparts and collections.
 
-* Explained the "EM" acronym in the DESCRIPTION text.
-* Replaced `\dontrun{}` with runnable example code (the wrapped example ran
-  in well under 5s, so it was unwrapped entirely rather than switched to
-  `\donttest{}`).
-* Replaced a few `cat()`/`print()` calls that could not be suppressed with
-  `message()`, or gated them behind `verbose` (in
-  `NormalBlockVarCollectionSparsity`, `NormalBlockVarCollectionClustersSparsity`
-  and `SelectionNClusters`); calls inside `print`/`summary` methods were left
-  as is.
+The package's own graphical-lasso solver replaces the `glassoFast`
+dependency, which has therefore been dropped from Imports. The
+`RhpcBLASctl` suggestion has been dropped too, along with the control
+argument that used it.
 
 ## Tested environments
 
-* tested locally on Ubuntu Linux 24.04, R-release, GCC
+* locally on Ubuntu Linux 24.04, R-release, GCC (`R CMD check --as-cran`)
 
-* tested remotely with github-action
+* remotely with github-actions:
+  - Linux ubuntu 24.04, R-release
+  - Linux ubuntu 24.04, R-devel
+  - Linux ubuntu 24.04, R-oldrel-1
+  - macOS, R-release
+  - Windows Server, R-release
 
-- Linux ubuntu 24.04, R-release (github-action)
-- Linux ubuntu 24.04, R-oldrel-1 (github-action)
-- Linux ubuntu 24.04, R-devel (github-action)
-- Windows Server 2022, R-release, 64 bit (github-action)
-- macOS latest, R-release (github-action)
+## R CMD check results
 
-* tested remotely with win-builder (R-oldrelease, R-release, R-devel)
-  1 NOTE for new submission
-  + False positive for mispelled words in DESCRIPTION (authors' names)
+0 errors | 0 warnings | 3 notes
 
-## Local R CMD check results
+* "Days since last update: 1" -- please see the note below.
 
-0 errors | 0 warnings | 1 note
+* "Compilation used the following non-portable flag(s):
+  '-mno-omit-leaf-frame-pointer'". This flag comes from the local R
+  installation's own `CXXFLAGS` (Ubuntu's r-base build), not from the
+  package: `src/Makevars` sets only `CXX_STD`, `PKG_CPPFLAGS` and
+  `PKG_LIBS`.
 
-* checking CRAN incoming feasibility ... NOTE
-  New submission -- expected for a first release.
+* "Skipping checking HTML validation: no command 'tidy' found" -- local
+  toolchain only.
+
+The URL flagged as possibly invalid
+(`https://github.com/jchiquet/normalblockr/commits/master`, status 429) is
+GitHub rate-limiting the checker; the URL resolves normally in a browser.

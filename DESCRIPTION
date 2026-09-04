@@ -1,7 +1,7 @@
 Package: normalblockr
 Type: Package
 Title: Gaussian Graphical Models with Latent Clustering Structure
-Version: 0.2.1
+Version: 0.3.0
 Authors@R: c(
   person("Jeanne", "Tous", role = "aut", email = "jeanne.tous@inrae.fr"),
   person("Nestor",  "Nglala Manguitini", role = "ctr"),
@@ -15,7 +15,9 @@ Description: Implements the Normal-Block model, a Gaussian graphical model
              dependencies between clusters rather than between individual
              variables, for known or unknown clusterings, with an optional
              zero-inflation extension for data with an excess of exact
-             zeros. See Tous & Chiquet (2026)
+             zeros. A complementary family clusters variables by their
+             regression response to covariates rather than by their
+             covariance, sharing one profile per cluster. See Tous & Chiquet (2026)
              <doi:10.1016/j.csda.2026.108347> for the model itself and its
              variational expectation-maximization estimation procedure.
 License: GPL (>= 3)
