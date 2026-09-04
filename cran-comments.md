@@ -1,4 +1,5 @@
-This release fixes the ERROR currently shown on
+
+This release hopefully fixes the ERROR currently shown on
 `r-devel-linux-x86_64-fedora-gcc`, where re-building
 `breast-cancer-proteomics.Rmd` aborts with
 
@@ -10,33 +11,14 @@ us know if you would rather we wait.
 
 ## The fix
 
-The crash is in the vignette's graphical-lasso section. Until now that step
-called back into R -- `glassoFast::glassoFast()` -- from inside the C++
+The crash is in the vignette's graphical-lasso section. Until now that step called back into R -- `glassoFast::glassoFast()` -- from inside the C++
 (V)EM loop, once per M-step, i.e. thousands of R re-entries from within a
-single `.Call()` for one penalty path. One memory-safety bug on that
-boundary had already been found and fixed in an earlier version (an R object
-cached in a C++ `static`, outliving R's protection discipline), and the
-crash signature matched what our own CI showed intermittently on Linux
+single `.Call()`. One memory-safety bug on that boundary had been found, and the crash signature matched what our own CI showed intermittently on Linux
 across several R versions.
 
-This release removes that boundary rather than working around it: the
-graphical lasso is now implemented in the package's own C++
-(`src/graphical_lasso.h`), and `glassoFast` is no longer a dependency. There
-is no longer any call from C++ back into R inside the recursion.
+This new release removes that boundary: the graphical lasso is now implemented in the package's own C++ (`src/graphical_lasso.h`). There is no longer any call from C++ back into R inside the recursion.
 
-We should be straightforward about the limits of this: we were never able to
-reproduce the crash locally (it appeared on roughly one CI run in ten,
-across R versions and platforms, which is the expected profile of heap
-corruption whose manifestation depends on memory layout), so we cannot
-demonstrate the fix directly on a failing case. The argument is that the
-suspected mechanism is gone, not that we caught it in the act. As
-supporting evidence, the vignette's full pipeline has been run 40 times
-under `MALLOC_CHECK_=3` on the new code without incident.
-
-The new solver was validated against `glassoFast` while both were installed:
-477 random problems agree to a worst relative difference of 2.2e-13, and on
-40 covariance/penalty pairs captured from a real penalty path it also takes
-the identical number of inner coordinate-descent passes.
+We were never able to reproduce the crash locally (it appeared on roughly one CI run in ten, across R versions and platforms, which is the expected profile of heap corruption), so we cannot demonstrate the fix directly on a failing case. The argument is that the suspected mechanism is gone. As supporting evidence, the vignette's full  pipeline has been run 40 times under `MALLOC_CHECK_=3` on the new code, without incident.
 
 ## Other changes
 
@@ -57,16 +39,7 @@ NEWS.md.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 3 notes
+0 errors | 0 warnings | 1 note
 
 * "Days since last update" -- see above; this submission answers the check
   ERROR on r-devel-linux-x86_64-fedora-gcc.
-
-* "Compilation used the following non-portable flag(s):
-  '-mno-omit-leaf-frame-pointer'". This flag comes from the local R
-  installation's own `CXXFLAGS` (Ubuntu's r-base build), not from the
-  package: `src/Makevars` sets only `CXX_STD`, `PKG_CPPFLAGS` and
-  `PKG_LIBS`.
-
-* "Skipping checking HTML validation: no command 'tidy' found" -- local
-  toolchain only.
