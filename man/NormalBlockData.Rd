@@ -7,6 +7,11 @@
 R6 class holding the responses and design matrix used to fit a
 normal-block model.
 }
+\examples{
+ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+c(n = data$n, p = data$p, d = data$d)
+}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

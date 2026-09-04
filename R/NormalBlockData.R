@@ -30,6 +30,10 @@
 #' directly convertible back to the original units (the per-column scaling
 #' factors are not the same within a block, so there is no single way to
 #' "unscale" a shared block covariance back to a p x p matrix).
+#' @examples
+#' ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex$Y, ex$X)
+#' c(n = data$n, p = data$p, d = data$d)
 #' @export
 NormalBlockData <- R6::R6Class(
   classname = "NormalBlockData",

@@ -7,6 +7,12 @@
 #'
 #' R6 class for a collection of normal-block models with a fixed clustering
 #' (blocks) and different sparsity levels.
+#' @examples
+#' ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex$Y, ex$X)
+#' models <- normal_block(data, blocks = ex$parameters$C, sparsity = TRUE,
+#'                        control = NB_control(verbose = FALSE, n_sparsity_penalties = 5))
+#' models$get_best_model("BIC")$sparsity
 #' @export
 NormalBlockVarCollectionSparsity <- R6::R6Class(
   classname = "NormalBlockVarCollectionSparsity",

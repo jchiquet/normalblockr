@@ -7,6 +7,12 @@
 R6 class for a normal-block model with a fixed number of clusters (but
 unknown clustering).
 }
+\examples{
+ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+model$clustering
+}
 \section{Super classes}{
 \code{\link[normalblockr:NormalBlockBase]{NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockVarBase]{NormalBlockVarBase}} -> \code{NormalBlockVarUnknownClusters}
 }
