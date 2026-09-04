@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,6 +19,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
@@ -35,7 +36,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>NB_control</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/v0.2.1/R/normal_block.R" class="external-link"><code>R/normal_block.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/R/normal_block.R" class="external-link"><code>R/normal_block.R</code></a></small>
       <div class="d-none name"><code>NB_control.Rd</code></div>
     </div>
 
@@ -48,15 +49,16 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">NB_control</span><span class="op">(</span></span>
 <span>  niter <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="fl">1e-04</span>,</span>
+<span>  fixed_point_niter <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  sparsity_weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sparsity_penalties <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_sparsity_penalties <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  min_ratio <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  fixed_tau <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  clustering_init <span class="op">=</span> <span class="st">"ward2"</span>,</span>
+<span>  clustering_init <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  heuristic <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  noise_covariance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"diagonal"</span>, <span class="st">"spherical"</span><span class="op">)</span>,</span>
+<span>  noise_covariance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  refine <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -71,6 +73,13 @@
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
 <dd><p>loglikelihood / elbo threshold under which optimization stops</p></dd>
+
+
+<dt id="arg-fixed-point-niter">fixed_point_niter<a class="anchor" aria-label="anchor" href="#arg-fixed-point-niter"></a></dt>
+<dd><p>number of sweeps of the tau update for
+Normal-Block-Mean with unknown clusters. Each sweep visits the rows of
+tau sequentially and maximizes the ELBO exactly in each, so it can never
+decrease the ELBO.</p></dd>
 
 
 <dt id="arg-sparsity-weights">sparsity_weights<a class="anchor" aria-label="anchor" href="#arg-sparsity-weights"></a></dt>
@@ -99,12 +108,15 @@ useful for calls to fixed_q models in stability_selection</p></dd>
 
 <dt id="arg-clustering-init">clustering_init<a class="anchor" aria-label="anchor" href="#arg-clustering-init"></a></dt>
 <dd><p>how to obtain the initial clustering of the q
-unknown blocks: a heuristic name ("ward2", the default, "kmeans", "sbm" or
+unknown blocks: a heuristic name ("ward2", "kmeans", "sbm" or
 "spectral"), an actual clustering (a vector of labels or a p x q indicator
 matrix, or a list of either per q for a collection), or "best_of_inits" to
 try several heuristics per model and keep the best-ELBO fit (see
 [NormalBlockVarBase]'s `best_of_inits()`; not supported with `sparsity =
-TRUE`). See `inst/methods_initialization_and_refine.md` for the
+TRUE`). Default `NULL`, resolved per model family at fit time: "ward2"
+for variance-block models, "kmeans" for mean-block models ("ward2" was
+benchmarked substantially worse there – see [NormalBlockMeanBase]).
+See `inst/methods_initialization_and_refine.md` for the
 heuristics' rationale, why no single one dominates, and how this interacts
 with `refine` (below).</p></dd>
 
@@ -121,7 +133,18 @@ are all `NA` on the resulting model.</p></dd>
 
 
 <dt id="arg-noise-covariance">noise_covariance<a class="anchor" aria-label="anchor" href="#arg-noise-covariance"></a></dt>
-<dd><p>variance can be variable specific ("diagonal", the default) or common ("spherical")</p></dd>
+<dd><p>shape of the residual covariance. Variance-block
+models accept "diagonal" (variable-specific) or "spherical" (common);
+mean-block models, whose Sigma is the full p x p residual covariance, also
+accept "full". Default `NULL`, resolved per model family at fit time to
+"diagonal" – except for a mean-block model with `sparsity &gt; 0`, which
+implies "full" since a penalty on a diagonal precision matrix would have
+nothing to act on (explicitly asking for both is an error). The mean-block
+"diagonal"/"spherical" variants need no matrix inversion, hence no
+`n &gt; p` requirement, and they select the number of clusters markedly
+better than a full Sigma once p approaches n: the p(p+1)/2 covariance
+parameters otherwise drown the mean structure BIC/ICL are weighing. Use
+"full" when the residual associations are themselves of interest.</p></dd>
 
 
 <dt id="arg-refine">refine<a class="anchor" aria-label="anchor" href="#arg-refine"></a></dt>

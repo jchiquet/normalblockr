@@ -15,7 +15,7 @@ l'Eau et des Milieux Aquatiques&quot;), using electrofishing."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,6 +27,7 @@ l'Eau et des Milieux Aquatiques&quot;), using electrofishing."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
@@ -43,7 +44,7 @@ l'Eau et des Milieux Aquatiques&quot;), using electrofishing."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>French stream fish community data (ONEMA / OFB electrofishing surveys)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/v0.2.1/R/data.R" class="external-link"><code>R/data.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/R/data.R" class="external-link"><code>R/data.R</code></a></small>
       <div class="d-none name"><code>onema.Rd</code></div>
     </div>
 
@@ -110,7 +111,7 @@ information for clustering anyway).</p>
 <span class="r-in"><span><span class="va">nb_data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">Y</span>, <span class="va">X</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">nb_data</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">15</span>, control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>clustering_init <span class="op">=</span> <span class="st">"ward2"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fitting a diagonal normal-block model with unknown q </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fitting a  normal-block-var model with unknown q </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 number of blocks = 2           	 number of blocks = 3           	 number of blocks = 4           	 number of blocks = 5           	 number of blocks = 6           	 number of blocks = 7           	 number of blocks = 8           	 number of blocks = 9           	 number of blocks = 10           	 number of blocks = 11           	 number of blocks = 12           	 number of blocks = 13           	 number of blocks = 14           	 number of blocks = 15           </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DONE</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>

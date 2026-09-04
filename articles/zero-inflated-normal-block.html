@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul>
@@ -62,9 +63,9 @@
                         <h4 data-toc-skip class="author">Julien Chiquet
 &amp; Jeanne Tous</h4>
             
-            <h4 data-toc-skip class="date">2026-09-03</h4>
+            <h4 data-toc-skip class="date">2026-09-04</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/v0.2.1/vignettes/zero-inflated-normal-block.Rmd" class="external-link"><code>vignettes/zero-inflated-normal-block.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/vignettes/zero-inflated-normal-block.Rmd" class="external-link"><code>vignettes/zero-inflated-normal-block.Rmd</code></a></small>
       <div class="d-none name"><code>zero-inflated-normal-block.Rmd</code></div>
     </div>
 
@@ -287,7 +288,7 @@ known in advance for this kind of data, so we let
 fitted models, one per number of clusters:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">8</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fitting a diagonal normal-block model with unknown q </span></span>
+<span><span class="co">#&gt; Fitting a  normal-block-var model with unknown q </span></span>
 <span><span class="co">#&gt;   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -379,11 +380,9 @@ quantity. The most and least zero-inflated species here illustrate the
 range:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kappa_hat</span>, <span class="fl">2</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="co"># almost always structurally absent</span></span>
-<span><span class="co">#&gt; self.data.X0 self.data.X0 self.data.X0 self.data.X0 self.data.X0 </span></span>
-<span><span class="co">#&gt;         0.97         0.97         0.97         0.96         0.94</span></span>
+<span><span class="co">#&gt; [1] 0.97 0.97 0.97 0.96 0.94</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">kappa_hat</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>                    <span class="co"># almost always present in some quantity</span></span>
-<span><span class="co">#&gt; self.data.X0 self.data.X0 self.data.X0 self.data.X0 self.data.X0 </span></span>
-<span><span class="co">#&gt;         0.22         0.23         0.24         0.26         0.32</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.22 0.23 0.24 0.26 0.32</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -396,7 +395,7 @@ with <code>sparsity = TRUE</code> explores a path of
 penalties on the inter-cluster association network <span class="citation">(see Tous and Chiquet 2026)</span>.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="va">myModel</span><span class="op">$</span><span class="va">q</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fitting a Collection of  zero-inflated diagonal normal-block models with fixed q, with different sparsity penalties. </span></span>
+<span><span class="co">#&gt; Fitting a Collection of  zero-inflated  normal-block-var models with fixed q, with different sparsity penalties. </span></span>
 <span><span class="co">#&gt;   penalty = 0.03319511                penalty = 0.028321              penalty = 0.02416257                penalty = 0.02061473                penalty = 0.01758782                penalty = 0.01500536                penalty = 0.01280209                penalty = 0.01092234                penalty = 0.009318585               penalty = 0.007950317               penalty = 0.006782955               penalty = 0.005786999               penalty = 0.004937282               penalty = 0.00421233                penalty = 0.003593825               penalty = 0.003066136               penalty = 0.002615928               penalty = 0.002231826               penalty = 0.001904122               penalty = 0.001624536               penalty = 0.001386002               penalty = 0.001182492               penalty = 0.001008864               penalty = 0.0008607306              penalty = 0.0007343476              penalty = 0.0006265218              penalty = 0.0005345283              penalty = 0.0004560423              penalty = 0.0003890807              penalty = 0.0003319511           </span></span>
 <span><span class="co">#&gt; DONE</span></span>
 <span><span class="va">out_sp</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"EBIC"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>

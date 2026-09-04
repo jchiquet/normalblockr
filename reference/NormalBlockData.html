@@ -9,7 +9,7 @@ normal-block model."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,6 +21,7 @@ normal-block model."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
@@ -37,7 +38,7 @@ normal-block model."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Data Container for Normal-Block Models</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/v0.2.1/R/NormalBlockData.R" class="external-link"><code>R/NormalBlockData.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/R/NormalBlockData.R" class="external-link"><code>R/NormalBlockData.R</code></a></small>
       <div class="d-none name"><code>NormalBlockData.Rd</code></div>
     </div>
 
@@ -86,6 +87,10 @@ normal-block model.</p>
 <dd><p>number of variables</p></dd>
 
 
+    <dt><code>XtX</code></dt>
+<dd><p>useful for inference in some cases</p></dd>
+
+
     <dt><code>XtXm1</code></dt>
 <dd><p>inverse of XtX, useful for inference</p></dd>
 
@@ -118,12 +123,22 @@ normal-block model.</p>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockData-initialize"><code>NormalBlockData$new()</code></a></p></li>
+<li><p><a href="#method-NormalBlockData-ols_fit"><code>NormalBlockData$ols_fit()</code></a></p></li>
+<li><p><a href="#method-NormalBlockData-zi_ols_fit"><code>NormalBlockData$zi_ols_fit()</code></a></p></li>
+<li><p><a href="#method-NormalBlockData-zi_fit"><code>NormalBlockData$zi_fit()</code></a></p></li>
 <li><p><a href="#method-NormalBlockData-clone"><code>NormalBlockData$clone()</code></a></p></li>
 </ul></div><p></p><hr><a id="method-NormalBlockData-initialize"></a><div class="section">
 <h3 id="normalblockdata-new-"><code>NormalBlockData$new()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-new-"></a></h3>
 <p>Create a new [`NormalBlockData`] object.</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">Y</span>, <span class="va">X</span>, X0 <span class="op">=</span> <span class="cn">NULL</span>, formula <span class="op">=</span> <span class="cn">NULL</span>, scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
+<span>  <span class="va">Y</span>,</span>
+<span>  <span class="va">X</span>,</span>
+<span>  X0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  zeros <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>Y</code></dt>
@@ -143,8 +158,63 @@ normal-block model.</p>
 deviation (no centering). Default TRUE – see the class-level
 documentation for the rationale and its limits.</p></dd>
 
+      <dt><code>zeros</code></dt>
+<dd><p>an optional 0/1 matrix of structural zeros, overriding the
+default `Y == 0`.</p></dd>
+
 
 </dl><p></p></div>
+</div>
+
+</div>
+
+<p></p><hr><a id="method-NormalBlockData-ols_fit"></a><div class="section">
+<h3 id="normalblockdata-ols-fit-"><code>NormalBlockData$ols_fit()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-ols-fit-"></a></h3>
+<p>Ordinary-least-squares fit of Y on X, with its residuals
+and their covariance. Computed once and memoized: it depends only on
+the data, yet every model in a collection over q used to recompute it
+(measured at 9<!-- % of a q = 1:30 variance-block collection on `brca_rppa`). --></p><div class="section">
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">ols_fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
+<p>a list with `B` (d x p), `R` (n x p residuals) and `Sigma`
+(p x p residual covariance)</p>
+</div>
+
+</div>
+
+<p></p><hr><a id="method-NormalBlockData-zi_ols_fit"></a><div class="section">
+<h3 id="normalblockdata-zi-ols-fit-"><code>NormalBlockData$zi_ols_fit()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-zi-ols-fit-"></a></h3>
+<p>Masked counterpart of `ols_fit()`: a per-variable weighted
+least-squares fit of B under the zero-inflation mask, with its inverse
+residual variances and residuals (see `zi_weighted_fit()`). Memoized for
+the same reason – every zero-inflated model in a collection over q used
+to redo the same IRLS.</p><div class="section">
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">zi_ols_fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<p>a list with `B` (d x p), `dm1` (p) and `R` (n x p masked residuals)</p>
+</div>
+
+</div>
+
+<p></p><hr><a id="method-NormalBlockData-zi_fit"></a><div class="section">
+<h3 id="normalblockdata-zi-fit-"><code>NormalBlockData$zi_fit()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-zi-fit-"></a></h3>
+<p>Zero-inflation component: `p` independent logistic
+regressions of each variable's zero pattern on `X0`, and the fixed
+contribution they make to the log-likelihood. The (V)EM never revisits
+these, so they are a property of the data rather than of a model –
+hence computed once and memoized here. Every model in a collection over
+q used to refit all `p` regressions (measured at 53<!-- % of a q = 2:8 -->
+zero-inflated mean-block collection).</p><div class="section">
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">zi_fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<p>a list with `B0` (d0 x p), `kappa` (n x p zero-inflation
+probabilities) and `ZI_cond_mean` (a scalar)</p>
 </div>
 
 </div>
@@ -152,7 +222,7 @@ documentation for the rationale and its limits.</p></dd>
 <p></p><hr><a id="method-NormalBlockData-clone"></a><div class="section">
 <h3 id="normalblockdata-clone-"><code>NormalBlockData$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
@@ -168,6 +238,15 @@ documentation for the rationale and its limits.</p></dd>
 
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="generate_normal_block_var_data.html">generate_normal_block_var_data</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span>, p <span class="op">=</span> <span class="fl">20</span>, d <span class="op">=</span> <span class="fl">1</span>, q <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">ex</span><span class="op">$</span><span class="va">Y</span>, <span class="va">ex</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">n</span>, p <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">p</span>, d <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">d</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  n  p  d </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50 20  1 </span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

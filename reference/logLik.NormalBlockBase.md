@@ -1,0 +1,38 @@
+# Extract Log-Likelihood of a Normal-Block Model
+
+Returns the (variational) log-likelihood of a fitted normal-block model
+as a \`"logLik"\` object, compatible with \[stats::AIC()\] and
+\[stats::BIC()\].
+
+## Usage
+
+``` r
+# S3 method for class 'NormalBlockBase'
+logLik(object, ...)
+```
+
+## Arguments
+
+- object:
+
+  An object of class NormalBlockBase.
+
+- ...:
+
+  not used, only here for S3 compatibility
+
+## Value
+
+An object of class \`"logLik"\`. The numeric value is the log-likelihood
+or its variational lower bound (ELBO). Attributes \`df\` and \`nobs\`
+hold the number of parameters and observations.
+
+## Examples
+
+``` r
+ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+logLik(model)
+#> 'log Lik.' -562.7895 (df=48)
+```

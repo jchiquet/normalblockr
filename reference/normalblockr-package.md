@@ -6,9 +6,12 @@ data. The model clusters variables and, building on the graphical lasso,
 infers a network of statistical dependencies between clusters rather
 than between individual variables, for known or unknown clusterings,
 with an optional zero-inflation extension for data with an excess of
-exact zeros. See Tous & Chiquet (2026)
+exact zeros. A complementary family clusters variables by their
+regression response to covariates rather than by their covariance,
+sharing one profile per cluster. See Tous & Chiquet (2026)
 [doi:10.1016/j.csda.2026.108347](https://doi.org/10.1016/j.csda.2026.108347)
-for the model itself and its variational EM estimation procedure.
+for the model itself and its variational expectation-maximization
+estimation procedure.
 
 ## See also
 
@@ -29,3 +32,7 @@ Authors:
   ([ORCID](https://orcid.org/0000-0002-3629-3429))
 
 - Jeanne Tous <jeanne.tous@inrae.fr>
+
+Other contributors:
+
+- Nestor Nglala Manguitini \[contractor\]

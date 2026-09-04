@@ -3,8 +3,9 @@
 R6 class for a normal-block model with a fixed number of clusters (but
 unknown clustering).
 
-## Super class
+## Super classes
 
+[`NormalBlockBase`](NormalBlockBase.md) -\>
 [`NormalBlockVarBase`](NormalBlockVarBase.md) -\>
 `NormalBlockVarUnknownClusters`
 
@@ -20,7 +21,7 @@ unknown clustering).
 - `model_par`:
 
   a list with the matrices of the model parameters: B (covariates), dm1
-  (species variance), Omegaq (groups precision matrix))
+  (species variance), Omega (groups precision matrix))
 
 - `nb_param`:
 
@@ -53,19 +54,19 @@ unknown clustering).
 
 Inherited methods
 
-- [`NormalBlockVarBase$best_of_inits()`](NormalBlockVarBase.html#method-best_of_inits)
-- [`NormalBlockVarBase$candidates_merge()`](NormalBlockVarBase.html#method-candidates_merge)
-- [`NormalBlockVarBase$candidates_split()`](NormalBlockVarBase.html#method-candidates_split)
-- [`NormalBlockVarBase$latent_network()`](NormalBlockVarBase.html#method-latent_network)
+- [`NormalBlockBase$best_of_inits()`](NormalBlockBase.html#method-best_of_inits)
+- [`NormalBlockBase$candidates_merge()`](NormalBlockBase.html#method-candidates_merge)
+- [`NormalBlockBase$candidates_split()`](NormalBlockBase.html#method-candidates_split)
+- [`NormalBlockBase$latent_network()`](NormalBlockBase.html#method-latent_network)
+- [`NormalBlockBase$optimize()`](NormalBlockBase.html#method-optimize)
+- [`NormalBlockBase$plot()`](NormalBlockBase.html#method-plot)
+- [`NormalBlockBase$plot_loglik()`](NormalBlockBase.html#method-plot_loglik)
+- [`NormalBlockBase$plot_network()`](NormalBlockBase.html#method-plot_network)
+- [`NormalBlockBase$predict()`](NormalBlockBase.html#method-predict)
+- [`NormalBlockBase$print()`](NormalBlockBase.html#method-print)
+- [`NormalBlockBase$update()`](NormalBlockBase.html#method-update)
 - [`NormalBlockVarBase$merge()`](NormalBlockVarBase.html#method-merge)
-- [`NormalBlockVarBase$optimize()`](NormalBlockVarBase.html#method-optimize)
-- [`NormalBlockVarBase$plot()`](NormalBlockVarBase.html#method-plot)
-- [`NormalBlockVarBase$plot_loglik()`](NormalBlockVarBase.html#method-plot_loglik)
-- [`NormalBlockVarBase$plot_network()`](NormalBlockVarBase.html#method-plot_network)
-- [`NormalBlockVarBase$predict()`](NormalBlockVarBase.html#method-predict)
-- [`NormalBlockVarBase$print()`](NormalBlockVarBase.html#method-print)
 - [`NormalBlockVarBase$split()`](NormalBlockVarBase.html#method-split)
-- [`NormalBlockVarBase$update()`](NormalBlockVarBase.html#method-update)
 - [`NormalBlockVarBase$warm_start_from()`](NormalBlockVarBase.html#method-warm_start_from)
 
 ------------------------------------------------------------------------
@@ -120,3 +121,13 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+model$clustering
+#>  [1] 1 2 1 3 1 2 3 3 2 2 1 1 1 3 3 1 3 1 2 3
+```

@@ -3,20 +3,13 @@
 R6 class for a collection of normal-block models with different number
 of clusters (q) and different sparsity levels.
 
-## Super class
+## Super classes
 
-[`NormalBlockVarCollection`](NormalBlockVarCollection.md) -\>
-`NormalBlockVarCollectionClustersSparsity`
+[`NormalBlockCollection`](NormalBlockCollection.md) -\>
+[`NormalBlockCollectionClustersSparsity`](NormalBlockCollectionClustersSparsity.md)
+-\> `NormalBlockVarCollectionClustersSparsity`
 
 ## Active bindings
-
-- `q_list`:
-
-  number of blocks
-
-- `sparsity`:
-
-  list of penalties used for each q
 
 - `who_am_I`:
 
@@ -28,19 +21,16 @@ of clusters (q) and different sparsity levels.
 
 - [`NormalBlockVarCollectionClustersSparsity$new()`](#method-NormalBlockVarCollectionClustersSparsity-initialize)
 
-- [`NormalBlockVarCollectionClustersSparsity$get_model()`](#method-NormalBlockVarCollectionClustersSparsity-get_model)
-
-- [`NormalBlockVarCollectionClustersSparsity$get_best_model()`](#method-NormalBlockVarCollectionClustersSparsity-get_best_model)
-
-- [`NormalBlockVarCollectionClustersSparsity$plot()`](#method-NormalBlockVarCollectionClustersSparsity-plot)
-
 - [`NormalBlockVarCollectionClustersSparsity$clone()`](#method-NormalBlockVarCollectionClustersSparsity-clone)
 
 Inherited methods
 
-- [`NormalBlockVarCollection$optimize()`](NormalBlockVarCollection.html#method-optimize)
-- [`NormalBlockVarCollection$print()`](NormalBlockVarCollection.html#method-print)
-- [`NormalBlockVarCollection$summary()`](NormalBlockVarCollection.html#method-summary)
+- [`NormalBlockCollection$optimize()`](NormalBlockCollection.html#method-optimize)
+- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
+- [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
+- [`NormalBlockCollectionClustersSparsity$get_best_model()`](NormalBlockCollectionClustersSparsity.html#method-get_best_model)
+- [`NormalBlockCollectionClustersSparsity$get_model()`](NormalBlockCollectionClustersSparsity.html#method-get_model)
+- [`NormalBlockCollectionClustersSparsity$plot()`](NormalBlockCollectionClustersSparsity.html#method-plot)
 
 ------------------------------------------------------------------------
 
@@ -81,85 +71,6 @@ A new \[\`NormalBlockVarCollectionClustersSparsity\`\] object
 
 ------------------------------------------------------------------------
 
-### `NormalBlockVarCollectionClustersSparsity$get_model()`
-
-returns a collection of models corresponding to given q or one single
-model if penalty is also given
-
-#### Usage
-
-    NormalBlockVarCollectionClustersSparsity$get_model(q, sparsity = NA)
-
-#### Arguments
-
-- `q`:
-
-  number of blocks asked by user.
-
-- `sparsity`:
-
-  sparsity penalty asked by user
-
-#### Returns
-
-either a NormalBlockVarCollectionSparsity or a
-NormalBlockVarUnknownClusters object
-
-------------------------------------------------------------------------
-
-### `NormalBlockVarCollectionClustersSparsity$get_best_model()`
-
-Extract best model in the collection
-
-#### Usage
-
-    NormalBlockVarCollectionClustersSparsity$get_best_model(
-      crit = c("ICL", "BIC", "EBIC")
-    )
-
-#### Arguments
-
-- `crit`:
-
-  a character for the criterion used to performed the selection. Either
-  "BIC", "EBIC" or "ICL". "ICL" is the default criterion
-
-#### Returns
-
-a \[\`NormalBlockVarUnknownClusters\`\] object
-
-------------------------------------------------------------------------
-
-### `NormalBlockVarCollectionClustersSparsity$plot()`
-
-Display various outputs (goodness-of-fit criteria, robustness,
-diagnostic) associated with a collection of network fits (a
-\[\`Networkfamily\`\])
-
-#### Usage
-
-    NormalBlockVarCollectionClustersSparsity$plot(
-      criterion = c("deviance", "ICL", "BIC", "EBIC"),
-      n_intervals = NULL
-    )
-
-#### Arguments
-
-- `criterion`:
-
-  The criteria to plot in \`c("deviance", BIC", "EBIC", "ICL")\`.
-  Defaults deviance.
-
-- `n_intervals`:
-
-  number of intervals into which the penalties range should be split
-
-#### Returns
-
-a \[\`ggplot\`\] heatmap
-
-------------------------------------------------------------------------
-
 ### `NormalBlockVarCollectionClustersSparsity$clone()`
 
 The objects of this class are cloneable with this method.
@@ -173,3 +84,14 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+models <- normal_block(data, blocks = 2:3, sparsity = TRUE,
+                       control = NB_control(verbose = FALSE, n_sparsity_penalties = 3))
+models$get_best_model("BIC")$q
+#> [1] 3
+```

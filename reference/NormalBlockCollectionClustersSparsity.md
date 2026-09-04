@@ -1,7 +1,10 @@
-# R6 class for a collection of normal-block models with different number of clusters (q) and different sparsity levels.
+# Base Class for a Collection over Cluster Counts and Sparsity Levels
 
-R6 class for a collection of normal-block models with different number
-of clusters (q) and different sparsity levels.
+Shared scaffolding for \[NormalBlockVarCollectionClustersSparsity\] and
+\[NormalBlockMeanCollectionClustersSparsity\]: a collection of sparsity
+sub-collections, one per q. Everything family-agnostic (two-key model
+lookup, model selection over both axes, the criteria heatmap) lives
+here; subclasses only build \`self\$models\` and name themselves.
 
 ## Super class
 
@@ -18,15 +21,9 @@ of clusters (q) and different sparsity levels.
 
   list of penalties used for each q
 
-- `who_am_I`:
-
-  a method to print what model is being fitted
-
 ## Methods
 
 ### Public methods
-
-- [`NormalBlockCollectionClustersSparsity$new()`](#method-NormalBlockCollectionClustersSparsity-initialize)
 
 - [`NormalBlockCollectionClustersSparsity$get_model()`](#method-NormalBlockCollectionClustersSparsity-get_model)
 
@@ -39,43 +36,8 @@ of clusters (q) and different sparsity levels.
 Inherited methods
 
 - [`NormalBlockCollection$optimize()`](NormalBlockCollection.html#method-optimize)
-
-------------------------------------------------------------------------
-
-### `NormalBlockCollectionClustersSparsity$new()`
-
-Create a new \[\`NormalBlockCollectionClustersSparsity\`\] object.
-
-#### Usage
-
-    NormalBlockCollectionClustersSparsity$new(
-      mydata,
-      q_list,
-      zero_inflation = FALSE,
-      control = NB_control()
-    )
-
-#### Arguments
-
-- `mydata`:
-
-  object of NormalBlockData class, with responses and design matrix
-
-- `q_list`:
-
-  list of q values (number of groups) in the collection
-
-- `zero_inflation`:
-
-  boolean to specify whether data is zero-inflated
-
-- `control`:
-
-  structured list of parameters to handle sparsity control
-
-#### Returns
-
-A new \[\`NormalBlockCollectionClustersSparsity\`\] object
+- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
+- [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
 
 ------------------------------------------------------------------------
 
@@ -100,8 +62,7 @@ model if penalty is also given
 
 #### Returns
 
-either a NormalBlockCollectionSparsity or a NormalBlockUnknownClusters
-object
+either a sparsity sub-collection or a single model object
 
 ------------------------------------------------------------------------
 
@@ -124,15 +85,14 @@ Extract best model in the collection
 
 #### Returns
 
-a \[\`NormalBlockUnknownClusters\`\] object
+a single fitted model object
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockCollectionClustersSparsity$plot()`
 
 Display various outputs (goodness-of-fit criteria, robustness,
-diagnostic) associated with a collection of network fits (a
-\[\`Networkfamily\`\])
+diagnostic) associated with a collection of network fits
 
 #### Usage
 
@@ -150,11 +110,11 @@ diagnostic) associated with a collection of network fits (a
 
 - `n_intervals`:
 
-  number of intervals into which the penalties range should be splitted
+  number of intervals into which the penalties range should be split
 
 #### Returns
 
-a \[\`ggplot\`\] heatmap
+a \[\`ggplot2::ggplot\`\] heatmap
 
 ------------------------------------------------------------------------
 
@@ -171,3 +131,10 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+# An internal abstract base class, never instantiated directly -- see
+# normal_block() for how collections are created and fitted.
+```

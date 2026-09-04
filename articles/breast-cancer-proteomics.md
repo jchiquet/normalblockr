@@ -60,8 +60,8 @@ what `plot_network()` displays: the inferred association network
 *between clusters*, not between individual proteins. In its plain
 (non-regularized) form, that network is dense and not very informative
 to look at directly – we only visualize it at the end of this vignette,
-after regularizing it with a graphical lasso penalty (section 10 of
-`inst/normal_block_models.qmd`).
+after regularizing it with a graphical lasso penalty (the “Sparse
+precision matrix” section of `inst/normal_block_models.qmd`).
 
 See Tous and Chiquet (2026) for the model itself, and
 `inst/normal_block_models.qmd` (the package’s reference card) for the
@@ -127,7 +127,7 @@ not the grouping itself.
 ``` r
 
 NB_prot_group <- normal_block(data_subtype, blocks = group)
-#> Fitting a diagonal normal-block model with fixed blocks 
+#> Fitting a diagonal normal-block-var model with fixed blocks 
 #> 
 #> DONE
 plot(NB_prot_group)
@@ -138,7 +138,7 @@ plot(NB_prot_group)
 ``` r
 
 print(NB_prot_group)
-#> A diagonal normal-block model with fixed blocks .
+#> A diagonal normal-block-var model with fixed blocks .
 #> ===========================================================================
 #>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
 #>       999 6      15        0 -70387.84 140775.7 146616.3 144073.3 146670    14
@@ -170,7 +170,7 @@ default here.
 ``` r
 
 NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30)
-#> Fitting a diagonal normal-block model with unknown q 
+#> Fitting a  normal-block-var model with unknown q 
 #>   number of blocks = 1                number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8                number of blocks = 9                number of blocks = 10               number of blocks = 11               number of blocks = 12               number of blocks = 13               number of blocks = 14               number of blocks = 15               number of blocks = 16               number of blocks = 17               number of blocks = 18               number of blocks = 19               number of blocks = 20               number of blocks = 21               number of blocks = 22               number of blocks = 23               number of blocks = 24               number of blocks = 25               number of blocks = 26               number of blocks = 27               number of blocks = 28               number of blocks = 29               number of blocks = 30           
 #> DONE
 ```
@@ -293,14 +293,15 @@ The association network $`\Omega`$ of the ICL-selected model above is
 dense (no penalty was applied), which makes it hard to read directly.
 Treating that clustering as fixed, we can refit the model once more with
 the graphical-lasso penalty on $`\Omega`$ explored over a path of values
-(`sparsity = TRUE`, see section 10 of `inst/normal_block_models.qmd`),
-and pick the sparsity level with the best BIC.
+(`sparsity = TRUE`, see the “Sparse precision matrix” section of
+`inst/normal_block_models.qmd`), and pick the sparsity level with the
+best BIC.
 
 ``` r
 
 group_selected <- selected_NB_refined$clustering |> normalblockr:::as_indicator()
 NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE, control = NB_control(min_ratio=0.001))
-#> Fitting a Collection of diagonal normal-block models with fixed blocks, with different sparsity penalties. 
+#> Fitting a Collection of  normal-block-var models with fixed blocks, with different sparsity penalties. 
 #>   penalty = 0.6628733             penalty = 0.5223748             penalty = 0.4116555             penalty = 0.3244036             penalty = 0.2556451             penalty = 0.2014601             penalty = 0.1587599             penalty = 0.1251102             penalty = 0.0985926             penalty = 0.07769553                penalty = 0.06122767                penalty = 0.04825024                penalty = 0.03802342                penalty = 0.02996422                penalty = 0.02361319                penalty = 0.01860829                penalty = 0.01466419                penalty = 0.01155606                penalty = 0.009106711               penalty = 0.00717651                penalty = 0.005655422               penalty = 0.004456734               penalty = 0.003512113               penalty = 0.002767707               penalty = 0.002181081               penalty = 0.001718793               penalty = 0.001354489               penalty = 0.0010674             penalty = 0.0008411603              penalty = 0.0006628733           
 #> DONE
 ```

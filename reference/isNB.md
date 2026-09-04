@@ -1,6 +1,7 @@
 # Check if an Object is a Normal-Block Model
 
-Checks if a model is of class \[NormalBlockVarBase()\].
+Checks if a model is of class \[NormalBlockBase()\], i.e. any
+normal-block model (variance-block or mean-block family).
 
 ## Usage
 
@@ -16,5 +17,5 @@ isNB(object)
 
 ## Value
 
-A boolean telling whether object inherits from the NormalBlockVarBase
+A boolean telling whether object inherits from the NormalBlockBase
 class.

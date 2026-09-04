@@ -9,7 +9,7 @@ clusters (q) and a fixed sparsity level."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,6 +21,7 @@ clusters (q) and a fixed sparsity level."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
@@ -37,7 +38,7 @@ clusters (q) and a fixed sparsity level."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Collection of Normal-Block Models over a Range of Cluster Counts</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/v0.2.1/R/NormalBlockVarCollectionClusters.R" class="external-link"><code>R/NormalBlockVarCollectionClusters.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/R/NormalBlockVarCollectionClusters.R" class="external-link"><code>R/NormalBlockVarCollectionClusters.R</code></a></small>
       <div class="d-none name"><code>NormalBlockVarCollectionClusters.Rd</code></div>
     </div>
 
@@ -48,16 +49,12 @@ clusters (q) and a fixed sparsity level.</p>
 
 
     <div class="section level2">
-    <h2 id="super-class">Super class<a class="anchor" aria-label="anchor" href="#super-class"></a></h2>
-    <p><code><a href="NormalBlockVarCollection.html">NormalBlockVarCollection</a></code> -&gt; <code>NormalBlockVarCollectionClusters</code></p>
+    <h2 id="super-classes">Super classes<a class="anchor" aria-label="anchor" href="#super-classes"></a></h2>
+    <p><code><a href="NormalBlockCollection.html">NormalBlockCollection</a></code> -&gt; <code><a href="NormalBlockCollectionClusters.html">NormalBlockCollectionClusters</a></code> -&gt; <code>NormalBlockVarCollectionClusters</code></p>
     </div>
     <div class="section level2">
     <h2 id="active-bindings">Active bindings<a class="anchor" aria-label="anchor" href="#active-bindings"></a></h2>
-    <p></p><div class="r6-active-bindings"><dl><dt><code>q_list</code></dt>
-<dd><p>number of blocks</p></dd>
-
-
-    <dt><code>who_am_I</code></dt>
+    <p></p><div class="r6-active-bindings"><dl><dt><code>who_am_I</code></dt>
 <dd><p>a method to print what model is being fitted</p></dd>
 
 
@@ -69,14 +66,14 @@ clusters (q) and a fixed sparsity level.</p>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockVarCollectionClusters-initialize"><code>NormalBlockVarCollectionClusters$new()</code></a></p></li>
-<li><p><a href="#method-NormalBlockVarCollectionClusters-get_model"><code>NormalBlockVarCollectionClusters$get_model()</code></a></p></li>
-<li><p><a href="#method-NormalBlockVarCollectionClusters-get_best_model"><code>NormalBlockVarCollectionClusters$get_best_model()</code></a></p></li>
-<li><p><a href="#method-NormalBlockVarCollectionClusters-plot"><code>NormalBlockVarCollectionClusters$plot()</code></a></p></li>
-<li><p><a href="#method-NormalBlockVarCollectionClusters-optimize"><code>NormalBlockVarCollectionClusters$optimize()</code></a></p></li>
-<li><p><a href="#method-NormalBlockVarCollectionClusters-refine"><code>NormalBlockVarCollectionClusters$refine()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarCollectionClusters-clone"><code>NormalBlockVarCollectionClusters$clone()</code></a></p></li>
-</ul></div><p><details open><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="print"><a href="NormalBlockVarCollection.html#method-print"><code>NormalBlockVarCollection$print()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="summary"><a href="NormalBlockVarCollection.html#method-summary"><code>NormalBlockVarCollection$summary()</code></a></span></li>
+</ul></div><p><details><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href="NormalBlockCollection.html#method-print"><code>NormalBlockCollection$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href="NormalBlockCollection.html#method-summary"><code>NormalBlockCollection$summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_best_model"><a href="NormalBlockCollectionClusters.html#method-get_best_model"><code>NormalBlockCollectionClusters$get_best_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_model"><a href="NormalBlockCollectionClusters.html#method-get_model"><code>NormalBlockCollectionClusters$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="optimize"><a href="NormalBlockCollectionClusters.html#method-optimize"><code>NormalBlockCollectionClusters$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="plot"><a href="NormalBlockCollectionClusters.html#method-plot"><code>NormalBlockCollectionClusters$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="refine"><a href="NormalBlockCollectionClusters.html#method-refine"><code>NormalBlockCollectionClusters$refine()</code></a></span></li>
 </ul></details></p><hr><a id="method-NormalBlockVarCollectionClusters-initialize"></a><div class="section">
 <h3 id="normalblockvarcollectionclusters-new-"><code>NormalBlockVarCollectionClusters$new()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionclusters-new-"></a></h3>
 <p>Create a new [`NormalBlockVarCollectionClusters`] object.</p><div class="section">
@@ -114,146 +111,13 @@ clusters (q) and a fixed sparsity level.</p>
 
 </div>
 
-<p></p><hr><a id="method-NormalBlockVarCollectionClusters-get_model"></a><div class="section">
-<h3 id="normalblockvarcollectionclusters-get-model-"><code>NormalBlockVarCollectionClusters$get_model()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionclusters-get-model-"></a></h3>
-<p>returns the NormalBlockVarUnknownClusters model corresponding to given q</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionClusters</span><span class="op">$</span><span class="fu">get_model</span><span class="op">(</span><span class="va">q</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div><p></p><div class="section">
-<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>q</code></dt>
-<dd><p>number of blocks asked by user</p></dd>
-
-
-</dl><p></p></div>
-</div><p></p><div class="section">
-<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
-<p>A NormalBlockVarUnknownClusters object with given value q</p>
-</div>
-
-</div>
-
-<p></p><hr><a id="method-NormalBlockVarCollectionClusters-get_best_model"></a><div class="section">
-<h3 id="normalblockvarcollectionclusters-get-best-model-"><code>NormalBlockVarCollectionClusters$get_best_model()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionclusters-get-best-model-"></a></h3>
-<p>Extract best model in the collection</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionClusters</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span></span>
-<span>  crit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ICL"</span>, <span class="st">"BIC"</span>, <span class="st">"EBIC"</span>, <span class="st">"deviance"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div><p></p><div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>crit</code></dt>
-<dd><p>a character for the criterion used to performed the selection.
-Either "ICL" or "BIC". "ICL" is the default criterion</p></dd>
-
-
-</dl><p></p></div>
-</div><p></p><div class="section">
-<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
-<p>a [`NormalBlockVarUnknownClusters`] object</p>
-</div>
-
-</div>
-
-<p></p><hr><a id="method-NormalBlockVarCollectionClusters-plot"></a><div class="section">
-<h3 id="normalblockvarcollectionclusters-plot-"><code>NormalBlockVarCollectionClusters$plot()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionclusters-plot-"></a></h3>
-<p>Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionClusters</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span></span>
-<span>  criteria <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"deviance"</span>, <span class="st">"ICL"</span>, <span class="st">"BIC"</span>, <span class="st">"EBIC"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div><p></p><div class="section">
-<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>criteria</code></dt>
-<dd><p>vector of characters. The criteria to plot in `c("deviance", "BIC", "ICL")`. Defaults to all of them.</p></dd>
-
-
-</dl><p></p></div>
-</div><p></p><div class="section">
-<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
-<p>a [`ggplot2::ggplot`] graph</p>
-</div>
-
-</div>
-
-<p></p><hr><a id="method-NormalBlockVarCollectionClusters-optimize"></a><div class="section">
-<h3 id="normalblockvarcollectionclusters-optimize-"><code>NormalBlockVarCollectionClusters$optimize()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionclusters-optimize-"></a></h3>
-<p>optimizes every model in the collection, then – if
-`control$refine` is `TRUE` (see [NB_control()], default `FALSE`) –
-calls [refine()] automatically.</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionClusters</span><span class="op">$</span><span class="fu">optimize</span><span class="op">(</span></span>
-<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">500</span>, threshold <span class="op">=</span> <span class="fl">1e-04</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div><p></p><div class="section">
-<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>control</code></dt>
-<dd><p>optimization parameters (niter, threshold, verbose)</p></dd>
-
-
-</dl><p></p></div>
-</div>
-
-</div>
-
-<p></p><hr><a id="method-NormalBlockVarCollectionClusters-refine"></a><div class="section">
-<h3 id="normalblockvarcollectionclusters-refine-"><code>NormalBlockVarCollectionClusters$refine()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionclusters-refine-"></a></h3>
-<p>Tries to improve every model in the collection with a
-short split-and-reoptimize trial seeded from its smaller-q neighbor
-(`"split"`), a short merge-and-reoptimize trial seeded from its
-larger-q neighbor (`"merge"`), or both (the default); a candidate
-replaces the original only if it strictly lowers the deviance, so this
-can only improve (or leave unchanged) each model it touches. Only
-contiguous q pairs (`q` and `q -/+ 1`, both present in the collection)
-are refined. See `inst/methods_initialization_and_refine.md` for the
-rationale and empirical evidence.</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionClusters</span><span class="op">$</span><span class="fu">refine</span><span class="op">(</span></span>
-<span>  trial_niter <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  max_candidates <span class="op">=</span> <span class="fl">30</span>,</span>
-<span>  directions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"split"</span>, <span class="st">"merge"</span><span class="op">)</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="va">self</span><span class="op">$</span><span class="va">control</span><span class="op">$</span><span class="va">verbose</span></span>
-<span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div><p></p><div class="section">
-<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>trial_niter</code></dt>
-<dd><p>number of EM iterations used for the cheap trial
-candidates (passed to `candidates_split()`/`candidates_merge()`)
-before fully re-optimizing only the best one.</p></dd>
-
-      <dt><code>max_candidates</code></dt>
-<dd><p>passed to `candidates_merge()` (ignored for
-`"split"`, which is never combinatorial in q) – see its
-documentation.</p></dd>
-
-      <dt><code>directions</code></dt>
-<dd><p>which neighbor(s) to seed refinement candidates
-from: `"split"` (smaller-q neighbor), `"merge"` (larger-q neighbor),
-or both (the default).</p></dd>
-
-      <dt><code>verbose</code></dt>
-<dd><p>whether to print, for each q attempted, whether the
-candidate from that neighbor improved on it. Defaults to
-`control$verbose` (the value set at construction, see
-[NB_control()]).</p></dd>
-
-
-</dl><p></p></div>
-</div><p></p><div class="section">
-<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
-<p>invisibly returns `self`; improved models replace the
-originals in `$models` in place.</p>
-</div>
-
-</div>
-
 <p></p><hr><a id="method-NormalBlockVarCollectionClusters-clone"></a><div class="section">
 <h3 id="normalblockvarcollectionclusters-clone-"><code>NormalBlockVarCollectionClusters$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionclusters-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionClusters</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -266,6 +130,15 @@ originals in `$models` in place.</p>
 
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="generate_normal_block_var_data.html">generate_normal_block_var_data</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span>, p <span class="op">=</span> <span class="fl">20</span>, d <span class="op">=</span> <span class="fl">1</span>, q <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">ex</span><span class="op">$</span><span class="va">Y</span>, <span class="va">ex</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">4</span>, control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">models</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"ICL"</span><span class="op">)</span><span class="op">$</span><span class="va">q</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

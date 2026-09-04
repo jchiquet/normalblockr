@@ -1,7 +1,11 @@
-# R6 class for a collection of normal-block models with different number of clusters (q) and a fixed sparsity level.
+# Base Class for a Collection of Models over a Range of Cluster Counts
 
-R6 class for a collection of normal-block models with different number
-of clusters (q) and a fixed sparsity level.
+Shared scaffolding for \[NormalBlockVarCollectionClusters\] and
+\[NormalBlockMeanCollectionClusters\]: everything that does not depend
+on the model family (model lookup, model selection, the criteria plot
+and the split/merge \`refine()\` search). Concrete subclasses only build
+\`self\$models\` in their \`initialize()\` and name themselves through
+\`who_am_I\`.
 
 ## Super class
 
@@ -14,15 +18,9 @@ of clusters (q) and a fixed sparsity level.
 
   number of blocks
 
-- `who_am_I`:
-
-  a method to print what model is being fitted
-
 ## Methods
 
 ### Public methods
-
-- [`NormalBlockCollectionClusters$new()`](#method-NormalBlockCollectionClusters-initialize)
 
 - [`NormalBlockCollectionClusters$get_model()`](#method-NormalBlockCollectionClusters-get_model)
 
@@ -36,54 +34,16 @@ of clusters (q) and a fixed sparsity level.
 
 - [`NormalBlockCollectionClusters$clone()`](#method-NormalBlockCollectionClusters-clone)
 
-------------------------------------------------------------------------
+Inherited methods
 
-### `NormalBlockCollectionClusters$new()`
-
-Create a new \[\`NormalBlockCollectionClusters\`\] object.
-
-#### Usage
-
-    NormalBlockCollectionClusters$new(
-      mydata,
-      q_list,
-      zero_inflation = FALSE,
-      sparsity = 0,
-      control = NB_control()
-    )
-
-#### Arguments
-
-- `mydata`:
-
-  object of NormalBlockData class, with responses and design matrix
-
-- `q_list`:
-
-  list of q values (number of groups) in the collection
-
-- `zero_inflation`:
-
-  whether the models in the collection should be zero-inflated or not
-
-- `sparsity`:
-
-  sparsity penalty on the network density
-
-- `control`:
-
-  structured list of more specific parameters, to generate with
-  NB_control
-
-#### Returns
-
-A new \[\`NormalBlockCollectionClusters\`\] object
+- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
+- [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockCollectionClusters$get_model()`
 
-returns the NormalBlockUnknownClusters model corresponding to given q
+returns the unknown-clusters model corresponding to given q
 
 #### Usage
 
@@ -97,7 +57,7 @@ returns the NormalBlockUnknownClusters model corresponding to given q
 
 #### Returns
 
-A NormalBlockUnknownClusters object with given value q
+A unknown-clusters object with given value q
 
 ------------------------------------------------------------------------
 
@@ -120,7 +80,7 @@ Extract best model in the collection
 
 #### Returns
 
-a \[\`NormalBlockUnknownClusters\`\] object
+a \[\`unknown-clusters\`\] object
 
 ------------------------------------------------------------------------
 
@@ -236,3 +196,10 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+# An internal abstract base class, never instantiated directly -- see
+# normal_block() for how collections are created and fitted.
+```

@@ -1,6 +1,7 @@
-# R6 abstract class for a generic sparse Normal Block model
+# Root Base Class for Normal-Block Models
 
-R6 abstract class for a generic sparse Normal Block model
+R6 abstract class shared by the variance-block (\[NormalBlockVarBase\])
+and mean-block (\[NormalBlockMeanBase\]) model families.
 
 ## Public fields
 
@@ -26,10 +27,6 @@ R6 abstract class for a generic sparse Normal Block model
 
   number of variables (dimensions in X)
 
-- `d0`:
-
-  number of zi variables (dimensions in X0)
-
 - `q`:
 
   number of blocks
@@ -37,39 +34,7 @@ R6 abstract class for a generic sparse Normal Block model
 - `n_edges`:
 
   number of edges of the network (non null coefficient of the sparse
-  precision matrix Omegaq)
-
-- `model_par`:
-
-  a list with the matrices of the model parameters: B (covariates), dm1
-  (species variance), Omegaq (groups precision matrix)). On the internal
-  fitting scale (\`self\$data\$Y\`, possibly column-rescaled by
-  \`NormalBlockData(scale = TRUE)\`) – use
-  \`\$B_original\`/\`\$dm1_original\` for the same quantities converted
-  back to Y's original units.
-
-- `B_original`:
-
-  regression coefficients (d x p), converted back to Y's original units
-  (undoing \`NormalBlockData(scale = TRUE)\`'s column-wise rescaling, if
-  any). Use \`model_par\$B\` instead for the coefficients on the
-  internal fitting scale.
-
-- `dm1_original`:
-
-  inverse residual variance per variable (1 / Var(Y_j)), converted back
-  to Y's original units. Use \`model_par\$dm1\` instead for the internal
-  fitting scale. With \`noise_covariance = "spherical"\`,
-  \`model_par\$dm1\` is a single value repeated p times (one shared
-  variance on the fitting scale); once converted back per-variable, the
-  p values returned here generally differ from one another whenever Y's
-  columns were rescaled by different factors – correctly so, since a
-  single shared \*scaled\* variance does not correspond to a single
-  shared variance in the original, heterogeneous-scale units.
-
-- `nb_param`:
-
-  number of parameters in the model
+  precision matrix Omega)
 
 - `objective`:
 
@@ -107,17 +72,9 @@ R6 abstract class for a generic sparse Normal Block model
 
   (overall sparsity parameter)
 
-- `sparsity_weights`:
-
-  (weights associated to each pair of groups)
-
 - `sparsity_term`:
 
   (sparsity_term term in log-likelihood due to sparsity)
-
-- `get_res_covariance`:
-
-  whether the residual covariance is diagonal or spherical
 
 - `memberships`:
 
@@ -143,19 +100,13 @@ R6 abstract class for a generic sparse Normal Block model
 
 - [`NormalBlockBase$update()`](#method-NormalBlockBase-update)
 
-- [`NormalBlockBase$best_of_inits()`](#method-NormalBlockBase-best_of_inits)
-
 - [`NormalBlockBase$optimize()`](#method-NormalBlockBase-optimize)
 
-- [`NormalBlockBase$warm_start_from()`](#method-NormalBlockBase-warm_start_from)
-
-- [`NormalBlockBase$split()`](#method-NormalBlockBase-split)
+- [`NormalBlockBase$best_of_inits()`](#method-NormalBlockBase-best_of_inits)
 
 - [`NormalBlockBase$candidates_split()`](#method-NormalBlockBase-candidates_split)
 
 - [`NormalBlockBase$candidates_merge()`](#method-NormalBlockBase-candidates_merge)
-
-- [`NormalBlockBase$merge()`](#method-NormalBlockBase-merge)
 
 - [`NormalBlockBase$predict()`](#method-NormalBlockBase-predict)
 
@@ -179,13 +130,7 @@ Create a new \[\`NormalBlockBase\`\] object.
 
 #### Usage
 
-    NormalBlockBase$new(
-      data,
-      q,
-      sparsity = 0,
-      control = NB_control(),
-      zero_inflation = FALSE
-    )
+    NormalBlockBase$new(data, q, sparsity = 0, control, zero_inflation = FALSE)
 
 #### Arguments
 
@@ -232,13 +177,16 @@ All possible parameters of the child classes
       B = NA,
       dm1 = NA,
       C = NA,
-      Omegaq = NA,
+      Omega = NA,
       gamma = NA,
       mu = NA,
       kappa = NA,
       alpha = NA,
       M = NA,
       S = NA,
+      Psi = NA,
+      Phi = NA,
+      Lambda = NA,
       ll_list = NA,
       warm_started = NA,
       clustering_init = NA
@@ -248,43 +196,60 @@ All possible parameters of the child classes
 
 - `B`:
 
-  regression matrix
+  regression matrix \[all\]
 
 - `dm1`:
 
-  diagonal vector of inverse variance matrix (variables level)
+  diagonal vector of inverse variance matrix (variables level) \[NBVar\]
 
 - `C`:
 
-  the matrix of groups memberships (posterior probabilities)
+  the matrix of groups memberships (posterior probabilities) \[all\]
 
-- `Omegaq`:
+- `Omega`:
 
-  groups inverse variance matrix
+  inverse variance matrix (cluster-level for Normal Block models,
+  variable-level for Normal Mean Block models) \[all\]
 
 - `gamma`:
 
-  variance of posterior distribution of W
+  variance of posterior distribution of W \[NBVar - known\]
 
 - `mu`:
 
-  mean for posterior distribution of W
+  mean for posterior distribution of W \[NBVar - known\]
 
 - `kappa`:
 
-  vector of zero-inflation probabilities
+  vector of zero-inflation probabilities \[ZINBVar\]
 
 - `alpha`:
 
-  vector of groups probabilities
+  vector of groups probabilities \[NBVar\]
 
 - `M`:
 
-  variational mean for posterior distribution of W
+  variational mean for posterior distribution of W \[NBVar - unknown\]
 
 - `S`:
 
   variational diagonal of variances for posterior distribution of W
+  \[NBVar - unknown\]
+
+- `Psi`:
+
+  variational expectation of C'Omega C, intermediary term in
+  calculations \[NBMean - unknown\]
+
+- `Phi`:
+
+  variational correction term used in the Psi/ELBO computations
+  \[NBMean - unknown\]
+
+- `Lambda`:
+
+  variational correction term used in the Sigma-hat update \[NBMean -
+  unknown\]
 
 - `ll_list`:
 
@@ -292,68 +257,18 @@ All possible parameters of the child classes
 
 - `warm_started`:
 
-  whether \`EM_initialize()\` should treat the model as already
-  initialized (reuse B/Omegaq/dm1/C/alpha/M/S as they stand) rather than
+  whether \`optim_initialize()\` should treat the model as already
+  initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand) rather than
   recomputing a fresh heuristic initialization – set by
   \[warm_start_from()\] and by \[split()\]/\[merge()\].
 
 - `clustering_init`:
 
-  name of a clustering heuristic to switch to, re-derived at the next
-  \`optimize()\` call instead of reusing the current state (see
-  \`NB_control(clustering_init = )\`). Used by \[best_of_inits()\].
+  initial clustering
 
 #### Returns
 
 Update the current \[\`normal\`\] object
-
-------------------------------------------------------------------------
-
-### `NormalBlockBase$best_of_inits()`
-
-Try several clustering-initialization heuristics and keep the best-ELBO
-converged fit (see \`NB_control(clustering_init = )\` and
-\`inst/methods_initialization_and_refine.md\` for the rationale). Every
-candidate is first screened with a short \`trial_niter\` run (same idea
-as \`candidates_split()\`/\`candidates_merge()\`), and only the
-\`max_training\` best-screened ones are fully retrained with
-\`control\`.
-
-#### Usage
-
-    NormalBlockBase$best_of_inits(
-      inits = c("ward2", "kmeans", "spectral"),
-      trial_niter = 10,
-      max_training = 2,
-      control = list(niter = 500, threshold = 1e-04)
-    )
-
-#### Arguments
-
-- `inits`:
-
-  vector of clustering-heuristic names to try
-
-- `trial_niter`:
-
-  number of (V)EM iterations used to cheaply screen every candidate in
-  \`inits\` before fully retraining the best few
-
-- `max_training`:
-
-  how many of the screened candidates (best \`loglik\` after
-  \`trial_niter\` iterations) get fully retrained with \`control\`
-
-- `control`:
-
-  \`optimize()\` control list (\`niter\`/\`threshold\`) used for the
-  final full retraining of the \`max_training\` best candidates
-
-#### Returns
-
-a new, already-optimized \[\`NormalBlockBase\`\] object. Does not mutate
-the current object; reassign the result (\`model \<-
-model\$best_of_inits()\`).
 
 ------------------------------------------------------------------------
 
@@ -364,7 +279,7 @@ calls optimization (EM or heuristic) and updates relevant fields
 #### Usage
 
     NormalBlockBase$optimize(
-      control = list(niter = 500, threshold = 1e-04),
+      control = list(niter = 500, threshold = 1e-04, fixed_point_niter = 5),
       warn = TRUE
     )
 
@@ -389,61 +304,51 @@ optimizes the model and updates its parameters
 
 ------------------------------------------------------------------------
 
-### `NormalBlockBase$warm_start_from()`
+### `NormalBlockBase$best_of_inits()`
 
-Seed this model's starting parameters from another, already-optimized
-model with the same q, instead of the heuristic clustering-derived
-values set at construction time. Used by
-\[NormalBlockCollectionSparsity\] to warm-start each penalty in a
-sparsity path from the previous (adjacent) one's converged solution –
-adjacent penalties along a sorted path usually have similar optima, so
-this typically needs far fewer EM iterations than starting cold each
-time (the same rationale as warm-starting in glmnet/glassoFast's own
-regularization paths). \`B0\`/\`kappa\` (zero-inflation) are
-deliberately left untouched: they depend only on the data, not on
-sparsity/blocks, so they are already set correctly and independently on
-every model.
+Try several clustering-initialization heuristics and keep the best-ELBO
+converged fit (see \`NB_control(clustering_init = )\` and
+\`inst/methods_initialization_and_refine.md\` for the rationale). Every
+candidate is first screened with a short \`trial_niter\` run (same idea
+as \`candidates_split()\`/\`candidates_merge()\`), and only the
+\`max_training\` best-screened ones are fully retrained with
+\`control\`.
 
 #### Usage
 
-    NormalBlockBase$warm_start_from(other)
+    NormalBlockBase$best_of_inits(
+      inits = private$default_inits,
+      trial_niter = 10,
+      max_training = 2,
+      control = list(niter = 500, threshold = 1e-04, fixed_point_niter = 5)
+    )
 
 #### Arguments
 
-- `other`:
+- `inits`:
 
-  a \[NormalBlockBase\] object, already optimized
+  vector of clustering-heuristic names to try; defaults to the model
+  family's own preferred order (\`private\$default_inits\`)
 
-#### Returns
+- `trial_niter`:
 
-Update the current object in place with \`other\`'s parameters
+  number of (V)EM iterations used to cheaply screen every candidate in
+  \`inits\` before fully retraining the best few
 
-------------------------------------------------------------------------
+- `max_training`:
 
-### `NormalBlockBase$split()`
+  how many of the screened candidates (best \`loglik\` after
+  \`trial_niter\` iterations) get fully retrained with \`control\`
 
-Create a clone of the current \[\`NormalBlockBase\`\] object after
-splitting cluster \`cl\` We split the cluster according to the species
-variances
+- `control`:
 
-#### Usage
-
-    NormalBlockBase$split(index, in_place = FALSE)
-
-#### Arguments
-
-- `index`:
-
-  index (integer) of the cluster to split
-
-- `in_place`:
-
-  should the split applied to the object itself, or should a copy be
-  sent? default FALSE (send a copy)
+  \`optimize()\` control list (\`niter\`/\`threshold\`) used for the
+  final full retraining of the \`max_training\` best candidates
 
 #### Returns
 
-A new \[\`NormalBlockBase\`\] object
+a new, already-optimized model. Does not mutate the current object;
+reassign the result (\`model \<- model\$best_of_inits()\`).
 
 ------------------------------------------------------------------------
 
@@ -460,10 +365,8 @@ of the current model
 
 - `trial_niter`:
 
-  number of EM iterations used to cheaply score each candidate before
-  \[SelectionNClusters\] fully re-optimizes the best few
-  (\`train_best_candidates()\`'s \`max_training\`) – kept short on
-  purpose.
+  number of (V)EM iterations used to cheaply score each candidate before
+  the caller fully re-optimizes the best few – kept short on purpose.
 
 ------------------------------------------------------------------------
 
@@ -482,10 +385,9 @@ the current model
 
   merge candidates are, unlike split's, quadratic in q (\`choose(q,
   q-2)\` pairs) – beyond \`max_candidates\` pairs, only the most
-  promising ones (largest \`\|Omegaq\[i, j\]\|\`, i.e. the most strongly
-  related cluster pairs in the current fit) are actually built and
-  trial-optimized, since merging two nearly independent blocks is rarely
-  competitive anyway. Set to \`Inf\` to always try every pair.
+  promising ones are actually built and trial-optimized, ranked by the
+  family's own \`private\$merge_score()\`. Set to \`Inf\` to always try
+  every pair.
 
 - `trial_niter`:
 
@@ -493,35 +395,10 @@ the current model
 
 ------------------------------------------------------------------------
 
-### `NormalBlockBase$merge()`
-
-Create a clone of the current \[\`NormalBlockBase\`\] object after
-merging clusters \`cl1\` and \`cl2\`
-
-#### Usage
-
-    NormalBlockBase$merge(indices, in_place = FALSE)
-
-#### Arguments
-
-- `indices`:
-
-  indices (couple of integer) of the clusters to merge
-
-- `in_place`:
-
-  should the split applied to the object itself, or should a copy be
-  sent? default FALSE (send a copy)
-
-#### Returns
-
-A new \[\`NormalBlockBase\`\] object
-
-------------------------------------------------------------------------
-
 ### `NormalBlockBase$predict()`
 
-Predicts observations Y for new covariates X.
+Predicts observations Y for new covariates X, in Y's original units
+(like \`\$fitted\`, so that predicting on the training X reproduces it).
 
 #### Usage
 
@@ -541,7 +418,8 @@ A n\*p prediction matrix for new observations
 
 ### `NormalBlockBase$latent_network()`
 
-Extract interaction network in the latent space
+Extract interaction network in the latent space, as a matrix rather than
+a plot – see \`\$plot_network()\` to plot it instead.
 
 #### Usage
 
@@ -574,13 +452,9 @@ plots the evolution of the objective (log-likelihood or ELBO) across the
 
 - `show_increment`:
 
-  whether to add, below the objective trace, a second panel with the
-  (log10) absolute increment between consecutive iterations and the
-  convergence \`threshold\` used to stop optimize() (dashed line). That
-  second panel is what actually tells convergence apart from merely
-  running out of iterations: the objective trace alone tends to look
-  flat well before the increment has actually crossed the threshold,
-  especially as the number of blocks grows (see inst/CSDA_analyses).
+  whether to add a second panel with the (log10) absolute increment
+  between iterations and the convergence \`threshold\` – distinguishes
+  true convergence from a flat-looking objective trace.
 
 #### Returns
 
@@ -590,7 +464,8 @@ a \[\`ggplot2::ggplot\`\] graph
 
 ### `NormalBlockBase$plot_network()`
 
-plot the latent network.
+plot the latent network. To extract the network as a matrix instead of
+plotting it, use \`\$latent_network()\`.
 
 #### Usage
 
@@ -683,3 +558,10 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+# An internal abstract base class, never instantiated directly -- see
+# normal_block() for how concrete models are created and fitted.
+```

@@ -1,6 +1,6 @@
-# Extracts model coefficients from objects returned by \[NormalBlockBase()\] and its variants
+# Extract Model Coefficients
 
-Extract coefficients from an NormalBlockBase object.
+Extract coefficients from a normal-block model.
 
 ## Usage
 
@@ -21,4 +21,4 @@ coef(object, ...)
 
 ## Value
 
-A matrix of coefficients extracted from the NormalBlockBase model.
+A matrix of coefficients extracted from the model.

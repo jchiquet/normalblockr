@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul>
@@ -62,9 +63,9 @@
                         <h4 data-toc-skip class="author">Julien Chiquet
 &amp; Jeanne Tous</h4>
             
-            <h4 data-toc-skip class="date">2026-09-03</h4>
+            <h4 data-toc-skip class="date">2026-09-04</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/v0.2.1/vignettes/breast-cancer-proteomics.Rmd" class="external-link"><code>vignettes/breast-cancer-proteomics.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/vignettes/breast-cancer-proteomics.Rmd" class="external-link"><code>vignettes/breast-cancer-proteomics.Rmd</code></a></small>
       <div class="d-none name"><code>breast-cancer-proteomics.Rmd</code></div>
     </div>
 
@@ -141,7 +142,8 @@ the latent factors’ precision matrix, is what
 <em>between clusters</em>, not between individual proteins. In its plain
 (non-regularized) form, that network is dense and not very informative
 to look at directly – we only visualize it at the end of this vignette,
-after regularizing it with a graphical lasso penalty (section 10 of
+after regularizing it with a graphical lasso penalty (the “Sparse
+precision matrix” section of
 <code>inst/normal_block_models.qmd</code>).</p>
 <p>See <span class="citation">Tous and Chiquet (2026)</span> for the
 model itself, and <code>inst/normal_block_models.qmd</code> (the
@@ -196,14 +198,14 @@ a known clustering – the model only estimates the association network
 between the 6 blocks, not the grouping itself.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">NB_prot_group</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="va">group</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fitting a diagonal normal-block model with fixed blocks </span></span>
+<span><span class="co">#&gt; Fitting a diagonal normal-block-var model with fixed blocks </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; DONE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">NB_prot_group</span><span class="op">)</span></span></code></pre></div>
 <p><img src="breast-cancer-proteomics_files/figure-html/running-normal-block-known-group-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">NB_prot_group</span><span class="op">)</span></span>
-<span><span class="co">#&gt; A diagonal normal-block model with fixed blocks .</span></span>
+<span><span class="co">#&gt; A diagonal normal-block-var model with fixed blocks .</span></span>
 <span><span class="co">#&gt; ===========================================================================</span></span>
 <span><span class="co">#&gt;  nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter</span></span>
 <span><span class="co">#&gt;       999 6      15        0 -70387.84 140775.7 146616.3 144073.3 146670    14</span></span>
@@ -237,7 +239,7 @@ of what it would add (see
 the default here.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">NB_prot_subtype</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fitting a diagonal normal-block model with unknown q </span></span>
+<span><span class="co">#&gt; Fitting a  normal-block-var model with unknown q </span></span>
 <span><span class="co">#&gt;   number of blocks = 1                number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8                number of blocks = 9                number of blocks = 10               number of blocks = 11               number of blocks = 12               number of blocks = 13               number of blocks = 14               number of blocks = 15               number of blocks = 16               number of blocks = 17               number of blocks = 18               number of blocks = 19               number of blocks = 20               number of blocks = 21               number of blocks = 22               number of blocks = 23               number of blocks = 24               number of blocks = 25               number of blocks = 26               number of blocks = 27               number of blocks = 28               number of blocks = 29               number of blocks = 30           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
 </div>
@@ -353,13 +355,14 @@ of the ICL-selected model above is dense (no penalty was applied), which
 makes it hard to read directly. Treating that clustering as fixed, we
 can refit the model once more with the graphical-lasso penalty on
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Ω</mi><annotation encoding="application/x-tex">\Omega</annotation></semantics></math>
-explored over a path of values (<code>sparsity = TRUE</code>, see
-section 10 of <code>inst/normal_block_models.qmd</code>), and pick the
-sparsity level with the best BIC.</p>
+explored over a path of values (<code>sparsity = TRUE</code>, see the
+“Sparse precision matrix” section of
+<code>inst/normal_block_models.qmd</code>), and pick the sparsity level
+with the best BIC.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">group_selected</span> <span class="op">&lt;-</span> <span class="va">selected_NB_refined</span><span class="op">$</span><span class="va">clustering</span> <span class="op">|&gt;</span> <span class="fu">normalblockr</span><span class="fu">:::</span><span class="fu">as_indicator</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">NB_prot_sparse</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="va">group_selected</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>min_ratio<span class="op">=</span><span class="fl">0.001</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fitting a Collection of diagonal normal-block models with fixed blocks, with different sparsity penalties. </span></span>
+<span><span class="co">#&gt; Fitting a Collection of  normal-block-var models with fixed blocks, with different sparsity penalties. </span></span>
 <span><span class="co">#&gt;   penalty = 0.6628733             penalty = 0.5223748             penalty = 0.4116555             penalty = 0.3244036             penalty = 0.2556451             penalty = 0.2014601             penalty = 0.1587599             penalty = 0.1251102             penalty = 0.0985926             penalty = 0.07769553                penalty = 0.06122767                penalty = 0.04825024                penalty = 0.03802342                penalty = 0.02996422                penalty = 0.02361319                penalty = 0.01860829                penalty = 0.01466419                penalty = 0.01155606                penalty = 0.009106711               penalty = 0.00717651                penalty = 0.005655422               penalty = 0.004456734               penalty = 0.003512113               penalty = 0.002767707               penalty = 0.002181081               penalty = 0.001718793               penalty = 0.001354489               penalty = 0.0010674             penalty = 0.0008411603              penalty = 0.0006628733           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">

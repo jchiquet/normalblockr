@@ -184,7 +184,7 @@ models, one per number of clusters:
 ``` r
 
 out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE)
-#> Fitting a diagonal normal-block model with unknown q 
+#> Fitting a  normal-block-var model with unknown q 
 #>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8           
 #> DONE
 ```
@@ -295,11 +295,9 @@ range:
 ``` r
 
 sort(round(kappa_hat, 2), decreasing = TRUE)[1:5] # almost always structurally absent
-#> self.data.X0 self.data.X0 self.data.X0 self.data.X0 self.data.X0 
-#>         0.97         0.97         0.97         0.96         0.94
+#> [1] 0.97 0.97 0.97 0.96 0.94
 sort(round(kappa_hat, 2))[1:5]                    # almost always present in some quantity
-#> self.data.X0 self.data.X0 self.data.X0 self.data.X0 self.data.X0 
-#>         0.22         0.23         0.24         0.26         0.32
+#> [1] 0.22 0.23 0.24 0.26 0.32
 ```
 
 ## Sparsifying the association network
@@ -312,7 +310,7 @@ inter-cluster association network (see Tous and Chiquet 2026).
 ``` r
 
 out_sp <- normal_block(data, blocks = myModel$q, sparsity = TRUE, zero_inflation = TRUE)
-#> Fitting a Collection of  zero-inflated diagonal normal-block models with fixed q, with different sparsity penalties. 
+#> Fitting a Collection of  zero-inflated  normal-block-var models with fixed q, with different sparsity penalties. 
 #>   penalty = 0.03319511                penalty = 0.028321              penalty = 0.02416257                penalty = 0.02061473                penalty = 0.01758782                penalty = 0.01500536                penalty = 0.01280209                penalty = 0.01092234                penalty = 0.009318585               penalty = 0.007950317               penalty = 0.006782955               penalty = 0.005786999               penalty = 0.004937282               penalty = 0.00421233                penalty = 0.003593825               penalty = 0.003066136               penalty = 0.002615928               penalty = 0.002231826               penalty = 0.001904122               penalty = 0.001624536               penalty = 0.001386002               penalty = 0.001182492               penalty = 0.001008864               penalty = 0.0008607306              penalty = 0.0007343476              penalty = 0.0006265218              penalty = 0.0005345283              penalty = 0.0004560423              penalty = 0.0003890807              penalty = 0.0003319511           
 #> DONE
 out_sp$plot(c("BIC", "EBIC"))

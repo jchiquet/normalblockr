@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,6 +19,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
@@ -56,6 +57,13 @@
 
         <dt>
 
+          <code><a href="normal_block_sequential.html">normal_block_sequential()</a></code>
+
+        </dt>
+        <dd>Cluster variables in the mean, then in the residual covariance</dd>
+
+        <dt>
+
           <code><a href="NB_control.html">NB_control()</a></code>
 
         </dt>
@@ -66,11 +74,18 @@
           <code><a href="generate_normal_block_var_data.html">generate_normal_block_var_data()</a></code>
 
         </dt>
-        <dd>Generate Normal Block Data</dd>
+        <dd>Generate Normal Block Var Data</dd>
+
+        <dt>
+
+          <code><a href="generate_normal_block_mean_data.html">generate_normal_block_mean_data()</a></code>
+
+        </dt>
+        <dd>Generate Normal Block Mean Data</dd>
       </dl></div><div class="section level2">
       <h2 id="model-and-data-classes">Model and data classes<a class="anchor" aria-label="anchor" href="#model-and-data-classes"></a></h2>
 
-      <div class="section-desc"><p>R6 classes returned by normal_block(). NormalBlockData wraps the responses and design matrix; NormalBlockVar<em>Clusters (optionally ZI-prefixed) are single fitted models, known- or unknown-clustering; NormalBlockVarCollection</em> are collections of models explored over a range of q and/or sparsity penalties.</p></div>
+      <div class="section-desc"><p>R6 classes returned by normal_block(). NormalBlockData wraps the responses and design matrix; NormalBlockVar<em>Clusters (optionally ZI-prefixed) are single fitted models, known- or unknown-clustering; NormalBlockCollection</em> are collections of models explored over a range of q and/or sparsity penalties.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -100,6 +115,20 @@
 
         <dt>
 
+          <code><a href="NormalBlockMeanKnownClusters.html">NormalBlockMeanKnownClusters</a></code>
+
+        </dt>
+        <dd>Mean-Block Model with Known Clustering</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockMeanUnknownClusters.html">NormalBlockMeanUnknownClusters</a></code>
+
+        </dt>
+        <dd>Mean-Block Model with Unknown Clustering</dd>
+
+        <dt>
+
           <code><a href="ZINormalBlockVarKnownClusters.html">ZINormalBlockVarKnownClusters</a></code>
 
         </dt>
@@ -111,6 +140,20 @@
 
         </dt>
         <dd>Zero-Inflated Normal-Block Model with Unknown Clustering</dd>
+
+        <dt>
+
+          <code><a href="ZINormalBlockMeanKnownClusters.html">ZINormalBlockMeanKnownClusters</a></code>
+
+        </dt>
+        <dd>Zero-Inflated Mean-Block Model with Known Clustering</dd>
+
+        <dt>
+
+          <code><a href="ZINormalBlockMeanUnknownClusters.html">ZINormalBlockMeanUnknownClusters</a></code>
+
+        </dt>
+        <dd>Zero-Inflated Mean-Block Model with Unknown Clustering</dd>
 
         <dt>
 
@@ -132,6 +175,27 @@
 
         </dt>
         <dd>Collection of Normal-Block Models over Cluster Counts and Sparsity Levels</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockMeanCollectionClusters.html">NormalBlockMeanCollectionClusters</a></code>
+
+        </dt>
+        <dd>Collection of Mean-Block Models over a Range of Cluster Counts</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockMeanCollectionSparsity.html">NormalBlockMeanCollectionSparsity</a></code>
+
+        </dt>
+        <dd>Collection of Mean-Block Models over a Sparsity Path</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockMeanCollectionClustersSparsity.html">NormalBlockMeanCollectionClustersSparsity</a></code>
+
+        </dt>
+        <dd>Collection of Mean-Block Models over Cluster Counts and Sparsity Levels</dd>
       </dl></div><div class="section level2">
       <h2 id="data-sets">Data sets<a class="anchor" aria-label="anchor" href="#data-sets"></a></h2>
 
@@ -165,7 +229,7 @@
       </dl></div><div class="section level2">
       <h2 id="s-methods">S3 methods<a class="anchor" aria-label="anchor" href="#s-methods"></a></h2>
 
-      <div class="section-desc"><p>Standard extractors and methods for a fitted model (any NormalBlockVarBase subclass) and for a collection of models (any NormalBlockVarCollection subclass)</p></div>
+      <div class="section-desc"><p>Standard extractors and methods for a fitted model (any NormalBlockBase subclass) and for a collection of models (any NormalBlockCollection subclass)</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -174,108 +238,115 @@
 
       <dl><dt>
 
-          <code><a href="coef.NormalBlockVarBase.html">coef(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="coef.NormalBlockBase.html">coef(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
         <dd>Extract Model Coefficients</dd>
 
         <dt>
 
-          <code><a href="fitted.NormalBlockVarBase.html">fitted(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="fitted.NormalBlockBase.html">fitted(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
         <dd>Extract Fitted Values</dd>
 
         <dt>
 
-          <code><a href="predict.NormalBlockVarBase.html">predict(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="predict.NormalBlockBase.html">predict(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
-        <dd>Predict Method for Normal-Block Models</dd>
+        <dd>Predict Method for Variance-Block Models</dd>
 
         <dt>
 
-          <code><a href="sigma.NormalBlockVarBase.html">sigma(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="sigma.NormalBlockBase.html">sigma(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
-        <dd>Extract the Latent-Block Covariance Matrix</dd>
+        <dd>Extract the Covariance Matrix</dd>
 
         <dt>
 
-          <code><a href="print.NormalBlockVarBase.html">print(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="print.NormalBlockBase.html">print(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
         <dd>Print a Normal-Block Model</dd>
 
         <dt>
 
-          <code><a href="summary.NormalBlockVarBase.html">summary(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="summary.NormalBlockBase.html">summary(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
         <dd>Summarize a Normal-Block Model</dd>
 
         <dt>
 
-          <code><a href="print.summary.NormalBlockVarBase.html">print(<i>&lt;summary.NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="print.summary.NormalBlockBase.html">print(<i>&lt;summary.NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
         <dd>Print a Normal-Block Model Summary</dd>
 
         <dt>
 
-          <code><a href="plot.NormalBlockVarBase.html">plot(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="plot.NormalBlockBase.html">plot(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
         <dd>Plot a Normal-Block Model</dd>
 
         <dt>
 
-          <code><a href="logLik.NormalBlockVarBase.html">logLik(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="logLik.NormalBlockBase.html">logLik(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
         <dd>Extract Log-Likelihood of a Normal-Block Model</dd>
 
         <dt>
 
-          <code><a href="BIC.NormalBlockVarBase.html">BIC(<i>&lt;NormalBlockVarBase&gt;</i>)</a></code>
+          <code><a href="BIC.NormalBlockBase.html">BIC(<i>&lt;NormalBlockBase&gt;</i>)</a></code>
 
         </dt>
         <dd>Bayesian Information Criterion for a Normal-Block Model</dd>
 
         <dt>
 
-          <code><a href="print.NormalBlockVarCollection.html">print(<i>&lt;NormalBlockVarCollection&gt;</i>)</a></code>
+          <code><a href="print.NormalBlockCollection.html">print(<i>&lt;NormalBlockCollection&gt;</i>)</a></code>
 
         </dt>
         <dd>Print a Collection of Normal-Block Models</dd>
 
         <dt>
 
-          <code><a href="summary.NormalBlockVarCollection.html">summary(<i>&lt;NormalBlockVarCollection&gt;</i>)</a></code>
+          <code><a href="summary.NormalBlockCollection.html">summary(<i>&lt;NormalBlockCollection&gt;</i>)</a></code>
 
         </dt>
         <dd>Summarize a Collection of Normal-Block Models</dd>
 
         <dt>
 
-          <code><a href="print.summary.NormalBlockVarCollection.html">print(<i>&lt;summary.NormalBlockVarCollection&gt;</i>)</a></code>
+          <code><a href="print.summary.NormalBlockCollection.html">print(<i>&lt;summary.NormalBlockCollection&gt;</i>)</a></code>
 
         </dt>
         <dd>Print a Collection Summary</dd>
 
         <dt>
 
-          <code><a href="logLik.NormalBlockVarCollection.html">logLik(<i>&lt;NormalBlockVarCollection&gt;</i>)</a></code>
+          <code><a href="logLik.NormalBlockCollection.html">logLik(<i>&lt;NormalBlockCollection&gt;</i>)</a></code>
 
         </dt>
         <dd>Extract Log-Likelihood of a Collection of Normal-Block Models</dd>
 
         <dt>
 
-          <code><a href="BIC.NormalBlockVarCollection.html">BIC(<i>&lt;NormalBlockVarCollection&gt;</i>)</a></code>
+          <code><a href="BIC.NormalBlockCollection.html">BIC(<i>&lt;NormalBlockCollection&gt;</i>)</a></code>
 
         </dt>
         <dd>Bayesian Information Criterion for a Collection of Normal-Block Models</dd>
+
+        <dt>
+
+          <code><a href="print.normal_block_sequential.html">print(<i>&lt;normal_block_sequential&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print a Sequential Mean-then-Variance Fit</dd>
       </dl></div><div class="section level2">
       <h2 id="internal">Internal<a class="anchor" aria-label="anchor" href="#internal"></a></h2>
 
@@ -288,17 +359,52 @@
 
       <dl><dt>
 
-          <code><a href="NormalBlockVarBase.html">NormalBlockVarBase</a></code>
+          <code><a href="NormalBlockBase.html">NormalBlockBase</a></code>
 
         </dt>
-        <dd>Base Class for Normal-Block Models</dd>
+        <dd>Root Base Class for Normal-Block Models</dd>
 
         <dt>
 
-          <code><a href="NormalBlockVarCollection.html">NormalBlockVarCollection</a></code>
+          <code><a href="NormalBlockVarBase.html">NormalBlockVarBase</a></code>
+
+        </dt>
+        <dd>Base Class for Variance-Block Models</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockMeanBase.html">NormalBlockMeanBase</a></code>
+
+        </dt>
+        <dd>Base Class for Mean-Block Models</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockCollection.html">NormalBlockCollection</a></code>
 
         </dt>
         <dd>Base Class for a Collection of Normal-Block Models</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockCollectionClusters.html">NormalBlockCollectionClusters</a></code>
+
+        </dt>
+        <dd>Base Class for a Collection of Models over a Range of Cluster Counts</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockCollectionSparsity.html">NormalBlockCollectionSparsity</a></code>
+
+        </dt>
+        <dd>Base Class for a Collection of Models over a Sparsity Path</dd>
+
+        <dt>
+
+          <code><a href="NormalBlockCollectionClustersSparsity.html">NormalBlockCollectionClustersSparsity</a></code>
+
+        </dt>
+        <dd>Base Class for a Collection over Cluster Counts and Sparsity Levels</dd>
 
         <dt>
 

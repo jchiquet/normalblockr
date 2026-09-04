@@ -1,4 +1,4 @@
-# Generate Normal Block Data
+# Generate Normal Block Var Data
 
 A function to draw data from the normal block model (see details). The
 function returns both the generated data and the corresponding model

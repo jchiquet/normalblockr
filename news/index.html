@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,6 +19,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
@@ -35,14 +36,48 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/jchiquet/normalblockr/blob/v0.2.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="normalblockr-030">normalblockr 0.3.0<a class="anchor" aria-label="anchor" href="#normalblockr-030"></a></h2>
+<div class="section level3">
+<h3 id="new-model-family-clustering-in-the-mean-0-3-0">New model family: clustering in the mean<a class="anchor" aria-label="anchor" href="#new-model-family-clustering-in-the-mean-0-3-0"></a></h3>
+<p>The package now fits two complementary families. The original Normal-Block model clusters variables by how they <em>covary</em>; the new mean-block family clusters them by how they <em>respond</em> to the covariates, constraining the mean as <code>mu_i = C B' X_i</code> with one regression profile per cluster.</p>
+<ul><li>
+<code>normal_block(..., model = "mean")</code> fits it, for a known clustering (<code>NormalBlockMeanKnownClusters</code>) or an unknown one inferred by variational EM (<code>NormalBlockMeanUnknownClusters</code>), over a range of cluster counts (<code>NormalBlockMeanCollectionClusters</code>), a penalty path (<code>NormalBlockMeanCollectionSparsity</code>) or both (<code>NormalBlockMeanCollectionClustersSparsity</code>).</li>
+<li>Zero-inflated counterparts (<code>ZINormalBlockMeanKnownClusters</code>, <code>ZINormalBlockMeanUnknownClusters</code>), and collections of those over a range of cluster counts.</li>
+<li>
+<code>noise_covariance</code> gains a <code>"full"</code> shape for this family, whose Sigma is the p x p residual covariance rather than a diagonal noise term. <code>"diagonal"</code> is the default: a full Sigma spends p(p+1)/2 parameters that drown the mean structure the criteria are weighing, and selects the number of clusters markedly worse as p approaches n. Asking for <code>sparsity &gt; 0</code> implies <code>"full"</code>, since a diagonal precision matrix has nothing for the graphical lasso to penalize.</li>
+<li>
+<code><a href="../reference/normal_block_sequential.html">normal_block_sequential()</a></code> chains the two families: a mean-block fit, then a variance-block fit on its residuals. A heuristic two-stage estimator, not a joint model.</li>
+<li>
+<code>NormalBlockData$new()</code> gains a <code>zeros</code> argument, to carry an explicit zero-inflation mask when the matrix handed to a model is no longer the one carrying the zeros (the residuals of a first stage, say).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="the-graphical-lasso-is-now-in-package-0-3-0">The graphical lasso is now in-package<a class="anchor" aria-label="anchor" href="#the-graphical-lasso-is-now-in-package-0-3-0"></a></h3>
+<p>This also fixes the segfault CRAN reported on <code>r-devel-linux-x86_64-fedora-gcc</code> when re-building <code>breast-cancer-proteomics.Rmd</code> (<code>address 0x580, cause 'memory not mapped'</code>), which our own CI had been hitting intermittently on Linux.</p>
+<ul><li>
+<code>glassoFast</code> is no longer a dependency. The C++ (V)EM used to call back into R once per M-step to reach it – thousands of round trips from inside a single <code>.Call</code> for one sparsity path, and a recurring source of intermittent crashes. The solver now lives in <code>src/graphical_lasso.h</code>.</li>
+<li>Two bugs in <code>glassoFast</code> are fixed on the way. When the empirical covariance has no off-diagonal mass the problem separates and the solution is diagonal; it returned <code>1 / max(rho_ii, eps)</code> there, dropping the variance term, so with an unpenalized diagonal it returned about 9e15 instead of <code>1 / S_ii</code> – and every <code>q = 1</code> problem takes that branch. Separately, its inner loop could not terminate on non-finite input.</li>
+<li>Each M-step warm-starts from the previous one, at a tightened threshold: faster <em>and</em> closer to the optimum than the previous cold starts.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-3-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-3-0"></a></h3>
+<ul><li>Zero-inflation with more than one zero-inflation covariate (<code>X0</code> with two or more columns) failed with “non-conformable arguments”: <code>B0</code> was built transposed. A second bug behind it made <code>kappa</code> non-finite when the response had no zeros at all. Both were unreachable before, so no working fit changes.</li>
+<li>Fixed two crashes on the penalized path, one of them a long-standing memory-safety bug (an R object cached in a C++ <code>static</code>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="other-changes-0-3-0">Other changes<a class="anchor" aria-label="anchor" href="#other-changes-0-3-0"></a></h3>
+<ul><li>A collection over cluster counts no longer repeats work that does not depend on the cluster count: the OLS fit, the zero-inflation logistic regressions, and the shareable part of each clustering heuristic (one hierarchical tree cut at each q, one eigendecomposition, one lossless row compression) are computed once. Fitted values are unchanged.</li>
+<li>Printed model descriptions now name the residual-covariance shape for every family, and the zero-inflated variance-block models name their family.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.1" id="normalblockr-021">normalblockr 0.2.1<a class="anchor" aria-label="anchor" href="#normalblockr-021"></a></h2>
 <p>First CRAN submission</p>
 <ul><li>S3 methods <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, <code><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik()</a></code> and <code><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC()</a></code> for fitted models (any <code>NormalBlockVarBase</code> subclass), and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>/<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>/<code><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik()</a></code>/<code><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC()</a></code> for collections of models; accessing <code>$loglik</code> on a collection now raises an informative error instead of silently returning <code>NULL</code>.</li>
-<li>Addressed reviewer feedback ahead of CRAN submission: shortened/title-cased man page titles, added missing <code>@examples</code>, cross-referenced <code>$plot_network()</code>/<code>$latent_network()</code> in each other’s documentation, and replaced a few inefficient matrix operations (<code><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve()</a></code> on symmetric positive-definite matrices, <code>M %*% t(C)</code>) with <code>chol2inv(chol())</code>/<code><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">tcrossprod()</a></code>.</li>
+<li>Shortened/title-cased man page titles, added missing <code>@examples</code>, cross-referenced <code>$plot_network()</code>/<code>$latent_network()</code> in each other’s documentation, and replaced a few inefficient matrix operations (<code><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve()</a></code> on symmetric positive-definite matrices, <code>M %*% t(C)</code>) with <code>chol2inv(chol())</code>/<code><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">tcrossprod()</a></code>.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="normalblockr-020">normalblockr 0.2.0<a class="anchor" aria-label="anchor" href="#normalblockr-020"></a></h2>

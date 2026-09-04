@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,6 +21,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: a worked example with breast cancer proteomics data</a></li>
+    <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models: a worked example with fish biomass data</a></li>
   </ul></li>
@@ -37,7 +38,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Collection of Normal-Block Models over a Sparsity Path</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/v0.2.1/R/NormalBlockVarCollectionSparsity.R" class="external-link"><code>R/NormalBlockVarCollectionSparsity.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/R/NormalBlockVarCollectionSparsity.R" class="external-link"><code>R/NormalBlockVarCollectionSparsity.R</code></a></small>
       <div class="d-none name"><code>NormalBlockVarCollectionSparsity.Rd</code></div>
     </div>
 
@@ -48,32 +49,12 @@
 
 
     <div class="section level2">
-    <h2 id="super-class">Super class<a class="anchor" aria-label="anchor" href="#super-class"></a></h2>
-    <p><code><a href="NormalBlockVarCollection.html">NormalBlockVarCollection</a></code> -&gt; <code>NormalBlockVarCollectionSparsity</code></p>
-    </div>
-    <div class="section level2">
-    <h2 id="public-fields">Public fields<a class="anchor" aria-label="anchor" href="#public-fields"></a></h2>
-    <p></p><div class="r6-fields"><dl><dt><code>data</code></dt>
-<dd><p>object of NormalBlockData class, with responses and design matrix</p></dd>
-
-
-</dl><p></p></div>
+    <h2 id="super-classes">Super classes<a class="anchor" aria-label="anchor" href="#super-classes"></a></h2>
+    <p><code><a href="NormalBlockCollection.html">NormalBlockCollection</a></code> -&gt; <code><a href="NormalBlockCollectionSparsity.html">NormalBlockCollectionSparsity</a></code> -&gt; <code>NormalBlockVarCollectionSparsity</code></p>
     </div>
     <div class="section level2">
     <h2 id="active-bindings">Active bindings<a class="anchor" aria-label="anchor" href="#active-bindings"></a></h2>
-    <p></p><div class="r6-active-bindings"><dl><dt><code>q</code></dt>
-<dd><p>number of blocks</p></dd>
-
-
-    <dt><code>blocks</code></dt>
-<dd><p>group matrix or number of blocks.</p></dd>
-
-
-    <dt><code>sparsity</code></dt>
-<dd><p>list of sparsity penalties</p></dd>
-
-
-    <dt><code>sparsity_details</code></dt>
+    <p></p><div class="r6-active-bindings"><dl><dt><code>sparsity_details</code></dt>
 <dd><p>list of information about model's penalties</p></dd>
 
 
@@ -101,14 +82,14 @@
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockVarCollectionSparsity-initialize"><code>NormalBlockVarCollectionSparsity$new()</code></a></p></li>
-<li><p><a href="#method-NormalBlockVarCollectionSparsity-optimize"><code>NormalBlockVarCollectionSparsity$optimize()</code></a></p></li>
-<li><p><a href="#method-NormalBlockVarCollectionSparsity-get_model"><code>NormalBlockVarCollectionSparsity$get_model()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarCollectionSparsity-get_best_model"><code>NormalBlockVarCollectionSparsity$get_best_model()</code></a></p></li>
-<li><p><a href="#method-NormalBlockVarCollectionSparsity-plot"><code>NormalBlockVarCollectionSparsity$plot()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarCollectionSparsity-stability_selection"><code>NormalBlockVarCollectionSparsity$stability_selection()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarCollectionSparsity-clone"><code>NormalBlockVarCollectionSparsity$clone()</code></a></p></li>
-</ul></div><p><details open><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="print"><a href="NormalBlockVarCollection.html#method-print"><code>NormalBlockVarCollection$print()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarCollection" data-id="summary"><a href="NormalBlockVarCollection.html#method-summary"><code>NormalBlockVarCollection$summary()</code></a></span></li>
+</ul></div><p><details open><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href="NormalBlockCollection.html#method-print"><code>NormalBlockCollection$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href="NormalBlockCollection.html#method-summary"><code>NormalBlockCollection$summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="get_model"><a href="NormalBlockCollectionSparsity.html#method-get_model"><code>NormalBlockCollectionSparsity$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="optimize"><a href="NormalBlockCollectionSparsity.html#method-optimize"><code>NormalBlockCollectionSparsity$optimize()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="plot"><a href="NormalBlockCollectionSparsity.html#method-plot"><code>NormalBlockCollectionSparsity$plot()</code></a></span></li>
 </ul></details></p><hr><a id="method-NormalBlockVarCollectionSparsity-initialize"></a><div class="section">
 <h3 id="normalblockvarcollectionsparsity-new-"><code>NormalBlockVarCollectionSparsity$new()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionsparsity-new-"></a></h3>
 <p>Create a new [`NormalBlockVarCollectionSparsity`] object.</p><div class="section">
@@ -142,59 +123,16 @@
 
 </div>
 
-<p></p><hr><a id="method-NormalBlockVarCollectionSparsity-optimize"></a><div class="section">
-<h3 id="normalblockvarcollectionsparsity-optimize-"><code>NormalBlockVarCollectionSparsity$optimize()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionsparsity-optimize-"></a></h3>
-<p>optimizes every model in the sparsity path, warm-starting
-each one (after the first) from the previous, adjacent penalty's
-converged parameters (see [NormalBlockVarBase]'s `warm_start_from()`)
-instead of re-deriving everything from the heuristic clustering, the
-way the generic [NormalBlockVarCollection] `optimize()` would. `blocks`
-(hence q) is fixed across the whole path, only the sparsity penalty
-changes, so the warm start is always between models of matching shape.</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionSparsity</span><span class="op">$</span><span class="fu">optimize</span><span class="op">(</span></span>
-<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">500</span>, threshold <span class="op">=</span> <span class="fl">1e-04</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div><p></p><div class="section">
-<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>control</code></dt>
-<dd><p>optimization parameters (niter and threshold)</p></dd>
-
-
-</dl><p></p></div>
-</div>
-
-</div>
-
-<p></p><hr><a id="method-NormalBlockVarCollectionSparsity-get_model"></a><div class="section">
-<h3 id="normalblockvarcollectionsparsity-get-model-"><code>NormalBlockVarCollectionSparsity$get_model()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionsparsity-get-model-"></a></h3>
-<p>returns the NormalBlockVarKnownClusters model corresponding to given penalty</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionSparsity</span><span class="op">$</span><span class="fu">get_model</span><span class="op">(</span><span class="va">sparsity</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div><p></p><div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>sparsity</code></dt>
-<dd><p>sparsity penalty asked by user</p></dd>
-
-
-</dl><p></p></div>
-</div><p></p><div class="section">
-<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
-<p>A NormalBlockVarKnownClusters (sparse) object with given value penalty</p>
-</div>
-
-</div>
-
 <p></p><hr><a id="method-NormalBlockVarCollectionSparsity-get_best_model"></a><div class="section">
 <h3 id="normalblockvarcollectionsparsity-get-best-model-"><code>NormalBlockVarCollectionSparsity$get_best_model()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionsparsity-get-best-model-"></a></h3>
 <p>Extract best model in the collection</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionSparsity</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span></span>
 <span>  crit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"EBIC"</span>, <span class="st">"ICL"</span>, <span class="st">"StARS"</span><span class="op">)</span>,</span>
 <span>  stability <span class="op">=</span> <span class="fl">0.9</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>crit</code></dt>
 <dd><p>a character for the criterion used to performed the selection.</p></dd>
 
@@ -205,33 +143,8 @@ Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC</p></dd>
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>a [`NormalBlockVarUnknownClusters`] object</p>
-</div>
-
-</div>
-
-<p></p><hr><a id="method-NormalBlockVarCollectionSparsity-plot"></a><div class="section">
-<h3 id="normalblockvarcollectionsparsity-plot-"><code>NormalBlockVarCollectionSparsity$plot()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionsparsity-plot-"></a></h3>
-<p>Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionSparsity</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span></span>
-<span>  criteria <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"deviance"</span>, <span class="st">"BIC"</span>, <span class="st">"EBIC"</span>, <span class="st">"ICL"</span><span class="op">)</span>,</span>
-<span>  log.x <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div><p></p><div class="section">
-<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>criteria</code></dt>
-<dd><p>vector of characters. The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults to all of them.</p></dd>
-
-      <dt><code>log.x</code></dt>
-<dd><p>logical: should the x-axis be represented in log-scale? Default is `TRUE`.</p></dd>
-
-
-</dl><p></p></div>
-</div><p></p><div class="section">
-<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
-<p>a [`ggplot`] graph</p>
 </div>
 
 </div>
@@ -239,13 +152,13 @@ Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC</p></dd>
 <p></p><hr><a id="method-NormalBlockVarCollectionSparsity-stability_selection"></a><div class="section">
 <h3 id="normalblockvarcollectionsparsity-stability-selection-"><code>NormalBlockVarCollectionSparsity$stability_selection()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionsparsity-stability-selection-"></a></h3>
 <p>Compute the stability path by stability selection</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionSparsity</span><span class="op">$</span><span class="fu">stability_selection</span><span class="op">(</span></span>
 <span>  subsamples <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_subsamples <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>subsamples</code></dt>
 <dd><p>a list of vectors describing the subsamples. The number of vectors (or list length) determines the number of subsamples used in the stability selection. Automatically set to 20 subsamples with size `10*sqrt(n)` if `n &gt;= 144` and `0.8*n` otherwise following Liu et al. (2010) recommendations.</p></dd>
 
@@ -261,10 +174,10 @@ Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC</p></dd>
 <p></p><hr><a id="method-NormalBlockVarCollectionSparsity-clone"></a><div class="section">
 <h3 id="normalblockvarcollectionsparsity-clone-"><code>NormalBlockVarCollectionSparsity$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockvarcollectionsparsity-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarCollectionSparsity</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -277,6 +190,16 @@ Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC</p></dd>
 
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="generate_normal_block_var_data.html">generate_normal_block_var_data</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span>, p <span class="op">=</span> <span class="fl">20</span>, d <span class="op">=</span> <span class="fl">1</span>, q <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">ex</span><span class="op">$</span><span class="va">Y</span>, <span class="va">ex</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="va">ex</span><span class="op">$</span><span class="va">parameters</span><span class="op">$</span><span class="va">C</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>                       control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span>, n_sparsity_penalties <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">models</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"BIC"</span><span class="op">)</span><span class="op">$</span><span class="va">sparsity</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.001058849</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
