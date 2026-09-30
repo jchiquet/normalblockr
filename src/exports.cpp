@@ -416,8 +416,8 @@ Rcpp::List ZINormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::
 //' Graphical lasso (Rcpp/Armadillo core)
 //'
 //' In-package replacement for `glassoFast::glassoFast()`; see
-//' src/graphical_lasso.h for the algorithm and the two deliberate departures
-//' from the Fortran it ports.
+//' src/graphical_lasso.h (shared verbatim with PLNmodels) for the algorithm, its
+//' scaling to a unit diagonal and its departures from the Fortran it ports.
 //'
 //' @param S empirical covariance matrix (n x n)
 //' @param rho penalty, either a scalar or an n x n matrix of per-pair weights
@@ -426,7 +426,9 @@ Rcpp::List ZINormalBlockMeanUnknownClusters_fit(const arma::mat& Y, const arma::
 //' @param w_init,wi_init optional warm start: a previous solve's `w`/`wi`.
 //' Both must be given, and have S's dimensions, to be used.
 //' @return a list with `w` (covariance estimate), `wi` (precision estimate),
-//' `niter` and `converged`
+//' `niter`, `converged`, `status` (how the solve ended), `delta` (best
+//' convergence criterion, relative to its threshold) and `shift` (added to the
+//' diagonal of `wi` to make it positive definite, 0 if it was)
 //' @noRd
 // [[Rcpp::export]]
 Rcpp::List graphical_lasso_fit(const arma::mat& S, const Rcpp::NumericVector& rho,
@@ -442,17 +444,20 @@ Rcpp::List graphical_lasso_fit(const arma::mat& S, const Rcpp::NumericVector& rh
     if (L.n_rows != S.n_rows || L.n_cols != S.n_cols)
       Rcpp::stop("`rho`, when a matrix, must have the same dimensions as `S`");
   }
-  nb_glasso::State warm;
+  graphical_lasso::State warm;
   if (w_init.isNotNull() && wi_init.isNotNull()) {
     warm.W = Rcpp::as<arma::mat>(w_init.get());
     warm.X = Rcpp::as<arma::mat>(wi_init.get());
     warm.filled = true;
   }
-  nb_glasso::Result res = nb_glasso::solve(S, L, thr, maxIt, warm.filled ? &warm : nullptr);
+  graphical_lasso::Result res = graphical_lasso::solve(S, L, thr, maxIt, warm.filled ? &warm : nullptr);
   return Rcpp::List::create(
     Rcpp::Named("w")         = res.W,
     Rcpp::Named("wi")        = res.X,
     Rcpp::Named("niter")     = res.niter,
-    Rcpp::Named("converged") = res.converged
+    Rcpp::Named("converged") = res.converged,
+    Rcpp::Named("status")    = graphical_lasso::status_name(res.status),
+    Rcpp::Named("delta")     = res.delta,
+    Rcpp::Named("shift")     = res.shift
   );
 }

@@ -1,3 +1,23 @@
+# normalblockr (development version)
+
+## Graphical lasso shared with PLNmodels
+
+* `src/graphical_lasso.h` is now the very same file as in PLNmodels, which
+  ported the same glassoFast Fortran: the two copies had drifted apart. It is
+  shared verbatim (namespace `graphical_lasso`), and brings to normalblockr:
+  * **the problem is solved scaled to a unit diagonal**, an exact change of
+    variables. On a covariance whose variances span orders of magnitude, the
+    unscaled descent could stall in a limit cycle, fail in its inner loop, or
+    return an indefinite precision matrix; scaled, it converges in a few sweeps
+    (median number of sweeps from 646 to 4 on PLN residual covariances). On
+    ordinary input the result is unchanged up to the tolerance;
+  * **an indefinite precision matrix is shifted on its diagonal** to positive
+    definite, which keeps its support, where `ensure_pd()` clamped its
+    eigenvalues and made it dense;
+  * the detection of limit cycles, as a safeguard, and interrupt checks, so
+    that a long solve can be stopped from R (by the user or by a time limit).
+* `graphical_lasso_fit()` also returns `status`, `delta` and `shift`.
+
 # normalblockr 0.3.0
 
 ## New model family: clustering in the mean

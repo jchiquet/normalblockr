@@ -1,7 +1,7 @@
 Package: normalblockr
 Type: Package
 Title: Gaussian Graphical Models with Latent Clustering Structure
-Version: 0.3.0
+Version: 0.3.0.9000
 Authors@R: c(
   person("Jeanne", "Tous", role = "aut", email = "jeanne.tous@inrae.fr"),
   person("Nestor",  "Ngalala Manguitini", role = "ctb"),

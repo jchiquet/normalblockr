@@ -14,10 +14,13 @@ namespace nb_omega {
 // MUST match NB_GLASSO_THRESHOLD (R/utils.R), which the R reference recursion uses: the two are compared trace-for-trace at 1e-8 in test-cpp-normal-block-mean.R
 constexpr double kGlassoThreshold = 1e-6;
 
-// Armadillo equivalent of ensure_pd() (R/utils.R): the graphical lasso can
-// return a precision matrix that is not quite positive definite (an EM
-// iterate's Sigma can be badly conditioned, especially for the p x p Sigma of
-// the mean-block family), which would then make log_det_sympd() throw
+// Armadillo equivalent of ensure_pd() (R/utils.R): a guard against a precision
+// matrix that is not quite positive definite (an EM iterate's Sigma can be
+// badly conditioned, especially for the p x p Sigma of the mean-block family),
+// which would then make log_det_sympd() throw. The graphical lasso itself now
+// shifts an indefinite output on its diagonal, which keeps its support, so
+// that the eigenvalue clamp below, which does not, should no longer be reached
+// from it
 inline arma::mat ensure_pd(const arma::mat& M, double floor_value = 1e-6) {
   arma::mat sym = arma::symmatu(M), R;
   if (arma::chol(R, sym)) return sym;
@@ -36,14 +39,14 @@ inline arma::mat ensure_pd(const arma::mat& M, double floor_value = 1e-6) {
 // than a cold start at the looser one.
 inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity,
                           const arma::mat& sparsity_weights,
-                          nb_glasso::State* warm = nullptr,
+                          graphical_lasso::State* warm = nullptr,
                           double thr = 1e-4) {
   if (sparsity <= 0.0) {
     return arma::inv_sympd(Sigma_hat);
   }
 
   const arma::mat penalty = sparsity * sparsity_weights;
-  nb_glasso::Result glasso_out = nb_glasso::solve(Sigma_hat, penalty, thr, 10000, warm);
+  graphical_lasso::Result glasso_out = graphical_lasso::solve(Sigma_hat, penalty, thr, 10000, warm);
 
   // A warm start is only ever a starting point, and a bad one is not free: on
   // an ill-conditioned Sigma it can send the coordinate descent off to
@@ -52,7 +55,7 @@ inline arma::mat estimate(const arma::mat& Sigma_hat, double sparsity,
   // this retry exists rather than a direct fall-through to the unpenalized
   // inverse.
   if (glasso_out.X.has_nan() && warm != nullptr && warm->usable_for(Sigma_hat.n_rows)) {
-    glasso_out = nb_glasso::solve(Sigma_hat, penalty, thr, 10000, nullptr);
+    glasso_out = graphical_lasso::solve(Sigma_hat, penalty, thr, 10000, nullptr);
   }
 
   if (warm != nullptr) {

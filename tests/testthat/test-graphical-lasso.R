@@ -3,10 +3,11 @@
 ## glassoFast callback the C++ (V)EM used to make once per M-step.
 ##
 ## glassoFast is no longer a dependency, so these tests can't compare against
-## it; the equivalence was established while both were installed (477 random
-## problems, worst relative difference 2.2e-13) and is pinned here instead by
-## the two properties that actually matter: the returned matrix solves the
-## penalized problem, and the known-in-closed-form cases come out exact.
+## it; the equivalence (same supports, entries within the tolerance, since the
+## problem is solved scaled to a unit diagonal) is checked in PLNmodels, whose
+## src/graphical_lasso.h is the very same file. It is pinned here by the
+## properties that actually matter: the returned matrix solves the penalized
+## problem, and the known-in-closed-form cases come out exact.
 ###############################################################################
 
 ## a well-conditioned covariance: 3n degrees of freedom plus a small ridge, so
@@ -244,4 +245,45 @@ test_that("a diverging warm start is a real failure mode, not a hypothetical", {
   ## whatever the warm attempt does, a cold solve on the same problem is fine
   expect_false(anyNA(ok$wi))
   expect_true(is.matrix(warm$wi))
+})
+
+###############################################################################
+## Scaling: the problem is solved on a unit diagonal, which is an exact change
+## of variables. It matters on covariances whose variances span orders of
+## magnitude, on which the unscaled descent stalled, failed in its inner loop,
+## or returned an indefinite precision matrix.
+###############################################################################
+
+test_that("the solution is equivariant to a rescaling of the variables", {
+  set.seed(313)
+  n <- 15
+  S <- rand_S(n)
+  rho <- 0.05 * off_diag_weights(n)
+  DD <- tcrossprod(10^runif(n, -2, 2))
+  ## Theta solves (S, rho) iff Theta / DD solves (DSD, D rho D)
+  ref    <- graphical_lasso_fit(S, rho)
+  scaled <- graphical_lasso_fit(S * DD, rho * DD)
+  expect_equal(scaled$wi * DD, ref$wi, tolerance = 1e-10)
+  expect_equal(scaled$w / DD, ref$w, tolerance = 1e-10)
+})
+
+## A residual covariance met along a PLNnetwork path (PLNmodels#184), with
+## variances from 95 to 7300: unscaled, the descent failed in its inner loop
+pln_residual_cov <- readRDS(test_path("fixtures", "plnnetwork_residual_cov.rds"))
+
+test_that("a covariance with heterogeneous variances converges in a few sweeps", {
+  fit <- graphical_lasso_fit(pln_residual_cov$S, pln_residual_cov$rho)
+  expect_equal(fit$status, "converged")
+  expect_lt(fit$niter, 50)
+  expect_equal(fit$shift, 0)
+  expect_gt(min(eigen(fit$wi, symmetric = TRUE, only.values = TRUE)$values), 0)
+})
+
+test_that("an indefinite precision matrix is shifted to positive definite", {
+  ## short of convergence, wi is not the inverse of w and can be indefinite:
+  ## one sweep on this covariance is enough for that
+  fit <- graphical_lasso_fit(pln_residual_cov$S, pln_residual_cov$rho, maxIt = 1)
+  expect_gt(fit$shift, 0)
+  ev <- eigen(fit$wi, symmetric = TRUE, only.values = TRUE)$values
+  expect_equal(min(ev), 1 / max(eigen(fit$w, symmetric = TRUE, only.values = TRUE)$values), tolerance = 1e-8)
 })
