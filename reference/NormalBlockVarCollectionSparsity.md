@@ -169,5 +169,5 @@ data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = ex$parameters$C, sparsity = TRUE,
                        control = NB_control(verbose = FALSE, n_sparsity_penalties = 5))
 models$get_best_model("BIC")$sparsity
-#> [1] 0.001058849
+#> [1] 0.001295596
 ```

@@ -115,7 +115,7 @@ models$get_best_model()
 #> A diagonal normal-block-mean model with 2 unknown blocks .
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>        23 2       0        0 -963.653 1927.305 2017.282 2017.282 2017.282     3
+#>        23 2       0        0 -966.418 1932.836 2022.812 2022.812 2022.812     3
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

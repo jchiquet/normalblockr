@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,23 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.3.0" id="normalblockr-030">normalblockr 0.3.0<a class="anchor" aria-label="anchor" href="#normalblockr-030"></a></h2>
+<h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
+<div class="section level3">
+<h3 id="graphical-lasso-shared-with-plnmodels-development-version">Graphical lasso shared with PLNmodels<a class="anchor" aria-label="anchor" href="#graphical-lasso-shared-with-plnmodels-development-version"></a></h3>
+<ul><li>
+<code>src/graphical_lasso.h</code> is now the very same file as in PLNmodels, which ported the same glassoFast Fortran: the two copies had drifted apart. It is shared verbatim (namespace <code>graphical_lasso</code>), and brings to normalblockr:
+<ul><li>
+<strong>the problem is solved scaled to a unit diagonal</strong>, an exact change of variables. On a covariance whose variances span orders of magnitude, the unscaled descent could stall in a limit cycle, fail in its inner loop, or return an indefinite precision matrix; scaled, it converges in a few sweeps (median number of sweeps from 646 to 4 on PLN residual covariances). On ordinary input the result is unchanged up to the tolerance;</li>
+<li>
+<strong>an indefinite precision matrix is shifted on its diagonal</strong> to positive definite, which keeps its support, where <code>ensure_pd()</code> clamped its eigenvalues and made it dense;</li>
+<li>the detection of limit cycles, as a safeguard, and interrupt checks, so that a long solve can be stopped from R (by the user or by a time limit).</li>
+</ul></li>
+<li>
+<code>graphical_lasso_fit()</code> also returns <code>status</code>, <code>delta</code> and <code>shift</code>.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="normalblockr-030">normalblockr 0.3.0<a class="anchor" aria-label="anchor" href="#normalblockr-030"></a></h2><p class="text-muted">CRAN release: 2026-09-11</p>
 <div class="section level3">
 <h3 id="new-model-family-clustering-in-the-mean-0-3-0">New model family: clustering in the mean<a class="anchor" aria-label="anchor" href="#new-model-family-clustering-in-the-mean-0-3-0"></a></h3>
 <p>The package now fits two complementary families. The original Normal-Block model clusters variables by how they <em>covary</em>; the new mean-block family clusters them by how they <em>respond</em> to the covariates, constraining the mean as <code>mu_i = C B' X_i</code> with one regression profile per cluster.</p>

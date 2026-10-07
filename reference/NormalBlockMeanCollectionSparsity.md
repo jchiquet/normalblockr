@@ -113,7 +113,7 @@ data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 3, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 5))
 #> Fitting a normal-block-mean model with sparsity path 
-#>   penalty = 0.3489394             penalty = 0.1103443             penalty = 0.03489394                penalty = 0.01103443                penalty = 0.003489394           
+#>   penalty = 0.4565671             penalty = 0.1443792             penalty = 0.04565671                penalty = 0.01443792                penalty = 0.004565671           
 #> DONE
 models$plot(c("BIC", "EBIC"))
 ```

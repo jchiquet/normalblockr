@@ -15,7 +15,7 @@ path, which relies on `fixed_tau`, not supported by the mean-block VEM."></head>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -156,7 +156,7 @@ either "BIC", "EBIC" or "ICL". Default is BIC</p></dd>
 <span class="r-in"><span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">3</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, model <span class="op">=</span> <span class="st">"mean"</span>,</span></span>
 <span class="r-in"><span>                       control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>n_sparsity_penalties <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fitting a normal-block-mean model with sparsity path </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	 penalty = 0.3489394           	 penalty = 0.1103443           	 penalty = 0.03489394           	 penalty = 0.01103443           	 penalty = 0.003489394           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	 penalty = 0.4565671           	 penalty = 0.1443792           	 penalty = 0.04565671           	 penalty = 0.01443792           	 penalty = 0.004565671           </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DONE</span>
 <span class="r-in"><span><span class="va">models</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"EBIC"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="NormalBlockMeanCollectionSparsity-1.png" alt="" width="700" height="433"></span>
