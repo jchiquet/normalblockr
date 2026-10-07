@@ -33,7 +33,7 @@ protected:
   // omega_estimation.h.
   // The state is per-model and lives across the whole recursion, so every
   // M-step after the first resumes from the previous one; see nb_omega::estimate.
-  mutable nb_glasso::State glasso_state_;
+  mutable graphical_lasso::State glasso_state_;
 
   arma::mat estimate_omega(const arma::mat& Sigma_hat) const {
     return nb_omega::estimate(Sigma_hat, sparsity_, sparsity_weights_,
