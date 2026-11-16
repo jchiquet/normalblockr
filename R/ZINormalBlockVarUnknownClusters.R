@@ -90,6 +90,7 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
         C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
         noise_covariance = private$res_covariance, fixed_tau = self$fixed_tau,
+        accelerate = !isFALSE(control$acceleration),
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter

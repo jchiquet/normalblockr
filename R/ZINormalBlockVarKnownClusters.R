@@ -73,6 +73,7 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
         B0 = init$B, dm1_0 = init$dm1, Omega0 = init$Omega,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
         noise_covariance = private$res_covariance,
+        accelerate = !isFALSE(control$acceleration),
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter

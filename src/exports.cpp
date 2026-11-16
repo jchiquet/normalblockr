@@ -95,6 +95,8 @@ Rcpp::List ZINormalBlockVarUnknownClusters_result(const Model& model) {
 //' @param noise_covariance either "diagonal" or "spherical"
 //' @param niter maximum number of EM iterations
 //' @param threshold convergence threshold on the objective increment
+//' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+//' plain EM (never attempted when sparsity > 0)
 //' @return a list with the fitted parameters (B, dm1, Omega, gamma, mu), the
 //' objective (log-likelihood) trace and the number of iterations performed
 //' @noRd
@@ -103,15 +105,17 @@ Rcpp::List NormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat& 
                                   arma::mat B0, arma::vec dm1_0, arma::mat Omega0,
                                   double sparsity, arma::mat sparsity_weights,
                                   std::string noise_covariance,
-                                  int niter, double threshold) {
+                                  int niter, double threshold, bool accelerate = true) {
   NormalBlockData data(Y, X);
 
   if (noise_covariance == "diagonal") {
     norm_block_var_cov_diag_noise_known_clusters model(data, C, B0, dm1_0, Omega0, sparsity, sparsity_weights);
+    model.set_acceleration(accelerate);
     model.run_em(niter, threshold);
     return known_clusters_result(model);
   } else if (noise_covariance == "spherical") {
     norm_block_var_cov_spherical_noise_known_clusters model(data, C, B0, dm1_0, Omega0, sparsity, sparsity_weights);
+    model.set_acceleration(accelerate);
     model.run_em(niter, threshold);
     return known_clusters_result(model);
   }
@@ -140,17 +144,19 @@ Rcpp::List NormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat
                                     arma::mat C0, arma::vec alpha0, arma::mat M0, arma::vec S0,
                                     double sparsity, arma::mat sparsity_weights,
                                     std::string noise_covariance, bool fixed_tau,
-                                    int niter, double threshold) {
+                                    int niter, double threshold, bool accelerate = true) {
   NormalBlockData data(Y, X);
 
   if (noise_covariance == "diagonal") {
     norm_block_var_cov_diag_noise_unknown_clusters model(data, B0, dm1_0, Omega0, C0, alpha0, M0, S0,
                                                       sparsity, sparsity_weights, fixed_tau);
+    model.set_acceleration(accelerate);
     model.run_em(niter, threshold);
     return unknown_clusters_result(model);
   } else if (noise_covariance == "spherical") {
     norm_block_var_cov_spherical_noise_unknown_clusters model(data, B0, dm1_0, Omega0, C0, alpha0, M0, S0,
                                                           sparsity, sparsity_weights, fixed_tau);
+    model.set_acceleration(accelerate);
     model.run_em(niter, threshold);
     return unknown_clusters_result(model);
   }
@@ -179,6 +185,8 @@ Rcpp::List NormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::mat
 //' @param noise_covariance either "diagonal" or "spherical"
 //' @param niter maximum number of EM iterations
 //' @param threshold convergence threshold on the objective increment
+//' @param accelerate whether to attempt the SQUAREM extrapolation on top of
+//' plain EM (never attempted when sparsity > 0)
 //' @return a list with the fitted parameters (B, dm1, Omega, gamma, mu -- gamma
 //' is a q x q x n array, one posterior covariance matrix per row), the
 //' log-likelihood trace and the number of iterations performed
@@ -189,15 +197,17 @@ Rcpp::List ZINormalBlockVarKnownClusters_fit(const arma::mat& Y, const arma::mat
                                   arma::mat B0, arma::vec dm1_0, arma::mat Omega0,
                                   double sparsity, arma::mat sparsity_weights,
                                   std::string noise_covariance,
-                                  int niter, double threshold) {
+                                  int niter, double threshold, bool accelerate = true) {
   ZINormalBlockData data(Y, X, zeros_bar, zi_cond_mean);
 
   if (noise_covariance == "diagonal") {
     zi_norm_block_var_cov_diag_noise_known_clusters model(data, C, B0, dm1_0, Omega0, sparsity, sparsity_weights);
+    model.set_acceleration(accelerate);
     model.run_em(niter, threshold);
     return ZINormalBlockVarKnownClusters_result(model);
   } else if (noise_covariance == "spherical") {
     zi_norm_block_var_cov_spherical_noise_known_clusters model(data, C, B0, dm1_0, Omega0, sparsity, sparsity_weights);
+    model.set_acceleration(accelerate);
     model.run_em(niter, threshold);
     return ZINormalBlockVarKnownClusters_result(model);
   }
@@ -229,17 +239,19 @@ Rcpp::List ZINormalBlockVarUnknownClusters_fit(const arma::mat& Y, const arma::m
                                     arma::mat C0, arma::vec alpha0, arma::mat M0, arma::mat S0,
                                     double sparsity, arma::mat sparsity_weights,
                                     std::string noise_covariance, bool fixed_tau,
-                                    int niter, double threshold) {
+                                    int niter, double threshold, bool accelerate = true) {
   ZINormalBlockData data(Y, X, zeros_bar, zi_cond_mean);
 
   if (noise_covariance == "diagonal") {
     zi_norm_block_var_cov_diag_noise_unknown_clusters model(data, B0, dm1_0, Omega0, C0, alpha0, M0, S0,
                                                          sparsity, sparsity_weights, fixed_tau);
+    model.set_acceleration(accelerate);
     model.run_em(niter, threshold);
     return ZINormalBlockVarUnknownClusters_result(model);
   } else if (noise_covariance == "spherical") {
     zi_norm_block_var_cov_spherical_noise_unknown_clusters model(data, B0, dm1_0, Omega0, C0, alpha0, M0, S0,
                                                               sparsity, sparsity_weights, fixed_tau);
+    model.set_acceleration(accelerate);
     model.run_em(niter, threshold);
     return ZINormalBlockVarUnknownClusters_result(model);
   }
