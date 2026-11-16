@@ -42,6 +42,8 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
     penalty_groups = function() {
       rbind(super$penalty_groups(), penalty_group("kappa", self$p * self$d0, self$n))
     },
+    ## split(rule = "kmeans"): residuals of the non-zero-inflated cells only
+    split_target = function() (self$data$Y - self$data$X %*% private$B) * self$data$zeros_bar,
 
     get_heuristic_parameters = function(){
       zi_diag <- private$zi_diag_normal_inference()

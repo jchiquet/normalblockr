@@ -159,3 +159,64 @@ test_that("candidates_merge() requires at least two clusters", {
   model$optimize(control = list(niter = 5, threshold = -1))
   expect_error(model$candidates_merge(), "at least two clusters")
 })
+
+## Two well-separated groups of 3 variables, lumped into a single cluster:
+## split(rule = "kmeans") must recover them, in both families.
+two_groups <- function(family) {
+  set.seed(7)
+  n <- 60
+  x <- rnorm(n)
+  X <- cbind(1, x)
+  if (family == "var") {
+    W <- matrix(rnorm(2 * n), n, 2)
+    signal <- W[, c(1, 1, 1, 2, 2, 2)]
+  } else {
+    signal <- cbind(X %*% c(0, 3), X %*% c(0, 3), X %*% c(0, 3),
+                    X %*% c(0, -3), X %*% c(0, -3), X %*% c(0, -3))
+  }
+  Y <- signal + matrix(rnorm(6 * n, sd = 0.1), n, 6)
+  NormalBlockData$new(Y, X)
+}
+
+test_that("split(rule = 'kmeans') separates two distinct groups lumped in one cluster", {
+  model <- NormalBlockVarUnknownClusters$new(two_groups("var"), 1, control = NB_control(verbose = FALSE))
+  model$optimize(control = list(niter = 5, threshold = -1))
+  set.seed(1)
+  cl <- model$split(1, rule = "kmeans")$clustering
+  expect_equal(length(unique(cl[1:3])), 1)
+  expect_equal(length(unique(cl[4:6])), 1)
+  expect_false(cl[1] == cl[4])
+
+  model <- NormalBlockMeanUnknownClusters$new(two_groups("mean"), 1, control = NB_control(verbose = FALSE))
+  model$optimize(control = list(niter = 5, threshold = -1, fixed_point_niter = 5))
+  set.seed(1)
+  cl <- model$split(1, rule = "kmeans")$clustering
+  expect_equal(length(unique(cl[1:3])), 1)
+  expect_equal(length(unique(cl[4:6])), 1)
+  expect_false(cl[1] == cl[4])
+})
+
+test_that("split(rule = 'noise') keeps the previous median-of-noise-variance rule", {
+  model <- NormalBlockVarUnknownClusters$new(data, 2, control = NB_control(verbose = FALSE))
+  model$optimize(control = list(niter = 5, threshold = -1))
+  priv <- model$.__enclos_env__$private
+  cl   <- model$clustering == 1
+  var  <- 1 / priv$dm1
+  expected_new <- which((var <= median(var[cl])) & cl)
+  expect_setequal(which(model$split(1, rule = "noise")$clustering == model$q + 1), expected_new)
+})
+
+test_that("variance-block merge candidates are ranked by signed block correlation", {
+  model <- NormalBlockVarUnknownClusters$new(data, 3, control = NB_control(verbose = FALSE))
+  model$optimize(control = list(niter = 5, threshold = -1))
+  priv  <- model$.__enclos_env__$private
+  Sigma <- matrix(c(1, -.8, .5,
+                    -.8, 1, 0,
+                    .5, 0, 1), 3, 3)
+  priv$Omega <- solve(Sigma)
+  pairs <- list(c(1, 2), c(1, 3), c(2, 3))
+  expect_equal(priv$merge_score(pairs), c(-.8, .5, 0))
+  ## the anticorrelated pair comes last: a merged block cannot hold
+  ## negatively co-varying variables
+  expect_equal(order(priv$merge_score(pairs), decreasing = TRUE), c(2, 3, 1))
+})

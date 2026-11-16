@@ -73,20 +73,27 @@ NormalBlockVarBase <- R6::R6Class(
       invisible(self)
     },
 
-    #' @description Create a clone of the current [`NormalBlockVarBase`] object after splitting cluster `cl`
-    #' We split the cluster according to the species variances
+    #' @description Create a clone of the current [`NormalBlockVarBase`] object after splitting cluster `index`
     #' @param index index (integer) of the cluster to split
     #' @param in_place should the split applied to the object itself, or should a copy be sent?
     #' default FALSE (send a copy)
+    #' @param rule how the members of the cluster are divided: `"kmeans"`
+    #' runs a 2-means on their columns of residuals `Y - XB`, the geometry of
+    #' the model (members of a block are noisy copies of a common latent
+    #' signal, so they lie close to each other); `"noise"` cuts them at the
+    #' median of their noise variance (the rule used before 0.4.0). Default
+    #' `NULL`, resolved to `"kmeans"` for this family: on `brca_rppa` it lets
+    #' `refine()` lower the deviance summed over q = 1..30 by 22,166 against
+    #' 18,588 for `"noise"`.
     #' @return A new [`NormalBlockVarBase`] object
-    split = function(index, in_place = FALSE) {
+    split = function(index, in_place = FALSE, rule = NULL) {
       ## update private fields related to group parameters
       ## C, Omega, M, S, sparsity_weights
 
-      ## indices of individuals split within the cluster
-      cl  <- self$clustering == index
-      var <- 1/private$dm1; var_median <- median(var[cl])
-      split1 <- (var > var_median) & cl ;  split2 <- (var <= var_median) & cl
+      ## split2 moves to the new cluster q + 1, split1 stays in `index`
+      cl     <- self$clustering == index
+      split2 <- private$split_members(index, rule)
+      split1 <- cl & !split2
 
       ## Cluster split
       new_C <- cbind(private$C, .Machine$double.eps)
@@ -193,6 +200,8 @@ NormalBlockVarBase <- R6::R6Class(
     ## heuristics tried by best_of_inits(), best first (see
     ## inst/methods_initialization_and_refine.md for the benchmark)
     default_inits     = c("ward2", "kmeans", "spectral"),
+    ## split() rule used by refine() unless told otherwise (see split())
+    default_split_rule = "kmeans",
     dm1               = NA, # diagonal vector of inverse variance matrix (variables level)
     gamma             = NA, # variance of  posterior distribution of W
     mu                = NA, # mean for posterior distribution of W
@@ -224,9 +233,21 @@ NormalBlockVarBase <- R6::R6Class(
     ## Cluster pairs are ranked by how strongly related they are in the
     ## current fit: merging two nearly independent blocks is rarely
     ## competitive.
+    ## Ranked by the signed correlation between the two blocks' latent
+    ## signals, Sigma_kl / sqrt(Sigma_kk Sigma_ll), highest first: within a
+    ## block, the covariance of two variables is Sigma_kk > 0, so a merged
+    ## block can only describe positively co-varying variables. Merging two
+    ## negatively correlated blocks is never a sensible candidate (ranking by
+    ## |Omega_kl|, as before 0.4.0, tried those too).
     merge_score = function(pairs) {
-      map_dbl(pairs, function(ij) abs(private$Omega[ij[1], ij[2]]))
+      block_cor <- cov2cor(chol2inv(chol(private$Omega)))
+      map_dbl(pairs, function(ij) block_cor[ij[1], ij[2]])
     },
+    ## split(rule = "kmeans") clusters the columns of the residuals, which
+    ## carry the latent signal W shared by the members of a block
+    split_target = function() self$data$Y - self$data$X %*% private$B,
+    ## split(rule = "noise") cuts at the median of the noise variances
+    noise_variance = function() 1 / private$dm1,
 
     omega_from_M_S = function(M, S, weights) {
       s_vec <- if (is.matrix(S)) colMeans(S) else S

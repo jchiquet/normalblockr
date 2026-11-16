@@ -200,9 +200,12 @@ NormalBlockBase <- R6::R6Class(
     #' @param trial_niter number of (V)EM iterations used to cheaply score each
     #' candidate before the caller fully re-optimizes the best few -- kept
     #' short on purpose.
-    candidates_split = function(trial_niter = 5) {
+    #' @param split_rule passed to `split()` as its `rule`: `"kmeans"`,
+    #' `"noise"`, or `NULL` for the family's default
+    candidates_split = function(trial_niter = 5, split_rule = NULL) {
       # do not split groups with less than 2 guys
-      candidates <- map((1:self$q)[self$cluster_sizes > 1], self$split)
+      candidates <- map((1:self$q)[self$cluster_sizes > 1],
+                        function(k) self$split(k, rule = split_rule))
       # keep candidates with at least 2 guys per cluster and non empty split.
       # Compared against the number of currently *live* (non-empty) clusters
       # rather than self$q: the (V)EM can converge to an empty cluster,
@@ -463,6 +466,32 @@ NormalBlockBase <- R6::R6Class(
     ## Ranks candidate cluster pairs for candidates_merge(), highest first.
     ## Overridden by each family (see NormalBlockVarBase/NormalBlockMeanBase).
     merge_score = function(pairs) rep(0, length(pairs)),
+    ## family-specific default of split()'s rule
+    default_split_rule = "noise",
+
+    ## Which members of cluster `index` split() moves to the new cluster.
+    ## "kmeans": a 2-means on the members' columns of the family's
+    ## split_target() (the data its clustering is about); "noise": the
+    ## members whose noise_variance() is at most the cluster's median. The
+    ## 2-means falls back to the noise rule if it cannot produce two
+    ## non-empty groups (e.g. fewer than 2 distinct columns).
+    split_members = function(index, rule = NULL) {
+      if (is.null(rule)) rule <- private$default_split_rule
+      rule <- match.arg(rule, c("kmeans", "noise"))
+      cl   <- self$clustering == index
+      if (rule == "kmeans" && sum(cl) > 1) {
+        target <- private$split_target()[, cl, drop = FALSE]
+        km <- tryCatch(stats::kmeans(t(target), centers = 2, nstart = 10),
+                       error = function(e) NULL)
+        if (!is.null(km) && length(unique(km$cluster)) == 2) {
+          moved <- logical(self$p)
+          moved[cl] <- km$cluster == 2
+          return(moved)
+        }
+      }
+      var <- private$noise_variance()
+      (var <= median(var[cl])) & cl
+    },
 
     warn_if_not_converged = function() {
       if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())

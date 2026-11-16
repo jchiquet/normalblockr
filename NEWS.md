@@ -25,6 +25,23 @@ The criteria change, so the number of clusters they select can change too.
 * On `brca_rppa`, the mean-block ICL now selects 50 clusters instead of 70
   over `seq(5, 120, 5)`; the variance-block BIC selection is unchanged.
 
+## Better split and merge candidates in `refine()`
+
+* Variance-block merge candidates are ranked by the **signed** correlation
+  between the two blocks' latent signals instead of `|Omega_kl|`. Within a
+  block, two variables necessarily covary positively (their covariance is
+  `Sigma_kk > 0`), so merging two anticorrelated blocks is never a sensible
+  candidate; the former ranking tried those first.
+* `split()` gains a `rule` argument, and `refine()` / `candidates_split()` a
+  `split_rule` one: `"kmeans"` divides a cluster by a 2-means on its members'
+  columns of residuals (variance-block) or least-squares trajectories
+  (mean-block), `"noise"` at the median of their noise variances (the former
+  rule). The default is family-specific: `"kmeans"` for the variance-block
+  family, `"noise"` for the mean-block one.
+* On `brca_rppa`, `refine()` now lowers the variance-block deviance summed
+  over `q = 1:30` by 22,166 instead of 15,758, and runs faster; the selected
+  `q` moves from 27 to 22.
+
 ## Graphical lasso shared with PLNmodels
 
 * `src/graphical_lasso.h` is now the very same file as in PLNmodels, which

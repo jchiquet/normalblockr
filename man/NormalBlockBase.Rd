@@ -273,7 +273,7 @@ object; reassign the result (`model <- model$best_of_inits()`).
 by splitting the clusters of the current model
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$candidates_split(trial_niter = 5)}
+    \preformatted{NormalBlockBase$candidates_split(trial_niter = 5, split_rule = NULL)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -282,6 +282,8 @@ by splitting the clusters of the current model
       \item{\code{trial_niter}}{number of (V)EM iterations used to cheaply score each
 candidate before the caller fully re-optimizes the best few -- kept
 short on purpose.}
+      \item{\code{split_rule}}{passed to `split()` as its `rule`: `"kmeans"`,
+`"noise"`, or `NULL` for the family's default}
     }
     \if{html}{\out{</div>}}
   }

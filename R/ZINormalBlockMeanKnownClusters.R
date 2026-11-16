@@ -44,6 +44,8 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
     penalty_groups = function() {
       rbind(super$penalty_groups(), penalty_group("kappa", self$p * self$data$d0, self$n))
     },
+    ## split(rule = "kmeans"): masked least-squares profiles, as the initialization
+    split_target = function() self$data$X %*% self$data$zi_ols_fit()$B,
     optim_initialize = function() {
       if (private$warm_started) list(B = private$B, Omega = private$Omega)
       else private$get_heuristic_parameters()
