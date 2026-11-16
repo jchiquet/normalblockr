@@ -11,8 +11,13 @@ normal-block model.
 
 - `Y_scale`:
 
-  the per-column standard deviation Y was divided by (all 1's if \`scale
-  = FALSE\`)
+  the per-column standard deviation Y was divided by (all 1's if Y was
+  not rescaled)
+
+- `scale`:
+
+  the \`scale\` argument as given: \`TRUE\`, \`FALSE\`, or \`NULL\` for
+  the family default (see \`for_family()\`)
 
 - `X`:
 
@@ -79,6 +84,8 @@ normal-block model.
 
 - [`NormalBlockData$new()`](#method-NormalBlockData-initialize)
 
+- [`NormalBlockData$for_family()`](#method-NormalBlockData-for_family)
+
 - [`NormalBlockData$ols_fit()`](#method-NormalBlockData-ols_fit)
 
 - [`NormalBlockData$zi_ols_fit()`](#method-NormalBlockData-zi_ols_fit)
@@ -100,7 +107,7 @@ Create a new \[\`NormalBlockData\`\] object.
       X,
       X0 = NULL,
       formula = NULL,
-      scale = TRUE,
+      scale = NULL,
       zeros = NULL
     )
 
@@ -126,13 +133,37 @@ Create a new \[\`NormalBlockData\`\] object.
 - `scale`:
 
   whether to rescale each column of Y by its own standard deviation (no
-  centering). Default TRUE, see the class-level documentation for the
-  rationale and its limits.
+  centering): \`NULL\` (default) for the model family's default, see the
+  class-level documentation and \`for_family()\`.
 
 - `zeros`:
 
   an optional 0/1 matrix of structural zeros, overriding the default \`Y
   == 0\`.
+
+------------------------------------------------------------------------
+
+### `NormalBlockData$for_family()`
+
+The data a model of the given family is fitted on. When \`scale\` was
+given explicitly, the object itself. Otherwise (\`scale = NULL\`) the
+family decides: the object itself, unscaled, for the mean-block family;
+a rescaled copy for the variance-block family, built once and shared by
+every model fitted on it.
+
+#### Usage
+
+    NormalBlockData$for_family(model = c("var", "mean"))
+
+#### Arguments
+
+- `model`:
+
+  the model family, \`"var"\` or \`"mean"\`
+
+#### Returns
+
+a \[\`NormalBlockData\`\] object
 
 ------------------------------------------------------------------------
 

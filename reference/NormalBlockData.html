@@ -57,7 +57,12 @@ normal-block model.</p>
 
     <dt><code>Y_scale</code></dt>
 <dd><p>the per-column standard deviation Y was divided by (all
-1's if `scale = FALSE`)</p></dd>
+1's if Y was not rescaled)</p></dd>
+
+
+    <dt><code>scale</code></dt>
+<dd><p>the `scale` argument as given: `TRUE`, `FALSE`, or `NULL`
+for the family default (see `for_family()`)</p></dd>
 
 
     <dt><code>X</code></dt>
@@ -124,6 +129,7 @@ normal-block model.</p>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockData-initialize"><code>NormalBlockData$new()</code></a></p></li>
+<li><p><a href="#method-NormalBlockData-for_family"><code>NormalBlockData$for_family()</code></a></p></li>
 <li><p><a href="#method-NormalBlockData-ols_fit"><code>NormalBlockData$ols_fit()</code></a></p></li>
 <li><p><a href="#method-NormalBlockData-zi_ols_fit"><code>NormalBlockData$zi_ols_fit()</code></a></p></li>
 <li><p><a href="#method-NormalBlockData-zi_fit"><code>NormalBlockData$zi_fit()</code></a></p></li>
@@ -137,7 +143,7 @@ normal-block model.</p>
 <span>  <span class="va">X</span>,</span>
 <span>  X0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  zeros <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
@@ -156,8 +162,8 @@ normal-block model.</p>
 
       <dt><code>scale</code></dt>
 <dd><p>whether to rescale each column of Y by its own standard
-deviation (no centering). Default TRUE, see the class-level
-documentation for the rationale and its limits.</p></dd>
+deviation (no centering): `NULL` (default) for the model family's
+default, see the class-level documentation and `for_family()`.</p></dd>
 
       <dt><code>zeros</code></dt>
 <dd><p>an optional 0/1 matrix of structural zeros, overriding the
@@ -169,14 +175,37 @@ default `Y == 0`.</p></dd>
 
 </div>
 
+<p></p><hr><a id="method-NormalBlockData-for_family"></a><div class="section">
+<h3 id="normalblockdata-for-family-"><code>NormalBlockData$for_family()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-for-family-"></a></h3>
+<p>The data a model of the given family is fitted on. When
+`scale` was given explicitly, the object itself. Otherwise (`scale =
+NULL`) the family decides: the object itself, unscaled, for the
+mean-block family; a rescaled copy for the variance-block family,
+built once and shared by every model fitted on it.</p><div class="section">
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">for_family</span><span class="op">(</span>model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"var"</span>, <span class="st">"mean"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>model</code></dt>
+<dd><p>the model family, `"var"` or `"mean"`</p></dd>
+
+
+</dl><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
+<p>a [`NormalBlockData`] object</p>
+</div>
+
+</div>
+
 <p></p><hr><a id="method-NormalBlockData-ols_fit"></a><div class="section">
 <h3 id="normalblockdata-ols-fit-"><code>NormalBlockData$ols_fit()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-ols-fit-"></a></h3>
 <p>Ordinary-least-squares fit of Y on X, with its residuals
 and their covariance. Computed once and memoized.</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">ols_fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>a list with `B` (d x p), `R` (n x p residuals) and `Sigma`
 (p x p residual covariance)</p>
 </div>
@@ -189,10 +218,10 @@ and their covariance. Computed once and memoized.</p><div class="section">
 least-squares fit of B under the zero-inflation mask, with its inverse
 residual variances and residuals (see `zi_weighted_fit()`).
 Computed once and memoized.</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">zi_ols_fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>a list with `B` (d x p), `dm1` (p) and `R` (n x p masked residuals)</p>
 </div>
 
@@ -204,10 +233,10 @@ Computed once and memoized.</p><div class="section">
 regressions of each variable's zero pattern on `X0`, and the fixed
 contribution they make to the log-likelihood. The (V)EM never revisits
 these, so they are a property of the data rather than of a model.</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">zi_fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>a list with `B0` (d0 x p), `kappa` (n x p zero-inflation
 probabilities) and `ZI_cond_mean` (a scalar)</p>
 </div>
@@ -217,10 +246,10 @@ probabilities) and `ZI_cond_mean` (a scalar)</p>
 <p></p><hr><a id="method-NormalBlockData-clone"></a><div class="section">
 <h3 id="normalblockdata-clone-"><code>NormalBlockData$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 

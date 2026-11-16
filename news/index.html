@@ -43,6 +43,16 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="rescaling-of-y-now-depends-on-the-model-family-development-version">Rescaling of Y now depends on the model family<a class="anchor" aria-label="anchor" href="#rescaling-of-y-now-depends-on-the-model-family-development-version"></a></h3>
+<p>The fits of mean-block models on default data change.</p>
+<ul><li>
+<code>NormalBlockData$new()</code> gains <code>scale = NULL</code> as its default: the model family decides when a model is fitted. Variance-block models keep rescaling each column of Y by its standard deviation; mean-block models no longer do. <code>scale = TRUE</code> or <code>FALSE</code> forces either for both families.</li>
+<li>Rescaling breaks the mean-block model, whose variables share a mean profile within a block: on <code>brca_rppa</code> and <code>onema</code> the unscaled mean-block fit has the better exact ICL on the original scale, while the rescaled one wins for the variance-block model. On data simulated from either model, rescaling makes every criterion over-select the number of clusters.</li>
+<li>
+<code><a href="../reference/normal_block_sequential.html">normal_block_sequential()</a></code> hands the residuals of its mean-block stage to the variance-block stage with the same <code>scale</code> request, so each stage applies its own default.</li>
+<li>New method <code>NormalBlockData$for_family()</code> returns the data a model of a given family is fitted on.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="diagnostics-development-version">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics-development-version"></a></h3>
 <ul><li>
 <code>within_block_correlations()</code> on variance-block models: for each block, the empirical correlations of the residuals <code>Y - XB</code> (mean, minimum, proportion of negative ones) against the correlation the fitted model implies. Within a block two variables covary positively by construction (their covariance is <code>Sigma_kk &gt; 0</code>), so a block holding anticorrelated variables, typically from a known clustering taken from an annotation, is misspecified.</li>

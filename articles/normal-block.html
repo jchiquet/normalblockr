@@ -357,7 +357,7 @@ Penalty selection can be done similarly to the selection of the number
 of clusters.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">myNB_sparse_0.1</span>   <span class="op">&lt;-</span> <span class="va">my_NB_sparse</span><span class="op">$</span><span class="fu">get_model</span><span class="op">(</span><span class="fl">0.1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658166 Collection penalty values can be found via $sparsity</span></span>
+<span><span class="co">#&gt; No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658165 Collection penalty values can be found via $sparsity</span></span>
 <span><span class="va">myNB_sparse_BIC</span>   <span class="op">&lt;-</span> <span class="va">my_NB_sparse</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"BIC"</span><span class="op">)</span></span></code></pre></div>
 <p>Both the sparsity penalty and the number of clusters can also be left
 to vary jointly.</p>

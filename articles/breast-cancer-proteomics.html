@@ -174,9 +174,11 @@ expression level before looking for structure in what’s left.</p>
 proteins, we build a simple, fully data-driven baseline: a hierarchical
 (Ward) clustering of the proteins from their expression profiles alone,
 with no reference to the Normal-Block model at all. By default
-<code>normalblockr</code> scales the data, so this a priori clustering
-is computed on the same (column-)scaled matrix for consistency. Six
-clusters is an arbitrary but visually natural cut of the dendrogram.</p>
+<code>normalblockr</code> scales the data for variance-block models
+(each protein divided by its own standard deviation), so this a priori
+clustering is computed on the same (column-)scaled matrix for
+consistency. Six clusters is an arbitrary but visually natural cut of
+the dendrogram.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hc_expr</span> <span class="op">&lt;-</span> <span class="va">brca_rppa</span><span class="op">$</span><span class="va">expr</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/dist.html" class="external-link">dist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/hclust.html" class="external-link">hclust</a></span><span class="op">(</span><span class="st">"ward.D2"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hc_expr</span>, labels <span class="op">=</span> <span class="cn">FALSE</span>, hang <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,</span>
@@ -392,12 +394,12 @@ the sparsity level with the best BIC.</p>
 <span><span class="co">#&gt;   penalty = 0.0595657             penalty = 0.04694053                penalty = 0.03699131                penalty = 0.02915087                penalty = 0.02297223                penalty = 0.01810318                penalty = 0.01426614                penalty = 0.01124238                penalty = 0.008859517               penalty = 0.00698171                penalty = 0.00550191                penalty = 0.00433576                penalty = 0.00341678                penalty = 0.00269258                penalty = 0.002121878           </span></span>
 <span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at</span></span>
 <span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000413, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
+<span><span class="co">#&gt; = 0.000459, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
 <span><span class="co">#&gt; especially with many blocks -- see plot_loglik() to check.</span></span>
 <span><span class="co">#&gt;   penalty = 0.001672138           </span></span>
 <span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at</span></span>
 <span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.00109, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
+<span><span class="co">#&gt; = 0.0011, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
 <span><span class="co">#&gt; especially with many blocks -- see plot_loglik() to check.</span></span>
 <span><span class="co">#&gt;   penalty = 0.001317722               penalty = 0.001038426               penalty = 0.0008183278              penalty = 0.0006448802              penalty = 0.0005081954           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
