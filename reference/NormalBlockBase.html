@@ -386,13 +386,17 @@ object; reassign the result (`model &lt;- model$best_of_inits()`).</p>
 <p>generate and select a set of candidate models
 by splitting the clusters of the current model</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">candidates_split</span><span class="op">(</span>trial_niter <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">candidates_split</span><span class="op">(</span>trial_niter <span class="op">=</span> <span class="fl">5</span>, split_rule <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>trial_niter</code></dt>
 <dd><p>number of (V)EM iterations used to cheaply score each
 candidate before the caller fully re-optimizes the best few – kept
 short on purpose.</p></dd>
+
+      <dt><code>split_rule</code></dt>
+<dd><p>passed to `split()` as its `rule`: `"kmeans"`,
+`"noise"`, or `NULL` for the family's default</p></dd>
 
 
 </dl><p></p></div>

@@ -307,17 +307,17 @@ It is not run by default (it adds real cost), so it is called explicitly
 here:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span><span class="op">$</span><span class="fu">refine</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   refine: q = 3 -- no improvement found ( split )</span></span>
+<span><span class="co">#&gt;   refine: q = 3 -- deviance 27235.92 -&gt; 27194.75 (improved via split )</span></span>
 <span><span class="co">#&gt;   refine: q = 4 -- no improvement found ( split )</span></span>
-<span><span class="co">#&gt;   refine: q = 5 -- deviance 27038.71 -&gt; 27034 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 6 -- deviance 27038.71 -&gt; 27034 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 7 -- deviance 27042.68 -&gt; 27034 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 8 -- deviance 27042.68 -&gt; 27034 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 7 -- deviance 27034 -&gt; 27034 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 6 -- deviance 27034 -&gt; 27034 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 5 -- deviance 27034 -&gt; 27034 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 5 -- no improvement found ( split )</span></span>
+<span><span class="co">#&gt;   refine: q = 6 -- no improvement found ( split )</span></span>
+<span><span class="co">#&gt;   refine: q = 7 -- deviance 27042.68 -&gt; 27038.71 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 8 -- deviance 27042.68 -&gt; 27038.71 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 7 -- deviance 27038.71 -&gt; 27034 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 6 -- deviance 27038.71 -&gt; 27034 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 5 -- deviance 27038.71 -&gt; 27034 (improved via merge )</span></span>
 <span><span class="co">#&gt;   refine: q = 4 -- deviance 27034 -&gt; 27034 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 3 -- deviance 27235.92 -&gt; 27096.46 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 3 -- deviance 27194.75 -&gt; 27096.46 (improved via merge )</span></span>
 <span><span class="co">#&gt;   refine: q = 2 -- deviance 27370.52 -&gt; 27261.14 (improved via merge )</span></span>
 <span><span class="va">out</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>criteria <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"EBIC"</span>, <span class="st">"deviance"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="zero-inflated-normal-block_files/figure-html/refine-zi-1.png" class="r-plt" alt="" width="700"></p>

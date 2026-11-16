@@ -388,7 +388,7 @@ of the current model
 
 #### Usage
 
-    NormalBlockBase$candidates_split(trial_niter = 5)
+    NormalBlockBase$candidates_split(trial_niter = 5, split_rule = NULL)
 
 #### Arguments
 
@@ -396,6 +396,11 @@ of the current model
 
   number of (V)EM iterations used to cheaply score each candidate before
   the caller fully re-optimizes the best few – kept short on purpose.
+
+- `split_rule`:
+
+  passed to \`split()\` as its \`rule\`: \`"kmeans"\`, \`"noise"\`, or
+  \`NULL\` for the family's default
 
 ------------------------------------------------------------------------
 

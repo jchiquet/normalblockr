@@ -147,14 +147,11 @@ Create a clone of the current \[\`NormalBlockMeanBase\`\] object after
 splitting cluster \`index\`. Unlike the variance-block family, Omega and
 the sparsity weights are p x p here and do not depend on q, so they
 carry over unchanged; only C (tau) and B (one column per cluster) are
-affected. Variables are split by their current noise variance (1 /
-diag(Omega)) around its within-cluster median, the same criterion
-\[NormalBlockVarBase\]'s \`split()\` uses via \`dm1\`, since
-\`diag(Omega)\` plays the same per-variable-precision role here.
+affected.
 
 #### Usage
 
-    NormalBlockMeanBase$split(index, in_place = FALSE)
+    NormalBlockMeanBase$split(index, in_place = FALSE, rule = NULL)
 
 #### Arguments
 
@@ -166,6 +163,17 @@ diag(Omega)) around its within-cluster median, the same criterion
 
   should the split be applied to the object itself, or should a copy be
   sent? Default FALSE (send a copy)
+
+- `rule`:
+
+  how the members of the cluster are divided: \`"kmeans"\` runs a
+  2-means on their own fitted mean trajectories \`X B_ols\` (each
+  variable's unconstrained least-squares profile, the quantity the
+  initial clustering is computed on); \`"noise"\` cuts them at the
+  median of their noise variance \`1 / diag(Omega)\`. Default \`NULL\`,
+  resolved to \`"noise"\` for this family: with it, \`refine()\` removes
+  slightly more deviance on every seed of \`brca_rppa\` (about 1.7 1
+  differs (\`inst/mean_block_analyses/split_rule_comparison.R\`).
 
 #### Returns
 

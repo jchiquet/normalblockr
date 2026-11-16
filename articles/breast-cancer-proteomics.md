@@ -187,60 +187,60 @@ leave unchanged) each model it touches.
 ``` r
 
 NB_prot_subtype$refine()
-#>   refine: q = 2 -- no improvement found ( split )
-#>   refine: q = 3 -- no improvement found ( split )
+#>   refine: q = 2 -- deviance 146766.1 -> 146766.1 (improved via split )
+#>   refine: q = 3 -- deviance 142087.1 -> 142087.1 (improved via split )
 #>   refine: q = 4 -- no improvement found ( split )
 #>   refine: q = 5 -- no improvement found ( split )
-#>   refine: q = 6 -- deviance 138548.1 -> 138420.2 (improved via split )
-#>   refine: q = 7 -- no improvement found ( split )
-#>   refine: q = 8 -- deviance 137071.8 -> 137054.2 (improved via split )
+#>   refine: q = 6 -- deviance 138548.1 -> 138409.3 (improved via split )
+#>   refine: q = 7 -- deviance 137802.5 -> 137629 (improved via split )
+#>   refine: q = 8 -- no improvement found ( split )
 #>   refine: q = 9 -- no improvement found ( split )
-#>   refine: q = 10 -- deviance 136359.2 -> 136183.7 (improved via split )
+#>   refine: q = 10 -- no improvement found ( split )
 #>   refine: q = 11 -- no improvement found ( split )
-#>   refine: q = 12 -- no improvement found ( split )
-#>   refine: q = 13 -- deviance 135413.1 -> 135403.3 (improved via split )
-#>   refine: q = 14 -- no improvement found ( split )
-#>   refine: q = 15 -- deviance 135159 -> 134883.8 (improved via split )
-#>   refine: q = 16 -- deviance 134925.2 -> 134674.1 (improved via split )
-#>   refine: q = 17 -- deviance 134716 -> 134471.4 (improved via split )
-#>   refine: q = 18 -- deviance 134556 -> 134356.6 (improved via split )
-#>   refine: q = 19 -- deviance 134474 -> 134075.5 (improved via split )
-#>   refine: q = 20 -- deviance 134390.4 -> 133894.3 (improved via split )
-#>   refine: q = 21 -- deviance 133657 -> 133220.8 (improved via split )
-#>   refine: q = 22 -- deviance 133386.1 -> 133017.8 (improved via split )
-#>   refine: q = 23 -- deviance 133032.2 -> 132929.8 (improved via split )
-#>   refine: q = 24 -- deviance 132876.8 -> 132876.3 (improved via split )
-#>   refine: q = 25 -- deviance 132833.9 -> 132723.8 (improved via split )
-#>   refine: q = 26 -- deviance 132714.6 -> 132676.5 (improved via split )
-#>   refine: q = 27 -- no improvement found ( split )
-#>   refine: q = 28 -- deviance 132100.6 -> 131954.4 (improved via split )
-#>   refine: q = 29 -- deviance 132026 -> 131741.2 (improved via split )
-#>   refine: q = 30 -- deviance 131826.3 -> 131441.7 (improved via split )
-#>   refine: q = 29 -- deviance 131741.2 -> 131459.4 (improved via merge )
-#>   refine: q = 28 -- deviance 131954.4 -> 131510.3 (improved via merge )
-#>   refine: q = 27 -- deviance 132248.1 -> 131620.5 (improved via merge )
-#>   refine: q = 26 -- deviance 132676.5 -> 131804 (improved via merge )
-#>   refine: q = 25 -- deviance 132723.8 -> 132031.3 (improved via merge )
-#>   refine: q = 24 -- deviance 132876.3 -> 132198.7 (improved via merge )
-#>   refine: q = 23 -- deviance 132929.8 -> 132459.1 (improved via merge )
-#>   refine: q = 22 -- deviance 133017.8 -> 132617.6 (improved via merge )
-#>   refine: q = 21 -- deviance 133220.8 -> 132756.5 (improved via merge )
-#>   refine: q = 20 -- deviance 133894.3 -> 133057.6 (improved via merge )
-#>   refine: q = 19 -- deviance 134075.5 -> 133312.2 (improved via merge )
-#>   refine: q = 18 -- deviance 134356.6 -> 133635.2 (improved via merge )
-#>   refine: q = 17 -- deviance 134471.4 -> 133955.1 (improved via merge )
-#>   refine: q = 16 -- deviance 134674.1 -> 134088.1 (improved via merge )
-#>   refine: q = 15 -- deviance 134883.8 -> 134311.4 (improved via merge )
-#>   refine: q = 14 -- deviance 135242.5 -> 134456.8 (improved via merge )
-#>   refine: q = 13 -- deviance 135403.3 -> 134846.6 (improved via merge )
-#>   refine: q = 12 -- deviance 135679.5 -> 135135.9 (improved via merge )
-#>   refine: q = 11 -- deviance 135862.7 -> 135589 (improved via merge )
-#>   refine: q = 10 -- deviance 136183.7 -> 135980.9 (improved via merge )
-#>   refine: q = 9 -- deviance 136709.9 -> 136497.4 (improved via merge )
-#>   refine: q = 8 -- deviance 137054.2 -> 137004.5 (improved via merge )
-#>   refine: q = 7 -- deviance 137802.5 -> 137722.9 (improved via merge )
+#>   refine: q = 12 -- deviance 135679.5 -> 135617 (improved via split )
+#>   refine: q = 13 -- deviance 135413.1 -> 135323.2 (improved via split )
+#>   refine: q = 14 -- deviance 135242.5 -> 134745.8 (improved via split )
+#>   refine: q = 15 -- deviance 135159 -> 134481.4 (improved via split )
+#>   refine: q = 16 -- deviance 134925.2 -> 134204.1 (improved via split )
+#>   refine: q = 17 -- deviance 134716 -> 134007.7 (improved via split )
+#>   refine: q = 18 -- deviance 134556 -> 133866 (improved via split )
+#>   refine: q = 19 -- deviance 134474 -> 133396.9 (improved via split )
+#>   refine: q = 20 -- deviance 134390.4 -> 133069.9 (improved via split )
+#>   refine: q = 21 -- deviance 133657 -> 132901.5 (improved via split )
+#>   refine: q = 22 -- deviance 133386.1 -> 132693.7 (improved via split )
+#>   refine: q = 23 -- deviance 133032.2 -> 132493.8 (improved via split )
+#>   refine: q = 24 -- deviance 132876.8 -> 132117.1 (improved via split )
+#>   refine: q = 25 -- deviance 132833.9 -> 131966.6 (improved via split )
+#>   refine: q = 26 -- deviance 132714.6 -> 131810.2 (improved via split )
+#>   refine: q = 27 -- deviance 132248.1 -> 131693.7 (improved via split )
+#>   refine: q = 28 -- deviance 132100.6 -> 131565.2 (improved via split )
+#>   refine: q = 29 -- deviance 132026 -> 131411.8 (improved via split )
+#>   refine: q = 30 -- deviance 131826.3 -> 131099.6 (improved via split )
+#>   refine: q = 29 -- deviance 131411.8 -> 131253.5 (improved via merge )
+#>   refine: q = 28 -- deviance 131565.2 -> 131430.8 (improved via merge )
+#>   refine: q = 27 -- deviance 131693.7 -> 131487 (improved via merge )
+#>   refine: q = 26 -- deviance 131810.2 -> 131664.6 (improved via merge )
+#>   refine: q = 25 -- deviance 131966.6 -> 131819.6 (improved via merge )
+#>   refine: q = 24 -- deviance 132117.1 -> 131996.6 (improved via merge )
+#>   refine: q = 23 -- deviance 132493.8 -> 132155.4 (improved via merge )
+#>   refine: q = 22 -- deviance 132693.7 -> 132355.2 (improved via merge )
+#>   refine: q = 21 -- deviance 132901.5 -> 132570.1 (improved via merge )
+#>   refine: q = 20 -- deviance 133069.9 -> 132730 (improved via merge )
+#>   refine: q = 19 -- deviance 133396.9 -> 132936.9 (improved via merge )
+#>   refine: q = 18 -- deviance 133866 -> 133157.8 (improved via merge )
+#>   refine: q = 17 -- deviance 134007.7 -> 133349.3 (improved via merge )
+#>   refine: q = 16 -- deviance 134204.1 -> 133628.1 (improved via merge )
+#>   refine: q = 15 -- deviance 134481.4 -> 133903.8 (improved via merge )
+#>   refine: q = 14 -- deviance 134745.8 -> 134229.2 (improved via merge )
+#>   refine: q = 13 -- deviance 135323.2 -> 134640.8 (improved via merge )
+#>   refine: q = 12 -- deviance 135617 -> 135026.4 (improved via merge )
+#>   refine: q = 11 -- deviance 135862.7 -> 135434.9 (improved via merge )
+#>   refine: q = 10 -- deviance 136359.2 -> 135851.8 (improved via merge )
+#>   refine: q = 9 -- deviance 136709.9 -> 136404.3 (improved via merge )
+#>   refine: q = 8 -- deviance 137071.8 -> 136920.9 (improved via merge )
+#>   refine: q = 7 -- no improvement found ( merge )
 #>   refine: q = 6 -- no improvement found ( merge )
-#>   refine: q = 5 -- no improvement found ( merge )
+#>   refine: q = 5 -- deviance 139187.3 -> 139187.3 (improved via merge )
 #>   refine: q = 4 -- deviance 140446 -> 140393.1 (improved via merge )
 #>   refine: q = 3 -- deviance 142087.1 -> 142080.9 (improved via merge )
 #>   refine: q = 2 -- no improvement found ( merge )
@@ -280,7 +280,37 @@ the graphical-lasso penalty on $`\Omega`$ explored over a path of values
 group_selected <- selected_NB_refined$clustering |> normalblockr:::as_indicator()
 NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE, control = NB_control(min_ratio=0.001))
 #> Fitting a Collection of diagonal normal-block-var models with fixed blocks, with different sparsity penalties. 
-#>   penalty = 0.662582              penalty = 0.5221453             penalty = 0.4114746             penalty = 0.3242611             penalty = 0.2555327             penalty = 0.2013716             penalty = 0.1586901             penalty = 0.1250552             penalty = 0.09854927                penalty = 0.07766139                penalty = 0.06120077                penalty = 0.04822904                penalty = 0.03800671                penalty = 0.02995105                penalty = 0.02360281                penalty = 0.01860011                penalty = 0.01465775                penalty = 0.01155098                penalty = 0.009102709               penalty = 0.007173356               penalty = 0.005652936               penalty = 0.004454776               penalty = 0.003510569               penalty = 0.002766491               penalty = 0.002180123               penalty = 0.001718038               penalty = 0.001353893               penalty = 0.001066931               penalty = 0.0008407907              penalty = 0.000662582           
+#>   penalty = 0.5081954             penalty = 0.4004815             penalty = 0.315598              penalty = 0.2487058             penalty = 0.1959917             penalty = 0.1544505           
+#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> the niter cap (500) without reaching the convergence threshold (last increment
+#> = 0.000535, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> especially with many blocks -- see plot_loglik() to check.
+#>   penalty = 0.1217142           
+#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> the niter cap (500) without reaching the convergence threshold (last increment
+#> = 0.000981, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> especially with many blocks -- see plot_loglik() to check.
+#>   penalty = 0.09591639           
+#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> the niter cap (500) without reaching the convergence threshold (last increment
+#> = 0.000623, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> especially with many blocks -- see plot_loglik() to check.
+#>   penalty = 0.07558655           
+#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> the niter cap (500) without reaching the convergence threshold (last increment
+#> = 0.000326, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> especially with many blocks -- see plot_loglik() to check.
+#>   penalty = 0.0595657             penalty = 0.04694053                penalty = 0.03699131                penalty = 0.02915087                penalty = 0.02297223                penalty = 0.01810318                penalty = 0.01426614                penalty = 0.01124238                penalty = 0.008859517               penalty = 0.00698171                penalty = 0.00550191                penalty = 0.00433576                penalty = 0.00341678                penalty = 0.00269258                penalty = 0.002121878           
+#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> the niter cap (500) without reaching the convergence threshold (last increment
+#> = 0.000459, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> especially with many blocks -- see plot_loglik() to check.
+#>   penalty = 0.001672138           
+#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> the niter cap (500) without reaching the convergence threshold (last increment
+#> = 0.0011, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> especially with many blocks -- see plot_loglik() to check.
+#>   penalty = 0.001317722               penalty = 0.001038426               penalty = 0.0008183278              penalty = 0.0006448802              penalty = 0.0005081954           
 #> DONE
 ```
 
@@ -295,7 +325,7 @@ plot(NB_prot_sparse, c("EBIC", "deviance"))
 
 sparse_best <- NB_prot_sparse$get_best_model("EBIC")
 paste0("BIC selects a penalty of ", round(sparse_best$sparsity, 4), ".")
-#> [1] "BIC selects a penalty of 0.0045."
+#> [1] "BIC selects a penalty of 0.0143."
 ```
 
 ``` r

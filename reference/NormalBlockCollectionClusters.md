@@ -148,7 +148,8 @@ empirical evidence.
       trial_niter = 2,
       max_candidates = 30,
       directions = c("split", "merge"),
-      verbose = self$control$verbose
+      verbose = self$control$verbose,
+      split_rule = NULL
     )
 
 #### Arguments
@@ -175,6 +176,13 @@ empirical evidence.
   whether to print, for each q attempted, whether the candidate from
   that neighbor improved on it. Defaults to \`control\$verbose\` (the
   value set at construction, see \[NB_control()\]).
+
+- `split_rule`:
+
+  how a cluster is split to seed the q + 1 model, see the \`rule\`
+  argument of the models' \`split()\`: \`"kmeans"\`, \`"noise"\`, or
+  \`NULL\` (default) for the family's own default (\`"kmeans"\` for the
+  variance-block family, \`"noise"\` for the mean-block one).
 
 #### Returns
 

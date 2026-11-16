@@ -54,6 +54,14 @@
 <li>On <code>brca_rppa</code>, the mean-block ICL now selects 50 clusters instead of 70 over <code>seq(5, 120, 5)</code>; the variance-block BIC selection is unchanged.</li>
 </ul></div>
 <div class="section level3">
+<h3 id="better-split-and-merge-candidates-in-refine-development-version">Better split and merge candidates in <code>refine()</code>
+<a class="anchor" aria-label="anchor" href="#better-split-and-merge-candidates-in-refine-development-version"></a></h3>
+<ul><li>Variance-block merge candidates are ranked by the <strong>signed</strong> correlation between the two blocks’ latent signals instead of <code>|Omega_kl|</code>. Within a block, two variables necessarily covary positively (their covariance is <code>Sigma_kk &gt; 0</code>), so merging two anticorrelated blocks is never a sensible candidate; the former ranking tried those first.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/split.html" class="external-link">split()</a></code> gains a <code>rule</code> argument, and <code>refine()</code> / <code>candidates_split()</code> a <code>split_rule</code> one: <code>"kmeans"</code> divides a cluster by a 2-means on its members’ columns of residuals (variance-block) or least-squares trajectories (mean-block), <code>"noise"</code> at the median of their noise variances (the former rule). The default is family-specific: <code>"kmeans"</code> for the variance-block family, <code>"noise"</code> for the mean-block one, where the two rules are close and <code>"noise"</code> is slightly ahead on real data (<code>inst/mean_block_analyses/split_rule_comparison.R</code>).</li>
+<li>On <code>brca_rppa</code>, <code>refine()</code> now lowers the variance-block deviance summed over <code>q = 1:30</code> by 22,166 instead of 15,758, and runs faster; the selected <code>q</code> moves from 27 to 22.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="graphical-lasso-shared-with-plnmodels-development-version">Graphical lasso shared with PLNmodels<a class="anchor" aria-label="anchor" href="#graphical-lasso-shared-with-plnmodels-development-version"></a></h3>
 <ul><li>
 <code>src/graphical_lasso.h</code> is now the very same file as in PLNmodels, which ported the same glassoFast Fortran: the two copies had drifted apart. It is shared verbatim (namespace <code>graphical_lasso</code>), and brings to normalblockr:
