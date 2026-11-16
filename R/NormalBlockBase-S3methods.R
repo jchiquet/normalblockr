@@ -86,7 +86,11 @@ logLik.NormalBlockBase <- function(object, ...) {
 
 #' @title Bayesian Information Criterion for a Normal-Block Model
 #' @description Extracts the (variational) BIC of a fitted normal-block
-#' model, computed as `deviance + log(n) * nb_param` (lower is better).
+#' model, computed as `deviance + penalty` (lower is better). The penalty
+#' charges each group of parameters the log of the number of observations
+#' informing it (see the `penalty_terms` field of [NormalBlockBase]), so it
+#' differs from `stats::BIC()`'s default `log(nobs) * df` computed from
+#' [logLik()].
 #' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return A scalar: the (variational) BIC.

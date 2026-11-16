@@ -26,8 +26,6 @@ model$clustering
 
     \item{\code{model_par}}{a list with model parameters: B, Omega and kappa (zero-inflation probabilities)}
 
-    \item{\code{nb_param}}{number of parameters in the model}
-
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }
   \if{html}{\out{</div>}}

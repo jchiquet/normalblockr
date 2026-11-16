@@ -38,6 +38,11 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
 
+    ## zero-inflation coefficients: d0 per variable, informed by its n observations
+    penalty_groups = function() {
+      rbind(super$penalty_groups(), penalty_group("kappa", self$p * self$d0, self$n))
+    },
+
     get_heuristic_parameters = function(){
       zi_diag <- private$zi_diag_normal_inference()
       Sigmaq  <- private$heuristic_Sigmaq_from_Sigma(cov(zi_diag$R))
@@ -80,18 +85,6 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
   active = list(
     #' @field posterior_par a list with the parameters of posterior distribution W | Y
     posterior_par = function() list(gamma = private$gamma, mu = private$mu),
-    #' @field entropy Entropy of the conditional distribution
-    entropy    = function() {
-      if (!private$approx){
-        log_det_Gamma <- private$gamma %>%
-          map(determinant, logarithm = TRUE) %>%
-          map("modulus") %>% map(as.numeric) %>% unlist()
-        res <- .5 * (self$n * self$q * log(2*pi*exp(1)) + sum(log_det_Gamma))
-      } else {res <- NA}
-      res
-    },
-    #' @field nb_param number of parameters in the model
-    nb_param = function() super$nb_param + self$p * self$d0, # adding kappa
     #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix), kappa (zero-inflation probabilities)
     model_par  = function() {
       par       <- super$model_par

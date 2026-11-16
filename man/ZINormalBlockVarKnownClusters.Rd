@@ -21,10 +21,6 @@ model$clustering
   \describe{
     \item{\code{posterior_par}}{a list with the parameters of posterior distribution W | Y}
 
-    \item{\code{entropy}}{Entropy of the conditional distribution}
-
-    \item{\code{nb_param}}{number of parameters in the model}
-
     \item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix), kappa (zero-inflation probabilities)}
 
     \item{\code{fitted}}{Y values predicted by the model, in Y's original units}

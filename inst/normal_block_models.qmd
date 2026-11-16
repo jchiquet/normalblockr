@@ -393,6 +393,38 @@ where $\hat\Sigma$ is the corresponding M-step covariance estimate of each varia
 
 The **mean-block unknown-clusters criterion (§10.2)** needs no such correction, for a different reason than the known-clusters case above: it is not a profiled shortcut to begin with. Its ELBO (the formula in §10.2) is written out in full from $(B,\Omega)$ -- via $\log|\Omega|$ and the trace terms $\mathrm{tr}(\bar R\,\Omega\,\bar R^\top) + \mathrm{tr}(\Phi M)$ -- and never assumes $\Omega=\hat\Sigma^{-1}$ at any point, sparse or not; the penalty term is simply subtracted from it directly (`NormalBlockMeanUnknownClusters::objective()`, `src/normal_block_mean_unknown_clusters.h`).
 
+### Model-selection criteria
+
+Every variant reports the same three criteria (`R/NormalBlockBase.R`), on the deviance scale (lower is better), from $J$ the criterion of its section above: the exact log-likelihood for known clusters (§1-2, §6-7, §10.1, §11), and also for the mean-block family with a diagonal or spherical $\Sigma$ even when the clusters are unknown -- the columns of $Y$ are then independent given $C$, so the mean-field posterior over $C$ is exact and the VEM is a genuine EM -- and the ELBO otherwise (§3-4, §8-9, §10.2 with a full $\Sigma$).
+
+**BIC: one penalty per group of parameters.** Following the ICL of @daudin2008mixture for stochastic block models and of @keribin2015lbm for latent block models, a group of $\nu_g$ free parameters is charged $\nu_g\log N_g$, with $N_g$ the number of independent observations informing it rather than $n$ throughout:
+
+$$\mathrm{BIC} = -2J + \sum_g \nu_g \log N_g .$$
+
+| group | variance-block $\nu_g$ | mean-block $\nu_g$ | $N_g$ |
+|------------------------|------------------------|------------------------|------------------------|
+| cluster proportions $\alpha$ (unknown clusters) | $q-1$ | $q-1$ | $p$ |
+| variable-specific regression coefficients | $pd$ | -- | $n$ |
+| cluster profiles $\beta_k$ (columns of $B$) | -- | $qd$ | $np$ |
+| diagonal noise $d_j$ / $w_j$ | $p$ | $p$ | $n$ |
+| spherical noise | $1$ | $1$ | $np$ |
+| precision matrix: diagonal + non-zero off-diagonal terms | $q + \lvert E\rvert$ | $p + \lvert E\rvert$ (full $\Sigma$) | $n$ |
+| zero-inflation coefficients $\kappa$ | $p\,d_0$ | $p\,d_0$ | $n$ |
+
+The variables are the units being clustered, hence $\log p$ for $\alpha$; a cluster profile $\beta_k$ is shared by all the $n\times p_k$ cells of its block, hence the $\log(np)$ of a latent block model's block parameters, and the same holds for a spherical variance. `penalty_terms` returns this table for a fitted model, `penalty` its total and `nb_param` $=\sum_g\nu_g$ (the `df` of `logLik()`).
+
+**ICL: the partition alone is completed.** As in @biernacki2000icl, the ICL completes the discrete clustering only, the latent vectors $W$ of the variance-block family being integrated out: since $\mathbb E_\tau[\log p(Y,C)] \ge J - \mathcal H(\tau)$ (§3's ELBO splits as an expected complete log-likelihood in $(W,C)$ plus the entropies of $W$ and of $C$),
+
+$$\mathrm{ICL} = \mathrm{BIC} + 2\,\mathcal H(\tau), \qquad \mathcal H(\tau) = -\sum_{jk}\tau_{jk}\log\tau_{jk},$$
+
+so that $\mathrm{ICL} = \mathrm{BIC}$ for a known clustering. (An earlier version also added the Gaussian entropy of $W$, $\tfrac{nq}2\log(2\pi e) + \tfrac n2\sum_k\log S_k$, which made the ICL differ from the BIC even for known clusters and depend on the scale of the data.)
+
+**EBIC.** The extended BIC of @foygel2010ebic with $\gamma = 1/2$, on the network the sparsity acts on:
+
+$$\mathrm{EBIC} = \mathrm{BIC} + 2\,\lvert E\rvert \log(\mathrm{dim}), \qquad \mathrm{dim} = q \ \text{(variance-block)}, \quad p \ \text{(mean-block, full } \Sigma).$$
+
+**Open point.** Under `sparsity > 0`, $\lvert E\rvert$ counts the non-zero off-diagonal terms of $\hat\Omega$ (the degrees of freedom of the lasso). For the mean-block family with a full $\Sigma$ this makes the BIC non-monotone in $q$ whenever a larger $q$ leaves $\hat\Omega$ sparser (`inst/mean_block_analyses/nestor_protocol_qsel_unpenalised.R`); the diagonal default is unaffected.
+
 # Part II -- Implementation and numerical notes
 
 Nothing in this part changes any model of Part I. It records how those formulas are actually evaluated, which shortcuts are exact and which are approximations, and the numerical traps found along the way.

@@ -16,7 +16,11 @@ A scalar: the (variational) BIC.
 }
 \description{
 Extracts the (variational) BIC of a fitted normal-block
-model, computed as `deviance + log(n) * nb_param` (lower is better).
+model, computed as `deviance + penalty` (lower is better). The penalty
+charges each group of parameters the log of the number of observations
+informing it (see the `penalty_terms` field of [NormalBlockBase]), so it
+differs from `stats::BIC()`'s default `log(nobs) * df` computed from
+[logLik()].
 }
 \examples{
 ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)

@@ -40,6 +40,10 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    ## zero-inflation coefficients: d0 per variable, informed by its n observations
+    penalty_groups = function() {
+      rbind(super$penalty_groups(), penalty_group("kappa", self$p * self$data$d0, self$n))
+    },
     optim_initialize = function() {
       if (private$warm_started) list(B = private$B, Omega = private$Omega)
       else private$get_heuristic_parameters()
@@ -83,8 +87,6 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
     },
     #' @field model_par a list with model parameters: B, Omega and kappa (zero-inflation probabilities)
     model_par = function() c(super$model_par, list(kappa = private$kappa)),
-    #' @field nb_param number of parameters in the model
-    nb_param = function() as.integer(super$nb_param + self$p * self$data$d0), # adding kappa
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
     {paste("zero-inflated", private$res_covariance, "normal-block-mean model with fixed blocks")}

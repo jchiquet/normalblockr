@@ -40,6 +40,11 @@ NormalBlockVarUnknownClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
 
+    ## cluster proportions: q - 1 parameters, informed by the p variables
+    penalty_groups = function() {
+      rbind(super$penalty_groups(), penalty_group("alpha", self$q - 1, self$p))
+    },
+
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for heuristic inference -----------------------
 
@@ -96,18 +101,12 @@ NormalBlockVarUnknownClusters <- R6::R6Class(
       parameters       <- super$model_par
       parameters$alpha <- private$alpha
       parameters},
-    #' @field nb_param number of parameters in the model
-    nb_param = function() {as.integer(super$nb_param + self$q - 1)}, # adding alpha
     #' @field var_par a list with the matrices of the variational parameters: M (means), S (variances), tau (posterior group probabilities)
     var_par    = function() list(M = private$M,  S = private$S, tau = private$C),
-    #' @field entropy Entropy of the conditional distribution
-    entropy    = function() {
-      if (!private$approx){
-        res <- .5 * self$n * self$q * log(2 * pi * exp(1)) + .5 * self$n * sum(log(private$S))
-        res <- res - sum(xlogx(private$C))
-      } else {res <- NA}
-      res
-    },
+    #' @field entropy entropy of the variational distribution of the
+    #' clustering, `-sum(tau * log(tau))` (W is integrated out, not completed:
+    #' see [NormalBlockBase]'s `ICL`)
+    entropy    = function() if (private$approx) NA else -sum(xlogx(private$C)),
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
       res <- if (private$approx) {

@@ -1,9 +1,10 @@
-set.seed(1234)
-ex     <- generate_normal_block_mean_data(n = 100, p = 20, d = 2, q = 3)
-truth  <- apply(ex$parameters$C, 1, which.max)
-data0  <- NormalBlockData$new(ex$Y, ex$X)
-Yzi    <- ex$Y; Yzi[runif(length(Yzi)) < 0.25] <- 0
-datazi <- NormalBlockData$new(Yzi, ex$X)
+## Frozen fixture (see testdata/test_data_generation.R): data simulated on the
+## fly differ across BLAS/LAPACK builds, which made the ARI check below fail
+## on some platforms only.
+testdata <- readRDS("testdata/testdata_normal_mean_block_zi.RDS")
+truth  <- apply(testdata$C, 1, which.max)
+data0  <- NormalBlockData$new(testdata$Y, testdata$X)
+datazi <- NormalBlockData$new(testdata$Yzi, testdata$X)
 ctrl   <- NB_control(verbose = FALSE)
 
 test_that("with no zeros at all, the ZI model reduces to the plain diagonal one", {
@@ -14,10 +15,11 @@ test_that("with no zeros at all, the ZI model reduces to the plain diagonal one"
 })
 
 test_that("the VEM increases the ELBO at every iteration and recovers the clustering", {
+  set.seed(1) # the kmeans initialization draws random starts
   fit <- normal_block(datazi, 3, model = "mean", zero_inflation = TRUE, control = ctrl)
   expect_true(all(diff(fit$objective) > -1e-8))
   expect_gt(aricode::ARI(fit$clustering, truth), 0.8)
-  expect_equal(dim(fit$fitted), dim(ex$Y))
+  expect_equal(dim(fit$fitted), dim(testdata$Y))
   expect_true(all(fit$fitted[datazi$zeros == 1] == 0))
 })
 

@@ -167,6 +167,21 @@ NormalBlockMeanBase <- R6::R6Class(
     ## kmeans first: benchmarked better than ward2 for this family
     default_inits     = c("kmeans", "ward2", "spectral"),
     res_covariance    = NA, # shape of Sigma: "full", "diagonal" or "spherical"
+
+    ## Each cluster profile beta_k is shared by every cell of its block, hence
+    ## charged log(n * p) like the block parameters of a latent block model;
+    ## so is a spherical variance. Per-variable variances and a full
+    ## precision matrix (diagonal plus non-zero off-diagonal terms) are
+    ## informed by the n observations.
+    penalty_groups = function() {
+      cov <- switch(private$res_covariance,
+                    "full"      = penalty_group("Omega", self$p + self$n_edges, self$n),
+                    "diagonal"  = penalty_group("noise", self$p, self$n),
+                    "spherical" = penalty_group("noise", 1, self$n * self$p))
+      rbind(penalty_group("B", self$q * self$d, self$n * self$p), cov)
+    },
+    ## the network relates the p variables (full Sigma only)
+    network_dim = function() self$p,
     Psi               = NA,
     Phi               = NA,
     Lambda            = NA,
@@ -220,14 +235,6 @@ NormalBlockMeanBase <- R6::R6Class(
   active = list(
     #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`): use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
     model_par = function() list(B = private$B, Omega = private$Omega),
-    #' @field nb_param number of parameters in the model
-    nb_param = function() {
-      n_cov <- switch(private$res_covariance,
-                      "full"      = self$p + self$n_edges,
-                      "diagonal"  = self$p,
-                      "spherical" = 1L)
-      as.integer(self$q * self$d + n_cov)
-    },
     #' @field sparsity_weights (weights associated to each pair of groups)
     sparsity_weights = function(value) {
       if (missing(value)) {

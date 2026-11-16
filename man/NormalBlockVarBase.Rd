@@ -29,8 +29,6 @@ coefficients on the internal fitting scale.}
 
     \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
 
-    \item{\code{nb_param}}{number of parameters in the model}
-
     \item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
 
     \item{\code{dm1_original}}{inverse residual variance per variable
