@@ -17,7 +17,8 @@ NB_control(
   verbose = TRUE,
   heuristic = FALSE,
   noise_covariance = NULL,
-  refine = FALSE
+  refine = FALSE,
+  acceleration = TRUE
 )
 }
 \arguments{
@@ -81,6 +82,12 @@ parameters otherwise drown the mean structure BIC/ICL are weighing. Use
 `optimize()` should automatically call `refine()` afterwards. Default
 `FALSE` since it adds real cost; call `collection$refine()` directly at
 any point afterwards for the same effect without setting this.}
+
+\item{acceleration}{whether the (V)EM is accelerated by SQUAREM
+(Varadhan & Roland, 2008), an extrapolation built on two successive (V)EM
+steps and accepted only if it does not lower the objective. Default `TRUE`;
+it is never attempted when `sparsity > 0`. Set to `FALSE` to run plain
+(V)EM, e.g. to measure what the acceleration buys.}
 }
 \value{
 A named list of parameters to pass to [normal_block()]'s `control`

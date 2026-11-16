@@ -31,11 +31,15 @@ public:
   virtual std::unique_ptr<NormalBlockEMBase> clone() const = 0;
   virtual void restore_from(const NormalBlockEMBase& other) = 0;
 
+  // Lets the caller turn SQUAREM off (NB_control(acceleration = FALSE)), e.g.
+  // to measure what it buys; it only ever runs where supports_acceleration().
+  void set_acceleration(bool accelerate) { accelerate_requested_ = accelerate; }
+
   void run_em(int maxit, double tol) {
     objective_trace_.clear();
     objective_trace_.push_back(objective());
     niter_ = 0;
-    if (!supports_acceleration()) {
+    if (!(accelerate_requested_ && supports_acceleration())) {
       for (int h = 0; h < maxit; ++h) {
         em_cycle();
         objective_trace_.push_back(objective());
@@ -93,6 +97,7 @@ protected:
 private:
   std::vector<double> objective_trace_;
   int niter_ = 0;
+  bool accelerate_requested_ = true;
 
   // One SQUAREM cycle from the current (p2, objective() == obj2) state;
   // backtracks the steplength (Varadhan & Roland's scheme) until the

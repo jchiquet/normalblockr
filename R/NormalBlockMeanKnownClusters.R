@@ -90,6 +90,7 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
         B0 = init$B, Omega0 = init$Omega,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
         noise_covariance = private$res_covariance,
+        accelerate = !isFALSE(control$acceleration),
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter
