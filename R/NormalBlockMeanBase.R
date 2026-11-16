@@ -110,9 +110,10 @@ NormalBlockMeanBase <- R6::R6Class(
     #' variable's unconstrained least-squares profile, the quantity the
     #' initial clustering is computed on); `"noise"` cuts them at the median of
     #' their noise variance `1 / diag(Omega)`. Default `NULL`, resolved to
-    #' `"noise"` for this family: on `brca_rppa` the two rules are close, with
-    #' `refine()` lowering the deviance summed over q = 1..40 by 21,757 with
-    #' `"noise"` and 21,387 with `"kmeans"`.
+    #' `"noise"` for this family: with it, `refine()` removes slightly more
+    #' deviance on every seed of `brca_rppa` (about 1.7%) and `onema` (under
+    #' 1%), the two rules tie on simulated data, and the selected q never
+    #' differs (`inst/mean_block_analyses/split_rule_comparison.R`).
     #' @return A new [`NormalBlockMeanBase`] object
     split = function(index, in_place = FALSE, rule = NULL) {
       ## split2 moves to the new cluster q + 1, split1 stays in `index`

@@ -37,7 +37,9 @@ The criteria change, so the number of clusters they select can change too.
   columns of residuals (variance-block) or least-squares trajectories
   (mean-block), `"noise"` at the median of their noise variances (the former
   rule). The default is family-specific: `"kmeans"` for the variance-block
-  family, `"noise"` for the mean-block one.
+  family, `"noise"` for the mean-block one, where the two rules are close
+  and `"noise"` is slightly ahead on real data
+  (`inst/mean_block_analyses/split_rule_comparison.R`).
 * On `brca_rppa`, `refine()` now lowers the variance-block deviance summed
   over `q = 1:30` by 22,166 instead of 15,758, and runs faster; the selected
   `q` moves from 27 to 22.
