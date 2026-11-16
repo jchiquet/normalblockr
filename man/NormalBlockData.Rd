@@ -18,7 +18,10 @@ c(n = data$n, p = data$p, d = data$d)
     \item{\code{Y}}{the matrix of responses (rescaled column-wise if `scale = TRUE`)}
 
     \item{\code{Y_scale}}{the per-column standard deviation Y was divided by (all
-1's if `scale = FALSE`)}
+1's if Y was not rescaled)}
+
+    \item{\code{scale}}{the `scale` argument as given: `TRUE`, `FALSE`, or `NULL`
+for the family default (see `for_family()`)}
 
     \item{\code{X}}{the matrix of covariates}
 
@@ -54,6 +57,7 @@ c(n = data$n, p = data$p, d = data$d)
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockData-initialize}{\code{NormalBlockData$new()}}
+    \item \href{#method-NormalBlockData-for_family}{\code{NormalBlockData$for_family()}}
     \item \href{#method-NormalBlockData-ols_fit}{\code{NormalBlockData$ols_fit()}}
     \item \href{#method-NormalBlockData-zi_ols_fit}{\code{NormalBlockData$zi_ols_fit()}}
     \item \href{#method-NormalBlockData-zi_fit}{\code{NormalBlockData$zi_fit()}}
@@ -72,7 +76,7 @@ c(n = data$n, p = data$p, d = data$d)
   X,
   X0 = NULL,
   formula = NULL,
-  scale = TRUE,
+  scale = NULL,
   zeros = NULL
 )}
     \if{html}{\out{</div>}}
@@ -85,12 +89,38 @@ c(n = data$n, p = data$p, d = data$d)
       \item{\code{X0}}{zero-inflation design matrix, if applicable.}
       \item{\code{formula}}{describes the relationship between Y and X, useful if not all of X's covariates should be used.}
       \item{\code{scale}}{whether to rescale each column of Y by its own standard
-deviation (no centering). Default TRUE, see the class-level
-documentation for the rationale and its limits.}
+deviation (no centering): `NULL` (default) for the model family's
+default, see the class-level documentation and `for_family()`.}
       \item{\code{zeros}}{an optional 0/1 matrix of structural zeros, overriding the
 default `Y == 0`.}
     }
     \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockData-for_family"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockData-for_family}{}}}
+\subsection{\code{NormalBlockData$for_family()}}{
+  The data a model of the given family is fitted on. When
+`scale` was given explicitly, the object itself. Otherwise (`scale =
+NULL`) the family decides: the object itself, unscaled, for the
+mean-block family; a rescaled copy for the variance-block family,
+built once and shared by every model fitted on it.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockData$for_family(model = c("var", "mean"))}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{model}}{the model family, `"var"` or `"mean"`}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a [`NormalBlockData`] object
   }
 }
 

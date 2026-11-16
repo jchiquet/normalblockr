@@ -1,5 +1,24 @@
 # normalblockr (development version)
 
+## Rescaling of Y now depends on the model family
+
+The fits of mean-block models on default data change.
+
+* `NormalBlockData$new()` gains `scale = NULL` as its default: the model
+  family decides when a model is fitted. Variance-block models keep
+  rescaling each column of Y by its standard deviation; mean-block models no
+  longer do. `scale = TRUE` or `FALSE` forces either for both families.
+* Rescaling breaks the mean-block model, whose variables share a mean profile
+  within a block: on `brca_rppa` and `onema` the unscaled mean-block fit has
+  the better exact ICL on the original scale, while the rescaled one wins for
+  the variance-block model. On data simulated from either model, rescaling
+  makes every criterion over-select the number of clusters.
+* `normal_block_sequential()` hands the residuals of its mean-block stage to
+  the variance-block stage with the same `scale` request, so each stage
+  applies its own default.
+* New method `NormalBlockData$for_family()` returns the data a model of a
+  given family is fitted on.
+
 ## Diagnostics
 
 * `within_block_correlations()` on variance-block models: for each block, the
