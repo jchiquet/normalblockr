@@ -67,7 +67,7 @@ plot(hc_expr, labels = FALSE, hang = -1,
      main = "Hierarchical clustering of proteins (Ward, on scaled expression)",
      xlab = "proteins", sub = "")
 rect.hclust(hc_expr, k = 6, border = "red")
-group <- cutree(hc_expr, 6) |> normalblockr:::as_indicator()
+group <- model.matrix(~ 0 + factor(cutree(hc_expr, 6)))
 ```
 
 This fixed grouping is then handed to `normal_block()` as a known clustering: the model only estimates the association network between the 6 blocks, not the grouping itself.
@@ -79,6 +79,12 @@ plot(NB_prot_group)
 
 ```{r, print-known-group}
 print(NB_prot_group)
+```
+
+A known clustering should be checked against one property of the model: within a block, two variables are noisy copies of the same latent signal, so their correlation is necessarily positive. A block gathering anticorrelated proteins is misspecified, and would be better described as two blocks linked by a negative association. `within_block_correlations()` compares, block by block, the empirical correlations of the residuals with the ones the fitted model implies:
+
+```{r, within-block-correlations}
+NB_prot_group$within_block_correlations()
 ```
 
 # Letting the model infer its own clustering
@@ -126,7 +132,7 @@ On this dataset, `refine()` moves the ICL-selected number of clusters, a reminde
 The association network $\Omega$ of the ICL-selected model above is dense (no penalty was applied), which makes it hard to read directly. Treating that clustering as fixed, we can refit the model once more with the graphical-lasso penalty on $\Omega$ explored over a path of values (`sparsity = TRUE`), and pick the sparsity level with the best BIC.
 
 ```{r, sparsify}
-group_selected <- selected_NB_refined$clustering |> normalblockr:::as_indicator()
+group_selected <- model.matrix(~ 0 + factor(selected_NB_refined$clustering))
 NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE, control = NB_control(min_ratio=0.001))
 ```
 

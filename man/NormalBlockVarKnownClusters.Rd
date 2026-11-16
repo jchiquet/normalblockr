@@ -49,6 +49,7 @@ model$clustering
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="merge"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-merge'><code>NormalBlockVarBase$merge()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="split"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-split'><code>NormalBlockVarBase$split()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-warm_start_from'><code>NormalBlockVarBase$warm_start_from()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="within_block_correlations"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-within_block_correlations'><code>NormalBlockVarBase$within_block_correlations()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
