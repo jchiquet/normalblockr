@@ -14,14 +14,6 @@ R6 class for a zero-inflated normal-block model with a known clustering.
 
   a list with the parameters of posterior distribution W \| Y
 
-- `entropy`:
-
-  Entropy of the conditional distribution
-
-- `nb_param`:
-
-  number of parameters in the model
-
 - `model_par`:
 
   a list with model parameters: B (covariates), dm1 (species variance),

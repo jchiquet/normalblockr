@@ -29,10 +29,6 @@ clustering structures the latent covariance.
   \`\$B_original\`/\`\$dm1_original\` for the same quantities converted
   back to Y's original units.
 
-- `nb_param`:
-
-  number of parameters in the model
-
 - `sparsity_weights`:
 
   (weights associated to each pair of groups)

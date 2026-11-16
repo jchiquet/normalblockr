@@ -107,15 +107,19 @@ ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 2:5, model = "mean")
 #> Fitting a normal-block-mean model with unknown q 
-#>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5           
+#>   number of blocks = 2           
+     number of blocks = 3           
+     number of blocks = 4           
+     number of blocks = 5           
+
 #> DONE
 models$plot(c("BIC", "ICL"))
 
 models$get_best_model()
 #> A diagonal normal-block-mean model with 2 unknown blocks .
 #> ===========================================================================
-#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>        23 2       0        0 -966.418 1932.836 2022.812 2022.812 2022.812     3
+#>  nb_param q n_edges sparsity  loglik deviance      BIC      ICL     EBIC niter
+#>        23 2       0        0 -961.81 1923.621 2018.672 2018.672 2018.672     3
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

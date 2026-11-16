@@ -99,5 +99,5 @@ ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 2:4, control = NB_control(verbose = FALSE))
 models$get_best_model("ICL")$q
-#> [1] 4
+#> [1] 3
 ```

@@ -195,7 +195,7 @@ print(my_NB)
 #> A diagonal normal-block-var model with fixed blocks .
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>       126 3       3        0 -1635.17  3270.34 3850.592 3198.393 3857.183     7
+#>       126 3       3        0 -1635.17  3270.34 3850.592 3850.592 3857.183     7
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 
@@ -229,10 +229,8 @@ my_NB <- normal_block(data = my_data,
 print(my_NB)
 #> A diagonal normal-block-var model with 3 unknown blocks .
 #> ===========================================================================
-#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
-#>       128 3       3        0 -1678.676 3357.351 3946.813 3294.689 3953.405
-#>  niter
-#>      7
+#>  nb_param q n_edges sparsity    loglik deviance     BIC     ICL     EBIC niter
+#>       128 3       3        0 -1678.676 3357.351 3944.98 3944.98 3951.572     7
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

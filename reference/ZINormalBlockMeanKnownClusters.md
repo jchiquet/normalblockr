@@ -21,10 +21,6 @@ clustering. Sigma is diagonal or spherical here. See
   a list with model parameters: B, Omega and kappa (zero-inflation
   probabilities)
 
-- `nb_param`:
-
-  number of parameters in the model
-
 - `who_am_I`:
 
   a method to print what model is being fitted

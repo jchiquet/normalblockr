@@ -36,8 +36,8 @@ model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 summary(model)
 #> A diagonal normal-block-var model with 3 unknown blocks .
 #> ===========================================================================
-#>  nb_param q n_edges sparsity   loglik deviance      BIC     ICL    EBIC niter
-#>        48 3       3        0 -443.805  887.611 1075.388 809.619 1081.98    10
+#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
+#>        48 3       3        0 -471.902  943.805 1129.749 1129.749 1136.341    19
 #> ===========================================================================
 #> * Cluster sizes: 8, 9, 3 
 #> * Network: 3 edge(s), density = 1

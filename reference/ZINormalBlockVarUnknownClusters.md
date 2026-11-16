@@ -18,10 +18,6 @@ clusters (but unknown clustering).
 
 ## Active bindings
 
-- `nb_param`:
-
-  number of parameters in the model
-
 - `var_par`:
 
   a list with variational parameters
@@ -33,7 +29,9 @@ clusters (but unknown clustering).
 
 - `entropy`:
 
-  Entropy of the conditional distribution
+  entropy of the variational distribution of the clustering, \`-sum(tau
+  \* log(tau))\` (W is integrated out, not completed: see
+  \[NormalBlockBase\]'s \`ICL\`)
 
 - `fitted`:
 

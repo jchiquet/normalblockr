@@ -73,7 +73,13 @@ ex_data <- generate_normal_block_var_data(n=100, p=30, d=1, q=3)
 data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 my_normal_block <- normal_block(data, blocks = 1:6)
 #> Fitting a diagonal normal-block-var model with unknown q 
-#>   number of blocks = 1                number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6           
+#>   number of blocks = 1           
+     number of blocks = 2           
+     number of blocks = 3           
+     number of blocks = 4           
+     number of blocks = 5           
+     number of blocks = 6           
+
 #> DONE
 my_normal_block$plot(c("deviance", "BIC", "ICL"))
 
@@ -87,7 +93,13 @@ ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0
 zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)
 my_normal_block <- normal_block(zidata, blocks = 1:6, zero_inflation = TRUE)
 #> Fitting a diagonal normal-block-var model with unknown q 
-#>   number of blocks = 1                number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6           
+#>   number of blocks = 1           
+     number of blocks = 2           
+     number of blocks = 3           
+     number of blocks = 4           
+     number of blocks = 5           
+     number of blocks = 6           
+
 #> DONE
 ## Mean-Block model (clustering in the mean rather than the covariance)
 ex_mean <- generate_normal_block_mean_data(n=50, p=20, d=1, q=3)

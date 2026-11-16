@@ -99,7 +99,7 @@ NB_go
 #> A diagonal normal-block-mean model with fixed blocks .
 #> ===========================================================================
 #>  nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
-#>       303 28       0        0 -123715.7 247431.5 249202.9 249202.9 249202.9
+#>       303 28       0        0 -123715.7 247431.5 249916.1 249916.1 249916.1
 #>  niter
 #>     21
 #> ===========================================================================
@@ -159,7 +159,7 @@ NB_means$plot(c("deviance", "ICL"))
 
 selected <- NB_means$get_best_model("ICL")
 paste0("ICL selects ", selected$q, " clusters.")
-#> [1] "ICL selects 65 clusters."
+#> [1] "ICL selects 45 clusters."
 ```
 
 The model groups 163 proteins into a few dozen clusters, i.e. only a
@@ -182,11 +182,9 @@ above there are no adjacent $`q`$ to seed from, so it is skipped here.
 table(selected$clustering)
 #> 
 #>  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 
-#>  1  1  1  3  1  1  7  1  2  2  3  4  4  3  2  3  4  1  2  4  3  4  1  2  2  1 
-#> 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 
-#>  2  3  1  2  2  2  4  1  3  8  2  1  3  2  3  2  3  2  2  4  3  5  4  2  2  1 
-#> 53 54 55 56 57 58 59 60 61 62 63 64 65 
-#>  1  3  3  2  2  3  1  2  4  1  4  1  4
+#>  1  8  2  4  1  7  5  3 10  5  1  5  1  2  5  3  3  3  4  2  2  5  4  2  1  6 
+#> 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 
+#>  3  1  6  5  4  2  3  4  4  2  3  1  1  3  4  3  7  5  7
 ```
 
 Each cluster’s profile across the five subtypes is a column of
@@ -231,9 +229,9 @@ data.frame(
   BIC        = round(sapply(fits, `[[`, "BIC"), 1)
 )
 #>   covariance nb_param   loglik      BIC
-#> 1   diagonal      552 -78289.8 159806.9
-#> 2  spherical      390 -78558.2 159396.4
-#> 3       full    13755 -45154.3 170726.4
+#> 1   diagonal      432 -78932.0 161502.6
+#> 2  spherical      270 -79144.5 160985.5
+#> 3       full    13635 -45380.2 171589.5
 ```
 
 BIC agrees with the default here. That is not a reason to forget the
@@ -262,7 +260,7 @@ NB_sparse  <- normal_block(nb_data, blocks = C_selected, sparsity = 0.4,
 NB_sparse$model_par$Omega |> dim()
 #> [1] 163 163
 paste0(NB_sparse$n_edges, " edges out of ", choose(ncol(Y), 2), " possible ones.")
-#> [1] "458 edges out of 13203 possible ones."
+#> [1] "475 edges out of 13203 possible ones."
 ```
 
 ``` r

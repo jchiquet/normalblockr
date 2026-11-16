@@ -92,17 +92,30 @@ data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 2:4, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 4))
 #> Fitting a collection of normal-block-mean models with different values of q and different penalties 
-#>   number of blocks = 2                penalty = 0.553603              penalty = 0.1192702             penalty = 0.02569597                penalty = 0.00553603                number of blocks = 3                penalty = 0.553603              penalty = 0.1192702             penalty = 0.02569597                penalty = 0.00553603                number of blocks = 4                penalty = 0.553603              penalty = 0.1192702             penalty = 0.02569597                penalty = 0.00553603           
+#>   number of blocks = 2           
+     penalty = 0.5737578           
+     penalty = 0.1236124           
+     penalty = 0.02663148           
+     penalty = 0.005737578           
+     number of blocks = 3           
+     penalty = 0.5737578           
+     penalty = 0.1236124           
+     penalty = 0.02663148           
+     penalty = 0.005737578           
+     number of blocks = 4           
+     penalty = 0.5737578           
+     penalty = 0.1236124           
+     penalty = 0.02663148           
+     penalty = 0.005737578           
+
 #> DONE
 models$plot("BIC")
 
 models$get_best_model("BIC")
 #> A full normal-block-mean model with 3 unknown blocks .
 #> ===========================================================================
-#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
-#>        90 3      65    0.119 -1186.023 2372.045 2740.536 2741.148 2883.356
-#>  niter
-#>      8
+#>  nb_param q n_edges sparsity    loglik deviance      BIC     ICL     EBIC niter
+#>        85 3      60    0.124 -1195.953 2391.905 2746.714 2746.92 3106.202     7
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

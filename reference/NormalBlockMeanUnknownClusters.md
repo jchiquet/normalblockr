@@ -20,10 +20,6 @@ R6 class for a Normal-Block-Mean model with a fixed number of clusters
   a list with the variational parameter: tau (posterior group
   probabilities)
 
-- `nb_param`:
-
-  number of parameters in the model
-
 - `entropy`:
 
   Entropy of the conditional distribution The only latent variable is

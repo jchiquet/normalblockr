@@ -14,10 +14,6 @@ R6 class for a normal-block model with known clustering.
 
   a list with the parameters of posterior distribution W \| Y
 
-- `entropy`:
-
-  Entropy of the conditional distribution
-
 - `fitted`:
 
   Y values predicted by the model, in Y's original units

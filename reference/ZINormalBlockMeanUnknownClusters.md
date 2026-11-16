@@ -27,10 +27,6 @@ full one is out of reach under a mask.
   a list with model parameters: B, Omega and kappa (zero-inflation
   probabilities)
 
-- `nb_param`:
-
-  number of parameters in the model
-
 - `entropy`:
 
   Entropy of the conditional distribution
@@ -129,5 +125,5 @@ model <- normal_block(data, blocks = 3, model = "mean", zero_inflation = TRUE)
 #> 
 #> DONE
 model$clustering
-#>  [1] 2 2 2 2 3 2 2 1 3 2 1 2 3 1 2 2 3 1 2 2
+#>  [1] 2 2 2 2 3 1 1 2 3 2 2 2 3 2 1 2 3 2 2 2
 ```
