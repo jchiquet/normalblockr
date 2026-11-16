@@ -37,6 +37,13 @@ ZINormalBlockMeanUnknownClusters <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    ## zero-inflation coefficients (d0 per variable, informed by its n
+    ## observations) and cluster proportions (informed by the p variables)
+    penalty_groups = function() {
+      rbind(super$penalty_groups(),
+            penalty_group("kappa", self$p * self$data$d0, self$n),
+            penalty_group("alpha", self$q - 1, self$p))
+    },
     optim_initialize = function() {
       if (private$warm_started) list(B = private$B, Omega = private$Omega, tau = private$C)
       else private$get_heuristic_parameters()
@@ -91,10 +98,6 @@ ZINormalBlockMeanUnknownClusters <- R6::R6Class(
     var_par = function() list(tau = private$C),
     #' @field model_par a list with model parameters: B, Omega and kappa (zero-inflation probabilities)
     model_par = function() c(super$model_par, list(kappa = private$kappa)),
-    #' @field nb_param number of parameters in the model
-    nb_param = function() {
-      as.integer(super$nb_param + self$q - 1 + self$p * self$data$d0) # adding alpha and kappa
-    },
     #' @field entropy Entropy of the conditional distribution
     entropy = function() -sum(xlogx(private$C)),
     #' @field who_am_I a method to print what model is being fitted

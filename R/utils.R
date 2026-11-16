@@ -65,6 +65,14 @@ glasso_omega <- function(Sigma, rho) {
   Matrix::symmpart(glasso_out$wi)
 }
 
+# One or several groups of free parameters for the BIC penalty: `nu`
+# parameters, informed by `N` independent observations, cost nu * log(N)
+# (see the penalty_terms field of NormalBlockBase).
+penalty_group <- function(group, nu, N) {
+  data.frame(group = group, nu = as.integer(nu), N = as.numeric(N),
+             stringsAsFactors = FALSE)
+}
+
 # computes xlogx, setting it to 0 if x = 0
 xlogx <- function(x) ifelse(x < .Machine$double.eps, 0, x * log(x))
 

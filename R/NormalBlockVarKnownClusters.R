@@ -80,14 +80,6 @@ NormalBlockVarKnownClusters <- R6::R6Class(
   active = list(
     #' @field posterior_par a list with the parameters of posterior distribution W | Y
     posterior_par = function() list(gamma = private$gamma, mu = private$mu),
-    #' @field entropy Entropy of the conditional distribution
-    entropy    = function() {
-      if (!private$approx){
-        res <- .5 * self$n * self$q * log(2 * pi * exp(1)) +
-          .5 * self$n * as.numeric(determinant(private$gamma)$modulus)
-      } else {res <- NA}
-      res
-    },
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
       res <- if (private$approx) {

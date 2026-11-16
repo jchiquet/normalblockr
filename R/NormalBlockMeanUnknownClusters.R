@@ -34,6 +34,10 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    ## cluster proportions: q - 1 parameters, informed by the p variables
+    penalty_groups = function() {
+      rbind(super$penalty_groups(), penalty_group("alpha", self$q - 1, self$p))
+    },
     optim_initialize = function() {
       if (private$warm_started) {
         list(B = private$B, Omega = private$Omega, tau = private$C)
@@ -246,8 +250,6 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
     },
     #' @field var_par a list with the variational parameter: tau (posterior group probabilities)
     var_par    = function() list(tau = private$C),
-    #' @field nb_param number of parameters in the model
-    nb_param = function() {as.integer(super$nb_param + self$q - 1)}, # adding alpha
     #' @field entropy Entropy of the conditional distribution
     #' The only latent variable is the clustering, so the entropy of the
     #' variational distribution reduces to -sum(tau * log(tau)).

@@ -40,13 +40,36 @@ mean-block ([NormalBlockMeanBase]) model families.
 
     \item{\code{deviance}}{(or its variational lower bound)}
 
-    \item{\code{BIC}}{(or its variational lower bound)}
+    \item{\code{entropy}}{entropy of the (variational) posterior distribution of
+the clustering, `-sum(tau * log(tau))`: 0 when the clustering is
+known. Only the discrete partition is completed, as in the ICL of
+Biernacki, Celeux and Govaert (2000); the latent vectors W of the
+variance-block family are integrated out, not completed.}
 
-    \item{\code{entropy}}{Entropy of the conditional distribution when applicable}
+    \item{\code{penalty_terms}}{data frame with one row per group of parameters:
+its name (`group`), its number of free parameters (`nu`) and the
+number of independent observations informing it (`N`), so that the
+group costs `nu * log(N)` in the BIC. As in the ICL of Daudin, Picard
+and Robin (2008) for SBMs and Keribin et al. (2015) for latent block
+models, the cluster proportions are charged `log(p)` (the variables are
+the units being clustered), parameters shared by every cell of a block
+`log(n * p)`, and the remaining ones `log(n)`.}
 
-    \item{\code{ICL}}{variational lower bound of the ICL}
+    \item{\code{nb_param}}{number of free parameters in the model, `sum(penalty_terms$nu)`}
 
-    \item{\code{EBIC}}{variational lower bound of the EBIC}
+    \item{\code{penalty}}{BIC penalty, `sum(nu * log(N))` over `penalty_terms`}
+
+    \item{\code{BIC}}{Bayesian information criterion, `deviance + penalty` (lower
+is better); built on the ELBO when the clustering is unknown and the
+likelihood is not available in closed form.}
+
+    \item{\code{ICL}}{integrated completed likelihood criterion, `BIC + 2 * entropy`
+(lower is better); equal to the BIC when the clustering is known.}
+
+    \item{\code{EBIC}}{extended BIC of Foygel and Drton (2010) with gamma = 1/2,
+`BIC + 2 * n_edges * log(dim)`, where `dim` is the dimension of the
+network: q for the variance-block family (network between clusters), p
+for the mean-block family (network between variables).}
 
     \item{\code{criteria}}{a vector with loglik, BIC and number of parameters}
 

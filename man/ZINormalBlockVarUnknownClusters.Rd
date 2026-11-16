@@ -27,13 +27,13 @@ model$clustering
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{nb_param}}{number of parameters in the model}
-
     \item{\code{var_par}}{a list with variational parameters}
 
     \item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omega (blocks precision matrix), kappa (zero-inflation probabilities)}
 
-    \item{\code{entropy}}{Entropy of the conditional distribution}
+    \item{\code{entropy}}{entropy of the variational distribution of the
+clustering, `-sum(tau * log(tau))` (W is integrated out, not completed:
+see [NormalBlockBase]'s `ICL`)}
 
     \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 

@@ -28,11 +28,11 @@ model$clustering
   \describe{
     \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix))}
 
-    \item{\code{nb_param}}{number of parameters in the model}
-
     \item{\code{var_par}}{a list with the matrices of the variational parameters: M (means), S (variances), tau (posterior group probabilities)}
 
-    \item{\code{entropy}}{Entropy of the conditional distribution}
+    \item{\code{entropy}}{entropy of the variational distribution of the
+clustering, `-sum(tau * log(tau))` (W is integrated out, not completed:
+see [NormalBlockBase]'s `ICL`)}
 
     \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 

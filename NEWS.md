@@ -1,5 +1,30 @@
 # normalblockr (development version)
 
+## Model-selection criteria aligned with Biernacki and Daudin
+
+The criteria change, so the number of clusters they select can change too.
+
+* **BIC: one penalty per group of parameters.** Each group of parameters is
+  charged the log of the number of independent observations informing it,
+  following the ICL of Daudin, Picard & Robin (2008) for SBMs and Keribin et
+  al. (2015) for latent block models, instead of `log(n)` for all of them:
+  the cluster proportions `log(p)` (the variables are the units being
+  clustered), the mean-block cluster profiles and a spherical noise variance
+  `log(n * p)` (shared by every cell of a block), the rest `log(n)`. The new
+  fields `penalty_terms` (one row per group: `nu`, `N`) and `penalty` expose
+  the computation; `nb_param` is unchanged.
+* **ICL completes the partition only**, as in Biernacki, Celeux & Govaert
+  (2000): `ICL = BIC + 2 * entropy` with `entropy = -sum(tau * log(tau))`.
+  The variance-block models used to add the Gaussian entropy of the latent
+  vectors W, which made the ICL differ from the BIC even for a known
+  clustering and depend on the scale of the data. It now equals the BIC for a
+  known clustering, in both families.
+* **EBIC on the right network.** The EBIC term is `2 * n_edges * log(dim)`,
+  with `dim = q` for the variance-block family as before, but `dim = p` for
+  the mean-block family, whose network relates the p variables (it used `q`).
+* On `brca_rppa`, the mean-block ICL now selects 50 clusters instead of 70
+  over `seq(5, 120, 5)`; the variance-block BIC selection is unchanged.
+
 ## Graphical lasso shared with PLNmodels
 
 * `src/graphical_lasso.h` is now the very same file as in PLNmodels, which

@@ -419,6 +419,13 @@ NormalBlockBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    ## Groups of free parameters and the number of independent observations
+    ## informing each one (see the penalty_terms field). Each family declares
+    ## its own groups; subclasses append theirs (alpha, kappa) to super's.
+    penalty_groups = function() penalty_group(character(0), integer(0), numeric(0)),
+    ## Dimension of the network the EBIC is computed on. Overridden by the
+    ## mean-block family, whose network relates the p variables.
+    network_dim = function() self$q,
     kappa             = NA, # matrix of zero-inflation probabilities
     B0                = NA, # zero-inflation regression matrix
     ZI_cond_mean      = NA, # fixed contribution of the ZI component to the log-likelihood
@@ -586,14 +593,40 @@ NormalBlockBase <- R6::R6Class(
     loglik = function() if (private$approx) NA else private$ll_list[[length(private$ll_list)]] + self$sparsity_term,
     #' @field deviance (or its variational lower bound)
     deviance = function() -2 * self$loglik,
-    #' @field BIC (or its variational lower bound)
-    #' @field entropy Entropy of the conditional distribution when applicable
+    #' @field entropy entropy of the (variational) posterior distribution of
+    #' the clustering, `-sum(tau * log(tau))`: 0 when the clustering is
+    #' known. Only the discrete partition is completed, as in the ICL of
+    #' Biernacki, Celeux and Govaert (2000); the latent vectors W of the
+    #' variance-block family are integrated out, not completed.
     entropy    = function() 0,
-    BIC = function() self$deviance + log(self$n) * self$nb_param,
-    #' @field ICL variational lower bound of the ICL
+    #' @field penalty_terms data frame with one row per group of parameters:
+    #' its name (`group`), its number of free parameters (`nu`) and the
+    #' number of independent observations informing it (`N`), so that the
+    #' group costs `nu * log(N)` in the BIC. As in the ICL of Daudin, Picard
+    #' and Robin (2008) for SBMs and Keribin et al. (2015) for latent block
+    #' models, the cluster proportions are charged `log(p)` (the variables are
+    #' the units being clustered), parameters shared by every cell of a block
+    #' `log(n * p)`, and the remaining ones `log(n)`.
+    penalty_terms = function() private$penalty_groups(),
+    #' @field nb_param number of free parameters in the model, `sum(penalty_terms$nu)`
+    nb_param = function() as.integer(sum(private$penalty_groups()$nu)),
+    #' @field penalty BIC penalty, `sum(nu * log(N))` over `penalty_terms`
+    penalty = function() {
+      pen <- private$penalty_groups()
+      sum(pen$nu * log(pen$N))
+    },
+    #' @field BIC Bayesian information criterion, `deviance + penalty` (lower
+    #' is better); built on the ELBO when the clustering is unknown and the
+    #' likelihood is not available in closed form.
+    BIC = function() self$deviance + self$penalty,
+    #' @field ICL integrated completed likelihood criterion, `BIC + 2 * entropy`
+    #' (lower is better); equal to the BIC when the clustering is known.
     ICL        = function() self$BIC + 2 * self$entropy,
-    #' @field EBIC variational lower bound of the EBIC
-    EBIC   = function() self$BIC + 2 * ifelse(self$n_edges > 0, self$n_edges * log(self$q), 0),
+    #' @field EBIC extended BIC of Foygel and Drton (2010) with gamma = 1/2,
+    #' `BIC + 2 * n_edges * log(dim)`, where `dim` is the dimension of the
+    #' network: q for the variance-block family (network between clusters), p
+    #' for the mean-block family (network between variables).
+    EBIC   = function() self$BIC + 2 * ifelse(self$n_edges > 0, self$n_edges * log(private$network_dim()), 0),
     #' @field criteria a vector with loglik, BIC and number of parameters
     criteria   = function() {
       data.frame(nb_param = self$nb_param, q = self$q, n_edges = self$n_edges, sparsity = self$sparsity,

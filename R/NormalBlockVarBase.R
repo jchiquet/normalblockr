@@ -200,6 +200,21 @@ NormalBlockVarBase <- R6::R6Class(
     S                 = NA, # variational diagonal of variances for posterior distribution of W
     res_covariance    = NA, # shape of the residuals covariance (diagonal or spherical)
 
+    ## Variable-specific B and d are informed by the n observations, and so is
+    ## the q x q precision matrix of the n latent vectors W_i (diagonal plus
+    ## the non-zero off-diagonal terms). A spherical noise variance is shared
+    ## by all n * p cells.
+    penalty_groups = function() {
+      noise <- if (private$res_covariance == "diagonal") {
+        penalty_group("noise", self$p, self$n)
+      } else {
+        penalty_group("noise", 1, self$n * self$p)
+      }
+      rbind(penalty_group("B", self$p * self$d, self$n),
+            penalty_group("Omega", self$q + self$n_edges, self$n),
+            noise)
+    },
+
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for integrated (V)EM inference --------------
 
@@ -318,11 +333,6 @@ NormalBlockVarBase <- R6::R6Class(
     #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
     model_par = function() list(B = private$B, B0 = private$B0,
                                 dm1 = private$dm1, Omega = private$Omega),
-    #' @field nb_param number of parameters in the model
-    nb_param = function() {
-      nb_param_D <- ifelse(private$res_covariance == "diagonal", self$p, 1)
-      as.integer(self$p * self$d + self$q + self$n_edges + nb_param_D)
-    },
     #' @field sparsity_weights (weights associated to each pair of groups)
     sparsity_weights = function(value) {
       if (missing(value)) {

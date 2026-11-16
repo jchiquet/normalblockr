@@ -25,10 +25,12 @@ test_that("logLik.NormalBlockVarBase() returns a well-formed logLik object", {
   expect_equal(attr(ll, "nobs"), model$n)
 })
 
-test_that("BIC.NormalBlockVarBase() matches model$BIC and the logLik-based formula", {
+test_that("BIC.NormalBlockVarBase() matches model$BIC and the per-group penalty", {
   expect_equal(BIC(model), model$BIC)
-  ll <- logLik(model)
-  expect_equal(-2 * as.numeric(ll) + log(attr(ll, "nobs")) * attr(ll, "df"), BIC(model))
+  ll  <- logLik(model)
+  pen <- model$penalty_terms
+  expect_equal(attr(ll, "df"), sum(pen$nu))
+  expect_equal(-2 * as.numeric(ll) + sum(pen$nu * log(pen$N)), BIC(model))
 })
 
 test_that("print.NormalBlockVarBase() reports the model type and criteria", {

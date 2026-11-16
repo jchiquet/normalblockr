@@ -23,8 +23,6 @@ model$clustering
 
     \item{\code{var_par}}{a list with the variational parameter: tau (posterior group probabilities)}
 
-    \item{\code{nb_param}}{number of parameters in the model}
-
     \item{\code{entropy}}{Entropy of the conditional distribution
 The only latent variable is the clustering, so the entropy of the
 variational distribution reduces to -sum(tau * log(tau)).}

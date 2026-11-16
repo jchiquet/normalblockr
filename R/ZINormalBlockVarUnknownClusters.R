@@ -40,6 +40,14 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
 
+    ## zero-inflation coefficients (d0 per variable, informed by its n
+    ## observations) and cluster proportions (informed by the p variables)
+    penalty_groups = function() {
+      rbind(super$penalty_groups(),
+            penalty_group("kappa", self$p * self$d0, self$n),
+            penalty_group("alpha", self$q - 1, self$p))
+    },
+
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for heuristic inference -----------------------
 
@@ -93,8 +101,6 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
   ##  ACTIVE BINDINGS ------------------------------------
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field nb_param number of parameters in the model
-    nb_param = function() super$nb_param + self$p * self$d0 + self$q - 1, # adding kappa and alpha
     #' @field var_par a list with variational parameters
     var_par  = function() {list(M = private$M, S = private$S, tau = private$C)},
     #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omega (blocks precision matrix), kappa (zero-inflation probabilities)
@@ -104,14 +110,10 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
       par$alpha <- private$alpha
       par
     },
-    #' @field entropy Entropy of the conditional distribution
-    entropy    = function() {
-      if (!private$approx) {
-        res <- 0.5 * self$n * self$q * log(2 * pi * exp(1)) + .5 * sum(log(private$S))
-        res <- res - sum(xlogx(private$C))
-      } else {res <- NA}
-      res
-    },
+    #' @field entropy entropy of the variational distribution of the
+    #' clustering, `-sum(tau * log(tau))` (W is integrated out, not completed:
+    #' see [NormalBlockBase]'s `ICL`)
+    entropy    = function() if (private$approx) NA else -sum(xlogx(private$C)),
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
       if (private$approx) {
