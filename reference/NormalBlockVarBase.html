@@ -94,6 +94,7 @@ different factors.</p></dd>
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockVarBase-initialize"><code>NormalBlockVarBase$new()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarBase-warm_start_from"><code>NormalBlockVarBase$warm_start_from()</code></a></p></li>
+<li><p><a href="#method-NormalBlockVarBase-within_block_correlations"><code>NormalBlockVarBase$within_block_correlations()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarBase-split"><code>NormalBlockVarBase$split()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarBase-merge"><code>NormalBlockVarBase$merge()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarBase-clone"><code>NormalBlockVarBase$clone()</code></a></p></li>
@@ -170,10 +171,37 @@ each penalty in a sparsity path from the previous one's solution.</p><div class=
 
 </div>
 
+<p></p><hr><a id="method-NormalBlockVarBase-within_block_correlations"></a><div class="section">
+<h3 id="normalblockvarbase-within-block-correlations-"><code>NormalBlockVarBase$within_block_correlations()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-within-block-correlations-"></a></h3>
+<p>Diagnose whether the blocks are made of positively
+co-varying variables, as the model requires. Within block k, two
+variables j and l are noisy copies of the same latent signal, so their
+covariance is `Sigma_kk &gt; 0` and their correlation
+`Sigma_kk / sqrt((Sigma_kk + d_j) (Sigma_kk + d_l))` lies in (0, 1):
+the model cannot put two anticorrelated variables in the same block.
+This compares, for each block, the empirical correlations of the
+variables' residuals `Y - XB` (non-zero cells only for zero-inflated
+models) with the correlations the fitted model implies. Mostly useful
+for a known clustering (e.g. from an annotation): a block with many
+negative empirical correlations is misspecified, and should rather be
+split into blocks linked by a negative `Sigma_kl`.</p><div class="section">
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">within_block_correlations</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<p>a data frame with one row per block: `block`, `size`, the mean
+and minimum of the empirical within-block correlations (`mean_cor`,
+`min_cor`), the proportion of negative ones (`prop_negative`), and the
+mean correlation implied by the model (`model_cor`). `NA` for blocks
+with fewer than two variables.</p>
+</div>
+
+</div>
+
 <p></p><hr><a id="method-NormalBlockVarBase-split"></a><div class="section">
 <h3 id="normalblockvarbase-split-"><code>NormalBlockVarBase$split()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-split-"></a></h3>
 <p>Create a clone of the current [`NormalBlockVarBase`] object after splitting cluster `index`</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">split</span><span class="op">(</span><span class="va">index</span>, in_place <span class="op">=</span> <span class="cn">FALSE</span>, rule <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
@@ -197,7 +225,7 @@ median of their noise variance (the rule used before 0.4.0). Default
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>A new [`NormalBlockVarBase`] object</p>
 </div>
 
@@ -206,7 +234,7 @@ median of their noise variance (the rule used before 0.4.0). Default
 <p></p><hr><a id="method-NormalBlockVarBase-merge"></a><div class="section">
 <h3 id="normalblockvarbase-merge-"><code>NormalBlockVarBase$merge()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-merge-"></a></h3>
 <p>Create a clone of the current [`NormalBlockVarBase`] object after merging clusters `cl1` and `cl2`</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">merge</span><span class="op">(</span><span class="va">indices</span>, in_place <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
@@ -220,7 +248,7 @@ default FALSE (send a copy)</p></dd>
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
 <p>A new [`NormalBlockVarBase`] object</p>
 </div>
 
@@ -229,7 +257,7 @@ default FALSE (send a copy)</p></dd>
 <p></p><hr><a id="method-NormalBlockVarBase-clone"></a><div class="section">
 <h3 id="normalblockvarbase-clone-"><code>NormalBlockVarBase$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>

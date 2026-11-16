@@ -86,12 +86,12 @@ independently.</p>
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockMeanCollectionClusters-initialize"><code>NormalBlockMeanCollectionClusters$new()</code></a></p></li>
 <li><p><a href="#method-NormalBlockMeanCollectionClusters-clone"><code>NormalBlockMeanCollectionClusters$clone()</code></a></p></li>
-</ul></div><p><details><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href="NormalBlockCollection.html#method-print"><code>NormalBlockCollection$print()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href="NormalBlockCollection.html#method-summary"><code>NormalBlockCollection$summary()</code></a></span></li>
+</ul></div><p><details><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href="NormalBlockCollection.html#method-summary"><code>NormalBlockCollection$summary()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_best_model"><a href="NormalBlockCollectionClusters.html#method-get_best_model"><code>NormalBlockCollectionClusters$get_best_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_model"><a href="NormalBlockCollectionClusters.html#method-get_model"><code>NormalBlockCollectionClusters$get_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="optimize"><a href="NormalBlockCollectionClusters.html#method-optimize"><code>NormalBlockCollectionClusters$optimize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="plot"><a href="NormalBlockCollectionClusters.html#method-plot"><code>NormalBlockCollectionClusters$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="print"><a href="NormalBlockCollectionClusters.html#method-print"><code>NormalBlockCollectionClusters$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="refine"><a href="NormalBlockCollectionClusters.html#method-refine"><code>NormalBlockCollectionClusters$refine()</code></a></span></li>
 </ul></details></p><hr><a id="method-NormalBlockMeanCollectionClusters-initialize"></a><div class="section">
 <h3 id="normalblockmeancollectionclusters-new-"><code>NormalBlockMeanCollectionClusters$new()</code><a class="anchor" aria-label="anchor" href="#normalblockmeancollectionclusters-new-"></a></h3>
@@ -166,10 +166,10 @@ see [NormalBlockMeanBase])</p></dd>
 <span class="r-in"><span><span class="va">models</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"ICL"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="NormalBlockMeanCollectionClusters-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">models</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> A diagonal normal-block-mean model with 2 unknown blocks .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A diagonal normal-block-mean model with 3 unknown blocks .</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  nb_param q n_edges sparsity  loglik deviance      BIC      ICL     EBIC niter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        23 2       0        0 -961.81 1923.621 2018.672 2018.672 2018.672     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  nb_param q n_edges sparsity  loglik deviance      BIC     ICL     EBIC niter</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        25 3       0        0 -960.16  1920.32 2025.275 2027.66 2025.275     4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * Useful fields</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     $model_par, $posterior_par / $var_par, $clustering </span>

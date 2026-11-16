@@ -2,6 +2,24 @@
 
 ## normalblockr (development version)
 
+### Diagnostics
+
+- `within_block_correlations()` on variance-block models: for each
+  block, the empirical correlations of the residuals `Y - XB` (mean,
+  minimum, proportion of negative ones) against the correlation the
+  fitted model implies. Within a block two variables covary positively
+  by construction (their covariance is `Sigma_kk > 0`), so a block
+  holding anticorrelated variables, typically from a known clustering
+  taken from an annotation, is misspecified.
+- Collections over a range of q gain a `deviance_violations` field, the
+  values of q whose deviance exceeds the one at the previous q, and
+  [`print()`](https://rdrr.io/r/base/print.html) warns about them. The
+  models are nested, so every violation signals a poor local optimum,
+  which `refine()` is designed to repair.
+- Vignettes and README build a known clustering with
+  `model.matrix(~ 0 + factor(labels))` rather than the internal
+  `normalblockr:::as_indicator()`.
+
 ### SQUAREM can be turned off
 
 - `NB_control(acceleration = FALSE)` runs plain (V)EM instead of its

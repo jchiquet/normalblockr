@@ -46,6 +46,7 @@ Inherited methods
 - [`NormalBlockVarBase$merge()`](NormalBlockVarBase.html#method-merge)
 - [`NormalBlockVarBase$split()`](NormalBlockVarBase.html#method-split)
 - [`NormalBlockVarBase$warm_start_from()`](NormalBlockVarBase.html#method-warm_start_from)
+- [`NormalBlockVarBase$within_block_correlations()`](NormalBlockVarBase.html#method-within_block_correlations)
 
 ------------------------------------------------------------------------
 

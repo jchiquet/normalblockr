@@ -18,6 +18,15 @@ and the split/merge \`refine()\` search). Concrete subclasses only build
 
   number of blocks
 
+- `deviance_violations`:
+
+  the values of q whose deviance is higher than at the next smaller q of
+  the collection. The models are nested (a q-cluster model is a (q +
+  1)-cluster one with an empty cluster), so the deviance can only
+  decrease with q at the global optimum: every violation signals an
+  optimization stuck in a poorer local optimum, which \`refine()\` is
+  designed to repair. Empty when there is none.
+
 ## Methods
 
 ### Public methods
@@ -32,11 +41,12 @@ and the split/merge \`refine()\` search). Concrete subclasses only build
 
 - [`NormalBlockCollectionClusters$refine()`](#method-NormalBlockCollectionClusters-refine)
 
+- [`NormalBlockCollectionClusters$print()`](#method-NormalBlockCollectionClusters-print)
+
 - [`NormalBlockCollectionClusters$clone()`](#method-NormalBlockCollectionClusters-clone)
 
 Inherited methods
 
-- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
 - [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
 
 ------------------------------------------------------------------------
@@ -188,6 +198,18 @@ empirical evidence.
 
 invisibly returns \`self\`; improved models replace the originals in
 \`\$models\` in place.
+
+------------------------------------------------------------------------
+
+### `NormalBlockCollectionClusters$print()`
+
+User-friendly print method: as for any collection, plus a warning line
+when the deviance increases with q somewhere (see
+\`deviance_violations\`).
+
+#### Usage
+
+    NormalBlockCollectionClusters$print()
 
 ------------------------------------------------------------------------
 

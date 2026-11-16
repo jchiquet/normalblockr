@@ -31,12 +31,12 @@ methods are ill-suited to the mean-block family (see
 
 Inherited methods
 
-- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
 - [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
 - [`NormalBlockCollectionClusters$get_best_model()`](NormalBlockCollectionClusters.html#method-get_best_model)
 - [`NormalBlockCollectionClusters$get_model()`](NormalBlockCollectionClusters.html#method-get_model)
 - [`NormalBlockCollectionClusters$optimize()`](NormalBlockCollectionClusters.html#method-optimize)
 - [`NormalBlockCollectionClusters$plot()`](NormalBlockCollectionClusters.html#method-plot)
+- [`NormalBlockCollectionClusters$print()`](NormalBlockCollectionClusters.html#method-print)
 - [`NormalBlockCollectionClusters$refine()`](NormalBlockCollectionClusters.html#method-refine)
 
 ------------------------------------------------------------------------
@@ -116,10 +116,10 @@ models <- normal_block(data, blocks = 2:5, model = "mean")
 models$plot(c("BIC", "ICL"))
 
 models$get_best_model()
-#> A diagonal normal-block-mean model with 2 unknown blocks .
+#> A diagonal normal-block-mean model with 3 unknown blocks .
 #> ===========================================================================
-#>  nb_param q n_edges sparsity  loglik deviance      BIC      ICL     EBIC niter
-#>        23 2       0        0 -961.81 1923.621 2018.672 2018.672 2018.672     3
+#>  nb_param q n_edges sparsity  loglik deviance      BIC     ICL     EBIC niter
+#>        25 3       0        0 -960.16  1920.32 2025.275 2027.66 2025.275     4
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

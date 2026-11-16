@@ -103,7 +103,7 @@ rect.hclust(hc_expr, k = 6, border = "red")
 
 ``` r
 
-group <- cutree(hc_expr, 6) |> normalblockr:::as_indicator()
+group <- model.matrix(~ 0 + factor(cutree(hc_expr, 6)))
 ```
 
 This fixed grouping is then handed to
@@ -135,6 +135,26 @@ print(NB_prot_group)
 #>     $loglik, $BIC, $ICL, $objective, $nb_param, $criteria
 #> * Useful S3 methods
 #>     print(), summary(), plot(), coef(), sigma(), fitted(), predict()
+```
+
+A known clustering should be checked against one property of the model:
+within a block, two variables are noisy copies of the same latent
+signal, so their correlation is necessarily positive. A block gathering
+anticorrelated proteins is misspecified, and would be better described
+as two blocks linked by a negative association.
+`within_block_correlations()` compares, block by block, the empirical
+correlations of the residuals with the ones the fitted model implies:
+
+``` r
+
+NB_prot_group$within_block_correlations()
+#>   block size   mean_cor    min_cor prop_negative model_cor
+#> 1     1   18 0.23721985 -0.2016547    0.14379085 0.2679674
+#> 2     2   34 0.27230730 -0.1436343    0.05882353 0.3422232
+#> 3     3   31 0.33595194 -0.2609743    0.06666667 0.4367069
+#> 4     4   26 0.10972075 -0.2547531    0.22769231 0.1277935
+#> 5     5   28 0.24108436 -0.2079646    0.03968254 0.2729286
+#> 6     6   26 0.08398501 -0.3428242    0.34461538 0.1089980
 ```
 
 ## Letting the model infer its own clustering
@@ -277,7 +297,7 @@ the graphical-lasso penalty on $`\Omega`$ explored over a path of values
 
 ``` r
 
-group_selected <- selected_NB_refined$clustering |> normalblockr:::as_indicator()
+group_selected <- model.matrix(~ 0 + factor(selected_NB_refined$clustering))
 NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE, control = NB_control(min_ratio=0.001))
 #> Fitting a Collection of diagonal normal-block-var models with fixed blocks, with different sparsity penalties. 
 #>   penalty = 0.5081954             penalty = 0.4004815             penalty = 0.315598              penalty = 0.2487058             penalty = 0.1959917             penalty = 0.1544505           
@@ -303,12 +323,12 @@ NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity =
 #>   penalty = 0.0595657             penalty = 0.04694053                penalty = 0.03699131                penalty = 0.02915087                penalty = 0.02297223                penalty = 0.01810318                penalty = 0.01426614                penalty = 0.01124238                penalty = 0.008859517               penalty = 0.00698171                penalty = 0.00550191                penalty = 0.00433576                penalty = 0.00341678                penalty = 0.00269258                penalty = 0.002121878           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000459, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.000413, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
 #>   penalty = 0.001672138           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.0011, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.00109, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
 #>   penalty = 0.001317722               penalty = 0.001038426               penalty = 0.0008183278              penalty = 0.0006448802              penalty = 0.0005081954           
 #> DONE

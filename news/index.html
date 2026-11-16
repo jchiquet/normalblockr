@@ -43,6 +43,13 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="diagnostics-development-version">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics-development-version"></a></h3>
+<ul><li>
+<code>within_block_correlations()</code> on variance-block models: for each block, the empirical correlations of the residuals <code>Y - XB</code> (mean, minimum, proportion of negative ones) against the correlation the fitted model implies. Within a block two variables covary positively by construction (their covariance is <code>Sigma_kk &gt; 0</code>), so a block holding anticorrelated variables, typically from a known clustering taken from an annotation, is misspecified.</li>
+<li>Collections over a range of q gain a <code>deviance_violations</code> field, the values of q whose deviance exceeds the one at the previous q, and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> warns about them. The models are nested, so every violation signals a poor local optimum, which <code>refine()</code> is designed to repair.</li>
+<li>Vignettes and README build a known clustering with <code>model.matrix(~ 0 + factor(labels))</code> rather than the internal <code>normalblockr:::as_indicator()</code>.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="squarem-can-be-turned-off-development-version">SQUAREM can be turned off<a class="anchor" aria-label="anchor" href="#squarem-can-be-turned-off-development-version"></a></h3>
 <ul><li>
 <code>NB_control(acceleration = FALSE)</code> runs plain (V)EM instead of its SQUAREM-accelerated version, in both families and for every variant (the acceleration is on by default, and never attempted when <code>sparsity &gt; 0</code>). Useful to measure what the acceleration buys: on a variance-block model with 8 unknown clusters, plain VEM needs about ten times as many iterations.</li>

@@ -50,6 +50,8 @@ clustering structures the latent covariance.
 
 - [`NormalBlockVarBase$warm_start_from()`](#method-NormalBlockVarBase-warm_start_from)
 
+- [`NormalBlockVarBase$within_block_correlations()`](#method-NormalBlockVarBase-within_block_correlations)
+
 - [`NormalBlockVarBase$split()`](#method-NormalBlockVarBase-split)
 
 - [`NormalBlockVarBase$merge()`](#method-NormalBlockVarBase-merge)
@@ -139,6 +141,35 @@ sparsity path from the previous one's solution.
 #### Returns
 
 Update the current object in place with \`other\`'s parameters
+
+------------------------------------------------------------------------
+
+### `NormalBlockVarBase$within_block_correlations()`
+
+Diagnose whether the blocks are made of positively co-varying variables,
+as the model requires. Within block k, two variables j and l are noisy
+copies of the same latent signal, so their covariance is \`Sigma_kk \>
+0\` and their correlation \`Sigma_kk / sqrt((Sigma_kk + d_j) (Sigma_kk +
+d_l))\` lies in (0, 1): the model cannot put two anticorrelated
+variables in the same block. This compares, for each block, the
+empirical correlations of the variables' residuals \`Y - XB\` (non-zero
+cells only for zero-inflated models) with the correlations the fitted
+model implies. Mostly useful for a known clustering (e.g. from an
+annotation): a block with many negative empirical correlations is
+misspecified, and should rather be split into blocks linked by a
+negative \`Sigma_kl\`.
+
+#### Usage
+
+    NormalBlockVarBase$within_block_correlations()
+
+#### Returns
+
+a data frame with one row per block: \`block\`, \`size\`, the mean and
+minimum of the empirical within-block correlations (\`mean_cor\`,
+\`min_cor\`), the proportion of negative ones (\`prop_negative\`), and
+the mean correlation implied by the model (\`model_cor\`). \`NA\` for
+blocks with fewer than two variables.
 
 ------------------------------------------------------------------------
 

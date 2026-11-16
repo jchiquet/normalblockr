@@ -93,20 +93,20 @@ models <- normal_block(data, blocks = 2:4, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 4))
 #> Fitting a collection of normal-block-mean models with different values of q and different penalties 
 #>   number of blocks = 2           
-     penalty = 0.5737578           
-     penalty = 0.1236124           
-     penalty = 0.02663148           
-     penalty = 0.005737578           
+     penalty = 0.5883463           
+     penalty = 0.1267554           
+     penalty = 0.02730862           
+     penalty = 0.005883463           
      number of blocks = 3           
-     penalty = 0.5737578           
-     penalty = 0.1236124           
-     penalty = 0.02663148           
-     penalty = 0.005737578           
+     penalty = 0.5883463           
+     penalty = 0.1267554           
+     penalty = 0.02730862           
+     penalty = 0.005883463           
      number of blocks = 4           
-     penalty = 0.5737578           
-     penalty = 0.1236124           
-     penalty = 0.02663148           
-     penalty = 0.005737578           
+     penalty = 0.5883463           
+     penalty = 0.1267554           
+     penalty = 0.02730862           
+     penalty = 0.005883463           
 
 #> DONE
 models$plot("BIC")
@@ -114,8 +114,10 @@ models$plot("BIC")
 models$get_best_model("BIC")
 #> A full normal-block-mean model with 3 unknown blocks .
 #> ===========================================================================
-#>  nb_param q n_edges sparsity    loglik deviance      BIC     ICL     EBIC niter
-#>        85 3      60    0.124 -1195.953 2391.905 2746.714 2746.92 3106.202     7
+#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+#>        84 3      59    0.127 -1198.912 2397.824 2748.539 2749.468 3102.035
+#>  niter
+#>     10
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

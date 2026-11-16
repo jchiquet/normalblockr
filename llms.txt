@@ -97,7 +97,7 @@ network between the 6 blocks is estimated.
 ``` r
 
 hc    <- brca_rppa$expr |> scale() |> t() |> dist() |> hclust("ward.D2")
-group <- cutree(hc, 6) |> normalblockr:::as_indicator()
+group <- model.matrix(~ 0 + factor(cutree(hc, 6)))
 m_known <- normal_block(data, blocks = group)
 ```
 

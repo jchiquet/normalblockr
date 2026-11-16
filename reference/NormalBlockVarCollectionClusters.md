@@ -25,12 +25,12 @@ of clusters (q) and a fixed sparsity level.
 
 Inherited methods
 
-- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
 - [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
 - [`NormalBlockCollectionClusters$get_best_model()`](NormalBlockCollectionClusters.html#method-get_best_model)
 - [`NormalBlockCollectionClusters$get_model()`](NormalBlockCollectionClusters.html#method-get_model)
 - [`NormalBlockCollectionClusters$optimize()`](NormalBlockCollectionClusters.html#method-optimize)
 - [`NormalBlockCollectionClusters$plot()`](NormalBlockCollectionClusters.html#method-plot)
+- [`NormalBlockCollectionClusters$print()`](NormalBlockCollectionClusters.html#method-print)
 - [`NormalBlockCollectionClusters$refine()`](NormalBlockCollectionClusters.html#method-refine)
 
 ------------------------------------------------------------------------

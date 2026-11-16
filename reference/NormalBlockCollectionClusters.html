@@ -68,6 +68,15 @@ in their `initialize()` and name themselves through `who_am_I`.</p>
 <dd><p>number of blocks</p></dd>
 
 
+    <dt><code>deviance_violations</code></dt>
+<dd><p>the values of q whose deviance is higher
+than at the next smaller q of the collection. The models are nested (a
+q-cluster model is a (q + 1)-cluster one with an empty cluster), so the
+deviance can only decrease with q at the global optimum: every
+violation signals an optimization stuck in a poorer local optimum,
+which `refine()` is designed to repair. Empty when there is none.</p></dd>
+
+
 </dl><p></p></div>
     </div>
     <div class="section level2">
@@ -80,9 +89,9 @@ in their `initialize()` and name themselves through `who_am_I`.</p>
 <li><p><a href="#method-NormalBlockCollectionClusters-plot"><code>NormalBlockCollectionClusters$plot()</code></a></p></li>
 <li><p><a href="#method-NormalBlockCollectionClusters-optimize"><code>NormalBlockCollectionClusters$optimize()</code></a></p></li>
 <li><p><a href="#method-NormalBlockCollectionClusters-refine"><code>NormalBlockCollectionClusters$refine()</code></a></p></li>
+<li><p><a href="#method-NormalBlockCollectionClusters-print"><code>NormalBlockCollectionClusters$print()</code></a></p></li>
 <li><p><a href="#method-NormalBlockCollectionClusters-clone"><code>NormalBlockCollectionClusters$clone()</code></a></p></li>
-</ul></div><p><details open><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href="NormalBlockCollection.html#method-print"><code>NormalBlockCollection$print()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href="NormalBlockCollection.html#method-summary"><code>NormalBlockCollection$summary()</code></a></span></li>
+</ul></div><p><details open><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href="NormalBlockCollection.html#method-summary"><code>NormalBlockCollection$summary()</code></a></span></li>
 </ul></details></p><hr><a id="method-NormalBlockCollectionClusters-get_model"></a><div class="section">
 <h3 id="normalblockcollectionclusters-get-model-"><code>NormalBlockCollectionClusters$get_model()</code><a class="anchor" aria-label="anchor" href="#normalblockcollectionclusters-get-model-"></a></h3>
 <p>returns the unknown-clusters model corresponding to given q</p><div class="section">
@@ -223,10 +232,21 @@ originals in `$models` in place.</p>
 
 </div>
 
+<p></p><hr><a id="method-NormalBlockCollectionClusters-print"></a><div class="section">
+<h3 id="normalblockcollectionclusters-print-"><code>NormalBlockCollectionClusters$print()</code><a class="anchor" aria-label="anchor" href="#normalblockcollectionclusters-print-"></a></h3>
+<p>User-friendly print method: as for any collection, plus a
+warning line when the deviance increases with q somewhere (see
+`deviance_violations`).</p><div class="section">
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockCollectionClusters</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+</div>
+
 <p></p><hr><a id="method-NormalBlockCollectionClusters-clone"></a><div class="section">
 <h3 id="normalblockcollectionclusters-clone-"><code>NormalBlockCollectionClusters$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockcollectionclusters-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockCollectionClusters</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
