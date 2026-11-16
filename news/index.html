@@ -43,6 +43,11 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="squarem-can-be-turned-off-development-version">SQUAREM can be turned off<a class="anchor" aria-label="anchor" href="#squarem-can-be-turned-off-development-version"></a></h3>
+<ul><li>
+<code>NB_control(acceleration = FALSE)</code> runs plain (V)EM instead of its SQUAREM-accelerated version, in both families and for every variant (the acceleration is on by default, and never attempted when <code>sparsity &gt; 0</code>). Useful to measure what the acceleration buys: on a variance-block model with 8 unknown clusters, plain VEM needs about ten times as many iterations.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="model-selection-criteria-aligned-with-biernacki-and-daudin-development-version">Model-selection criteria aligned with Biernacki and Daudin<a class="anchor" aria-label="anchor" href="#model-selection-criteria-aligned-with-biernacki-and-daudin-development-version"></a></h3>
 <p>The criteria change, so the number of clusters they select can change too.</p>
 <ul><li>

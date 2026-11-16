@@ -60,7 +60,8 @@
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  heuristic <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  noise_covariance <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  refine <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  refine <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  acceleration <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -153,6 +154,14 @@ parameters otherwise drown the mean structure BIC/ICL are weighing. Use
 `optimize()` should automatically call `refine()` afterwards. Default
 `FALSE` since it adds real cost; call `collection$refine()` directly at
 any point afterwards for the same effect without setting this.</p></dd>
+
+
+<dt id="arg-acceleration">acceleration<a class="anchor" aria-label="anchor" href="#arg-acceleration"></a></dt>
+<dd><p>whether the (V)EM is accelerated by SQUAREM
+(Varadhan &amp; Roland, 2008), an extrapolation built on two successive (V)EM
+steps and accepted only if it does not lower the objective. Default `TRUE`;
+it is never attempted when `sparsity &gt; 0`. Set to `FALSE` to run plain
+(V)EM, e.g. to measure what the acceleration buys.</p></dd>
 
 </dl></div>
     <div class="section level2">

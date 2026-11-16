@@ -2,6 +2,15 @@
 
 ## normalblockr (development version)
 
+### SQUAREM can be turned off
+
+- `NB_control(acceleration = FALSE)` runs plain (V)EM instead of its
+  SQUAREM-accelerated version, in both families and for every variant
+  (the acceleration is on by default, and never attempted when
+  `sparsity > 0`). Useful to measure what the acceleration buys: on a
+  variance-block model with 8 unknown clusters, plain VEM needs about
+  ten times as many iterations.
+
 ### Model-selection criteria aligned with Biernacki and Daudin
 
 The criteria change, so the number of clusters they select can change
