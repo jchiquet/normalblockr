@@ -73,3 +73,6 @@ inst/normalblockmean/
 
 # knitr byproducts from knitting a vignette outside the package build
 figure/
+
+# Local Claude Code guidance (not for the public repository)
+CLAUDE.md
