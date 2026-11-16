@@ -75,6 +75,10 @@ NormalBlockCollectionClusters <- R6::R6Class(
     #' @param directions which neighbor(s) to seed refinement candidates
     #' from: `"split"` (smaller-q neighbor), `"merge"` (larger-q neighbor),
     #' or both (the default).
+    #' @param split_rule how a cluster is split to seed the q + 1 model, see
+    #' the `rule` argument of the models' `split()`: `"kmeans"`, `"noise"`,
+    #' or `NULL` (default) for the family's own default (`"kmeans"` for the
+    #' variance-block family, `"noise"` for the mean-block one).
     #' @param verbose whether to print, for each q attempted, whether the
     #' candidate from that neighbor improved on it. Defaults to
     #' `control$verbose` (the value set at construction, see
@@ -82,8 +86,10 @@ NormalBlockCollectionClusters <- R6::R6Class(
     #' @return invisibly returns `self`; improved models replace the
     #' originals in `$models` in place.
     refine = function(trial_niter = 2, max_candidates = 30,
-                      directions = c("split", "merge"), verbose = self$control$verbose) {
+                      directions = c("split", "merge"), verbose = self$control$verbose,
+                      split_rule = NULL) {
       stopifnot(all(directions %in% c("split", "merge")))
+      if (!is.null(split_rule)) split_rule <- match.arg(split_rule, c("kmeans", "noise"))
       ord <- order(self$q_list)
       q_sorted <- self$q_list[ord]
       n <- length(ord)
@@ -105,7 +111,7 @@ NormalBlockCollectionClusters <- R6::R6Class(
       if ("split" %in% directions) {
         for (i in 2:n) {
           if (q_sorted[i] != q_sorted[i - 1] + 1) next # non-contiguous, nothing to seed from
-          candidates <- self$models[[ord[i - 1]]]$candidates_split(trial_niter = trial_niter)
+          candidates <- self$models[[ord[i - 1]]]$candidates_split(trial_niter = trial_niter, split_rule = split_rule)
           try_candidate(ord[i], candidates, "split")
         }
       }

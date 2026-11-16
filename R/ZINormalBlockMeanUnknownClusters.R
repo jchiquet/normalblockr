@@ -44,6 +44,8 @@ ZINormalBlockMeanUnknownClusters <- R6::R6Class(
             penalty_group("kappa", self$p * self$data$d0, self$n),
             penalty_group("alpha", self$q - 1, self$p))
     },
+    ## split(rule = "kmeans"): masked least-squares profiles, as the initialization
+    split_target = function() self$data$X %*% self$data$zi_ols_fit()$B,
     optim_initialize = function() {
       if (private$warm_started) list(B = private$B, Omega = private$Omega, tau = private$C)
       else private$get_heuristic_parameters()
@@ -77,6 +79,7 @@ ZINormalBlockMeanUnknownClusters <- R6::R6Class(
         B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
         noise_covariance = private$res_covariance,
         fixed_tau = isTRUE(control$fixed_tau),
+        accelerate = !isFALSE(control$acceleration),
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter

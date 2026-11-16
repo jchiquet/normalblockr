@@ -184,6 +184,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
         noise_covariance = private$res_covariance,
         fixed_point_niter = control$fixed_point_niter,
         fixed_tau = isTRUE(control$fixed_tau),
+        accelerate = !isFALSE(control$acceleration),
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter

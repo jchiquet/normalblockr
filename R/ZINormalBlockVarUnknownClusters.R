@@ -47,6 +47,8 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
             penalty_group("kappa", self$p * self$d0, self$n),
             penalty_group("alpha", self$q - 1, self$p))
     },
+    ## split(rule = "kmeans"): residuals of the non-zero-inflated cells only
+    split_target = function() (self$data$Y - self$data$X %*% private$B) * self$data$zeros_bar,
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for heuristic inference -----------------------
@@ -88,6 +90,7 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
         C0 = init$C, alpha0 = init$alpha, M0 = init$M, S0 = init$S,
         sparsity = self$sparsity, sparsity_weights = self$sparsity_weights,
         noise_covariance = private$res_covariance, fixed_tau = self$fixed_tau,
+        accelerate = !isFALSE(control$acceleration),
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter

@@ -140,14 +140,10 @@ clustering-derived values set at construction time. Used by
 object after splitting cluster `index`. Unlike the variance-block
 family, Omega and the sparsity weights are p x p here and do not
 depend on q, so they carry over unchanged; only C (tau) and B (one
-column per cluster) are affected. Variables are split by their
-current noise variance (1 / diag(Omega)) around its within-cluster
-median, the same criterion [NormalBlockVarBase]'s `split()` uses
-via `dm1`, since `diag(Omega)` plays the same per-variable-precision
-role here.
+column per cluster) are affected.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanBase$split(index, in_place = FALSE)}
+    \preformatted{NormalBlockMeanBase$split(index, in_place = FALSE, rule = NULL)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -156,6 +152,15 @@ role here.
       \item{\code{index}}{index (integer) of the cluster to split}
       \item{\code{in_place}}{should the split be applied to the object itself, or
 should a copy be sent? Default FALSE (send a copy)}
+      \item{\code{rule}}{how the members of the cluster are divided: `"kmeans"`
+runs a 2-means on their own fitted mean trajectories `X B_ols` (each
+variable's unconstrained least-squares profile, the quantity the
+initial clustering is computed on); `"noise"` cuts them at the median of
+their noise variance `1 / diag(Omega)`. Default `NULL`, resolved to
+`"noise"` for this family: with it, `refine()` removes slightly more
+deviance on every seed of `brca_rppa` (about 1.7%) and `onema` (under
+1%), the two rules tie on simulated data, and the selected q never
+differs (`inst/mean_block_analyses/split_rule_comparison.R`).}
     }
     \if{html}{\out{</div>}}
   }
