@@ -47,6 +47,7 @@ different factors.}
   \itemize{
     \item \href{#method-NormalBlockVarBase-initialize}{\code{NormalBlockVarBase$new()}}
     \item \href{#method-NormalBlockVarBase-warm_start_from}{\code{NormalBlockVarBase$warm_start_from()}}
+    \item \href{#method-NormalBlockVarBase-within_block_correlations}{\code{NormalBlockVarBase$within_block_correlations()}}
     \item \href{#method-NormalBlockVarBase-split}{\code{NormalBlockVarBase$split()}}
     \item \href{#method-NormalBlockVarBase-merge}{\code{NormalBlockVarBase$merge()}}
     \item \href{#method-NormalBlockVarBase-clone}{\code{NormalBlockVarBase$clone()}}
@@ -124,6 +125,36 @@ each penalty in a sparsity path from the previous one's solution.
   }
   \subsection{Returns}{
     Update the current object in place with `other`'s parameters
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockVarBase-within_block_correlations"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-within_block_correlations}{}}}
+\subsection{\code{NormalBlockVarBase$within_block_correlations()}}{
+  Diagnose whether the blocks are made of positively
+co-varying variables, as the model requires. Within block k, two
+variables j and l are noisy copies of the same latent signal, so their
+covariance is `Sigma_kk > 0` and their correlation
+`Sigma_kk / sqrt((Sigma_kk + d_j) (Sigma_kk + d_l))` lies in (0, 1):
+the model cannot put two anticorrelated variables in the same block.
+This compares, for each block, the empirical correlations of the
+variables' residuals `Y - XB` (non-zero cells only for zero-inflated
+models) with the correlations the fitted model implies. Mostly useful
+for a known clustering (e.g. from an annotation): a block with many
+negative empirical correlations is misspecified, and should rather be
+split into blocks linked by a negative `Sigma_kl`.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockVarBase$within_block_correlations()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a data frame with one row per block: `block`, `size`, the mean
+and minimum of the empirical within-block correlations (`mean_cor`,
+`min_cor`), the proportion of negative ones (`prop_negative`), and the
+mean correlation implied by the model (`model_cor`). `NA` for blocks
+with fewer than two variables.
   }
 }
 

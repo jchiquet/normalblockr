@@ -73,6 +73,45 @@ NormalBlockVarBase <- R6::R6Class(
       invisible(self)
     },
 
+    #' @description Diagnose whether the blocks are made of positively
+    #' co-varying variables, as the model requires. Within block k, two
+    #' variables j and l are noisy copies of the same latent signal, so their
+    #' covariance is `Sigma_kk > 0` and their correlation
+    #' `Sigma_kk / sqrt((Sigma_kk + d_j) (Sigma_kk + d_l))` lies in (0, 1):
+    #' the model cannot put two anticorrelated variables in the same block.
+    #' This compares, for each block, the empirical correlations of the
+    #' variables' residuals `Y - XB` (non-zero cells only for zero-inflated
+    #' models) with the correlations the fitted model implies. Mostly useful
+    #' for a known clustering (e.g. from an annotation): a block with many
+    #' negative empirical correlations is misspecified, and should rather be
+    #' split into blocks linked by a negative `Sigma_kl`.
+    #' @return a data frame with one row per block: `block`, `size`, the mean
+    #' and minimum of the empirical within-block correlations (`mean_cor`,
+    #' `min_cor`), the proportion of negative ones (`prop_negative`), and the
+    #' mean correlation implied by the model (`model_cor`). `NA` for blocks
+    #' with fewer than two variables.
+    within_block_correlations = function() {
+      R <- self$data$Y - self$data$X %*% private$B
+      if (is.matrix(private$kappa)) R[self$data$zeros == 1] <- NA
+      emp_cor   <- suppressWarnings(stats::cor(R, use = "pairwise.complete.obs"))
+      Sigma_kk  <- diag(chol2inv(chol(private$Omega)))
+      noise_var <- 1 / private$dm1
+      cl <- self$clustering
+      do.call(rbind, lapply(seq_len(self$q), function(k) {
+        idx <- which(cl == k)
+        if (length(idx) < 2)
+          return(data.frame(block = k, size = length(idx), mean_cor = NA_real_, min_cor = NA_real_,
+                            prop_negative = NA_real_, model_cor = NA_real_))
+        pairs   <- upper.tri(diag(length(idx)))
+        emp     <- emp_cor[idx, idx][pairs]
+        sd_tot  <- sqrt(Sigma_kk[k] + noise_var[idx])
+        implied <- (Sigma_kk[k] / tcrossprod(sd_tot))[pairs]
+        data.frame(block = k, size = length(idx),
+                   mean_cor = mean(emp, na.rm = TRUE), min_cor = min(emp, na.rm = TRUE),
+                   prop_negative = mean(emp < 0, na.rm = TRUE), model_cor = mean(implied))
+      }))
+    },
+
     #' @description Create a clone of the current [`NormalBlockVarBase`] object after splitting cluster `index`
     #' @param index index (integer) of the cluster to split
     #' @param in_place should the split applied to the object itself, or should a copy be sent?

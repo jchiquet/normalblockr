@@ -39,12 +39,12 @@ models$get_best_model()
 }
 \if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_best_model"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-get_best_model'><code>NormalBlockCollectionClusters$get_best_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_model"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-get_model'><code>NormalBlockCollectionClusters$get_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-optimize'><code>NormalBlockCollectionClusters$optimize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="plot"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-plot'><code>NormalBlockCollectionClusters$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="print"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-print'><code>NormalBlockCollectionClusters$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="refine"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-refine'><code>NormalBlockCollectionClusters$refine()</code></a></span></li>
 </ul>
 </details>}}

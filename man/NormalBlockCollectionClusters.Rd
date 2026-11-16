@@ -22,6 +22,13 @@ in their `initialize()` and name themselves through `who_am_I`.
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
     \item{\code{q_list}}{number of blocks}
+
+    \item{\code{deviance_violations}}{the values of q whose deviance is higher
+than at the next smaller q of the collection. The models are nested (a
+q-cluster model is a (q + 1)-cluster one with an empty cluster), so the
+deviance can only decrease with q at the global optimum: every
+violation signals an optimization stuck in a poorer local optimum,
+which `refine()` is designed to repair. Empty when there is none.}
   }
   \if{html}{\out{</div>}}
 }
@@ -33,12 +40,12 @@ in their `initialize()` and name themselves through `who_am_I`.
     \item \href{#method-NormalBlockCollectionClusters-plot}{\code{NormalBlockCollectionClusters$plot()}}
     \item \href{#method-NormalBlockCollectionClusters-optimize}{\code{NormalBlockCollectionClusters$optimize()}}
     \item \href{#method-NormalBlockCollectionClusters-refine}{\code{NormalBlockCollectionClusters$refine()}}
+    \item \href{#method-NormalBlockCollectionClusters-print}{\code{NormalBlockCollectionClusters$print()}}
     \item \href{#method-NormalBlockCollectionClusters-clone}{\code{NormalBlockCollectionClusters$clone()}}
   }
 }
 \if{html}{\out{<details open><summary>Inherited methods</summary>
 <ul>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
 </ul>
 </details>}}
@@ -186,6 +193,20 @@ variance-block family, `"noise"` for the mean-block one).}
   \subsection{Returns}{
     invisibly returns `self`; improved models replace the
 originals in `$models` in place.
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockCollectionClusters-print"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-print}{}}}
+\subsection{\code{NormalBlockCollectionClusters$print()}}{
+  User-friendly print method: as for any collection, plus a
+warning line when the deviance increases with q somewhere (see
+`deviance_violations`).
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockCollectionClusters$print()}
+    \if{html}{\out{</div>}}
   }
 }
 

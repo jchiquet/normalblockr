@@ -123,6 +123,18 @@ NormalBlockCollectionClusters <- R6::R6Class(
         }
       }
       invisible(self)
+    },
+
+    #' @description User-friendly print method: as for any collection, plus a
+    #' warning line when the deviance increases with q somewhere (see
+    #' `deviance_violations`).
+    print = function() {
+      super$print()
+      viol <- self$deviance_violations
+      if (length(viol) > 0)
+        cat("* Warning: the deviance increases with q at q =", paste(viol, collapse = ", "),
+            "\n    (nested models: a sign of poor local optima). Try $refine().\n")
+      invisible(self)
     }
   ),
 
@@ -131,6 +143,17 @@ NormalBlockCollectionClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
     #' @field q_list number of blocks
-    q_list = function() map_dbl(self$models, "q")
+    q_list = function() map_dbl(self$models, "q"),
+    #' @field deviance_violations the values of q whose deviance is higher
+    #' than at the next smaller q of the collection. The models are nested (a
+    #' q-cluster model is a (q + 1)-cluster one with an empty cluster), so the
+    #' deviance can only decrease with q at the global optimum: every
+    #' violation signals an optimization stuck in a poorer local optimum,
+    #' which `refine()` is designed to repair. Empty when there is none.
+    deviance_violations = function() {
+      ord <- order(self$q_list)
+      dev <- self$criteria$deviance[ord]
+      self$q_list[ord][-1][which(diff(dev) > 1e-6 * pmax(1, abs(dev[-1])))]
+    }
   )
 )
