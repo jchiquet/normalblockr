@@ -28,6 +28,8 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @return A new [`NormalBlockMeanBase`] object
     initialize = function(data, q, sparsity = 0, control = NB_control(),
                           zero_inflation = FALSE) {
+      ## family default for scale = NULL (see NormalBlockData): unscaled
+      data <- data$for_family("mean")
       ## family default for the initial clustering
       if (is.null(control$clustering_init)) control$clustering_init <- "kmeans"
       ## "diagonal" by default. Asking for sparsity means asking for off-diagonal

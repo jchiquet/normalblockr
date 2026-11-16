@@ -205,6 +205,9 @@ get_model <- function(data,
                       control = NB_control(),
                       model = c("var", "mean")) {
   model <- match.arg(model)
+  ## family default for scale = NULL (see NormalBlockData): resolved once
+  ## here, so that every model of a collection shares the same data object
+  data <- data$for_family(model)
 
   changing_sparsity <- isTRUE(sparsity)
   unknown_q_list    <- !is.matrix(blocks) && length(blocks) > 1

@@ -32,6 +32,7 @@ NormalBlockVarBase <- R6::R6Class(
     #' @return A new [`NormalBlockVarBase`] object
     initialize = function(data, q, sparsity = 0, control = NB_control(), zero_inflation = FALSE) {
       ## family defaults (see NormalBlockMeanBase for the other ones)
+      data <- data$for_family("var")
       if (is.null(control$clustering_init)) control$clustering_init <- "ward2"
       if (is.null(control$noise_covariance)) control$noise_covariance <- "diagonal"
       stopifnot("noise_covariance = 'full' only applies to mean-block models, whose Sigma is the full p x p residual covariance" =

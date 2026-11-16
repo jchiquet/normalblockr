@@ -13,5 +13,6 @@ test_that("normal block mean with known clusters - basic tests", {
   data  <- NormalBlockData$new(Y, X)
   model <- NormalBlockMeanKnownClusters$new(data, C, 0.1)
   model$optimize()
-  expect_lt(model$BIC, 15400)
+  ## on Y's own scale (mean-block default: no rescaling; BIC 17071 at writing)
+  expect_lt(model$BIC, 17500)
 })

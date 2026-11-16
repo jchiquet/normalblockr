@@ -1,16 +1,16 @@
 ###############################################################################
-## Regression tests for NormalBlockData's scale = TRUE default (R/NormalBlockData.R):
-## each column of Y is divided by its own standard deviation (no centering --
-## the model's own intercept in X is expected to absorb the mean) so that
-## the normal-block model's shared within-block covariance assumption isn't
-## swamped by variables with very different baseline variances.
+## Regression tests for NormalBlockData's scale argument (R/NormalBlockData.R):
+## with scale = TRUE each column of Y is divided by its own standard deviation
+## (no centering -- the model's own intercept in X is expected to absorb the
+## mean). The default, scale = NULL, defers to the model family: rescaled for
+## variance-block models, unscaled for mean-block ones.
 set.seed(1)
 n <- 40; p <- 6
 Y <- matrix(rnorm(n * p), n, p) * matrix(c(1, 10, 100, 0.1, 1000, 1), n, p, byrow = TRUE)
 X <- matrix(1, n, 1)
 
-test_that("scale = TRUE (default) rescales each column to unit variance, without centering", {
-  data <- NormalBlockData$new(Y, X)
+test_that("scale = TRUE rescales each column to unit variance, without centering", {
+  data <- NormalBlockData$new(Y, X, scale = TRUE)
   expect_equal(apply(data$Y, 2, sd), rep(1, p), tolerance = 1e-10)
   expect_equal(data$Y_scale, apply(Y, 2, sd))
   ## not centered: dividing by sd alone does not zero out the column means
@@ -34,7 +34,37 @@ test_that("scaling does not change which entries are zero (zeros/zeros_bar unaff
 
 test_that("a near-constant column does not produce Inf/NaN in Y or Y_scale", {
   Yconst <- Y; Yconst[, 1] <- 1 # zero variance
-  data <- NormalBlockData$new(Yconst, X)
+  data <- NormalBlockData$new(Yconst, X, scale = TRUE)
   expect_true(all(is.finite(data$Y)))
   expect_true(all(is.finite(data$Y_scale)))
+})
+
+test_that("scale = NULL (default) defers to the family: rescaled for var, unscaled for mean", {
+  data <- NormalBlockData$new(Y, X)
+  expect_null(data$scale)
+  expect_equal(data$Y, Y)
+  var_data <- data$for_family("var")
+  expect_equal(var_data$Y, NormalBlockData$new(Y, X, scale = TRUE)$Y)
+  expect_identical(data$for_family("var"), var_data)   # built once, shared
+  expect_identical(data$for_family("mean"), data)
+  ## an explicit choice is kept by both families
+  for (sc in c(TRUE, FALSE)) {
+    d <- NormalBlockData$new(Y, X, scale = sc)
+    expect_identical(d$for_family("var"), d)
+    expect_identical(d$for_family("mean"), d)
+  }
+  expect_error(NormalBlockData$new(Y, X, scale = NA), "scale must be")
+})
+
+test_that("models fitted on default data use their family's scale, whatever the entry point", {
+  C <- model.matrix(~ 0 + factor(rep(1:2, each = 3)))
+  data <- NormalBlockData$new(Y, X)
+  ctrl <- NB_control(verbose = FALSE)
+  expect_equal(normal_block(data, blocks = C, control = ctrl)$data$Y_scale, apply(Y, 2, sd))
+  expect_equal(normal_block(data, blocks = C, model = "mean", control = ctrl)$data$Y_scale, rep(1, p))
+  expect_equal(NormalBlockVarKnownClusters$new(data, C)$data$Y_scale, apply(Y, 2, sd))
+  expect_equal(NormalBlockMeanKnownClusters$new(data, C)$data$Y_scale, rep(1, p))
+  ## a collection shares one data object across its models
+  co <- normal_block(data, blocks = 1:2, control = ctrl)
+  expect_identical(co$models[[1]]$data, co$models[[2]]$data)
 })

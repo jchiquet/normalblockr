@@ -2,7 +2,7 @@
 ## Regression tests for converting B/dm1/fitted back to Y's original units
 ## (R/NormalBlockVarBase.R: private$rescale_to_original(), B_original,
 ## dm1_original, and the fitted bindings in the 4 leaf classes). Y's columns
-## are rescaled by NormalBlockData(scale = TRUE) (default) but not centered;
+## are rescaled by NormalBlockData (the variance-block default) but not centered;
 ## model_par$B/model_par$dm1 stay on that internal scale (warm_start_from()
 ## relies on this), while B_original/dm1_original/fitted are converted back.
 set.seed(1)
@@ -13,7 +13,8 @@ test_that("B_original/dm1_original undo NormalBlockData's column-wise rescaling 
   model <- NormalBlockVarKnownClusters$new(data, ex$parameters$C)
   model$optimize(NB_control(verbose = FALSE))
 
-  s <- data$Y_scale
+  s <- model$data$Y_scale
+  expect_false(all(s == 1))
   expect_equal(model$B_original, model$model_par$B * matrix(s, nrow(model$model_par$B), ncol(model$model_par$B), byrow = TRUE))
   expect_equal(model$dm1_original, model$model_par$dm1 / s^2)
 })
@@ -21,7 +22,7 @@ test_that("B_original/dm1_original undo NormalBlockData's column-wise rescaling 
 test_that("fitted is on Y's original units: X %*% B_original reproduces it exactly", {
   model <- NormalBlockVarKnownClusters$new(data, ex$parameters$C, control = NB_control(heuristic = TRUE))
   model$optimize()
-  expect_equal(model$fitted, data$X %*% model$B_original)
+  expect_equal(model$fitted, model$data$X %*% model$B_original)
 })
 
 test_that("model_par$B/model_par$dm1 stay on the internal (scaled) axis, unaffected", {

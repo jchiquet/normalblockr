@@ -23,7 +23,7 @@ niter     <- 5
 threshold <- -1 # never trigger early stopping: forces exactly `niter` iterations
 
 test_that("ZINormalBlockVarKnownClusters_fit matches ZINormalBlockVarKnownClusters (diagonal/spherical, unpenalized/sparse)", {
-  data <- NormalBlockData$new(Y, X)
+  data <- NormalBlockData$new(Y, X, scale = TRUE)
 
   for (nc in c("diagonal", "spherical")) {
     for (sparsity in c(0, 0.05)) {
@@ -54,7 +54,7 @@ test_that("ZINormalBlockVarKnownClusters_fit matches ZINormalBlockVarKnownCluste
 })
 
 test_that("ZINormalBlockVarUnknownClusters_fit matches ZINormalBlockVarUnknownClusters (diagonal/spherical, unpenalized/sparse)", {
-  data <- NormalBlockData$new(Y, X)
+  data <- NormalBlockData$new(Y, X, scale = TRUE)
 
   for (nc in c("diagonal", "spherical")) {
     for (sparsity in c(0, 0.05)) {

@@ -54,7 +54,8 @@ normal_block_sequential <- function(data, blocks_mean, blocks_var,
   residuals <- data$Y * matrix(data$Y_scale, data$n, data$p, byrow = TRUE) - fitted(fit_mean)
 
   intercept <- matrix(1, data$n, 1, dimnames = list(NULL, "(Intercept)"))
-  data_var  <- NormalBlockData$new(residuals, intercept, zeros = data$zeros)
+  ## same scale request as the original data: NULL lets each family apply its own default
+  data_var  <- NormalBlockData$new(residuals, intercept, zeros = data$zeros, scale = data$scale)
   fit_var   <- pick(normal_block(data_var, blocks_var,
                                  zero_inflation = zero_inflation, control = control_var))
 

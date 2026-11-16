@@ -72,7 +72,7 @@ test_that("every model in a collection shares one data object, hence one fit", {
 
   ## R6 reference semantics: the models point at the caller's object, so the
   ## memoized zi_fit()/ols_fit() are computed once for the whole collection
-  for (m in coll$models) expect_identical(m$data, d)
+  for (m in coll$models) expect_identical(m$data, d$for_family("var"))
 })
 
 test_that("a q-range collection shares the q-independent part of its heuristic", {

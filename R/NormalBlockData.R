@@ -15,18 +15,32 @@
 #' when the matrix handed to the model is no longer the one carrying the zeros
 #' (typically the residuals of a first stage, see [normal_block_sequential()]).
 #' @param scale whether to rescale each column of Y by its own standard
-#' deviation before fitting (default TRUE). Columns are not centered: the
-#' model's own intercept already absorbs each variable's mean, so
-#' centering here would be redundant.
-#' Rescaling matters because the normal-block model assumes a single shared
-#' covariance value within each block (`Cov(Y_j, Y_j') = Var(W_k)` for j, j'
-#' in block k); on the raw scale, that assumption is swamped whenever
-#' variables in the same true block have very different baseline variances
-#' (e.g. species with very different total abundance). The resulting `B`,
-#' `Omega` and clustering are therefore properties of the *scaled* data, not
-#' directly convertible back to the original units (the per-column scaling
-#' factors are not the same within a block, so there is no single way to
-#' "unscale" a shared block covariance back to a p x p matrix).
+#' deviation before fitting. `NULL` (the default) leaves the choice to the
+#' model family, resolved when a model is fitted: `TRUE` for variance-block
+#' models, `FALSE` for mean-block ones. `TRUE` or `FALSE` forces it for both.
+#' Columns are never centered: the model's own intercept already absorbs each
+#' variable's mean.
+#'
+#' The two families need opposite defaults. A variance-block model loads every
+#' variable of block k on the same latent signal with weight 1
+#' (`Cov(Y_j, Y_j') = Var(W_k)` for j, j' in block k). On real data the
+#' variables of a block often carry that signal with very different
+#' amplitudes (units, dynamic ranges, abundances), and rescaling evens them
+#' out: on `brca_rppa` and `onema`, the variance-block fit to the rescaled
+#' data has the better exact ICL once brought back to the original scale
+#' (Jacobian included). A mean-block model shares a mean profile within a
+#' block; dividing each variable by its own standard deviation, which mixes
+#' that profile with the variable's own noise, makes the profiles differ
+#' within a true block. On the same two datasets the unscaled mean-block fit
+#' has the better exact ICL, and on data simulated from either model,
+#' rescaling makes every criterion over-select the number of clusters (see
+#' `inst/mean_block_analyses/criteria_selection_study.R`).
+#'
+#' The resulting `B`, `Omega` and clustering are properties of the data the
+#' model was fitted on; with rescaled data, use `$B_original`,
+#' `$dm1_original` and `$fitted` for quantities in Y's original units (a
+#' shared block covariance has no unique original-scale counterpart, since
+#' the scaling factors differ within a block).
 #' @examples
 #' ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
 #' data <- NormalBlockData$new(ex$Y, ex$X)
@@ -41,8 +55,11 @@ NormalBlockData <- R6::R6Class(
     #' @field Y the matrix of responses (rescaled column-wise if `scale = TRUE`)
     Y  = NULL,
     #' @field Y_scale the per-column standard deviation Y was divided by (all
-    #' 1's if `scale = FALSE`)
+    #' 1's if Y was not rescaled)
     Y_scale = NULL,
+    #' @field scale the `scale` argument as given: `TRUE`, `FALSE`, or `NULL`
+    #' for the family default (see `for_family()`)
+    scale = NULL,
     #' @field X the matrix of covariates
     X = NULL,
     #' @field X0 the matrix of zero-inflation covariates, if applicable
@@ -78,16 +95,27 @@ NormalBlockData <- R6::R6Class(
     #' @param X0 zero-inflation design matrix, if applicable.
     #' @param formula describes the relationship between Y and X, useful if not all of X's covariates should be used.
     #' @param scale whether to rescale each column of Y by its own standard
-    #' deviation (no centering). Default TRUE, see the class-level
-    #' documentation for the rationale and its limits.
+    #' deviation (no centering): `NULL` (default) for the model family's
+    #' default, see the class-level documentation and `for_family()`.
     #' @param zeros an optional 0/1 matrix of structural zeros, overriding the
     #' default `Y == 0`.
-    initialize = function(Y, X, X0 = NULL, formula = NULL, scale = TRUE,
+    initialize = function(Y, X, X0 = NULL, formula = NULL, scale = NULL,
                           zeros = NULL) {
       stopifnot("Y and X must be matrices" = all(is.matrix(Y), is.matrix(X)))
       stopifnot("Y and X must have the same number of rows" = (nrow(Y) == nrow(X)))
-      self$Y_scale <- if (scale) pmax(apply(Y, 2, sd), .Machine$double.eps) else rep(1, ncol(Y))
-      self$Y <- Y / matrix(self$Y_scale, nrow(Y), ncol(Y), byrow = TRUE)
+      stopifnot("scale must be NULL, TRUE or FALSE" =
+                  is.null(scale) || (is.logical(scale) && length(scale) == 1 && !is.na(scale)))
+      self$scale <- scale
+      ## the family default is resolved later (for_family()), from the
+      ## constructor's arguments: keep them, Y unscaled until then
+      if (is.null(scale)) private$args <- list(Y = Y, X = X, X0 = X0, formula = formula, zeros = zeros)
+      if (isTRUE(scale)) {
+        self$Y_scale <- pmax(apply(Y, 2, sd), .Machine$double.eps)
+        self$Y <- Y / matrix(self$Y_scale, nrow(Y), ncol(Y), byrow = TRUE)
+      } else {
+        self$Y_scale <- rep(1, ncol(Y))
+        self$Y <- Y
+      }
       self$n <- nrow(Y)
       self$p <- ncol(Y)
       self$formula <- formula
@@ -125,6 +153,23 @@ NormalBlockData <- R6::R6Class(
       self$zeros_bar <- 1 - self$zeros
       self$npY       <- sum(self$zeros_bar)
       self$nY        <- colSums(self$zeros_bar)
+    },
+
+    #' @description The data a model of the given family is fitted on. When
+    #' `scale` was given explicitly, the object itself. Otherwise (`scale =
+    #' NULL`) the family decides: the object itself, unscaled, for the
+    #' mean-block family; a rescaled copy for the variance-block family,
+    #' built once and shared by every model fitted on it.
+    #' @param model the model family, `"var"` or `"mean"`
+    #' @return a [`NormalBlockData`] object
+    for_family = function(model = c("var", "mean")) {
+      model <- match.arg(model)
+      if (!is.null(self$scale) || model == "mean") return(self)
+      if (is.null(private$scaled_copy))
+        private$scaled_copy <- NormalBlockData$new(private$args$Y, private$args$X, private$args$X0,
+                                                   private$args$formula, scale = TRUE,
+                                                   zeros = private$args$zeros)
+      private$scaled_copy
     },
 
     #' @description Ordinary-least-squares fit of Y on X, with its residuals
@@ -192,6 +237,10 @@ NormalBlockData <- R6::R6Class(
     ## set in initialize(), none of which change afterwards
     ols_cache     = NULL,
     zi_ols_cache  = NULL,
-    zi_cache      = NULL
+    zi_cache      = NULL,
+    ## for_family(): the constructor's arguments when scale = NULL, and the
+    ## rescaled copy built from them for the variance-block family
+    args          = NULL,
+    scaled_copy   = NULL
   )
 )

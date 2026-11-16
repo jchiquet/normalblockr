@@ -17,7 +17,10 @@ test_that("normal block mean with unknown clusters - basic tests", {
   data  <- NormalBlockData$new(Y, X)
   model <- NormalBlockMeanUnknownClusters$new(data, q, 0.1)
   model$optimize()
-  expect_lt(model$BIC, 11224)
+  ## on Y's own scale (mean-block default: no rescaling; BIC 17138 at writing)
+  expect_lt(model$BIC, 17500)
+  ## the default matters here: the same fit on column-rescaled data has ARI 0.29
+  expect_gt(aricode::ARI(model$clustering, as.vector(C %*% seq_len(q))), 0.8)
 })
 
 test_that("predict() maps the cluster-level predictor back to the variables", {
