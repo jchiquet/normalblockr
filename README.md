@@ -118,7 +118,7 @@ m_known
     A diagonal normal-block-var model with fixed blocks .
     ===========================================================================
      nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
-          999 6      15        0 -70387.84 140775.7 146616.3 144073.3 146670    14
+          999 6      15        0 -70387.84 140775.7 146616.3 146616.3 146670    14
     ===========================================================================
     * Useful fields
         $model_par, $posterior_par / $var_par, $clustering 
@@ -168,12 +168,12 @@ m_unknown$plot(c("deviance", "BIC", "ICL", "EBIC"))
 m_unknown$get_best_model("EBIC")
 ```
 
-    A diagonal normal-block-var model with 16 unknown blocks .
+    A diagonal normal-block-var model with 17 unknown blocks .
     ===========================================================================
      nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
-         1129 16     120        0 -67374.79 134749.6 141350.2 137746.6 142015.6
+         1147 17     136        0 -66808.34 133616.7 140310.5 140310.6 141081.1
      niter
-        32
+        20
     ===========================================================================
     * Useful fields
         $model_par, $posterior_par / $var_par, $clustering 
@@ -262,12 +262,10 @@ m_zi    <- normal_block(data_zi, blocks = 2:8, zero_inflation = TRUE)
 m_zi$get_best_model("ICL")
 ```
 
-    A zero-inflated diagonal normal-block-var model with 6 unknown blocks .
+    A zero-inflated diagonal normal-block-var model with 4 unknown blocks .
     ===========================================================================
-     nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
-          210 6      15        0 -13519.35 27038.71 28296.39 27090.47 28350.14
-     niter
-        20
+     nb_param q n_edges sparsity loglik deviance      BIC      ICL     EBIC niter
+          197 4       6        0 -13517    27034 28207.35 28225.94 28223.98    50
     ===========================================================================
     * Useful fields
         $model_par, $posterior_par / $var_par, $clustering 
