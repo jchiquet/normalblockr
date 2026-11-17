@@ -7,7 +7,12 @@
 ## criteria both before and after a single refine() call, so the cost of
 ## building the collection is paid once, not duplicated across the
 ## with/without-refine comparison.
+## The 15 (dataset, method) collections run in parallel (N_CORES, default 15),
+## one BLAS thread each (run with OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=1):
+## timings are then single-threaded, comparable between methods but not with
+## the multithreaded timings of earlier runs.
 devtools::load_all(".", quiet = TRUE)
+library(parallel)
 
 run_method <- function(data, q_values, method, zero_inflation, dataset_name) {
   ci <- if (method == "best_of_inits") "best_of_inits" else method
@@ -45,11 +50,11 @@ methods  <- c("kmeans", "ward2", "sbm", "spectral", "best_of_inits")
 datasets <- list(brca = data_brca, onema = data_onema, web = data_web)
 zi_flags <- c(brca = FALSE, onema = TRUE, web = FALSE)
 
-benchmark <- do.call(rbind, lapply(names(datasets), function(nm) {
-  do.call(rbind, lapply(methods, function(m) {
-    cat(nm, m, "\n")
-    run_method(datasets[[nm]], q_lists[[nm]], m, zi_flags[[nm]], nm)
-  }))
-}))
+jobs <- expand.grid(method = methods, dataset = names(datasets), stringsAsFactors = FALSE)
+benchmark <- do.call(rbind, mclapply(seq_len(nrow(jobs)), function(j) {
+  nm <- jobs$dataset[j]; m <- jobs$method[j]
+  set.seed(j)
+  run_method(datasets[[nm]], q_lists[[nm]], m, zi_flags[[nm]], nm)
+}, mc.cores = as.integer(Sys.getenv("N_CORES", 15)), mc.preschedule = FALSE))
 
 saveRDS(benchmark, "inst/clustering_initialization_benchmark/results/best_of_inits_refine_benchmark.rds")
