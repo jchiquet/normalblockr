@@ -1,5 +1,21 @@
 # normalblockr (development version)
 
+## Held-out log-likelihood and cross-validation
+
+* New method `heldout_loglik(newdata)` on every fitted model: the exact
+  log-likelihood of new observations at the fitted parameters and the MAP
+  partition, on Y's original scale. For variance-block models it is the
+  marginal over the latent W, computed with the Woodbury identity and the
+  determinant lemma (only q x q matrices are factorized); zero-inflated
+  models add the zero-inflation probabilities and use the marginal of the
+  non-zero cells. On the training data with a known clustering it equals
+  the model's log-likelihood, which the tests check for every variant.
+* New function `normal_block_cv()`: K-fold cross-validated log-likelihood of
+  a collection over q, with `print()` and `plot()` methods. A criterion that
+  rests on no penalty and compares families, shapes of Sigma and scalings on
+  the same footing. It plateaus beyond the true q, so the selected q
+  (attribute `best`) follows the one-standard-error rule.
+
 ## One initialization for both families, and refine() by default
 
 Fits over a range of cluster counts change: they are refined, and the

@@ -240,6 +240,33 @@ NormalBlockVarBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    ## heldout_loglik() (NormalBlockBase): mean of the new rows, and their
+    ## exact log-likelihoods, marginal over W: Y_i ~ N(B'X_i, C Sigma C' + D).
+    ## Woodbury and the determinant lemma, with A = Omega + C'D^{-1}C (q x q):
+    ##   log|C Sigma C' + D| = log|D| - log|Omega| + log|A|
+    ##   r'(C Sigma C' + D)^{-1} r = r'D^{-1}r - u'A^{-1}u, u = C'D^{-1}r.
+    ## `observed` (zero-inflated models): the marginal of each row's non-zero
+    ## cells, i.e. the same formulas on the observed sub-rows of C, D and r.
+    heldout_mean = function(X, C) X %*% private$B,
+    heldout_rows = function(R, C, observed) {
+      Omega <- private$Omega; dm1 <- private$dm1
+      ld_Omega <- as.numeric(determinant(Omega)$modulus)
+      if (is.null(observed)) {
+        cA <- chol(Omega + crossprod(C * dm1, C))
+        RD <- R * matrix(dm1, nrow(R), ncol(R), byrow = TRUE)
+        W  <- backsolve(cA, t(RD %*% C), transpose = TRUE)
+        quad <- rowSums(R * RD) - colSums(W^2)
+        logdet <- -sum(log(dm1)) - ld_Omega + 2 * sum(log(diag(cA)))
+        return(-0.5 * (ncol(R) * log(2 * pi) + logdet + quad))
+      }
+      vapply(seq_len(nrow(R)), function(i) {
+        o <- observed[i, ]; d <- dm1[o]; r <- R[i, o]; Co <- C[o, , drop = FALSE]
+        cA <- chol(Omega + crossprod(Co * d, Co))
+        w  <- backsolve(cA, crossprod(Co, d * r), transpose = TRUE)
+        logdet <- -sum(log(d)) - ld_Omega + 2 * sum(log(diag(cA)))
+        -0.5 * (sum(o) * log(2 * pi) + logdet + sum(d * r^2) - sum(w^2))
+      }, numeric(1))
+    },
     ## heuristics tried by best_of_inits(), best first (see NB_control()'s
     ## clustering_init and inst/clustering_initialization_benchmark/)
     default_inits     = c("kmeans", "ward2", "spectral"),
