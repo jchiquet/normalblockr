@@ -1,4 +1,4 @@
-# normalblockr: Gaussian graphical models with latent clustering structure for multivariate continuous data
+# normalblockr: Gaussian models with latent clustering of variables
 
 
 <!-- badges: start -->

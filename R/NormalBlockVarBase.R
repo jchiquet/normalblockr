@@ -240,8 +240,8 @@ NormalBlockVarBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-    ## heuristics tried by best_of_inits(), best first (see
-    ## inst/methods_initialization_and_refine.md for the benchmark)
+    ## heuristics tried by best_of_inits(), best first (see NB_control()'s
+    ## clustering_init and inst/clustering_initialization_benchmark/)
     default_inits     = c("kmeans", "ward2", "spectral"),
     ## split() rule used by refine() unless told otherwise (see split())
     default_split_rule = "kmeans",
