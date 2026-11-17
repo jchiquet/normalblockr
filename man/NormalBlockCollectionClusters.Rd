@@ -125,8 +125,9 @@ Either "ICL" or "BIC". "ICL" is the default criterion}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-optimize}{}}}
 \subsection{\code{NormalBlockCollectionClusters$optimize()}}{
   optimizes every model in the collection, then -- if
-`control$refine` is `TRUE` (see [NB_control()], default `FALSE`) --
-calls [refine()] automatically.
+`control$refine` is `TRUE` (see [NB_control()], the default) --
+calls [refine()] automatically, reporting in one line how many models
+it improved.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionClusters$optimize(

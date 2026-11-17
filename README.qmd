@@ -93,11 +93,10 @@ m_known
 
 ### Unknown number of clusters
 
-Leave the clustering for the model to infer, over a range of candidate cluster counts explored as a collection, then select by ICL.
+Leave the clustering for the model to infer, over a range of candidate cluster counts explored as a collection (each model initialized by `kmeans`, then the whole collection polished by `refine()`), then select by ICL.
 
 ```{r unknown}
 m_unknown <- normal_block(data, blocks = 2:20)
-m_unknown$refine(verbose = FALSE)
 m_unknown$plot(c("deviance", "BIC", "ICL", "EBIC"))
 ```
 

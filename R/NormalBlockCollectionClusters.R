@@ -48,12 +48,20 @@ NormalBlockCollectionClusters <- R6::R6Class(
     },
 
     #' @description optimizes every model in the collection, then -- if
-    #' `control$refine` is `TRUE` (see [NB_control()], default `FALSE`) --
-    #' calls [refine()] automatically.
+    #' `control$refine` is `TRUE` (see [NB_control()], the default) --
+    #' calls [refine()] automatically, reporting in one line how many models
+    #' it improved.
     #' @param control optimization parameters (niter, threshold, verbose)
     optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {
       super$optimize(control)
-      if (isTRUE(self$control$refine)) self$refine()
+      ## heuristic fits have no likelihood for refine() to compare
+      if (isTRUE(self$control$refine) && !isTRUE(self$control$heuristic)) {
+        before <- self$criteria$deviance
+        self$refine(verbose = FALSE)
+        if (isTRUE(self$control$verbose))
+          cat("\t refine(): improved", sum(self$criteria$deviance < before),
+              "of", length(before), "models\n")
+      }
       invisible(self)
     },
 
@@ -89,6 +97,8 @@ NormalBlockCollectionClusters <- R6::R6Class(
                       directions = c("split", "merge"), verbose = self$control$verbose,
                       split_rule = NULL) {
       stopifnot(all(directions %in% c("split", "merge")))
+      stopifnot("refine() compares deviances, which heuristic fits (NB_control(heuristic = TRUE)) do not have" =
+                  !isTRUE(self$control$heuristic))
       if (!is.null(split_rule)) split_rule <- match.arg(split_rule, c("kmeans", "noise"))
       ord <- order(self$q_list)
       q_sorted <- self$q_list[ord]

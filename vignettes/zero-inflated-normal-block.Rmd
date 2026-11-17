@@ -112,10 +112,11 @@ No separate zero-inflation design matrix is supplied here, so `NormalBlockData` 
 
 # Fitting a zero-inflated Normal-Block model
 
-Everything else works exactly as in the non-zero-inflated case (see the general vignette): the only difference is `zero_inflation = TRUE`. The number of clusters is rarely known in advance for this kind of data, so we let `normal_block` explore a range and return a collection of fitted models, one per number of clusters:
+Everything else works exactly as in the non-zero-inflated case (see the general vignette): the only difference is `zero_inflation = TRUE`. The number of clusters is rarely known in advance for this kind of data, so we let `normal_block` explore a range and return a collection of fitted models, one per number of clusters. Two settings depart from the defaults. The initial clustering uses `ward2` rather than `kmeans`: on zero-inflated abundance data such as these, it reaches better fits (see `?NB_control`). And `refine()`, normally run on every collection, is turned off to show what it changes in the next section:
 
 ```{r, fit-zi}
-out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE)
+out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE,
+                    control = NB_control(clustering_init = "ward2", refine = FALSE))
 ```
 
 ```{r, plot-zi}
@@ -124,7 +125,7 @@ out$plot(criteria = c("BIC", "EBIC", "deviance"))
 
 ## Refining the collection
 
-Each model in the collection above is initialized independently (a heuristic clustering on the zero-inflation-aware residuals, see `?NB_control`'s `clustering_init`), which can occasionally settle into a milder local optimum than a neighboring number of clusters' solution would. `refine()` tries a short split/merge trial from each model's already-fitted neighbors and keeps it only if it strictly improves. See `?NormalBlockVarCollectionClusters` for the full rationale. It is not run by default (it adds real cost), so it is called explicitly here:
+Each model in the collection above is initialized independently (a heuristic clustering on the zero-inflation-aware residuals, see `?NB_control`'s `clustering_init`), which can occasionally settle into a milder local optimum than a neighboring number of clusters' solution would. `refine()` tries a short split/merge trial from each model's already-fitted neighbors and keeps it only if it strictly improves. See `?NormalBlockVarCollectionClusters` for the full rationale. `normal_block()` runs it by default; since we turned it off above, we call it explicitly:
 
 ```{r, refine-zi}
 out$refine()

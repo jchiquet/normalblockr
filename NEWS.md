@@ -1,5 +1,23 @@
 # normalblockr (development version)
 
+## One initialization for both families, and refine() by default
+
+Fits over a range of cluster counts change: they are refined, and the
+variance-block ones start from another heuristic.
+
+* `NB_control(refine = TRUE)` is now the default, for collections of both
+  families: every collection over a range of `q` is polished by `refine()`
+  after its cold-started fit (typically 3 to 6 times the cost). A one-line
+  report says how many models it improved. `refine = FALSE` restores the
+  previous behaviour; heuristic fits (`heuristic = TRUE`) are never refined,
+  and `refine()` called on one now says why it cannot run.
+* The default `clustering_init` of variance-block models is now `"kmeans"`,
+  as for mean-block ones. On simulated data the heuristics are equivalent;
+  on real data `kmeans` followed by `refine()` gives the best fits on
+  `brca_rppa` and close to the best on the university data, while `"ward2"`
+  remains better on zero-inflated abundances such as `onema` (see
+  `inst/clustering_initialization_benchmark/var_init_study.R`).
+
 ## Rescaling of Y now depends on the model family
 
 The fits of mean-block models on default data change.

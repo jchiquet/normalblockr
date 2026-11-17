@@ -118,7 +118,7 @@ m_known
     A diagonal normal-block-var model with fixed blocks .
     ===========================================================================
      nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
-          999 6      15        0 -70387.84 140775.7 146616.3 144073.3 146670    14
+          999 6      15        0 -70387.84 140775.7 146616.3 146616.3 146670    14
     ===========================================================================
     * Useful fields
         $model_par, $posterior_par / $var_par, $clustering 
@@ -129,7 +129,9 @@ m_known
 ### Unknown number of clusters
 
 Leave the clustering for the model to infer, over a range of candidate
-cluster counts explored as a collection, then select by ICL.
+cluster counts explored as a collection (each model initialized by
+`kmeans`, then the whole collection polished by `refine()`), then select
+by ICL.
 
 ``` r
 m_unknown <- normal_block(data, blocks = 2:20)
@@ -155,10 +157,11 @@ m_unknown <- normal_block(data, blocks = 2:20)
          number of blocks = 18           
          number of blocks = 19           
          number of blocks = 20           
+         refine(): improved 16 of 19 models
+
     DONE
 
 ``` r
-m_unknown$refine(verbose = FALSE)
 m_unknown$plot(c("deviance", "BIC", "ICL", "EBIC"))
 ```
 
@@ -170,10 +173,8 @@ m_unknown$get_best_model("EBIC")
 
     A diagonal normal-block-var model with 16 unknown blocks .
     ===========================================================================
-     nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
-         1129 16     120        0 -67374.79 134749.6 141350.2 137746.6 142015.6
-     niter
-        32
+     nb_param  q n_edges sparsity loglik deviance      BIC      ICL     EBIC niter
+         1129 16     120        0 -66764   133528 140117.3 140117.5 140782.8    18
     ===========================================================================
     * Useful fields
         $model_par, $posterior_par / $var_par, $clustering 
@@ -256,18 +257,18 @@ m_zi    <- normal_block(data_zi, blocks = 2:8, zero_inflation = TRUE)
          number of blocks = 6           
          number of blocks = 7           
          number of blocks = 8           
+         refine(): improved 6 of 7 models
+
     DONE
 
 ``` r
 m_zi$get_best_model("ICL")
 ```
 
-    A zero-inflated diagonal normal-block-var model with 6 unknown blocks .
+    A zero-inflated diagonal normal-block-var model with 4 unknown blocks .
     ===========================================================================
-     nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
-          210 6      15        0 -13519.35 27038.71 28296.39 27090.47 28350.14
-     niter
-        20
+     nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
+          197 4       6        0 -13523.7  27047.4 28220.75 28241.19 28237.38     8
     ===========================================================================
     * Useful fields
         $model_par, $posterior_par / $var_par, $clustering 
