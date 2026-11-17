@@ -43,6 +43,13 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="one-initialization-for-both-families-and-refine-by-default-development-version">One initialization for both families, and refine() by default<a class="anchor" aria-label="anchor" href="#one-initialization-for-both-families-and-refine-by-default-development-version"></a></h3>
+<p>Fits over a range of cluster counts change: they are refined, and the variance-block ones start from another heuristic.</p>
+<ul><li>
+<code>NB_control(refine = TRUE)</code> is now the default, for collections of both families: every collection over a range of <code>q</code> is polished by <code>refine()</code> after its cold-started fit (typically 3 to 6 times the cost). A one-line report says how many models it improved. <code>refine = FALSE</code> restores the previous behaviour; heuristic fits (<code>heuristic = TRUE</code>) are never refined, and <code>refine()</code> called on one now says why it cannot run.</li>
+<li>The default <code>clustering_init</code> of variance-block models is now <code>"kmeans"</code>, as for mean-block ones. On simulated data the heuristics are equivalent; on real data <code>kmeans</code> followed by <code>refine()</code> gives the best fits on <code>brca_rppa</code> and close to the best on the university data, while <code>"ward2"</code> remains better on zero-inflated abundances such as <code>onema</code> (see <code>inst/clustering_initialization_benchmark/var_init_study.R</code>).</li>
+</ul></div>
+<div class="section level3">
 <h3 id="rescaling-of-y-now-depends-on-the-model-family-development-version">Rescaling of Y now depends on the model family<a class="anchor" aria-label="anchor" href="#rescaling-of-y-now-depends-on-the-model-family-development-version"></a></h3>
 <p>The fits of mean-block models on default data change.</p>
 <ul><li>

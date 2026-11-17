@@ -169,11 +169,13 @@ finding about this dataset, not a failure of the fit. The criteria do
 turn: they reach an interior minimum and rise again afterwards, which is
 what makes the selection meaningful.
 
-`refine()` is available to polish a collection, trying for each $`q`$ a
-short split-and-reoptimize seeded from its $`q-1`$ neighbour and a merge
-from its $`q+1`$ one, keeping a candidate only if it strictly lowers the
-deviance. It is most useful on a contiguous range; on the coarse grid
-above there are no adjacent $`q`$ to seed from, so it is skipped here.
+[`normal_block()`](../reference/normal_block.md) polishes every
+collection with `refine()`, which tries for each $`q`$ a short
+split-and-reoptimize seeded from its $`q-1`$ neighbour and a merge from
+its $`q+1`$ one, keeping a candidate only if it strictly lowers the
+deviance. It needs a contiguous range; on the coarse grid above there
+are no adjacent $`q`$ to seed from, so it leaves this collection
+unchanged.
 
 ### Reading the clusters
 

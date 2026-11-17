@@ -157,8 +157,9 @@ Either "ICL" or "BIC". "ICL" is the default criterion</p></dd>
 <p></p><hr><a id="method-NormalBlockCollectionClusters-optimize"></a><div class="section">
 <h3 id="normalblockcollectionclusters-optimize-"><code>NormalBlockCollectionClusters$optimize()</code><a class="anchor" aria-label="anchor" href="#normalblockcollectionclusters-optimize-"></a></h3>
 <p>optimizes every model in the collection, then – if
-`control$refine` is `TRUE` (see [NB_control()], default `FALSE`) –
-calls [refine()] automatically.</p><div class="section">
+`control$refine` is `TRUE` (see [NB_control()], the default) –
+calls [refine()] automatically, reporting in one line how many models
+it improved.</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockCollectionClusters</span><span class="op">$</span><span class="fu">optimize</span><span class="op">(</span></span>
 <span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>niter <span class="op">=</span> <span class="fl">500</span>, threshold <span class="op">=</span> <span class="fl">1e-04</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>

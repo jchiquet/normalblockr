@@ -177,11 +177,17 @@ Everything else works exactly as in the non-zero-inflated case (see the
 general vignette): the only difference is `zero_inflation = TRUE`. The
 number of clusters is rarely known in advance for this kind of data, so
 we let `normal_block` explore a range and return a collection of fitted
-models, one per number of clusters:
+models, one per number of clusters. Two settings depart from the
+defaults. The initial clustering uses `ward2` rather than `kmeans`: on
+zero-inflated abundance data such as these, it reaches better fits (see
+[`?NB_control`](../reference/NB_control.md)). And `refine()`, normally
+run on every collection, is turned off to show what it changes in the
+next section:
 
 ``` r
 
-out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE)
+out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE,
+                    control = NB_control(clustering_init = "ward2", refine = FALSE))
 #> Fitting a diagonal normal-block-var model with unknown q 
 #>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8           
 #> DONE
@@ -204,8 +210,8 @@ number of clusters’ solution would. `refine()` tries a short split/merge
 trial from each model’s already-fitted neighbors and keeps it only if it
 strictly improves. See
 [`?NormalBlockVarCollectionClusters`](../reference/NormalBlockVarCollectionClusters.md)
-for the full rationale. It is not run by default (it adds real cost), so
-it is called explicitly here:
+for the full rationale. [`normal_block()`](../reference/normal_block.md)
+runs it by default; since we turned it off above, we call it explicitly:
 
 ``` r
 
@@ -309,7 +315,17 @@ inter-cluster association network (see Tous and Chiquet 2026).
 
 out_sp <- normal_block(data, blocks = myModel$q, sparsity = TRUE, zero_inflation = TRUE)
 #> Fitting a Collection of zero-inflated diagonal normal-block-var models with fixed q, with different sparsity penalties. 
-#>   penalty = 0.03319511                penalty = 0.028321              penalty = 0.02416257                penalty = 0.02061473                penalty = 0.01758782                penalty = 0.01500536                penalty = 0.01280209                penalty = 0.01092234                penalty = 0.009318585               penalty = 0.007950317               penalty = 0.006782955               penalty = 0.005786999               penalty = 0.004937282               penalty = 0.00421233                penalty = 0.003593825               penalty = 0.003066136               penalty = 0.002615928               penalty = 0.002231826               penalty = 0.001904122               penalty = 0.001624536               penalty = 0.001386002               penalty = 0.001182492               penalty = 0.001008864               penalty = 0.0008607306              penalty = 0.0007343476              penalty = 0.0006265218              penalty = 0.0005345283              penalty = 0.0004560423              penalty = 0.0003890807              penalty = 0.0003319511           
+#>   penalty = 0.02839098           
+#> Warning: zero-inflated diagonal normal-block-var model with 4 unknown blocks:
+#> (V)EM stopped at the niter cap (500) without reaching the convergence threshold
+#> (last increment = 0.000476, threshold = 1.0e-04). Consider raising `niter` in
+#> NB_control(), especially with many blocks -- see plot_loglik() to check.
+#>   penalty = 0.02422227           
+#> Warning: zero-inflated diagonal normal-block-var model with 4 unknown blocks:
+#> (V)EM stopped at the niter cap (500) without reaching the convergence threshold
+#> (last increment = 0.000138, threshold = 1.0e-04). Consider raising `niter` in
+#> NB_control(), especially with many blocks -- see plot_loglik() to check.
+#>   penalty = 0.02066567                penalty = 0.01763128                penalty = 0.01504244                penalty = 0.01283373                penalty = 0.01094932                penalty = 0.009341612               penalty = 0.007969963               penalty = 0.006799716               penalty = 0.005801299               penalty = 0.004949482               penalty = 0.004222739               penalty = 0.003602705               penalty = 0.003073712               penalty = 0.002622392               penalty = 0.002237341               penalty = 0.001908827               penalty = 0.00162855                penalty = 0.001389427               penalty = 0.001185414               penalty = 0.001011357               penalty = 0.0008628574              penalty = 0.0007361622              penalty = 0.0006280699              penalty = 0.0005358491              penalty = 0.0004571692              penalty = 0.0003900421              penalty = 0.0003327714              penalty = 0.0002839098           
 #> DONE
 out_sp$plot(c("BIC", "EBIC"))
 ```

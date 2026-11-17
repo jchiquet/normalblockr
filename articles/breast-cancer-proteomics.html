@@ -239,16 +239,17 @@ accepts a range of candidate cluster counts and returns a collection of
 models, one per
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>q</mi><annotation encoding="application/x-tex">q</annotation></semantics></math>,
 fitted independently, each cold-started from a clustering heuristic on
-the residuals (<code>ward2</code> by default).<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Different heuristics can converge to substantially
+the residuals (<code>kmeans</code> by default), then polished by
+<code>refine()</code> (see below). We turn <code>refine()</code> off
+here, to show what it changes in the next section.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Different heuristics can converge to substantially
 different (V)EM local optima at the same
 &lt;math display=&quot;inline&quot; xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;semantics&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;annotation encoding=&quot;application/x-tex&quot;&gt;q&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;;
 &lt;code&gt;NB_control(clustering_init = &quot;best_of_inits&quot;)&lt;/code&gt; tries several
 and keeps the best-ELBO fit, at extra cost. Worth it when
-&lt;code&gt;refine()&lt;/code&gt; (next section) won’t also be applied, but on this
-dataset’s full range &lt;code&gt;refine()&lt;/code&gt; alone already recovers most
-of what it would add, so we stick with the default here.&lt;/p&gt;"><sup>2</sup></a></p>
+&lt;code&gt;refine()&lt;/code&gt; is turned off, but on this dataset’s full range
+&lt;code&gt;refine()&lt;/code&gt; alone already recovers what it would add.&lt;/p&gt;"><sup>2</sup></a></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">NB_prot_subtype</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">NB_prot_subtype</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span>, control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>refine <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a diagonal normal-block-var model with unknown q </span></span>
 <span><span class="co">#&gt;   number of blocks = 1                number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8                number of blocks = 9                number of blocks = 10               number of blocks = 11               number of blocks = 12               number of blocks = 13               number of blocks = 14               number of blocks = 15               number of blocks = 16               number of blocks = 17               number of blocks = 18               number of blocks = 19               number of blocks = 20               number of blocks = 21               number of blocks = 22               number of blocks = 23               number of blocks = 24               number of blocks = 25               number of blocks = 26               number of blocks = 27               number of blocks = 28               number of blocks = 29               number of blocks = 30           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
@@ -262,7 +263,7 @@ of what it would add, so we stick with the default here.&lt;/p&gt;"><sup>2</sup>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">selected_NB</span> <span class="op">&lt;-</span> <span class="va">NB_prot_subtype</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"ICL"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"ICL selects "</span>, <span class="va">selected_NB</span><span class="op">$</span><span class="va">q</span>, <span class="st">" clusters."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "ICL selects 27 clusters."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "ICL selects 25 clusters."</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -281,64 +282,66 @@ neighbor and/or a short merge-and-reoptimize trial seeded from its
 neighbor, keeping a candidate only if it strictly improves the deviance.
 It runs unconditionally over the whole range and discards whatever
 doesn’t help, so it can only improve (or leave unchanged) each model it
-touches.</p>
+touches. <code><a href="../reference/normal_block.html">normal_block()</a></code> runs it by default
+(<code>NB_control(refine = TRUE)</code>); since we turned it off above,
+we call it explicitly:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">NB_prot_subtype</span><span class="op">$</span><span class="fu">refine</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   refine: q = 2 -- deviance 146766.1 -&gt; 146766.1 (improved via split )</span></span>
 <span><span class="co">#&gt;   refine: q = 3 -- deviance 142087.1 -&gt; 142087.1 (improved via split )</span></span>
 <span><span class="co">#&gt;   refine: q = 4 -- no improvement found ( split )</span></span>
 <span><span class="co">#&gt;   refine: q = 5 -- no improvement found ( split )</span></span>
-<span><span class="co">#&gt;   refine: q = 6 -- deviance 138548.1 -&gt; 138409.3 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 7 -- deviance 137802.5 -&gt; 137629 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 8 -- no improvement found ( split )</span></span>
-<span><span class="co">#&gt;   refine: q = 9 -- no improvement found ( split )</span></span>
+<span><span class="co">#&gt;   refine: q = 6 -- deviance 138644.3 -&gt; 138409.3 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 7 -- deviance 138047.7 -&gt; 137629 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 8 -- deviance 137409.7 -&gt; 137107.1 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 9 -- deviance 136731 -&gt; 136672.8 (improved via split )</span></span>
 <span><span class="co">#&gt;   refine: q = 10 -- no improvement found ( split )</span></span>
-<span><span class="co">#&gt;   refine: q = 11 -- no improvement found ( split )</span></span>
-<span><span class="co">#&gt;   refine: q = 12 -- deviance 135679.5 -&gt; 135617 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 13 -- deviance 135413.1 -&gt; 135323.2 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 14 -- deviance 135242.5 -&gt; 134745.8 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 15 -- deviance 135159 -&gt; 134481.4 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 16 -- deviance 134925.2 -&gt; 134204.1 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 17 -- deviance 134716 -&gt; 134007.7 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 18 -- deviance 134556 -&gt; 133866 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 19 -- deviance 134474 -&gt; 133396.9 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 20 -- deviance 134390.4 -&gt; 133069.9 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 21 -- deviance 133657 -&gt; 132901.5 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 22 -- deviance 133386.1 -&gt; 132693.7 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 23 -- deviance 133032.2 -&gt; 132493.8 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 24 -- deviance 132876.8 -&gt; 132117.1 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 25 -- deviance 132833.9 -&gt; 131966.6 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 26 -- deviance 132714.6 -&gt; 131810.2 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 27 -- deviance 132248.1 -&gt; 131693.7 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 28 -- deviance 132100.6 -&gt; 131565.2 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 29 -- deviance 132026 -&gt; 131411.8 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 30 -- deviance 131826.3 -&gt; 131099.6 (improved via split )</span></span>
-<span><span class="co">#&gt;   refine: q = 29 -- deviance 131411.8 -&gt; 131253.5 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 28 -- deviance 131565.2 -&gt; 131430.8 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 27 -- deviance 131693.7 -&gt; 131487 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 26 -- deviance 131810.2 -&gt; 131664.6 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 25 -- deviance 131966.6 -&gt; 131819.6 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 24 -- deviance 132117.1 -&gt; 131996.6 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 23 -- deviance 132493.8 -&gt; 132155.4 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 22 -- deviance 132693.7 -&gt; 132355.2 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 21 -- deviance 132901.5 -&gt; 132570.1 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 20 -- deviance 133069.9 -&gt; 132730 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 19 -- deviance 133396.9 -&gt; 132936.9 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 18 -- deviance 133866 -&gt; 133157.8 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 17 -- deviance 134007.7 -&gt; 133349.3 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 16 -- deviance 134204.1 -&gt; 133628.1 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 15 -- deviance 134481.4 -&gt; 133903.8 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 14 -- deviance 134745.8 -&gt; 134229.2 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 13 -- deviance 135323.2 -&gt; 134640.8 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 12 -- deviance 135617 -&gt; 135026.4 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 11 -- deviance 135862.7 -&gt; 135434.9 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 10 -- deviance 136359.2 -&gt; 135851.8 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 9 -- deviance 136709.9 -&gt; 136404.3 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 8 -- deviance 137071.8 -&gt; 136920.9 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 11 -- deviance 135864.5 -&gt; 135493.1 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 12 -- deviance 135833.7 -&gt; 135157.5 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 13 -- deviance 135087 -&gt; 134873.9 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 14 -- deviance 135019.4 -&gt; 134669.1 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 15 -- deviance 134286.7 -&gt; 134048.9 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 16 -- deviance 133884.8 -&gt; 133765.4 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 17 -- deviance 133394.8 -&gt; 133255.6 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 18 -- deviance 133391.2 -&gt; 133054.4 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 19 -- no improvement found ( split )</span></span>
+<span><span class="co">#&gt;   refine: q = 20 -- deviance 132974.8 -&gt; 132465.9 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 21 -- deviance 133028.7 -&gt; 132257.8 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 22 -- deviance 132062 -&gt; 132020 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 23 -- deviance 132335.8 -&gt; 131777.5 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 24 -- deviance 132104.2 -&gt; 131602.6 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 25 -- deviance 131391.5 -&gt; 131380.4 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 26 -- deviance 131808.2 -&gt; 131231.8 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 27 -- deviance 131309.7 -&gt; 130914 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 28 -- deviance 131045.1 -&gt; 130743 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 29 -- deviance 131177.5 -&gt; 130542.6 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 30 -- deviance 130980.4 -&gt; 130341.2 (improved via split )</span></span>
+<span><span class="co">#&gt;   refine: q = 29 -- deviance 130542.6 -&gt; 130477.2 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 28 -- deviance 130743 -&gt; 130631 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 27 -- deviance 130914 -&gt; 130805.7 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 26 -- deviance 131231.8 -&gt; 130987.5 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 25 -- deviance 131380.4 -&gt; 131182.1 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 24 -- deviance 131602.6 -&gt; 131395.6 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 23 -- deviance 131777.5 -&gt; 131611.1 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 22 -- deviance 132020 -&gt; 131840.7 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 21 -- deviance 132257.8 -&gt; 132075 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 20 -- deviance 132465.9 -&gt; 132307.1 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 19 -- deviance 132692.6 -&gt; 132519.5 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 18 -- deviance 133054.4 -&gt; 132795.2 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 17 -- deviance 133255.6 -&gt; 133075.5 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 16 -- deviance 133765.4 -&gt; 133397.1 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 15 -- deviance 134048.9 -&gt; 133741.5 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 14 -- deviance 134669.1 -&gt; 134073.5 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 13 -- deviance 134873.9 -&gt; 134449.5 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 12 -- deviance 135157.5 -&gt; 134918.9 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 11 -- deviance 135493.1 -&gt; 135357.8 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 10 -- deviance 136250.3 -&gt; 135853.7 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 9 -- deviance 136672.8 -&gt; 136391.9 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 8 -- deviance 137107.1 -&gt; 136974.8 (improved via merge )</span></span>
 <span><span class="co">#&gt;   refine: q = 7 -- no improvement found ( merge )</span></span>
 <span><span class="co">#&gt;   refine: q = 6 -- no improvement found ( merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 5 -- deviance 139187.3 -&gt; 139187.3 (improved via merge )</span></span>
-<span><span class="co">#&gt;   refine: q = 4 -- deviance 140446 -&gt; 140393.1 (improved via merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 5 -- no improvement found ( merge )</span></span>
+<span><span class="co">#&gt;   refine: q = 4 -- no improvement found ( merge )</span></span>
 <span><span class="co">#&gt;   refine: q = 3 -- deviance 142087.1 -&gt; 142080.9 (improved via merge )</span></span>
 <span><span class="co">#&gt;   refine: q = 2 -- no improvement found ( merge )</span></span>
 <span><span class="co">#&gt;   refine: q = 1 -- no improvement found ( merge )</span></span></code></pre></div>
@@ -348,7 +351,7 @@ touches.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">selected_NB_refined</span> <span class="op">&lt;-</span> <span class="va">NB_prot_subtype</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"ICL"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"After refine(), ICL selects "</span>, <span class="va">selected_NB_refined</span><span class="op">$</span><span class="va">q</span>, <span class="st">" clusters."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "After refine(), ICL selects 27 clusters."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "After refine(), ICL selects 28 clusters."</span></span></code></pre></div>
 <p>On this dataset, <code>refine()</code> moves the ICL-selected number
 of clusters, a reminder that the collection-wide local search is not
 just cosmetic: a clustering that looked locally optimal in isolation can
@@ -371,37 +374,37 @@ the sparsity level with the best BIC.</p>
 <code class="sourceCode R"><span><span class="va">group_selected</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">selected_NB_refined</span><span class="op">$</span><span class="va">clustering</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">NB_prot_sparse</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="va">group_selected</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>min_ratio<span class="op">=</span><span class="fl">0.001</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a Collection of diagonal normal-block-var models with fixed blocks, with different sparsity penalties. </span></span>
-<span><span class="co">#&gt;   penalty = 0.5081954             penalty = 0.4004815             penalty = 0.315598              penalty = 0.2487058             penalty = 0.1959917             penalty = 0.1544505           </span></span>
+<span><span class="co">#&gt;   penalty = 0.4842032             penalty = 0.3815745             penalty = 0.3006984             penalty = 0.2369643             penalty = 0.1867388             penalty = 0.1471588           </span></span>
 <span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at</span></span>
 <span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000535, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
+<span><span class="co">#&gt; = 0.000773, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
 <span><span class="co">#&gt; especially with many blocks -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.1217142           </span></span>
+<span><span class="co">#&gt;   penalty = 0.115968           </span></span>
 <span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at</span></span>
 <span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000981, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
+<span><span class="co">#&gt; = 0.000721, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
 <span><span class="co">#&gt; especially with many blocks -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.09591639           </span></span>
+<span><span class="co">#&gt;   penalty = 0.09138812           </span></span>
 <span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at</span></span>
 <span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000623, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
+<span><span class="co">#&gt; = 0.000365, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
 <span><span class="co">#&gt; especially with many blocks -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.07558655           </span></span>
+<span><span class="co">#&gt;   penalty = 0.07201807                penalty = 0.05675357                penalty = 0.04472444                penalty = 0.03524493                penalty = 0.02777464           </span></span>
 <span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at</span></span>
 <span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000326, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
+<span><span class="co">#&gt; = 0.000157, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
 <span><span class="co">#&gt; especially with many blocks -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.0595657             penalty = 0.04694053                penalty = 0.03699131                penalty = 0.02915087                penalty = 0.02297223                penalty = 0.01810318                penalty = 0.01426614                penalty = 0.01124238                penalty = 0.008859517               penalty = 0.00698171                penalty = 0.00550191                penalty = 0.00433576                penalty = 0.00341678                penalty = 0.00269258                penalty = 0.002121878           </span></span>
+<span><span class="co">#&gt;   penalty = 0.0218877           </span></span>
 <span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at</span></span>
 <span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000413, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
+<span><span class="co">#&gt; = 0.000496, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
 <span><span class="co">#&gt; especially with many blocks -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.001672138           </span></span>
+<span><span class="co">#&gt;   penalty = 0.01724852           </span></span>
 <span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at</span></span>
 <span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.00109, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
+<span><span class="co">#&gt; = 0.00093, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
 <span><span class="co">#&gt; especially with many blocks -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.001317722               penalty = 0.001038426               penalty = 0.0008183278              penalty = 0.0006448802              penalty = 0.0005081954           </span></span>
+<span><span class="co">#&gt;   penalty = 0.01359263                penalty = 0.01071162                penalty = 0.008441254               penalty = 0.006652099               penalty = 0.005242162               penalty = 0.004131066               penalty = 0.003255471               penalty = 0.002565462               penalty = 0.002021703               penalty = 0.001593195               penalty = 0.001255512               penalty = 0.0009894014              penalty = 0.0007796941              penalty = 0.000614435               penalty = 0.0004842032           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">NB_prot_sparse</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EBIC"</span>, <span class="st">"deviance"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -409,7 +412,7 @@ the sparsity level with the best BIC.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sparse_best</span> <span class="op">&lt;-</span> <span class="va">NB_prot_sparse</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"EBIC"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"BIC selects a penalty of "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">sparse_best</span><span class="op">$</span><span class="va">sparsity</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "BIC selects a penalty of 0.0143."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "BIC selects a penalty of 0.0172."</span></span></code></pre></div>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sparse_best</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span>output <span class="op">=</span> <span class="st">"corrplot"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="breast-cancer-proteomics_files/figure-html/plot-network-sparse-1.png" class="r-plt" alt="" width="576"></p>

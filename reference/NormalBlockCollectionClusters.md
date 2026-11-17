@@ -122,8 +122,8 @@ a \[\`ggplot2::ggplot\`\] graph
 ### `NormalBlockCollectionClusters$optimize()`
 
 optimizes every model in the collection, then – if \`control\$refine\`
-is \`TRUE\` (see \[NB_control()\], default \`FALSE\`) – calls
-\[refine()\] automatically.
+is \`TRUE\` (see \[NB_control()\], the default) – calls \[refine()\]
+automatically, reporting in one line how many models it improved.
 
 #### Usage
 

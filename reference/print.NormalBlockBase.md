@@ -34,8 +34,8 @@ model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 print(model)
 #> A diagonal normal-block-var model with 3 unknown blocks .
 #> ===========================================================================
-#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>        48 3       3        0 -602.489 1204.977 1390.922 1390.922 1397.513    11
+#>  nb_param q n_edges sparsity   loglik deviance    BIC    ICL     EBIC niter
+#>        48 3       3        0 -632.728 1265.455 1451.4 1451.4 1457.991    10
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

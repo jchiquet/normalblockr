@@ -283,9 +283,15 @@ the general vignette): the only difference is
 <code>zero_inflation = TRUE</code>. The number of clusters is rarely
 known in advance for this kind of data, so we let
 <code>normal_block</code> explore a range and return a collection of
-fitted models, one per number of clusters:</p>
+fitted models, one per number of clusters. Two settings depart from the
+defaults. The initial clustering uses <code>ward2</code> rather than
+<code>kmeans</code>: on zero-inflated abundance data such as these, it
+reaches better fits (see <code><a href="../reference/NB_control.html">?NB_control</a></code>). And
+<code>refine()</code>, normally run on every collection, is turned off
+to show what it changes in the next section:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">8</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">8</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                    control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>clustering_init <span class="op">=</span> <span class="st">"ward2"</span>, refine <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a diagonal normal-block-var model with unknown q </span></span>
 <span><span class="co">#&gt;   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
@@ -303,8 +309,8 @@ number of clusters’ solution would. <code>refine()</code> tries a short
 split/merge trial from each model’s already-fitted neighbors and keeps
 it only if it strictly improves. See
 <code><a href="../reference/NormalBlockVarCollectionClusters.html">?NormalBlockVarCollectionClusters</a></code> for the full rationale.
-It is not run by default (it adds real cost), so it is called explicitly
-here:</p>
+<code><a href="../reference/normal_block.html">normal_block()</a></code> runs it by default; since we turned it off
+above, we call it explicitly:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span><span class="op">$</span><span class="fu">refine</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   refine: q = 3 -- deviance 27235.92 -&gt; 27194.75 (improved via split )</span></span>
@@ -394,7 +400,17 @@ penalties on the inter-cluster association network <span class="citation">(see T
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="va">myModel</span><span class="op">$</span><span class="va">q</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a Collection of zero-inflated diagonal normal-block-var models with fixed q, with different sparsity penalties. </span></span>
-<span><span class="co">#&gt;   penalty = 0.03319511                penalty = 0.028321              penalty = 0.02416257                penalty = 0.02061473                penalty = 0.01758782                penalty = 0.01500536                penalty = 0.01280209                penalty = 0.01092234                penalty = 0.009318585               penalty = 0.007950317               penalty = 0.006782955               penalty = 0.005786999               penalty = 0.004937282               penalty = 0.00421233                penalty = 0.003593825               penalty = 0.003066136               penalty = 0.002615928               penalty = 0.002231826               penalty = 0.001904122               penalty = 0.001624536               penalty = 0.001386002               penalty = 0.001182492               penalty = 0.001008864               penalty = 0.0008607306              penalty = 0.0007343476              penalty = 0.0006265218              penalty = 0.0005345283              penalty = 0.0004560423              penalty = 0.0003890807              penalty = 0.0003319511           </span></span>
+<span><span class="co">#&gt;   penalty = 0.02839098           </span></span>
+<span><span class="co">#&gt; Warning: zero-inflated diagonal normal-block-var model with 4 unknown blocks:</span></span>
+<span><span class="co">#&gt; (V)EM stopped at the niter cap (500) without reaching the convergence threshold</span></span>
+<span><span class="co">#&gt; (last increment = 0.000476, threshold = 1.0e-04). Consider raising `niter` in</span></span>
+<span><span class="co">#&gt; NB_control(), especially with many blocks -- see plot_loglik() to check.</span></span>
+<span><span class="co">#&gt;   penalty = 0.02422227           </span></span>
+<span><span class="co">#&gt; Warning: zero-inflated diagonal normal-block-var model with 4 unknown blocks:</span></span>
+<span><span class="co">#&gt; (V)EM stopped at the niter cap (500) without reaching the convergence threshold</span></span>
+<span><span class="co">#&gt; (last increment = 0.000138, threshold = 1.0e-04). Consider raising `niter` in</span></span>
+<span><span class="co">#&gt; NB_control(), especially with many blocks -- see plot_loglik() to check.</span></span>
+<span><span class="co">#&gt;   penalty = 0.02066567                penalty = 0.01763128                penalty = 0.01504244                penalty = 0.01283373                penalty = 0.01094932                penalty = 0.009341612               penalty = 0.007969963               penalty = 0.006799716               penalty = 0.005801299               penalty = 0.004949482               penalty = 0.004222739               penalty = 0.003602705               penalty = 0.003073712               penalty = 0.002622392               penalty = 0.002237341               penalty = 0.001908827               penalty = 0.00162855                penalty = 0.001389427               penalty = 0.001185414               penalty = 0.001011357               penalty = 0.0008628574              penalty = 0.0007361622              penalty = 0.0006280699              penalty = 0.0005358491              penalty = 0.0004571692              penalty = 0.0003900421              penalty = 0.0003327714              penalty = 0.0002839098           </span></span>
 <span><span class="co">#&gt; DONE</span></span>
 <span><span class="va">out_sp</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"EBIC"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="zero-inflated-normal-block_files/figure-html/sparsify-zi-1.png" class="r-plt" alt="" width="700"></p>

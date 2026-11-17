@@ -79,14 +79,15 @@ my_normal_block <- normal_block(data, blocks = 1:6)
      number of blocks = 4           
      number of blocks = 5           
      number of blocks = 6           
-
+     refine(): improved 4 of 6 models
+#> 
 #> DONE
 my_normal_block$plot(c("deviance", "BIC", "ICL"))
 
 Y_hat <- my_normal_block$get_best_model()$fitted
 plot(data$Y, Y_hat, log = "xy"); abline(0,1)
-#> Warning: 445 x values <= 0 omitted from logarithmic plot
-#> Warning: 374 y values <= 0 omitted from logarithmic plot
+#> Warning: 575 x values <= 0 omitted from logarithmic plot
+#> Warning: 528 y values <= 0 omitted from logarithmic plot
 
 ## Normal Data with Zero Inflation
 ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
@@ -99,7 +100,8 @@ my_normal_block <- normal_block(zidata, blocks = 1:6, zero_inflation = TRUE)
      number of blocks = 4           
      number of blocks = 5           
      number of blocks = 6           
-
+     refine(): improved 3 of 6 models
+#> 
 #> DONE
 ## Mean-Block model (clustering in the mean rather than the covariance)
 ex_mean <- generate_normal_block_mean_data(n=50, p=20, d=1, q=3)

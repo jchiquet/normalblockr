@@ -166,11 +166,13 @@ When the clustering is left unknown,
 [`normal_block()`](../reference/normal_block.md) accepts a range of
 candidate cluster counts and returns a collection of models, one per
 $`q`$, fitted independently, each cold-started from a clustering
-heuristic on the residuals (`ward2` by default).[^2]
+heuristic on the residuals (`kmeans` by default), then polished by
+`refine()` (see below). We turn `refine()` off here, to show what it
+changes in the next section.[^2]
 
 ``` r
 
-NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30)
+NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30, control = NB_control(refine = FALSE))
 #> Fitting a diagonal normal-block-var model with unknown q 
 #>   number of blocks = 1                number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8                number of blocks = 9                number of blocks = 10               number of blocks = 11               number of blocks = 12               number of blocks = 13               number of blocks = 14               number of blocks = 15               number of blocks = 16               number of blocks = 17               number of blocks = 18               number of blocks = 19               number of blocks = 20               number of blocks = 21               number of blocks = 22               number of blocks = 23               number of blocks = 24               number of blocks = 25               number of blocks = 26               number of blocks = 27               number of blocks = 28               number of blocks = 29               number of blocks = 30           
 #> DONE
@@ -189,7 +191,7 @@ NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
 
 selected_NB <- NB_prot_subtype$get_best_model("ICL")
 paste0("ICL selects ", selected_NB$q, " clusters.")
-#> [1] "ICL selects 27 clusters."
+#> [1] "ICL selects 25 clusters."
 ```
 
 ## Refining the clustering
@@ -204,6 +206,9 @@ trial seeded from its $`q+1`$ neighbor, keeping a candidate only if it
 strictly improves the deviance. It runs unconditionally over the whole
 range and discards whatever doesn’t help, so it can only improve (or
 leave unchanged) each model it touches.
+[`normal_block()`](../reference/normal_block.md) runs it by default
+(`NB_control(refine = TRUE)`); since we turned it off above, we call it
+explicitly:
 
 ``` r
 
@@ -212,57 +217,57 @@ NB_prot_subtype$refine()
 #>   refine: q = 3 -- deviance 142087.1 -> 142087.1 (improved via split )
 #>   refine: q = 4 -- no improvement found ( split )
 #>   refine: q = 5 -- no improvement found ( split )
-#>   refine: q = 6 -- deviance 138548.1 -> 138409.3 (improved via split )
-#>   refine: q = 7 -- deviance 137802.5 -> 137629 (improved via split )
-#>   refine: q = 8 -- no improvement found ( split )
-#>   refine: q = 9 -- no improvement found ( split )
+#>   refine: q = 6 -- deviance 138644.3 -> 138409.3 (improved via split )
+#>   refine: q = 7 -- deviance 138047.7 -> 137629 (improved via split )
+#>   refine: q = 8 -- deviance 137409.7 -> 137107.1 (improved via split )
+#>   refine: q = 9 -- deviance 136731 -> 136672.8 (improved via split )
 #>   refine: q = 10 -- no improvement found ( split )
-#>   refine: q = 11 -- no improvement found ( split )
-#>   refine: q = 12 -- deviance 135679.5 -> 135617 (improved via split )
-#>   refine: q = 13 -- deviance 135413.1 -> 135323.2 (improved via split )
-#>   refine: q = 14 -- deviance 135242.5 -> 134745.8 (improved via split )
-#>   refine: q = 15 -- deviance 135159 -> 134481.4 (improved via split )
-#>   refine: q = 16 -- deviance 134925.2 -> 134204.1 (improved via split )
-#>   refine: q = 17 -- deviance 134716 -> 134007.7 (improved via split )
-#>   refine: q = 18 -- deviance 134556 -> 133866 (improved via split )
-#>   refine: q = 19 -- deviance 134474 -> 133396.9 (improved via split )
-#>   refine: q = 20 -- deviance 134390.4 -> 133069.9 (improved via split )
-#>   refine: q = 21 -- deviance 133657 -> 132901.5 (improved via split )
-#>   refine: q = 22 -- deviance 133386.1 -> 132693.7 (improved via split )
-#>   refine: q = 23 -- deviance 133032.2 -> 132493.8 (improved via split )
-#>   refine: q = 24 -- deviance 132876.8 -> 132117.1 (improved via split )
-#>   refine: q = 25 -- deviance 132833.9 -> 131966.6 (improved via split )
-#>   refine: q = 26 -- deviance 132714.6 -> 131810.2 (improved via split )
-#>   refine: q = 27 -- deviance 132248.1 -> 131693.7 (improved via split )
-#>   refine: q = 28 -- deviance 132100.6 -> 131565.2 (improved via split )
-#>   refine: q = 29 -- deviance 132026 -> 131411.8 (improved via split )
-#>   refine: q = 30 -- deviance 131826.3 -> 131099.6 (improved via split )
-#>   refine: q = 29 -- deviance 131411.8 -> 131253.5 (improved via merge )
-#>   refine: q = 28 -- deviance 131565.2 -> 131430.8 (improved via merge )
-#>   refine: q = 27 -- deviance 131693.7 -> 131487 (improved via merge )
-#>   refine: q = 26 -- deviance 131810.2 -> 131664.6 (improved via merge )
-#>   refine: q = 25 -- deviance 131966.6 -> 131819.6 (improved via merge )
-#>   refine: q = 24 -- deviance 132117.1 -> 131996.6 (improved via merge )
-#>   refine: q = 23 -- deviance 132493.8 -> 132155.4 (improved via merge )
-#>   refine: q = 22 -- deviance 132693.7 -> 132355.2 (improved via merge )
-#>   refine: q = 21 -- deviance 132901.5 -> 132570.1 (improved via merge )
-#>   refine: q = 20 -- deviance 133069.9 -> 132730 (improved via merge )
-#>   refine: q = 19 -- deviance 133396.9 -> 132936.9 (improved via merge )
-#>   refine: q = 18 -- deviance 133866 -> 133157.8 (improved via merge )
-#>   refine: q = 17 -- deviance 134007.7 -> 133349.3 (improved via merge )
-#>   refine: q = 16 -- deviance 134204.1 -> 133628.1 (improved via merge )
-#>   refine: q = 15 -- deviance 134481.4 -> 133903.8 (improved via merge )
-#>   refine: q = 14 -- deviance 134745.8 -> 134229.2 (improved via merge )
-#>   refine: q = 13 -- deviance 135323.2 -> 134640.8 (improved via merge )
-#>   refine: q = 12 -- deviance 135617 -> 135026.4 (improved via merge )
-#>   refine: q = 11 -- deviance 135862.7 -> 135434.9 (improved via merge )
-#>   refine: q = 10 -- deviance 136359.2 -> 135851.8 (improved via merge )
-#>   refine: q = 9 -- deviance 136709.9 -> 136404.3 (improved via merge )
-#>   refine: q = 8 -- deviance 137071.8 -> 136920.9 (improved via merge )
+#>   refine: q = 11 -- deviance 135864.5 -> 135493.1 (improved via split )
+#>   refine: q = 12 -- deviance 135833.7 -> 135157.5 (improved via split )
+#>   refine: q = 13 -- deviance 135087 -> 134873.9 (improved via split )
+#>   refine: q = 14 -- deviance 135019.4 -> 134669.1 (improved via split )
+#>   refine: q = 15 -- deviance 134286.7 -> 134048.9 (improved via split )
+#>   refine: q = 16 -- deviance 133884.8 -> 133765.4 (improved via split )
+#>   refine: q = 17 -- deviance 133394.8 -> 133255.6 (improved via split )
+#>   refine: q = 18 -- deviance 133391.2 -> 133054.4 (improved via split )
+#>   refine: q = 19 -- no improvement found ( split )
+#>   refine: q = 20 -- deviance 132974.8 -> 132465.9 (improved via split )
+#>   refine: q = 21 -- deviance 133028.7 -> 132257.8 (improved via split )
+#>   refine: q = 22 -- deviance 132062 -> 132020 (improved via split )
+#>   refine: q = 23 -- deviance 132335.8 -> 131777.5 (improved via split )
+#>   refine: q = 24 -- deviance 132104.2 -> 131602.6 (improved via split )
+#>   refine: q = 25 -- deviance 131391.5 -> 131380.4 (improved via split )
+#>   refine: q = 26 -- deviance 131808.2 -> 131231.8 (improved via split )
+#>   refine: q = 27 -- deviance 131309.7 -> 130914 (improved via split )
+#>   refine: q = 28 -- deviance 131045.1 -> 130743 (improved via split )
+#>   refine: q = 29 -- deviance 131177.5 -> 130542.6 (improved via split )
+#>   refine: q = 30 -- deviance 130980.4 -> 130341.2 (improved via split )
+#>   refine: q = 29 -- deviance 130542.6 -> 130477.2 (improved via merge )
+#>   refine: q = 28 -- deviance 130743 -> 130631 (improved via merge )
+#>   refine: q = 27 -- deviance 130914 -> 130805.7 (improved via merge )
+#>   refine: q = 26 -- deviance 131231.8 -> 130987.5 (improved via merge )
+#>   refine: q = 25 -- deviance 131380.4 -> 131182.1 (improved via merge )
+#>   refine: q = 24 -- deviance 131602.6 -> 131395.6 (improved via merge )
+#>   refine: q = 23 -- deviance 131777.5 -> 131611.1 (improved via merge )
+#>   refine: q = 22 -- deviance 132020 -> 131840.7 (improved via merge )
+#>   refine: q = 21 -- deviance 132257.8 -> 132075 (improved via merge )
+#>   refine: q = 20 -- deviance 132465.9 -> 132307.1 (improved via merge )
+#>   refine: q = 19 -- deviance 132692.6 -> 132519.5 (improved via merge )
+#>   refine: q = 18 -- deviance 133054.4 -> 132795.2 (improved via merge )
+#>   refine: q = 17 -- deviance 133255.6 -> 133075.5 (improved via merge )
+#>   refine: q = 16 -- deviance 133765.4 -> 133397.1 (improved via merge )
+#>   refine: q = 15 -- deviance 134048.9 -> 133741.5 (improved via merge )
+#>   refine: q = 14 -- deviance 134669.1 -> 134073.5 (improved via merge )
+#>   refine: q = 13 -- deviance 134873.9 -> 134449.5 (improved via merge )
+#>   refine: q = 12 -- deviance 135157.5 -> 134918.9 (improved via merge )
+#>   refine: q = 11 -- deviance 135493.1 -> 135357.8 (improved via merge )
+#>   refine: q = 10 -- deviance 136250.3 -> 135853.7 (improved via merge )
+#>   refine: q = 9 -- deviance 136672.8 -> 136391.9 (improved via merge )
+#>   refine: q = 8 -- deviance 137107.1 -> 136974.8 (improved via merge )
 #>   refine: q = 7 -- no improvement found ( merge )
 #>   refine: q = 6 -- no improvement found ( merge )
-#>   refine: q = 5 -- deviance 139187.3 -> 139187.3 (improved via merge )
-#>   refine: q = 4 -- deviance 140446 -> 140393.1 (improved via merge )
+#>   refine: q = 5 -- no improvement found ( merge )
+#>   refine: q = 4 -- no improvement found ( merge )
 #>   refine: q = 3 -- deviance 142087.1 -> 142080.9 (improved via merge )
 #>   refine: q = 2 -- no improvement found ( merge )
 #>   refine: q = 1 -- no improvement found ( merge )
@@ -279,7 +284,7 @@ NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
 
 selected_NB_refined <- NB_prot_subtype$get_best_model("ICL")
 paste0("After refine(), ICL selects ", selected_NB_refined$q, " clusters.")
-#> [1] "After refine(), ICL selects 27 clusters."
+#> [1] "After refine(), ICL selects 28 clusters."
 ```
 
 On this dataset, `refine()` moves the ICL-selected number of clusters, a
@@ -301,37 +306,37 @@ the graphical-lasso penalty on $`\Omega`$ explored over a path of values
 group_selected <- model.matrix(~ 0 + factor(selected_NB_refined$clustering))
 NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE, control = NB_control(min_ratio=0.001))
 #> Fitting a Collection of diagonal normal-block-var models with fixed blocks, with different sparsity penalties. 
-#>   penalty = 0.5081954             penalty = 0.4004815             penalty = 0.315598              penalty = 0.2487058             penalty = 0.1959917             penalty = 0.1544505           
+#>   penalty = 0.4842032             penalty = 0.3815745             penalty = 0.3006984             penalty = 0.2369643             penalty = 0.1867388             penalty = 0.1471588           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000535, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.000773, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
-#>   penalty = 0.1217142           
+#>   penalty = 0.115968           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000981, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.000721, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
-#>   penalty = 0.09591639           
+#>   penalty = 0.09138812           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000623, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.000365, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
-#>   penalty = 0.07558655           
+#>   penalty = 0.07201807                penalty = 0.05675357                penalty = 0.04472444                penalty = 0.03524493                penalty = 0.02777464           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000326, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.000157, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
-#>   penalty = 0.0595657             penalty = 0.04694053                penalty = 0.03699131                penalty = 0.02915087                penalty = 0.02297223                penalty = 0.01810318                penalty = 0.01426614                penalty = 0.01124238                penalty = 0.008859517               penalty = 0.00698171                penalty = 0.00550191                penalty = 0.00433576                penalty = 0.00341678                penalty = 0.00269258                penalty = 0.002121878           
+#>   penalty = 0.0218877           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000413, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.000496, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
-#>   penalty = 0.001672138           
+#>   penalty = 0.01724852           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.00109, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.00093, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
-#>   penalty = 0.001317722               penalty = 0.001038426               penalty = 0.0008183278              penalty = 0.0006448802              penalty = 0.0005081954           
+#>   penalty = 0.01359263                penalty = 0.01071162                penalty = 0.008441254               penalty = 0.006652099               penalty = 0.005242162               penalty = 0.004131066               penalty = 0.003255471               penalty = 0.002565462               penalty = 0.002021703               penalty = 0.001593195               penalty = 0.001255512               penalty = 0.0009894014              penalty = 0.0007796941              penalty = 0.000614435               penalty = 0.0004842032           
 #> DONE
 ```
 
@@ -346,7 +351,7 @@ plot(NB_prot_sparse, c("EBIC", "deviance"))
 
 sparse_best <- NB_prot_sparse$get_best_model("EBIC")
 paste0("BIC selects a penalty of ", round(sparse_best$sparsity, 4), ".")
-#> [1] "BIC selects a penalty of 0.0143."
+#> [1] "BIC selects a penalty of 0.0172."
 ```
 
 ``` r
@@ -374,7 +379,6 @@ Clustering and Association Network Inference.” *Computational Statistics
 [^2]: Different heuristics can converge to substantially different (V)EM
     local optima at the same $`q`$;
     `NB_control(clustering_init = "best_of_inits")` tries several and
-    keeps the best-ELBO fit, at extra cost. Worth it when `refine()`
-    (next section) won’t also be applied, but on this dataset’s full
-    range `refine()` alone already recovers most of what it would add,
-    so we stick with the default here.
+    keeps the best-ELBO fit, at extra cost. Worth it when `refine()` is
+    turned off, but on this dataset’s full range `refine()` alone
+    already recovers what it would add.

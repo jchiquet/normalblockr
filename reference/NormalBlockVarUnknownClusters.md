@@ -128,5 +128,5 @@ ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 model$clustering
-#>  [1] 1 2 1 3 1 2 3 3 2 2 1 1 1 3 3 1 3 1 2 3
+#>  [1] 3 1 2 2 3 3 1 2 3 3 3 3 3 2 2 2 2 3 2 1
 ```
