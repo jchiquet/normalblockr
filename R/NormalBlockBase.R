@@ -547,16 +547,16 @@ NormalBlockBase <- R6::R6Class(
     ## instead of one ad hoc private method per algorithm, selectable via
     ## NB_control(clustering_init = ...) ("ward2"/"kmeans"/"sbm"/"spectral").
     ## Benchmarked separately per family (the two cluster genuinely different
-    ## quantities: residual covariance vs. mean trajectory). For the
-    ## variance-block family, on three real datasets: no single method
-    ## dominates everywhere, but combining each method's BIC rank with how
-    ## often its deviance path violates the model's theoretical guarantee
-    ## (deviance is non-increasing in q) favors ward2 as the most reliable
-    ## default (NormalBlockVarBase$initialize()) -- kmeans has a marginally
-    ## better raw BIC rank on average but violates that monotonicity far more
-    ## often. For the mean-block family, kmeans is the default instead
-    ## (NormalBlockMeanBase$initialize()): it consistently lands in a better
-    ## ELBO basin than ward2 or spectral there (inst/mean_block_analyses/).
+    ## quantities: residual covariance vs. mean trajectory); kmeans is the
+    ## default of both. For the mean-block family it consistently lands in a
+    ## better ELBO basin than ward2 or spectral (inst/mean_block_analyses/).
+    ## For the variance-block family no single method dominates on real data:
+    ## kmeans fits brca_rppa much better, ward2 the zero-inflated onema; and
+    ## a cold-started kmeans collection violates the monotonicity of the
+    ## deviance in q more often than a ward2 one. With refine(), on by
+    ## default since then, those violations disappear and kmeans gives the
+    ## best fits on two of the three datasets
+    ## (inst/clustering_initialization_benchmark/var_init_study.R).
     ## spectral clusters the eigenvectors of cov(R) (top q, each row rescaled
     ## to unit L2 norm, the classic Ng-Jordan-Weiss normalization).
     clustering_methods = list(

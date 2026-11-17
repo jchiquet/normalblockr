@@ -104,7 +104,10 @@ test_that("sharing the heuristic leaves the fitted collection unchanged", {
   d  <- NormalBlockData$new(ex$Y, ex$X)
   q_list <- 2:5
 
-  shared <- normal_block(d, blocks = q_list, control = NB_control(verbose = FALSE))
+  ## ward2 named explicitly (kmeans is the default), refine() off: the point is
+  ## the cold-started collection
+  shared <- normal_block(d, blocks = q_list,
+                         control = NB_control(verbose = FALSE, clustering_init = "ward2", refine = FALSE))
 
   ## the same models, each cold-started from its own independently-built tree
   per_model <- lapply(q_list, function(q) {

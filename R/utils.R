@@ -268,8 +268,8 @@ clustering_path_for_collection <- function(R, q_list, method) {
   })
 }
 
-# Entry point for a collection: resolves the family's default heuristic when
-# none was named, and hands clustering_path_for_collection() the matrix that
+# Entry point for a collection: resolves the default heuristic ("kmeans" for
+# both families) when none was named, and hands clustering_path_for_collection() the matrix that
 # family's models cluster -- the residuals for variance-block models, the
 # fitted mean trajectory X %*% B for mean-block ones (see the call sites in
 # NormalBlockVarUnknownClusters/NormalBlockMeanUnknownClusters, which must
@@ -278,7 +278,7 @@ clustering_path_for_family <- function(mydata, q_list, family = c("var", "mean")
                                        zero_inflation = FALSE, control = NB_control()) {
   family <- match.arg(family)
   method <- control$clustering_init
-  if (is.null(method)) method <- if (family == "var") "ward2" else "kmeans"
+  if (is.null(method)) method <- "kmeans"   # both families, see NB_control()
   if (!is.character(method) || length(method) != 1) return(NULL)
   if (!method %in% c("sbm", "ward2", "spectral", "kmeans")) return(NULL)
 

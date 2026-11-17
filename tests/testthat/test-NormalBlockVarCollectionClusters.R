@@ -42,8 +42,22 @@ set.seed(7)
 ex2 <- generate_normal_block_var_data(n = 60, p = 30, d = 1, q = 5)
 data2 <- NormalBlockData$new(ex2$Y, ex2$X)
 
-test_that("NB_control()'s refine option defaults to FALSE", {
-  expect_false(NB_control()$refine)
+test_that("NB_control()'s refine option defaults to TRUE, and kmeans is both families' initialization", {
+  expect_true(NB_control()$refine)
+  ## a single model resolves the heuristic itself...
+  for (cls in list(NormalBlockVarUnknownClusters, NormalBlockMeanUnknownClusters))
+    expect_equal(cls$new(data2, 3)$.__enclos_env__$private$clustering_approx, "kmeans")
+  ## ... a collection through one shared path, the kmeans one by default
+  for (family in c("var", "mean")) {
+    set.seed(1); default <- normalblockr:::clustering_path_for_family(data2, 2:4, family)
+    set.seed(1); km <- normalblockr:::clustering_path_for_family(data2, 2:4, family,
+                                                                 control = NB_control(clustering_init = "kmeans"))
+    expect_equal(default, km)
+  }
+  ## refine = TRUE leaves no deviance increase on these well-separated data
+  set.seed(1)
+  co <- normal_block(data2, blocks = 2:4, control = NB_control(verbose = FALSE))
+  expect_length(co$deviance_violations, 0)
 })
 
 test_that("refine() never makes a model's deviance worse, and skips non-contiguous q gaps", {

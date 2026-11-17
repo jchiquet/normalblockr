@@ -33,7 +33,10 @@ NormalBlockVarBase <- R6::R6Class(
     initialize = function(data, q, sparsity = 0, control = NB_control(), zero_inflation = FALSE) {
       ## family defaults (see NormalBlockMeanBase for the other ones)
       data <- data$for_family("var")
-      if (is.null(control$clustering_init)) control$clustering_init <- "ward2"
+      ## kmeans, as for the mean-block family: with refine() (on by default),
+      ## it gives the best fits on brca_rppa and the university data, see
+      ## inst/clustering_initialization_benchmark/var_init_study.R
+      if (is.null(control$clustering_init)) control$clustering_init <- "kmeans"
       if (is.null(control$noise_covariance)) control$noise_covariance <- "diagonal"
       stopifnot("noise_covariance = 'full' only applies to mean-block models, whose Sigma is the full p x p residual covariance" =
                   control$noise_covariance %in% c("diagonal", "spherical"))
@@ -239,7 +242,7 @@ NormalBlockVarBase <- R6::R6Class(
   private = list(
     ## heuristics tried by best_of_inits(), best first (see
     ## inst/methods_initialization_and_refine.md for the benchmark)
-    default_inits     = c("ward2", "kmeans", "spectral"),
+    default_inits     = c("kmeans", "ward2", "spectral"),
     ## split() rule used by refine() unless told otherwise (see split())
     default_split_rule = "kmeans",
     dm1               = NA, # diagonal vector of inverse variance matrix (variables level)
