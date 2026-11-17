@@ -429,6 +429,10 @@ $$\mathrm{EBIC} = \mathrm{BIC} + 2\,\lvert E\rvert \log(\mathrm{dim}), \qquad \m
 
 **Open point.** Under `sparsity > 0`, $\lvert E\rvert$ counts the non-zero off-diagonal terms of $\hat\Omega$ (the degrees of freedom of the lasso). For the mean-block family with a full $\Sigma$ this makes the BIC non-monotone in $q$ whenever a larger $q$ leaves $\hat\Omega$ sparser (`inst/mean_block_analyses/nestor_protocol_qsel_unpenalised.R`); the diagonal default is unaffected.
 
+**Held-out log-likelihood and cross-validation.** `heldout_loglik(newdata)` evaluates new observations at the fitted parameters and, for an unknown clustering, at the MAP partition $\tilde C$; the rows are then independent and each one's log-likelihood is exact. For the variance-block family, $Y_i \sim \mathcal N(B^\top X_i,\ \tilde C\Sigma\tilde C^\top + D)$, evaluated with $A = \Omega + \tilde C^\top D^{-1}\tilde C$ ($q\times q$, diagonal second term since $\tilde C$ is a partition):
+$$\log\lvert \tilde C\Sigma\tilde C^\top + D\rvert = \log\lvert D\rvert - \log\lvert\Omega\rvert + \log\lvert A\rvert, \qquad r^\top(\tilde C\Sigma\tilde C^\top + D)^{-1}r = r^\top D^{-1}r - u^\top A^{-1}u,\quad u = \tilde C^\top D^{-1} r.$$
+Zero-inflated variants add $\sum_{j:\,y_{ij}=0}\log\kappa_{ij} + \sum_{j:\,y_{ij}\neq0}\log(1-\kappa_{ij})$, with $\kappa$ from the new $X^0$, and apply the same formulas to the non-zero sub-row. The mean-block family is Gaussian with precision $\Omega$ directly. Values are on $Y$'s original scale ($-n\sum_j\log s_j$ for a rescaled fit). With a known clustering, on the training data, this is the model's log-likelihood. `normal_block_cv()` sums it over $K$ folds of observations, re-estimating everything (clustering included) on each training set; since superfluous clusters barely hurt prediction, it plateaus beyond the true $q$, and the reported choice follows the one-standard-error rule.
+
 # Part II -- Implementation and numerical notes
 
 Nothing in this part changes any model of Part I. It records how those formulas are actually evaluated, which shortcuts are exact and which are approximations, and the numerical traps found along the way.

@@ -18,6 +18,7 @@ reference:
   contents:
     - '`normal_block`'
     - '`normal_block_sequential`'
+    - '`normal_block_cv`'
     - '`NB_control`'
     - '`generate_normal_block_var_data`'
     - '`generate_normal_block_mean_data`'
@@ -74,6 +75,8 @@ reference:
     - '`logLik.NormalBlockCollection`'
     - '`BIC.NormalBlockCollection`'
     - '`print.normal_block_sequential`'
+    - '`print.normal_block_cv`'
+    - '`plot.normal_block_cv`'
 
 - title: 'Internal'
   desc: >

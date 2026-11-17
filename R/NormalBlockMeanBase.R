@@ -172,6 +172,21 @@ NormalBlockMeanBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    ## heldout_loglik() (NormalBlockBase): mean C B'X_i of the new rows, and
+    ## their Gaussian log-likelihoods with precision Omega. Zero-inflated
+    ## mean-block models have a diagonal Omega, so each non-zero cell
+    ## contributes independently.
+    heldout_mean = function(X, C) X %*% private$B %*% t(C),
+    heldout_rows = function(R, C, observed) {
+      Omega <- private$Omega
+      if (is.null(observed)) {
+        cO <- chol(Omega)
+        quad <- rowSums((R %*% t(cO))^2)
+        return(-0.5 * (ncol(R) * log(2 * pi) - 2 * sum(log(diag(cO))) + quad))
+      }
+      w <- matrix(diag(Omega), nrow(R), ncol(R), byrow = TRUE)
+      rowSums(ifelse(observed, 0.5 * log(w / (2 * pi)) - 0.5 * w * R^2, 0))
+    },
     ## kmeans first: benchmarked better than ward2 for this family
     default_inits     = c("kmeans", "ward2", "spectral"),
     ## split() rule used by refine() unless told otherwise (see split())
