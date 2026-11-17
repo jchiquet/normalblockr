@@ -324,12 +324,12 @@ NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity =
 #>   penalty = 0.0595657             penalty = 0.04694053                penalty = 0.03699131                penalty = 0.02915087                penalty = 0.02297223                penalty = 0.01810318                penalty = 0.01426614                penalty = 0.01124238                penalty = 0.008859517               penalty = 0.00698171                penalty = 0.00550191                penalty = 0.00433576                penalty = 0.00341678                penalty = 0.00269258                penalty = 0.002121878           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000413, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.000459, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
 #>   penalty = 0.001672138           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.00109, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
+#> = 0.0011, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
 #> especially with many blocks -- see plot_loglik() to check.
 #>   penalty = 0.001317722               penalty = 0.001038426               penalty = 0.0008183278              penalty = 0.0006448802              penalty = 0.0005081954           
 #> DONE
