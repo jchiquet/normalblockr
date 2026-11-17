@@ -33,12 +33,13 @@ cat(sprintf("%-9s ELBO: %10.2f  niter: %3d  time: %.1fs\n",
 ## ---------------------------------------------------------------------
 ## 2. Convergence diagnostics across a q range (default: kmeans init)
 ## ---------------------------------------------------------------------
-cat("\n=== 2. collection over q = 2:20 (default init) ===\n")
+cat("\n=== 2. collection over q = 2:70 (default init) ===\n")
 t0 <- Sys.time()
-coll <- normal_block(data_subtype, blocks = 2:20, model = "mean",
+coll <- normal_block(data_subtype, blocks = 2:70, model = "mean",
                      control = NB_control(verbose = FALSE))
 cat("total time:", round(as.numeric(Sys.time() - t0, units = "secs"), 1), "s\n")
-print(coll$criteria[, c("q", "nb_param", "loglik", "deviance", "BIC", "ICL", "niter")])
+print(coll$criteria[coll$q_list %% 5 == 0, c("q", "nb_param", "loglik", "deviance", "BIC", "ICL", "niter")])
+cat("deviance violations:", length(coll$deviance_violations), "\n")
 
 best_before <- coll$get_best_model("ICL")
 cat("\nICL selects q =", best_before$q, "\n")
@@ -48,9 +49,10 @@ cat("\nICL selects q =", best_before$q, "\n")
 ## ---------------------------------------------------------------------
 cat("\n=== 3. refine() ===\n")
 t0 <- Sys.time()
-coll$refine(verbose = TRUE)
+coll$refine(verbose = FALSE)
 cat("refine() time:", round(as.numeric(Sys.time() - t0, units = "secs"), 1), "s\n")
-print(coll$criteria[, c("q", "loglik", "deviance", "BIC", "ICL")])
+print(coll$criteria[coll$q_list %% 5 == 0, c("q", "loglik", "deviance", "BIC", "ICL")])
+cat("deviance violations:", length(coll$deviance_violations), "\n")
 best_after <- coll$get_best_model("ICL")
 cat("\nICL selects q =", best_after$q, "(was", best_before$q, "before refine())\n")
 
@@ -65,7 +67,7 @@ go <- as.integer(factor(go)) # ARI()/sort_pairs() as.integer()'s character label
 cat("ARI(mean-block clustering, GO term):", round(ARI(best_after$clustering, go), 4), "\n")
 
 ## same comparison for the variance-block model, as a reference point
-NB_var <- normal_block(data_subtype, blocks = 2:20, control = NB_control(verbose = FALSE))
+NB_var <- normal_block(data_subtype, blocks = 2:40, control = NB_control(verbose = FALSE))
 NB_var$refine()
 best_var <- NB_var$get_best_model("ICL")
 cat("(reference) variance-block: q =", best_var$q,

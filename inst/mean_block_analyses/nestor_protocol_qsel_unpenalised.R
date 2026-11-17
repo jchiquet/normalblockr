@@ -10,7 +10,7 @@ for (snr in c(0.3, 1.5)) for (qv in c(3, 5)) for (n in c(80, 150, 220, 300)) for
   res[[length(res)+1]] <- data.frame(snr = snr, q = qv, n = n,
     q_BIC = f$get_best_model("BIC")$q, q_ICL = f$get_best_model("ICL")$q)
 }
-r <- bind_rows(res); saveRDS(r, "/tmp/claude-1001/-home-jchiquet-Repos-jeanne-normalblockr/fd1c5035-aedc-4039-9568-ad44954786fd/scratchpad/qsel_nopen.rds")
+r <- bind_rows(res); saveRDS(r, "inst/mean_block_analyses/nestor_protocol_qsel_unpenalised.rds")
 cat("=== selection de q, Sigma pleine NON penalisee (nu identique a celui de Nestor) ===\n")
 print(as.data.frame(r |> group_by(snr, q) |> summarise(
   pct_BIC = 100*mean(q_BIC == q), pct_ICL = 100*mean(q_ICL == q),

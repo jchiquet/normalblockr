@@ -1,183 +1,26 @@
 160 configurations x 4 initialisations, plus q selection over 2:6
+   20/160  (5.8 min)
+   40/160  (10.3 min)
+   60/160  (15.6 min)
+   80/160  (20.1 min)
+  100/160  (23.7 min)
+  120/160  (27.6 min)
+  140/160  (32.3 min)
+  160/160  (36.8 min)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   20/160  (6.8 min)
+done in 36.8 min -> inst/mean_block_analyses/nestor_protocol_results.rds
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   40/160  (11.6 min)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   60/160  (17.2 min)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   80/160  (22.5 min)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  100/160  (26.5 min)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  120/160  (31.3 min)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  140/160  (37.1 min)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  160/160  (42.8 min)
-done in 42.8 min -> inst/mean_block_analyses/nestor_protocol_results.rds
 == unknown clustering: ARI by initialisation and SNR ==
   snr     init   ARI RMSE_BCt
 1 0.3   kmeans 0.898   0.0800
-2 0.3      sbm 0.884   0.0867
-3 0.3    ward2 0.780   0.1640
-4 0.3 spectral 0.764   0.1931
+2 0.3      sbm 0.882   0.0878
+3 0.3 spectral 0.826   0.1298
+4 0.3    ward2 0.780   0.1640
 5 1.5   kmeans 0.974   0.0225
 6 1.5      sbm 0.970   0.0239
-7 1.5    ward2 0.865   0.1236
-8 1.5 spectral 0.745   0.2353
+7 1.5 spectral 0.913   0.0869
+8 1.5    ward2 0.865   0.1236
+
 == unknown clustering: does more data help? (kmeans, the default) ==
    snr q   n   ARI RMSE_BCt RMSE_Sigma
 1  0.3 3  80 0.949   0.0764     0.4464
@@ -196,6 +39,7 @@ done in 42.8 min -> inst/mean_block_analyses/nestor_protocol_results.rds
 14 1.5 5 150 0.983   0.0264     0.1002
 15 1.5 5 220 0.966   0.0222     0.0558
 16 1.5 5 300 1.000   0.0192     0.0643
+
 == known clustering: RMSE against n ==
    snr q   n RMSE_B RMSE_Sigma
 1  0.3 3  80 0.0464     0.4468
@@ -214,10 +58,12 @@ done in 42.8 min -> inst/mean_block_analyses/nestor_protocol_results.rds
 14 1.5 5 150 0.0256     0.1002
 15 1.5 5 220 0.0181     0.0558
 16 1.5 5 300 0.0196     0.0643
+
 == selection of q (true q in the row label) ==
   snr q pct_BIC_exact pct_ICL_exact median_q_BIC median_q_ICL
-1 0.3 3          57.5          67.5            3            3
-2 0.3 5          45.0          37.5            5            5
-3 1.5 3          75.0          80.0            3            3
-4 1.5 5          77.5          80.0            5            5
-glasso fallbacks: 2 of 960 penalised fits
+1 0.3 3          65.0          72.5            3          3.0
+2 0.3 5          37.5          40.0            5          4.5
+3 1.5 3          82.5          87.5            3          3.0
+4 1.5 5          77.5          85.0            5          5.0
+
+glasso fallbacks: 3 of 960 penalised fits

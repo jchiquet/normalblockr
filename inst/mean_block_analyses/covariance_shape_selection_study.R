@@ -27,12 +27,13 @@ for (p in c(60, 150)) for (gen in c("Sigma pleine", "Sigma diagonale")) for (s i
   cat("."); flush.console()
 }
 cat("\n\n")
-saveRDS(res, "/tmp/claude-1001/-home-jchiquet-Repos-jeanne-normalblockr/fd1c5035-aedc-4039-9568-ad44954786fd/scratchpad/study.rds")
+saveRDS(res, file.path(tempdir(), "covariance_shape_selection_study.rds"))
 summ <- do.call(rbind, lapply(split(res, list(res$p, res$gen, res$forme)), function(z) data.frame(
   p = z$p[1], generatif = z$gen[1], ajuste = z$forme[1],
   BIC_exact = sprintf("%d/%d", sum(z$q_BIC == q_true), nrow(z)),
   ICL_exact = sprintf("%d/%d", sum(z$q_ICL == q_true), nrow(z)),
   ecart_BIC = round(mean(abs(z$q_BIC - q_true)), 2),
+  biais_BIC = round(mean(z$q_BIC - q_true), 2),
   ecart_ICL = round(mean(abs(z$q_ICL - q_true)), 2),
   ARI = round(mean(z$ARI_qtrue), 3),
   viol = round(mean(z$violations), 1))))
