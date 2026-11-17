@@ -81,3 +81,17 @@ test_that("normal_block_cv() takes explicit folds, the mean-block family and zer
 
   expect_error(normal_block_cv(d, blocks = 2, sparsity = TRUE), "StARS")
 })
+
+test_that("normal_block_cv() stratifies its folds on a categorical design", {
+  set.seed(5)
+  g  <- factor(rep(c("a", "b", "c"), c(40, 15, 5)))
+  X  <- model.matrix(~ 0 + g)
+  ex <- generate_normal_block_var_data(n = 60, p = 10, d = 1, q = 2)
+  d  <- NormalBlockData$new(ex$Y + X %*% matrix(rnorm(30), 3, 10), X)
+  cv <- normal_block_cv(d, blocks = 2, folds = 5)
+  ## the 5 observations of the rarest category land in 5 different folds
+  expect_equal(sort(attr(cv, "folds")[g == "c"]), 1:5)
+  expect_true(is.finite(cv$loglik))
+  ## a test fold without some category still gets a held-out log-likelihood
+  expect_no_error(NormalBlockData$new(ex$Y[1:5, ], X[1:5, , drop = FALSE]))
+})

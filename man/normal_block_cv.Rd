@@ -25,7 +25,10 @@ path (`sparsity = TRUE`) is not supported: its penalty grid depends on
 the data, hence on the fold; pick the penalty with StARS instead (see
 [NormalBlockVarCollectionSparsity]).}
 
-\item{folds}{the number of folds, or a vector of `data$n` fold labels}
+\item{folds}{the number of folds, or a vector of `data$n` fold labels.
+With a number, the folds are drawn at random, stratified on the distinct
+rows of the design X when it is categorical (e.g. a factor coded by
+`model.matrix()`), so that every training set sees every category.}
 
 \item{control}{a list of controls, see [NB_control()]}
 }

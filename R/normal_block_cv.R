@@ -22,7 +22,10 @@
 #' path (`sparsity = TRUE`) is not supported: its penalty grid depends on
 #' the data, hence on the fold; pick the penalty with StARS instead (see
 #' [NormalBlockVarCollectionSparsity]).
-#' @param folds the number of folds, or a vector of `data$n` fold labels
+#' @param folds the number of folds, or a vector of `data$n` fold labels.
+#' With a number, the folds are drawn at random, stratified on the distinct
+#' rows of the design X when it is categorical (e.g. a factor coded by
+#' `model.matrix()`), so that every training set sees every category.
 #' @param control a list of controls, see [NB_control()]
 #' @return an object of class `normal_block_cv`: a data frame with one row
 #' per model (`q`), the total held-out log-likelihood over the `n`
@@ -49,7 +52,18 @@ normal_block_cv <- function(data, blocks, model = c("var", "mean"), zero_inflati
             "a sparsity path is not supported (data-dependent grid): use StARS" = !isTRUE(sparsity),
             "heuristic fits have no likelihood" = !isTRUE(control$heuristic))
   n <- data$n
-  folds <- if (length(folds) == 1) sample(rep_len(seq_len(folds), n)) else folds
+  if (length(folds) == 1) {
+    ## stratified on the distinct rows of X when the design is categorical,
+    ## so that every training set sees every category
+    design <- match(do.call(paste, as.data.frame(data$X)), unique(do.call(paste, as.data.frame(data$X))))
+    K <- folds
+    folds <- integer(n)
+    if (max(design) <= n / 2) {
+      for (g in unique(design)) folds[design == g] <- sample(rep_len(sample(K), sum(design == g)))
+    } else {
+      folds <- sample(rep_len(seq_len(K), n))
+    }
+  }
   stopifnot("folds must give one label per observation" = length(folds) == n,
             "at least two folds are needed" = length(unique(folds)) >= 2)
 
