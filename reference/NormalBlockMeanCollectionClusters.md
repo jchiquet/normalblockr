@@ -118,8 +118,10 @@ models$plot(c("BIC", "ICL"))
 models$get_best_model()
 #> A diagonal normal-block-mean model with 2 unknown blocks .
 #> ===========================================================================
-#>  nb_param q n_edges sparsity    loglik deviance     BIC     ICL    EBIC niter
-#>        23 2       0        0 -2034.089 4068.178 4163.23 4163.23 4163.23     3
+#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+#>        23 2       0        0 -2032.562 4065.124 4160.176 4160.176 4160.176
+#>  niter
+#>      3
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 
