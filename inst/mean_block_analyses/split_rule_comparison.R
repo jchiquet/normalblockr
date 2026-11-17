@@ -39,8 +39,10 @@ res <- rbind(
   }))
 )
 print(res, digits = 4)
-## Results (2026-11-16): "noise" removes more deviance on every brca seed
-## (by 270-370, ~1.7%) and every onema seed (by 7-8, <1%); on the
-## simulations the two tie 6/10 times, "kmeans" is slightly ahead 3/10 and
-## "noise" clearly ahead once (78 vs 61). Selected q and ARI at the true q
-## are identical in every run. Hence "noise" stays the mean-block default.
+## Results (2026-11-17, unscaled data -- the mean-block default since #60):
+## "noise" removes more deviance on every brca seed (2-15% more) and every
+## onema seed (about 8%); the simulations tie 7/10, "kmeans" is ahead 2/10
+## and "noise" 1/10. Selected q and ARI at the true q are identical in every
+## run. Hence "noise" stays the mean-block default.
+## The previous run (2026-11-16, on rescaled data) reached the same conclusion
+## with smaller margins (~1.7% on brca, <1% on onema).
