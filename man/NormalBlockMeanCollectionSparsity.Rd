@@ -7,8 +7,10 @@
 R6 class for a collection of mean-block models ([NormalBlockMeanBase]) with
 a fixed clustering (or a fixed number of blocks) and different sparsity
 levels applied to the p x p precision matrix of the variables. Mirrors
-[NormalBlockVarCollectionSparsity], minus the StARS/stability selection
-path, which relies on `fixed_tau`, not supported by the mean-block VEM.
+[NormalBlockVarCollectionSparsity], StARS included: the network relates
+the variables, so its edges do not depend on cluster labels, and the
+subsample fits simply hold the clustering fixed (the known one, or the MAP
+partition of the least penalized model).
 }
 \examples{
 ex <- generate_normal_block_mean_data(n = 60, p = 20, d = 1, q = 3)
@@ -31,17 +33,18 @@ models$plot(c("BIC", "EBIC"))
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockMeanCollectionSparsity-initialize}{\code{NormalBlockMeanCollectionSparsity$new()}}
-    \item \href{#method-NormalBlockMeanCollectionSparsity-get_best_model}{\code{NormalBlockMeanCollectionSparsity$get_best_model()}}
     \item \href{#method-NormalBlockMeanCollectionSparsity-clone}{\code{NormalBlockMeanCollectionSparsity$clone()}}
   }
 }
-\if{html}{\out{<details open><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="get_best_model"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-get_best_model'><code>NormalBlockCollectionSparsity$get_best_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="get_model"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-get_model'><code>NormalBlockCollectionSparsity$get_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-optimize'><code>NormalBlockCollectionSparsity$optimize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="plot"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-plot'><code>NormalBlockCollectionSparsity$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="stability_selection"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-stability_selection'><code>NormalBlockCollectionSparsity$stability_selection()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
@@ -65,31 +68,6 @@ models$plot(c("BIC", "EBIC"))
   }
   \subsection{Returns}{
     A new [`NormalBlockMeanCollectionSparsity`] object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanCollectionSparsity-get_best_model"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionSparsity-get_best_model}{}}}
-\subsection{\code{NormalBlockMeanCollectionSparsity$get_best_model()}}{
-  Extract best model in the collection
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanCollectionSparsity$get_best_model(
-  crit = c("BIC", "EBIC", "ICL")
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{crit}}{a character for the criterion used to perform the selection,
-either "BIC", "EBIC" or "ICL". Default is BIC}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    a [`NormalBlockMeanBase`] object
   }
 }
 

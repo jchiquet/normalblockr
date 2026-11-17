@@ -7,8 +7,10 @@
 #' R6 class for a collection of mean-block models ([NormalBlockMeanBase]) with
 #' a fixed clustering (or a fixed number of blocks) and different sparsity
 #' levels applied to the p x p precision matrix of the variables. Mirrors
-#' [NormalBlockVarCollectionSparsity], minus the StARS/stability selection
-#' path, which relies on `fixed_tau`, not supported by the mean-block VEM.
+#' [NormalBlockVarCollectionSparsity], StARS included: the network relates
+#' the variables, so its edges do not depend on cluster labels, and the
+#' subsample fits simply hold the clustering fixed (the known one, or the MAP
+#' partition of the least penalized model).
 #' @examples
 #' ex <- generate_normal_block_mean_data(n = 60, p = 20, d = 1, q = 3)
 #' data <- NormalBlockData$new(ex$Y, ex$X)
@@ -64,21 +66,29 @@ NormalBlockMeanCollectionSparsity <- R6::R6Class(
       )
       private$progress_field <- "sparsity"
       private$progress_label <- "penalty"
-    },
-
-    #' @description Extract best model in the collection
-    #' @param crit a character for the criterion used to perform the selection,
-    #' either "BIC", "EBIC" or "ICL". Default is BIC
-    #' @return a [`NormalBlockMeanBase`] object
-    get_best_model = function(crit = c("BIC", "EBIC", "ICL")) {
-      crit <- match.arg(crit)
-      self$models[[private$best_id(crit)]]$clone()
     }
   ),
 
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  private = list(
+    ## StARS hooks (see NormalBlockCollectionSparsity): the subsample paths
+    ## hold the clustering fixed, as a known one -- the given blocks, or the
+    ## MAP partition of the least penalized model (empty clusters dropped)
+    subsample_path = function(data, control) {
+      blocks <- private$blocks_
+      if (!is.matrix(blocks)) {
+        cl <- self$get_model(min(private$sparsity_))$clustering
+        blocks <- as_indicator(match(cl, sort(unique(cl))))
+      }
+      NormalBlockMeanCollectionSparsity$new(data, blocks, control)
+    },
+    network_nodes = function() {
+      nm <- colnames(self$data$Y)
+      if (is.null(nm)) paste0("Y", seq_len(self$data$p)) else nm
+    }
+  ),
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

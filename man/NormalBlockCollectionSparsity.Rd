@@ -7,8 +7,11 @@
 Shared scaffolding for [NormalBlockVarCollectionSparsity] and
 [NormalBlockMeanCollectionSparsity]: the warm-started path traversal, the
 penalty lookup and the criteria plot. Concrete subclasses derive the
-penalty grid in their `initialize()` and provide their own
-`get_best_model()` (only the variance-block family offers StARS).
+penalty grid in their `initialize()`. Model selection, StARS included
+(stability selection, Liu et al. 2010), is shared: a family only says how
+to refit its path on a subsample with the clustering held fixed
+(`private$subsample_path()`) and how to name the nodes of its network
+(`private$network_nodes()`).
 }
 \examples{
 # An internal abstract base class, never instantiated directly -- see
@@ -33,6 +36,16 @@ penalty grid in their `initialize()` and provide their own
     \item{\code{blocks}}{group matrix or number of blocks}
 
     \item{\code{sparsity}}{list of sparsity penalties}
+
+    \item{\code{criteria}}{a data frame with the criteria of every model of the
+path, plus its StARS stability once `stability_selection()` has run}
+
+    \item{\code{stability_path}}{selection probability of every edge at every
+penalty (StARS), `NULL` until `stability_selection()` has run}
+
+    \item{\code{stability}}{mean edge stability along the penalty path,
+`1 - mean(4 p (1 - p))` over the edges; `NA` until
+`stability_selection()` has run}
   }
   \if{html}{\out{</div>}}
 }
@@ -41,6 +54,8 @@ penalty grid in their `initialize()` and provide their own
   \itemize{
     \item \href{#method-NormalBlockCollectionSparsity-optimize}{\code{NormalBlockCollectionSparsity$optimize()}}
     \item \href{#method-NormalBlockCollectionSparsity-get_model}{\code{NormalBlockCollectionSparsity$get_model()}}
+    \item \href{#method-NormalBlockCollectionSparsity-get_best_model}{\code{NormalBlockCollectionSparsity$get_best_model()}}
+    \item \href{#method-NormalBlockCollectionSparsity-stability_selection}{\code{NormalBlockCollectionSparsity$stability_selection()}}
     \item \href{#method-NormalBlockCollectionSparsity-plot}{\code{NormalBlockCollectionSparsity$plot()}}
     \item \href{#method-NormalBlockCollectionSparsity-clone}{\code{NormalBlockCollectionSparsity$clone()}}
   }
@@ -97,6 +112,62 @@ changes, so the warm start is always between models of matching shape.
   }
   \subsection{Returns}{
     A NormalBlockVarKnownClusters (sparse) object with given value penalty
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockCollectionSparsity-get_best_model"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockCollectionSparsity-get_best_model}{}}}
+\subsection{\code{NormalBlockCollectionSparsity$get_best_model()}}{
+  Extract best model in the collection
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockCollectionSparsity$get_best_model(
+  crit = c("BIC", "EBIC", "ICL", "StARS"),
+  stability = 0.9
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{crit}}{a character for the criterion used to perform the
+selection: "BIC" (default), "EBIC", "ICL" or "StARS".}
+      \item{\code{stability}}{if `crit = "StARS"`, the level of stability required.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a model of the collection's family
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockCollectionSparsity-stability_selection"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockCollectionSparsity-stability_selection}{}}}
+\subsection{\code{NormalBlockCollectionSparsity$stability_selection()}}{
+  Compute the stability path by stability selection (StARS,
+Liu et al. 2010): the whole penalty path is refitted on subsamples of
+the observations, with the clustering held fixed so that the networks
+are comparable across subsamples, and each edge's selection
+probability is recorded at every penalty. For a variance-block
+collection the network relates the q blocks; for a mean-block one,
+the p variables.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockCollectionSparsity$stability_selection(
+  subsamples = NULL,
+  n_subsamples = 10
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{subsamples}}{a list of vectors describing the subsamples. The number of vectors (or list length) determines the number of subsamples used in the stability selection. Automatically set to 10 subsamples with size `10*sqrt(n)` if `n >= 144` and `0.8*n` otherwise following Liu et al. (2010) recommendations.}
+      \item{\code{n_subsamples}}{number of subsamples to create if the subsamples are not given}
+    }
+    \if{html}{\out{</div>}}
   }
 }
 

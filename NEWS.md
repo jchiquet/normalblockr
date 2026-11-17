@@ -16,6 +16,20 @@
   the same footing. It plateaus beyond the true q, so the selected q
   (attribute `best`) follows the one-standard-error rule.
 
+## StARS for mean-block sparsity paths
+
+* `get_best_model("StARS")` and `stability_selection()` now apply to
+  mean-block sparsity paths too: the StARS machinery moved to the shared
+  base class `NormalBlockCollectionSparsity`. The subsample paths hold the
+  clustering fixed (the known one, or the MAP partition of the least
+  penalized model); the network relates the p variables.
+* Fix: the subsample paths now reuse the collection's penalties. They used
+  to derive their own grid from each subsample's covariance, so the
+  selection probabilities were filed under penalties that had not produced
+  them.
+* The subsamples keep the zero-inflation design `X0` and the data's `scale`
+  request.
+
 ## One initialization for both families, and refine() by default
 
 Fits over a range of cluster counts change: they are refined, and the

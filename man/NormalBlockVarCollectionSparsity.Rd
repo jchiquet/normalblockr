@@ -22,12 +22,6 @@ models$get_best_model("BIC")$sparsity
   \describe{
     \item{\code{sparsity_details}}{list of information about model's penalties}
 
-    \item{\code{criteria}}{a data frame with the values of some criteria ((approximated) log-likelihood, BIC) for the collection of models}
-
-    \item{\code{stability_path}}{measure of edges stability based on StARS method}
-
-    \item{\code{stability}}{mean edge stability along the sparsity penalties path}
-
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }
   \if{html}{\out{</div>}}
@@ -36,18 +30,18 @@ models$get_best_model("BIC")$sparsity
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockVarCollectionSparsity-initialize}{\code{NormalBlockVarCollectionSparsity$new()}}
-    \item \href{#method-NormalBlockVarCollectionSparsity-get_best_model}{\code{NormalBlockVarCollectionSparsity$get_best_model()}}
-    \item \href{#method-NormalBlockVarCollectionSparsity-stability_selection}{\code{NormalBlockVarCollectionSparsity$stability_selection()}}
     \item \href{#method-NormalBlockVarCollectionSparsity-clone}{\code{NormalBlockVarCollectionSparsity$clone()}}
   }
 }
-\if{html}{\out{<details open><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="print"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-print'><code>NormalBlockCollection$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="get_best_model"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-get_best_model'><code>NormalBlockCollectionSparsity$get_best_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="get_model"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-get_model'><code>NormalBlockCollectionSparsity$get_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-optimize'><code>NormalBlockCollectionSparsity$optimize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="plot"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-plot'><code>NormalBlockCollectionSparsity$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="stability_selection"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-stability_selection'><code>NormalBlockCollectionSparsity$stability_selection()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
@@ -77,56 +71,6 @@ models$get_best_model("BIC")$sparsity
   }
   \subsection{Returns}{
     A new [`NormalBlockVarCollectionSparsity`] object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionSparsity-get_best_model"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionSparsity-get_best_model}{}}}
-\subsection{\code{NormalBlockVarCollectionSparsity$get_best_model()}}{
-  Extract best model in the collection
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionSparsity$get_best_model(
-  crit = c("BIC", "EBIC", "ICL", "StARS"),
-  stability = 0.9
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{crit}}{a character for the criterion used to performed the selection.}
-      \item{\code{stability}}{if criterion = "StARS" gives level of stability required.
-Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    a [`NormalBlockVarUnknownClusters`] object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionSparsity-stability_selection"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionSparsity-stability_selection}{}}}
-\subsection{\code{NormalBlockVarCollectionSparsity$stability_selection()}}{
-  Compute the stability path by stability selection
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionSparsity$stability_selection(
-  subsamples = NULL,
-  n_subsamples = 10
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{subsamples}}{a list of vectors describing the subsamples. The number of vectors (or list length) determines the number of subsamples used in the stability selection. Automatically set to 20 subsamples with size `10*sqrt(n)` if `n >= 144` and `0.8*n` otherwise following Liu et al. (2010) recommendations.}
-      \item{\code{n_subsamples}}{number of subsamples to create if the subsamples are not given}
-    }
-    \if{html}{\out{</div>}}
   }
 }
 
