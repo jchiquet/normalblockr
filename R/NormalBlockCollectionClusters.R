@@ -72,8 +72,8 @@ NormalBlockCollectionClusters <- R6::R6Class(
     #' replaces the original only if it strictly lowers the deviance, so this
     #' can only improve (or leave unchanged) each model it touches. Only
     #' contiguous q pairs (`q` and `q -/+ 1`, both present in the collection)
-    #' are refined. See `inst/methods_initialization_and_refine.md` for the
-    #' rationale and empirical evidence.
+    #' are refined. Run by default after fitting a collection, see
+    #' [NB_control()]'s `refine` for the rationale.
     #' @param trial_niter number of EM iterations used for the cheap trial
     #' candidates (passed to `candidates_split()`/`candidates_merge()`)
     #' before fully re-optimizing only the best one.

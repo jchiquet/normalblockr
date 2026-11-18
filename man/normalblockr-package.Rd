@@ -4,7 +4,7 @@
 \name{normalblockr-package}
 \alias{normalblockr}
 \alias{normalblockr-package}
-\title{normalblockr: Gaussian Graphical Models with Latent Clustering Structure}
+\title{normalblockr: Gaussian Models with Latent Clustering of Variables}
 \description{
 Implements the Normal-Block model, a Gaussian graphical model with a latent clustering structure for the multivariate analysis of continuous data. The model clusters variables and, building on the graphical lasso, infers a network of statistical dependencies between clusters rather than between individual variables, for known or unknown clusterings, with an optional zero-inflation extension for data with an excess of exact zeros. A complementary family clusters variables by their regression response to covariates rather than by their covariance, sharing one profile per cluster. See Tous & Chiquet (2026) \doi{10.1016/j.csda.2026.108347} for the model itself and its variational expectation-maximization estimation procedure.
 }
@@ -24,11 +24,7 @@ Authors:
 \itemize{
   \item Julien Chiquet \email{julien.chiquet@inrae.fr} (\href{https://orcid.org/0000-0002-3629-3429}{ORCID})
   \item Jeanne Tous \email{jeanne.tous@inrae.fr}
-}
-
-Other contributors:
-\itemize{
-  \item Nestor Ngalala Manguitini [contributor]
+  \item Nestor Ngalala Manguitini
 }
 
 }

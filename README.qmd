@@ -1,5 +1,5 @@
 ---
-title: "normalblockr: Gaussian graphical models with latent clustering structure for multivariate continuous data"
+title: "normalblockr: Gaussian models with latent clustering of variables"
 format:
   gfm:
     default-image-extension: ""

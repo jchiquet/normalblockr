@@ -28,6 +28,7 @@ We use the same dataset as the `breast-cancer-proteomics` vignette (`?brca_rppa`
 
 ```{r, set-up}
 library(normalblockr)
+set.seed(1) # kmeans initializations draw random starts
 ```
 
 # Mathematical background

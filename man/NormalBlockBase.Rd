@@ -96,6 +96,7 @@ for the mean-block family (network between variables).}
     \item \href{#method-NormalBlockBase-best_of_inits}{\code{NormalBlockBase$best_of_inits()}}
     \item \href{#method-NormalBlockBase-candidates_split}{\code{NormalBlockBase$candidates_split()}}
     \item \href{#method-NormalBlockBase-candidates_merge}{\code{NormalBlockBase$candidates_merge()}}
+    \item \href{#method-NormalBlockBase-heldout_loglik}{\code{NormalBlockBase$heldout_loglik()}}
     \item \href{#method-NormalBlockBase-predict}{\code{NormalBlockBase$predict()}}
     \item \href{#method-NormalBlockBase-latent_network}{\code{NormalBlockBase$latent_network()}}
     \item \href{#method-NormalBlockBase-plot_loglik}{\code{NormalBlockBase$plot_loglik()}}
@@ -230,8 +231,8 @@ the cap is expected and not a sign of trouble.}
 \if{latex}{\out{\hypertarget{method-NormalBlockBase-best_of_inits}{}}}
 \subsection{\code{NormalBlockBase$best_of_inits()}}{
   Try several clustering-initialization heuristics and keep
-the best-ELBO converged fit (see `NB_control(clustering_init = )` and
-`inst/methods_initialization_and_refine.md` for the rationale). Every
+the best-ELBO converged fit (see [NB_control()]'s `clustering_init`
+for the heuristics and the rationale behind the default). Every
 candidate is first screened with a short `trial_niter` run (same idea
 as `candidates_split()`/`candidates_merge()`), and only the
 `max_training` best-screened ones are fully retrained with `control`.
@@ -311,6 +312,42 @@ try every pair.}
       \item{\code{trial_niter}}{see [candidates_split()]}
     }
     \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockBase-heldout_loglik"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockBase-heldout_loglik}{}}}
+\subsection{\code{NormalBlockBase$heldout_loglik()}}{
+  Log-likelihood of new observations under the fitted model,
+for held-out validation or cross-validation (see [normal_block_cv()]).
+The parameters stay at their fitted values and the partition at its
+MAP (for an unknown clustering); the observations are then
+independent, and each one's log-likelihood is exact: Gaussian for
+mean-block models, and for variance-block ones the marginal over the
+latent W, computed with the Woodbury identity and the determinant lemma
+so that only q x q matrices are factorized. Zero-inflated models add
+each cell's zero-inflation probability, from `newdata$X0`, and use the
+marginal of the non-zero cells. The value is on Y's original scale
+(the Jacobian of the column rescaling is included), so it compares
+models fitted with and without rescaling.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockBase$heldout_loglik(newdata, per_observation = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{newdata}}{a [NormalBlockData] object with the same variables and
+covariates (and zero-inflation covariates) as the training data.}
+      \item{\code{per_observation}}{whether to return one value per observation
+rather than their sum.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    the held-out log-likelihood, or a vector of `newdata$n` values
   }
 }
 

@@ -86,3 +86,43 @@ test_that("sparsity implies a full Sigma unless one is named explicitly", {
                  control = NB_control(verbose = FALSE, noise_covariance = "diagonal")),
     "needs noise_covariance = 'full'", fixed = TRUE)
 })
+
+## StARS, shared with the variance-block family (NormalBlockCollectionSparsity):
+## the network relates the p variables, and the subsample paths hold the
+## clustering fixed (known, or the MAP partition of the least penalized model).
+test_that("StARS works on mean-block sparsity paths, known or unknown clusters", {
+  set.seed(2)
+  ex <- generate_normal_block_mean_data(n = 80, p = 12, d = 1, q = 3)
+  d  <- NormalBlockData$new(ex$Y, ex$X)
+  ctrl <- NB_control(verbose = FALSE, n_sparsity_penalties = 4)
+  for (blocks in list(ex$parameters$C, 3)) {
+    path <- normal_block(d, blocks = blocks, sparsity = TRUE, model = "mean", control = ctrl)
+    expect_true(all(is.na(path$stability)))
+    set.seed(3)
+    path$stability_selection(n_subsamples = 3)
+    sp <- path$stability_path
+    expect_equal(nrow(sp), choose(12, 2) * 4)
+    expect_true(all(sp$Prob >= 0 & sp$Prob <= 1))
+    expect_equal(sort(unique(sp$Penalty)), sort(path$sparsity))
+    expect_match(sp$Edge[1], "^Y1\\|Y2$")
+    expect_true(all(path$stability >= 0 & path$stability <= 1))
+    expect_equal(path$criteria$stability, path$stability)
+    best <- path$get_best_model("StARS", stability = 0)
+    expect_true(best$sparsity %in% path$sparsity)
+    expect_s3_class(best, "NormalBlockMeanBase")
+  }
+})
+
+test_that("the subsample paths reuse the collection's penalties, so the stability path is labelled right", {
+  set.seed(4)
+  ex <- generate_normal_block_mean_data(n = 60, p = 10, d = 1, q = 2)
+  path <- normal_block(NormalBlockData$new(ex$Y, ex$X), blocks = ex$parameters$C, sparsity = TRUE,
+                       model = "mean", control = NB_control(verbose = FALSE, n_sparsity_penalties = 3))
+  ## a subsample would otherwise derive its own penalty grid from its own
+  ## covariance, and the probabilities would be filed under the wrong penalty
+  ctrl <- path$control; ctrl$sparsity_penalties <- path$sparsity
+  rows <- 1:40
+  sub_data <- NormalBlockData$new(ex$Y[rows, ], ex$X[rows, , drop = FALSE])
+  sub_path <- path$.__enclos_env__$private$subsample_path(sub_data, ctrl)
+  expect_equal(sub_path$sparsity, path$sparsity)
+})

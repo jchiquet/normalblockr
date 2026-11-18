@@ -21,14 +21,14 @@ bibentry(
 
 bibentry(
   bibtype  = "Manual",
-  title    = "{normalblockr}: Implementation of the Normal-Block Model",
-  author   = c(person("Jeanne", "Tous"), person("Julien", "Chiquet")),
+  title    = "{normalblockr}: Gaussian Models with Latent Clustering of Variables",
+  author   = c(person("Julien", "Chiquet"), person("Nestor", "Ngalala Manguitini"), person("Jeanne", "Tous")),
   year     = year,
   note     = note,
   url      = "https://github.com/jchiquet/normalblockr",
   textVersion = paste0(
-    "Tous, J., & Chiquet, J. (", year, "). ",
-    "normalblockr: Implementation of the Normal-Block Model. ",
+    "Chiquet, J., Ngalala Manguitini, N., & Tous, J. (", year, "). ",
+    "normalblockr: Gaussian Models with Latent Clustering of Variables. ",
     note, ". ",
     "https://github.com/jchiquet/normalblockr"
   )

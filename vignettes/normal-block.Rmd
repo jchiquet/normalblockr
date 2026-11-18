@@ -193,6 +193,17 @@ myNB_3   <- my_NB_unknown$get_model(3)
 myNB_BIC <- my_NB_unknown$get_best_model("BIC")
 ```
 
+The criteria above rest on penalties. Cross-validation offers a penalty-free alternative: `normal_block_cv()` fits the collection on all folds but one and computes the exact log-likelihood of the left-out observations (for the variance-block model, the marginal over the latent factors, computed at the selected partition). It typically plateaus beyond the true number of clusters, so the one-standard-error rule picks the smallest $q$ within one standard error of the best.
+
+```{r, simulation1-NB3-cv, fig.width=6, fig.height=4}
+set.seed(1)
+my_NB_cv <- normal_block_cv(my_data, blocks = 2:5, folds = 5)
+my_NB_cv
+plot(my_NB_cv)
+```
+
+Here every criterion selects more than the 3 simulated clusters, cross-validation least of all. This is the default column rescaling of $Y$ at work: on data simulated from the model itself, whose variables carry their block's signal with the same weight, rescaling makes the model misspecified. Fitting `NormalBlockData$new(my_nb_data$Y, my_nb_data$X, scale = FALSE)` instead, BIC, ICL and cross-validation all select $q = 3$. On real data the rescaling usually helps the variance-block model (see `?NormalBlockData`).
+
 
 ### Playing with sparsity
 By default, no penalty is applied to the association network. A penalty can be added via the `sparsity` argument of `normal_block()`, with any of the parametrizations seen above (fixed clustering, fixed number of clusters, or unknown number of clusters). The example below uses a fixed clustering.

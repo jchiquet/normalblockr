@@ -14,10 +14,11 @@
 #' Y. By default they are read off Y itself (`Y == 0`). Pass it explicitly
 #' when the matrix handed to the model is no longer the one carrying the zeros
 #' (typically the residuals of a first stage, see [normal_block_sequential()]).
-#' @param scale whether to rescale each column of Y by its own standard
-#' deviation before fitting. `NULL` (the default) leaves the choice to the
-#' model family, resolved when a model is fitted: `TRUE` for variance-block
-#' models, `FALSE` for mean-block ones. `TRUE` or `FALSE` forces it for both.
+#' @section Rescaling Y (`scale`):
+#' Each column of Y can be divided by its own standard deviation before
+#' fitting. `scale = NULL` (the default) leaves the choice to the model
+#' family, resolved when a model is fitted: rescaled for variance-block
+#' models, raw for mean-block ones; `TRUE` or `FALSE` forces it for both.
 #' Columns are never centered: the model's own intercept already absorbs each
 #' variable's mean.
 #'
@@ -28,7 +29,10 @@
 #' amplitudes (units, dynamic ranges, abundances), and rescaling evens them
 #' out: on `brca_rppa` and `onema`, the variance-block fit to the rescaled
 #' data has the better exact ICL once brought back to the original scale
-#' (Jacobian included). A mean-block model shares a mean profile within a
+#' (Jacobian included), and the better cross-validated log-likelihood
+#' ([normal_block_cv()]: by 2,080 on brca, standard error 124; by 169 on
+#' onema, standard error 65; not significantly different on the university
+#' text data). A mean-block model shares a mean profile within a
 #' block; dividing each variable by its own standard deviation, which mixes
 #' that profile with the variable's own noise, makes the profiles differ
 #' within a true block. On the same two datasets the unscaled mean-block fit
@@ -96,7 +100,7 @@ NormalBlockData <- R6::R6Class(
     #' @param formula describes the relationship between Y and X, useful if not all of X's covariates should be used.
     #' @param scale whether to rescale each column of Y by its own standard
     #' deviation (no centering): `NULL` (default) for the model family's
-    #' default, see the class-level documentation and `for_family()`.
+    #' default, see the section "Rescaling Y" below and `for_family()`.
     #' @param zeros an optional 0/1 matrix of structural zeros, overriding the
     #' default `Y == 0`.
     initialize = function(Y, X, X0 = NULL, formula = NULL, scale = NULL,
@@ -141,7 +145,9 @@ NormalBlockData <- R6::R6Class(
       self$d0        <- ncol(self$X0)
       self$d         <- ncol(self$X)
       self$XtX       <- crossprod(self$X)
-      self$XtXm1     <- chol2inv(chol(self$XtX))
+      ## a rank-deficient design (e.g. a category absent from a cross-validation
+      ## fold) falls back on the pseudo-inverse, i.e. minimum-norm least squares
+      self$XtXm1     <- tryCatch(chol2inv(chol(self$XtX)), error = function(e) MASS::ginv(self$XtX))
       self$XtY       <- crossprod(self$X, self$Y)
       if (is.null(zeros)) {
         self$zeros <- 1 * (self$Y == 0)

@@ -67,97 +67,23 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
       )
       private$progress_field <- "sparsity"
       private$progress_label <- "penalty"
-    },
-
-    #' @description Extract best model in the collection
-    #' @param crit a character for the criterion used to performed the selection.
-    #' @param stability if criterion = "StARS" gives level of stability required.
-    #' Either "BIC", "EBIC", "ICL" or "StARS". Default is BIC
-    #' @return a [`NormalBlockVarUnknownClusters`] object
-    get_best_model = function(crit = c("BIC", "EBIC", "ICL", "StARS"),
-                              stability = 0.9) {
-      crit <- match.arg(crit)
-      if (crit == "StARS") {
-        if (is.null(private$stab_path)) self$stability_selection()
-        max_stab <- max(self$criteria$stability)
-        if (max_stab < stability) {
-          message("No model reaches the required stability ", stability, ", returning model with highest stability: ", max_stab)
-          stability <- max_stab
-        }
-        id_stars <- self$criteria %>%
-          dplyr::select(sparsity, stability) %>% dplyr::rename(Stability = stability) %>%
-          dplyr::filter(Stability >= stability) %>%
-          dplyr::pull(sparsity) %>% min() %>% match(private$sparsity_)
-        model <- self$models[[id_stars]]$clone()
-      } else {
-        id <- private$best_id(crit)
-        model <- self$models[[id]]$clone()
-      }
-      model
-    },
-
-    ## Stability -------------------------
-    #' @description Compute the stability path by stability selection
-    #' @param subsamples a list of vectors describing the subsamples. The number of vectors (or list length) determines the number of subsamples used in the stability selection. Automatically set to 20 subsamples with size `10*sqrt(n)` if `n >= 144` and `0.8*n` otherwise following Liu et al. (2010) recommendations.
-    #' @param n_subsamples number of subsamples to create if the subsamples are not given
-    stability_selection = function(subsamples = NULL, n_subsamples = 10) {
-
-      ## select default subsamples according to Liu et al. (2010) recommendations.
-      if (is.null(subsamples)) {
-        subsample.size <- round(ifelse(self$data$n >= 144, 10*sqrt(self$data$n), 0.8*self$data$n))
-        subsamples <- replicate(n_subsamples, sample.int(self$data$n, subsample.size), simplify = FALSE)
-      }
-
-      ## retrieve all the appropriate control parameters for calling stabselection
-      control_stabs <- self$control
-      control_stabs$sparsity <- private$sparsity_
-      control_stabs$verbose <- FALSE
-      control_stabs$fixed_tau <- TRUE
-      blocks  <- private$blocks_
-      if (is.matrix(blocks)){
-        control_stabs$clustering_init <- blocks
-      } else {
-        control_stabs$clustering_init <- self$get_model(min(private$sparsity_))$var_par$tau
-      }
-
-      ## got for stability selection
-      if(self$control$verbose)
-        cat("\nStability Selection for NormalBlockVarKnownClusters (sparse): \nsubsampling: ")
-
-      stabs_out <- lapply(subsamples, function(subsample) {
-        mydata <- NormalBlockData$new(Y = self$data$Y[subsample, , drop = FALSE],
-                                  X = self$data$X[subsample, , drop = FALSE])
-        myNB <- NormalBlockVarCollectionSparsity$new(
-          mydata, blocks, self$control$zero_inflation, control_stabs)
-        myNB$optimize(control_stabs)
-
-        upper_tri <- upper.tri(diag(self$q))
-        nets <- do.call(cbind, lapply(myNB$models, function(model) {
-          model$latent_network("support")[upper_tri]
-        }))
-        nets
-      })
-
-      prob <- Reduce("+", stabs_out, accumulate = FALSE) / length(subsamples)
-      ## formatting/tyding
-      node_set <- lapply(1:self$q, f <- function(g){paste0("group_", g)})
-      colnames(prob) <- private$sparsity_
-      private$stab_path <- prob %>%
-        as.data.frame() %>%
-        dplyr::mutate(Edge = 1:dplyr::n()) %>%
-        tidyr::gather(key = "Penalty", value = "Prob", -Edge) %>%
-        dplyr::mutate(Penalty = as.numeric(Penalty),
-                      Node1   = node_set[edge_to_node(Edge)$node1],
-                      Node2   = node_set[edge_to_node(Edge)$node2],
-                      Edge    = paste0(Node1, "|", Node2))
-      invisible(subsamples)
     }
   ),
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-    stab_path = NULL # stability path, filled in by stability_selection()
+    ## StARS hooks (see NormalBlockCollectionSparsity): the clustering is held
+    ## fixed on the subsamples -- the known one, or the variational tau of the
+    ## least penalized model with fixed_tau = TRUE
+    subsample_path = function(data, control) {
+      if (!is.matrix(private$blocks_)) {
+        control$clustering_init <- self$get_model(min(private$sparsity_))$var_par$tau
+        control$fixed_tau <- TRUE
+      }
+      NormalBlockVarCollectionSparsity$new(data, private$blocks_, isTRUE(self$control$zero_inflation), control)
+    },
+    network_nodes = function() paste0("group_", seq_len(self$q))
   ),
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##  ACTIVE BINDINGS ----
@@ -167,24 +93,6 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
     sparsity_details = function()
       list("n_penalties" = length(self$sparsity), "min_ratio" = min(self$sparsity)/max(self$sparsity),
            "min_sparsity" = min(self$sparsity), "max_sparsity" = max(self$sparsity)),
-    #' @field criteria a data frame with the values of some criteria ((approximated) log-likelihood, BIC) for the collection of models
-    criteria = function() super$criteria %>% dplyr::mutate(stability = self$stability),
-    #' @field stability_path measure of edges stability based on StARS method
-    stability_path = function() private$stab_path,
-    #' @field stability mean edge stability along the sparsity penalties path
-    stability = function() {
-      if (!is.null(private$stab_path)) {
-        stability <- self$stability_path %>%
-          dplyr::select(Penalty, Prob) %>%
-          dplyr::group_by(Penalty) %>%
-          dplyr::summarize(Stability = 1 - mean(4 * Prob * (1 - Prob))) %>%
-          dplyr::arrange(desc(Penalty)) %>%
-          dplyr::pull(Stability)
-      } else {
-        stability <- rep(NA, length(private$sparsity_))
-      }
-      stability
-    },
     #' @field who_am_I a method to print what model is being fitted
     who_am_I  = function(){
       nc <- if (is.null(self$control$noise_covariance)) "diagonal" else self$control$noise_covariance
