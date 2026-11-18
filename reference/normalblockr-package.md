@@ -1,4 +1,4 @@
-# normalblockr: Gaussian Graphical Models with Latent Clustering Structure
+# normalblockr: Gaussian Models with Latent Clustering of Variables
 
 Implements the Normal-Block model, a Gaussian graphical model with a
 latent clustering structure for the multivariate analysis of continuous
@@ -35,6 +35,4 @@ Authors:
 
 - Jeanne Tous <jeanne.tous@inrae.fr>
 
-Other contributors:
-
-- Nestor Ngalala Manguitini \[contributor\]
+- Nestor Ngalala Manguitini

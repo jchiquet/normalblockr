@@ -181,6 +181,7 @@ for the mean-block family (network between variables).</p></dd>
 <li><p><a href="#method-NormalBlockBase-best_of_inits"><code>NormalBlockBase$best_of_inits()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-candidates_split"><code>NormalBlockBase$candidates_split()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-candidates_merge"><code>NormalBlockBase$candidates_merge()</code></a></p></li>
+<li><p><a href="#method-NormalBlockBase-heldout_loglik"><code>NormalBlockBase$heldout_loglik()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-predict"><code>NormalBlockBase$predict()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-latent_network"><code>NormalBlockBase$latent_network()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-plot_loglik"><code>NormalBlockBase$plot_loglik()</code></a></p></li>
@@ -341,8 +342,8 @@ the cap is expected and not a sign of trouble.</p></dd>
 <p></p><hr><a id="method-NormalBlockBase-best_of_inits"></a><div class="section">
 <h3 id="normalblockbase-best-of-inits-"><code>NormalBlockBase$best_of_inits()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-best-of-inits-"></a></h3>
 <p>Try several clustering-initialization heuristics and keep
-the best-ELBO converged fit (see `NB_control(clustering_init = )` and
-`inst/methods_initialization_and_refine.md` for the rationale). Every
+the best-ELBO converged fit (see [NB_control()]'s `clustering_init`
+for the heuristics and the rationale behind the default). Every
 candidate is first screened with a short `trial_niter` run (same idea
 as `candidates_split()`/`candidates_merge()`), and only the
 `max_training` best-screened ones are fully retrained with `control`.</p><div class="section">
@@ -428,22 +429,57 @@ try every pair.</p></dd>
 
 </div>
 
+<p></p><hr><a id="method-NormalBlockBase-heldout_loglik"></a><div class="section">
+<h3 id="normalblockbase-heldout-loglik-"><code>NormalBlockBase$heldout_loglik()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-heldout-loglik-"></a></h3>
+<p>Log-likelihood of new observations under the fitted model,
+for held-out validation or cross-validation (see [normal_block_cv()]).
+The parameters stay at their fitted values and the partition at its
+MAP (for an unknown clustering); the observations are then
+independent, and each one's log-likelihood is exact: Gaussian for
+mean-block models, and for variance-block ones the marginal over the
+latent W, computed with the Woodbury identity and the determinant lemma
+so that only q x q matrices are factorized. Zero-inflated models add
+each cell's zero-inflation probability, from `newdata$X0`, and use the
+marginal of the non-zero cells. The value is on Y's original scale
+(the Jacobian of the column rescaling is included), so it compares
+models fitted with and without rescaling.</p><div class="section">
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">heldout_loglik</span><span class="op">(</span><span class="va">newdata</span>, per_observation <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>newdata</code></dt>
+<dd><p>a [NormalBlockData] object with the same variables and
+covariates (and zero-inflation covariates) as the training data.</p></dd>
+
+      <dt><code>per_observation</code></dt>
+<dd><p>whether to return one value per observation
+rather than their sum.</p></dd>
+
+
+</dl><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<p>the held-out log-likelihood, or a vector of `newdata$n` values</p>
+</div>
+
+</div>
+
 <p></p><hr><a id="method-NormalBlockBase-predict"></a><div class="section">
 <h3 id="normalblockbase-predict-"><code>NormalBlockBase$predict()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-predict-"></a></h3>
 <p>Predicts observations Y for new covariates X, in Y's
 original units (like `$fitted`, so that predicting on the training X
 reproduces it).</p><div class="section">
-<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">new_X</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>new_X</code></dt>
 <dd><p>new set of covariates.</p></dd>
 
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p>A n*p prediction matrix for new observations</p>
 </div>
 
@@ -453,17 +489,17 @@ reproduces it).</p><div class="section">
 <h3 id="normalblockbase-latent-network-"><code>NormalBlockBase$latent_network()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-latent-network-"></a></h3>
 <p>Extract interaction network in the latent space, as a
 matrix rather than a plot – see `$plot_network()` to plot it instead.</p><div class="section">
-<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">latent_network</span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"partial_cor"</span>, <span class="st">"support"</span>, <span class="st">"precision"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
+<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>type</code></dt>
 <dd><p>edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)</p></dd>
 
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
+<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
 <p>a square matrix of size `self$q`</p>
 </div>
 
@@ -473,10 +509,10 @@ matrix rather than a plot – see `$plot_network()` to plot it instead.</p><div 
 <h3 id="normalblockbase-plot-loglik-"><code>NormalBlockBase$plot_loglik()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-plot-loglik-"></a></h3>
 <p>plots the evolution of the objective (log-likelihood or ELBO)
 across the (V)EM iterations of the last call to `optimize()`.</p><div class="section">
-<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">plot_loglik</span><span class="op">(</span>show_increment <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
+<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>show_increment</code></dt>
 <dd><p>whether to add a second panel with the (log10)
 absolute increment between iterations and the convergence `threshold`
@@ -485,7 +521,7 @@ absolute increment between iterations and the convergence `threshold`
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
+<h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
 <p>a [`ggplot2::ggplot`] graph</p>
 </div>
 
@@ -495,7 +531,7 @@ absolute increment between iterations and the convergence `threshold`
 <h3 id="normalblockbase-plot-network-"><code>NormalBlockBase$plot_network()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-plot-network-"></a></h3>
 <p>plot the latent network. To extract the network as a
 matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
-<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span></span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"partial_cor"</span>, <span class="st">"support"</span><span class="op">)</span>,</span>
 <span>  output <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"igraph"</span>, <span class="st">"corrplot"</span><span class="op">)</span>,</span>
@@ -506,7 +542,7 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 <span>  plot <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
+<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>type</code></dt>
 <dd><p>edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).</p></dd>
 
@@ -538,7 +574,7 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 <h3 id="normalblockbase-plot-"><code>NormalBlockBase$plot()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-plot-"></a></h3>
 <p>plots the evolution of the objective during model optimization
 (see `plot_loglik()`)</p><div class="section">
-<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
+<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -547,10 +583,10 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 <p></p><hr><a id="method-NormalBlockBase-print"></a><div class="section">
 <h3 id="normalblockbase-print-"><code>NormalBlockBase$print()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-print-"></a></h3>
 <p>User friendly print method</p><div class="section">
-<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
+<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span>model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="va">self</span><span class="op">$</span><span class="va">who_am_I</span>, <span class="st">".\n"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
+<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>model</code></dt>
 <dd><p>First line of the print output</p></dd>
 
@@ -563,10 +599,10 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 <p></p><hr><a id="method-NormalBlockBase-clone"></a><div class="section">
 <h3 id="normalblockbase-clone-"><code>NormalBlockBase$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
+<h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
+<h4 id="arguments-12">Arguments<a class="anchor" aria-label="anchor" href="#arguments-12"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -590,7 +626,7 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -15,19 +15,6 @@ R6 class for a collection of normal-block models with a fixed clustering
 
   list of information about model's penalties
 
-- `criteria`:
-
-  a data frame with the values of some criteria ((approximated)
-  log-likelihood, BIC) for the collection of models
-
-- `stability_path`:
-
-  measure of edges stability based on StARS method
-
-- `stability`:
-
-  mean edge stability along the sparsity penalties path
-
 - `who_am_I`:
 
   a method to print what model is being fitted
@@ -38,19 +25,17 @@ R6 class for a collection of normal-block models with a fixed clustering
 
 - [`NormalBlockVarCollectionSparsity$new()`](#method-NormalBlockVarCollectionSparsity-initialize)
 
-- [`NormalBlockVarCollectionSparsity$get_best_model()`](#method-NormalBlockVarCollectionSparsity-get_best_model)
-
-- [`NormalBlockVarCollectionSparsity$stability_selection()`](#method-NormalBlockVarCollectionSparsity-stability_selection)
-
 - [`NormalBlockVarCollectionSparsity$clone()`](#method-NormalBlockVarCollectionSparsity-clone)
 
 Inherited methods
 
 - [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
 - [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
+- [`NormalBlockCollectionSparsity$get_best_model()`](NormalBlockCollectionSparsity.html#method-get_best_model)
 - [`NormalBlockCollectionSparsity$get_model()`](NormalBlockCollectionSparsity.html#method-get_model)
 - [`NormalBlockCollectionSparsity$optimize()`](NormalBlockCollectionSparsity.html#method-optimize)
 - [`NormalBlockCollectionSparsity$plot()`](NormalBlockCollectionSparsity.html#method-plot)
+- [`NormalBlockCollectionSparsity$stability_selection()`](NormalBlockCollectionSparsity.html#method-stability_selection)
 
 ------------------------------------------------------------------------
 
@@ -89,61 +74,6 @@ Create a new \[\`NormalBlockVarCollectionSparsity\`\] object.
 #### Returns
 
 A new \[\`NormalBlockVarCollectionSparsity\`\] object
-
-------------------------------------------------------------------------
-
-### `NormalBlockVarCollectionSparsity$get_best_model()`
-
-Extract best model in the collection
-
-#### Usage
-
-    NormalBlockVarCollectionSparsity$get_best_model(
-      crit = c("BIC", "EBIC", "ICL", "StARS"),
-      stability = 0.9
-    )
-
-#### Arguments
-
-- `crit`:
-
-  a character for the criterion used to performed the selection.
-
-- `stability`:
-
-  if criterion = "StARS" gives level of stability required. Either
-  "BIC", "EBIC", "ICL" or "StARS". Default is BIC
-
-#### Returns
-
-a \[\`NormalBlockVarUnknownClusters\`\] object
-
-------------------------------------------------------------------------
-
-### `NormalBlockVarCollectionSparsity$stability_selection()`
-
-Compute the stability path by stability selection
-
-#### Usage
-
-    NormalBlockVarCollectionSparsity$stability_selection(
-      subsamples = NULL,
-      n_subsamples = 10
-    )
-
-#### Arguments
-
-- `subsamples`:
-
-  a list of vectors describing the subsamples. The number of vectors (or
-  list length) determines the number of subsamples used in the stability
-  selection. Automatically set to 20 subsamples with size
-  \`10\*sqrt(n)\` if \`n \>= 144\` and \`0.8\*n\` otherwise following
-  Liu et al. (2010) recommendations.
-
-- `n_subsamples`:
-
-  number of subsamples to create if the subsamples are not given
 
 ------------------------------------------------------------------------
 

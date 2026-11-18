@@ -45,13 +45,16 @@
 <url><loc>/reference/logLik.NormalBlockBase.html</loc></url>
 <url><loc>/reference/logLik.NormalBlockCollection.html</loc></url>
 <url><loc>/reference/normal_block.html</loc></url>
+<url><loc>/reference/normal_block_cv.html</loc></url>
 <url><loc>/reference/normal_block_sequential.html</loc></url>
 <url><loc>/reference/normalblockr-package.html</loc></url>
 <url><loc>/reference/onema.html</loc></url>
 <url><loc>/reference/plot.NormalBlockBase.html</loc></url>
+<url><loc>/reference/plot.normal_block_cv.html</loc></url>
 <url><loc>/reference/predict.NormalBlockBase.html</loc></url>
 <url><loc>/reference/print.NormalBlockBase.html</loc></url>
 <url><loc>/reference/print.NormalBlockCollection.html</loc></url>
+<url><loc>/reference/print.normal_block_cv.html</loc></url>
 <url><loc>/reference/print.normal_block_sequential.html</loc></url>
 <url><loc>/reference/print.summary.NormalBlockBase.html</loc></url>
 <url><loc>/reference/print.summary.NormalBlockCollection.html</loc></url>

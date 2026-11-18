@@ -184,8 +184,8 @@ larger-q neighbor (`"merge"`), or both (the default); a candidate
 replaces the original only if it strictly lowers the deviance, so this
 can only improve (or leave unchanged) each model it touches. Only
 contiguous q pairs (`q` and `q -/+ 1`, both present in the collection)
-are refined. See `inst/methods_initialization_and_refine.md` for the
-rationale and empirical evidence.</p><div class="section">
+are refined. Run by default after fitting a collection, see
+[NB_control()]'s `refine` for the rationale.</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockCollectionClusters</span><span class="op">$</span><span class="fu">refine</span><span class="op">(</span></span>
 <span>  trial_niter <span class="op">=</span> <span class="fl">2</span>,</span>
@@ -274,7 +274,7 @@ warning line when the deviance increases with q somewhere (see
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
 </div>
 
 <div class="pkgdown-footer-right">

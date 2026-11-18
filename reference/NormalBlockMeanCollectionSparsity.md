@@ -3,9 +3,10 @@
 R6 class for a collection of mean-block models (\[NormalBlockMeanBase\])
 with a fixed clustering (or a fixed number of blocks) and different
 sparsity levels applied to the p x p precision matrix of the variables.
-Mirrors \[NormalBlockVarCollectionSparsity\], minus the StARS/stability
-selection path, which relies on \`fixed_tau\`, not supported by the
-mean-block VEM.
+Mirrors \[NormalBlockVarCollectionSparsity\], StARS included: the
+network relates the variables, so its edges do not depend on cluster
+labels, and the subsample fits simply hold the clustering fixed (the
+known one, or the MAP partition of the least penalized model).
 
 ## Super classes
 
@@ -25,17 +26,17 @@ mean-block VEM.
 
 - [`NormalBlockMeanCollectionSparsity$new()`](#method-NormalBlockMeanCollectionSparsity-initialize)
 
-- [`NormalBlockMeanCollectionSparsity$get_best_model()`](#method-NormalBlockMeanCollectionSparsity-get_best_model)
-
 - [`NormalBlockMeanCollectionSparsity$clone()`](#method-NormalBlockMeanCollectionSparsity-clone)
 
 Inherited methods
 
 - [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
 - [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
+- [`NormalBlockCollectionSparsity$get_best_model()`](NormalBlockCollectionSparsity.html#method-get_best_model)
 - [`NormalBlockCollectionSparsity$get_model()`](NormalBlockCollectionSparsity.html#method-get_model)
 - [`NormalBlockCollectionSparsity$optimize()`](NormalBlockCollectionSparsity.html#method-optimize)
 - [`NormalBlockCollectionSparsity$plot()`](NormalBlockCollectionSparsity.html#method-plot)
+- [`NormalBlockCollectionSparsity$stability_selection()`](NormalBlockCollectionSparsity.html#method-stability_selection)
 
 ------------------------------------------------------------------------
 
@@ -65,29 +66,6 @@ Create a new \[\`NormalBlockMeanCollectionSparsity\`\] object.
 #### Returns
 
 A new \[\`NormalBlockMeanCollectionSparsity\`\] object
-
-------------------------------------------------------------------------
-
-### `NormalBlockMeanCollectionSparsity$get_best_model()`
-
-Extract best model in the collection
-
-#### Usage
-
-    NormalBlockMeanCollectionSparsity$get_best_model(
-      crit = c("BIC", "EBIC", "ICL")
-    )
-
-#### Arguments
-
-- `crit`:
-
-  a character for the criterion used to perform the selection, either
-  "BIC", "EBIC" or "ICL". Default is BIC
-
-#### Returns
-
-a \[\`NormalBlockMeanBase\`\] object
 
 ------------------------------------------------------------------------
 

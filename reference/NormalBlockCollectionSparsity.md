@@ -3,8 +3,11 @@
 Shared scaffolding for \[NormalBlockVarCollectionSparsity\] and
 \[NormalBlockMeanCollectionSparsity\]: the warm-started path traversal,
 the penalty lookup and the criteria plot. Concrete subclasses derive the
-penalty grid in their \`initialize()\` and provide their own
-\`get_best_model()\` (only the variance-block family offers StARS).
+penalty grid in their \`initialize()\`. Model selection, StARS included
+(stability selection, Liu et al. 2010), is shared: a family only says
+how to refit its path on a subsample with the clustering held fixed
+(\`private\$subsample_path()\`) and how to name the nodes of its network
+(\`private\$network_nodes()\`).
 
 ## Super class
 
@@ -31,6 +34,21 @@ penalty grid in their \`initialize()\` and provide their own
 
   list of sparsity penalties
 
+- `criteria`:
+
+  a data frame with the criteria of every model of the path, plus its
+  StARS stability once \`stability_selection()\` has run
+
+- `stability_path`:
+
+  selection probability of every edge at every penalty (StARS), \`NULL\`
+  until \`stability_selection()\` has run
+
+- `stability`:
+
+  mean edge stability along the penalty path, \`1 - mean(4 p (1 - p))\`
+  over the edges; \`NA\` until \`stability_selection()\` has run
+
 ## Methods
 
 ### Public methods
@@ -38,6 +56,10 @@ penalty grid in their \`initialize()\` and provide their own
 - [`NormalBlockCollectionSparsity$optimize()`](#method-NormalBlockCollectionSparsity-optimize)
 
 - [`NormalBlockCollectionSparsity$get_model()`](#method-NormalBlockCollectionSparsity-get_model)
+
+- [`NormalBlockCollectionSparsity$get_best_model()`](#method-NormalBlockCollectionSparsity-get_best_model)
+
+- [`NormalBlockCollectionSparsity$stability_selection()`](#method-NormalBlockCollectionSparsity-stability_selection)
 
 - [`NormalBlockCollectionSparsity$plot()`](#method-NormalBlockCollectionSparsity-plot)
 
@@ -92,6 +114,66 @@ penalty
 #### Returns
 
 A NormalBlockVarKnownClusters (sparse) object with given value penalty
+
+------------------------------------------------------------------------
+
+### `NormalBlockCollectionSparsity$get_best_model()`
+
+Extract best model in the collection
+
+#### Usage
+
+    NormalBlockCollectionSparsity$get_best_model(
+      crit = c("BIC", "EBIC", "ICL", "StARS"),
+      stability = 0.9
+    )
+
+#### Arguments
+
+- `crit`:
+
+  a character for the criterion used to perform the selection: "BIC"
+  (default), "EBIC", "ICL" or "StARS".
+
+- `stability`:
+
+  if \`crit = "StARS"\`, the level of stability required.
+
+#### Returns
+
+a model of the collection's family
+
+------------------------------------------------------------------------
+
+### `NormalBlockCollectionSparsity$stability_selection()`
+
+Compute the stability path by stability selection (StARS, Liu et al.
+2010): the whole penalty path is refitted on subsamples of the
+observations, with the clustering held fixed so that the networks are
+comparable across subsamples, and each edge's selection probability is
+recorded at every penalty. For a variance-block collection the network
+relates the q blocks; for a mean-block one, the p variables.
+
+#### Usage
+
+    NormalBlockCollectionSparsity$stability_selection(
+      subsamples = NULL,
+      n_subsamples = 10
+    )
+
+#### Arguments
+
+- `subsamples`:
+
+  a list of vectors describing the subsamples. The number of vectors (or
+  list length) determines the number of subsamples used in the stability
+  selection. Automatically set to 10 subsamples with size
+  \`10\*sqrt(n)\` if \`n \>= 144\` and \`0.8\*n\` otherwise following
+  Liu et al. (2010) recommendations.
+
+- `n_subsamples`:
+
+  number of subsamples to create if the subsamples are not given
 
 ------------------------------------------------------------------------
 

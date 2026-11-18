@@ -3,6 +3,39 @@
 R6 class holding the responses and design matrix used to fit a
 normal-block model.
 
+## Rescaling Y (\`scale\`)
+
+Each column of Y can be divided by its own standard deviation before
+fitting. \`scale = NULL\` (the default) leaves the choice to the model
+family, resolved when a model is fitted: rescaled for variance-block
+models, raw for mean-block ones; \`TRUE\` or \`FALSE\` forces it for
+both. Columns are never centered: the model's own intercept already
+absorbs each variable's mean.
+
+The two families need opposite defaults. A variance-block model loads
+every variable of block k on the same latent signal with weight 1
+(\`Cov(Y_j, Y_j') = Var(W_k)\` for j, j' in block k). On real data the
+variables of a block often carry that signal with very different
+amplitudes (units, dynamic ranges, abundances), and rescaling evens them
+out: on \`brca_rppa\` and \`onema\`, the variance-block fit to the
+rescaled data has the better exact ICL once brought back to the original
+scale (Jacobian included), and the better cross-validated log-likelihood
+(\[normal_block_cv()\]: by 2,080 on brca, standard error 124; by 169 on
+onema, standard error 65; not significantly different on the university
+text data). A mean-block model shares a mean profile within a block;
+dividing each variable by its own standard deviation, which mixes that
+profile with the variable's own noise, makes the profiles differ within
+a true block. On the same two datasets the unscaled mean-block fit has
+the better exact ICL, and on data simulated from either model, rescaling
+makes every criterion over-select the number of clusters (see
+\`inst/mean_block_analyses/criteria_selection_study.R\`).
+
+The resulting \`B\`, \`Omega\` and clustering are properties of the data
+the model was fitted on; with rescaled data, use \`\$B_original\`,
+\`\$dm1_original\` and \`\$fitted\` for quantities in Y's original units
+(a shared block covariance has no unique original-scale counterpart,
+since the scaling factors differ within a block).
+
 ## Public fields
 
 - `Y`:
@@ -134,7 +167,7 @@ Create a new \[\`NormalBlockData\`\] object.
 
   whether to rescale each column of Y by its own standard deviation (no
   centering): \`NULL\` (default) for the model family's default, see the
-  class-level documentation and \`for_family()\`.
+  section "Rescaling Y" below and \`for_family()\`.
 
 - `zeros`:
 

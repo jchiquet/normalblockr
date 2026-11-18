@@ -137,6 +137,8 @@ and mean-block (\[NormalBlockMeanBase\]) model families.
 
 - [`NormalBlockBase$candidates_merge()`](#method-NormalBlockBase-candidates_merge)
 
+- [`NormalBlockBase$heldout_loglik()`](#method-NormalBlockBase-heldout_loglik)
+
 - [`NormalBlockBase$predict()`](#method-NormalBlockBase-predict)
 
 - [`NormalBlockBase$latent_network()`](#method-NormalBlockBase-latent_network)
@@ -336,10 +338,10 @@ optimizes the model and updates its parameters
 ### `NormalBlockBase$best_of_inits()`
 
 Try several clustering-initialization heuristics and keep the best-ELBO
-converged fit (see \`NB_control(clustering_init = )\` and
-\`inst/methods_initialization_and_refine.md\` for the rationale). Every
-candidate is first screened with a short \`trial_niter\` run (same idea
-as \`candidates_split()\`/\`candidates_merge()\`), and only the
+converged fit (see \[NB_control()\]'s \`clustering_init\` for the
+heuristics and the rationale behind the default). Every candidate is
+first screened with a short \`trial_niter\` run (same idea as
+\`candidates_split()\`/\`candidates_merge()\`), and only the
 \`max_training\` best-screened ones are fully retrained with
 \`control\`.
 
@@ -426,6 +428,42 @@ the current model
 - `trial_niter`:
 
   see \[candidates_split()\]
+
+------------------------------------------------------------------------
+
+### `NormalBlockBase$heldout_loglik()`
+
+Log-likelihood of new observations under the fitted model, for held-out
+validation or cross-validation (see \[normal_block_cv()\]). The
+parameters stay at their fitted values and the partition at its MAP (for
+an unknown clustering); the observations are then independent, and each
+one's log-likelihood is exact: Gaussian for mean-block models, and for
+variance-block ones the marginal over the latent W, computed with the
+Woodbury identity and the determinant lemma so that only q x q matrices
+are factorized. Zero-inflated models add each cell's zero-inflation
+probability, from \`newdata\$X0\`, and use the marginal of the non-zero
+cells. The value is on Y's original scale (the Jacobian of the column
+rescaling is included), so it compares models fitted with and without
+rescaling.
+
+#### Usage
+
+    NormalBlockBase$heldout_loglik(newdata, per_observation = FALSE)
+
+#### Arguments
+
+- `newdata`:
+
+  a \[NormalBlockData\] object with the same variables and covariates
+  (and zero-inflation covariates) as the training data.
+
+- `per_observation`:
+
+  whether to return one value per observation rather than their sum.
+
+#### Returns
+
+the held-out log-likelihood, or a vector of \`newdata\$n\` values
 
 ------------------------------------------------------------------------
 

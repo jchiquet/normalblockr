@@ -43,6 +43,18 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="held-out-log-likelihood-and-cross-validation-development-version">Held-out log-likelihood and cross-validation<a class="anchor" aria-label="anchor" href="#held-out-log-likelihood-and-cross-validation-development-version"></a></h3>
+<ul><li>New method <code>heldout_loglik(newdata)</code> on every fitted model: the exact log-likelihood of new observations at the fitted parameters and the MAP partition, on Y’s original scale. For variance-block models it is the marginal over the latent W, computed with the Woodbury identity and the determinant lemma (only q x q matrices are factorized); zero-inflated models add the zero-inflation probabilities and use the marginal of the non-zero cells. On the training data with a known clustering it equals the model’s log-likelihood, which the tests check for every variant.</li>
+<li>New function <code><a href="../reference/normal_block_cv.html">normal_block_cv()</a></code>: K-fold cross-validated log-likelihood of a collection over q, with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods. A criterion that rests on no penalty and compares families, shapes of Sigma and scalings on the same footing. It plateaus beyond the true q, so the selected q (attribute <code>best</code>) follows the one-standard-error rule.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="stars-for-mean-block-sparsity-paths-development-version">StARS for mean-block sparsity paths<a class="anchor" aria-label="anchor" href="#stars-for-mean-block-sparsity-paths-development-version"></a></h3>
+<ul><li>
+<code>get_best_model("StARS")</code> and <code>stability_selection()</code> now apply to mean-block sparsity paths too: the StARS machinery moved to the shared base class <code>NormalBlockCollectionSparsity</code>. The subsample paths hold the clustering fixed (the known one, or the MAP partition of the least penalized model); the network relates the p variables.</li>
+<li>Fix: the subsample paths now reuse the collection’s penalties. They used to derive their own grid from each subsample’s covariance, so the selection probabilities were filed under penalties that had not produced them.</li>
+<li>The subsamples keep the zero-inflation design <code>X0</code> and the data’s <code>scale</code> request.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="one-initialization-for-both-families-and-refine-by-default-development-version">One initialization for both families, and refine() by default<a class="anchor" aria-label="anchor" href="#one-initialization-for-both-families-and-refine-by-default-development-version"></a></h3>
 <p>Fits over a range of cluster counts change: they are refined, and the variance-block ones start from another heuristic.</p>
 <ul><li>
@@ -174,7 +186,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -7,6 +7,8 @@ Main entry points for fitting a Normal-Block model and simulating data
 - [`normal_block()`](normal_block.md) : Normal-block model
 - [`normal_block_sequential()`](normal_block_sequential.md) : Cluster
   variables in the mean, then in the residual covariance
+- [`normal_block_cv()`](normal_block_cv.md) : Cross-validated
+  log-likelihood of normal-block models
 - [`NB_control()`](NB_control.md) : NB_control
 - [`generate_normal_block_var_data()`](generate_normal_block_var_data.md)
   : Generate Normal Block Var Data
@@ -101,6 +103,10 @@ subclass)
   Bayesian Information Criterion for a Collection of Normal-Block Models
 - [`print(`*`<normal_block_sequential>`*`)`](print.normal_block_sequential.md)
   : Print a Sequential Mean-then-Variance Fit
+- [`print(`*`<normal_block_cv>`*`)`](print.normal_block_cv.md) : Print a
+  Cross-Validated Log-Likelihood
+- [`plot(`*`<normal_block_cv>`*`)`](plot.normal_block_cv.md) : Plot a
+  Cross-Validated Log-Likelihood
 
 ## Internal
 

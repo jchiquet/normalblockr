@@ -290,6 +290,43 @@ myNB_3   <- my_NB_unknown$get_model(3)
 myNB_BIC <- my_NB_unknown$get_best_model("BIC")
 ```
 
+The criteria above rest on penalties. Cross-validation offers a
+penalty-free alternative:
+[`normal_block_cv()`](../reference/normal_block_cv.md) fits the
+collection on all folds but one and computes the exact log-likelihood of
+the left-out observations (for the variance-block model, the marginal
+over the latent factors, computed at the selected partition). It
+typically plateaus beyond the true number of clusters, so the
+one-standard-error rule picks the smallest $`q`$ within one standard
+error of the best.
+
+``` r
+
+set.seed(1)
+my_NB_cv <- normal_block_cv(my_data, blocks = 2:5, folds = 5)
+my_NB_cv
+#> Cross-validated log-likelihood, 5 folds (larger is better)
+#>  q    loglik        se
+#>  2 -6985.293 111.34704
+#>  3 -6435.029  54.40782
+#>  4 -6356.279  49.64443
+#>  5 -6348.556  48.71834
+#> Best: q = 4 (one-standard-error rule; maximum at q = 5)
+plot(my_NB_cv)
+```
+
+![](normal-block_files/figure-html/simulation1-NB3-cv-1.png)
+
+Here every criterion selects more than the 3 simulated clusters,
+cross-validation least of all. This is the default column rescaling of
+$`Y`$ at work: on data simulated from the model itself, whose variables
+carry their block’s signal with the same weight, rescaling makes the
+model misspecified. Fitting
+`NormalBlockData$new(my_nb_data$Y, my_nb_data$X, scale = FALSE)`
+instead, BIC, ICL and cross-validation all select $`q = 3`$. On real
+data the rescaling usually helps the variance-block model (see
+[`?NormalBlockData`](../reference/NormalBlockData.md)).
+
 #### Playing with sparsity
 
 By default, no penalty is applied to the association network. A penalty
@@ -378,7 +415,7 @@ my_NB_sparse_unknown <-  normal_block(data = my_data,
                                       blocks = 2:6,
                                       sparsity = TRUE)
 #> Fitting a Collection of diagonal normal-block-var models with different values of q and different penalties. 
-#>   number of blocks = 2                penalty = 0.300901              penalty = 0.256719              penalty = 0.2190244             penalty = 0.1868646             penalty = 0.1594269             penalty = 0.1360179             penalty = 0.1160461             penalty = 0.09900679                penalty = 0.08446941                penalty = 0.07206659                penalty = 0.0614849             penalty = 0.05245694                penalty = 0.04475457                penalty = 0.03818316                penalty = 0.03257665                penalty = 0.02779335                penalty = 0.02371239                penalty = 0.02023065                penalty = 0.01726014                penalty = 0.0147258             penalty = 0.01256358                penalty = 0.01071884                penalty = 0.009144969               penalty = 0.007802193               penalty = 0.006656581               penalty = 0.005679181               penalty = 0.004845294               penalty = 0.004133849               penalty = 0.003526867               penalty = 0.00300901                number of blocks = 3                penalty = 0.3002468             penalty = 0.2561609             penalty = 0.2185482             penalty = 0.1864583             penalty = 0.1590802             penalty = 0.1357222             penalty = 0.1157938             penalty = 0.09879153                penalty = 0.08428576                penalty = 0.0719099             penalty = 0.06135121                penalty = 0.05234288                penalty = 0.04465727                penalty = 0.03810014                penalty = 0.03250582                penalty = 0.02773292                penalty = 0.02366083                penalty = 0.02018666                penalty = 0.01722261                penalty = 0.01469378                penalty = 0.01253626                penalty = 0.01069553                penalty = 0.009125086               penalty = 0.00778523                penalty = 0.006642108               penalty = 0.005666833               penalty = 0.00483476                penalty = 0.004124861               penalty = 0.003519199               penalty = 0.003002468               number of blocks = 4                penalty = 0.4075854             penalty = 0.3477388             penalty = 0.2966795             penalty = 0.2531174             penalty = 0.2159517             penalty = 0.184243              penalty = 0.1571902             penalty = 0.1341096             penalty = 0.114418              penalty = 0.09761779                penalty = 0.08328436                penalty = 0.07105554                penalty = 0.0606223             penalty = 0.051721              penalty = 0.04412669                penalty = 0.03764747                penalty = 0.03211962                penalty = 0.02740342                penalty = 0.02337972                penalty = 0.01994683                penalty = 0.01701799                penalty = 0.0145192             penalty = 0.01238732                penalty = 0.01056846                penalty = 0.00901667                penalty = 0.007692733               penalty = 0.006563193               penalty = 0.005599505               penalty = 0.004777318               penalty = 0.004075854               number of blocks = 5                penalty = 0.5559088             penalty = 0.4742836             penalty = 0.4046435             penalty = 0.3452288             penalty = 0.2945381             penalty = 0.2512905             penalty = 0.2143929             penalty = 0.1829132             penalty = 0.1560556             penalty = 0.1331416             penalty = 0.1135922             penalty = 0.09691319                penalty = 0.08268322                penalty = 0.07054266                penalty = 0.06018473                penalty = 0.05134768                penalty = 0.04380819                penalty = 0.03737574                penalty = 0.03188778                penalty = 0.02720563                penalty = 0.02321097                penalty = 0.01980285                penalty = 0.01689516                penalty = 0.0144144             penalty = 0.01229791                penalty = 0.01049218                penalty = 0.008951589               penalty = 0.007637208               penalty = 0.00651582                penalty = 0.005559088               number of blocks = 6                penalty = 0.6043144             penalty = 0.5155816             penalty = 0.4398777             penalty = 0.3752895             penalty = 0.3201849             penalty = 0.2731715             penalty = 0.2330611             penalty = 0.1988403             penalty = 0.1696441             penalty = 0.1447349             penalty = 0.1234832             penalty = 0.1053519             penalty = 0.08988283                penalty = 0.07668514                penalty = 0.0654253             penalty = 0.05581876                penalty = 0.04762277                penalty = 0.04063022                penalty = 0.0346644             penalty = 0.02957455                penalty = 0.02523205                penalty = 0.02152718                penalty = 0.0183663             penalty = 0.01566953                penalty = 0.01336874                penalty = 0.01140578                penalty = 0.009731046               penalty = 0.008302215               penalty = 0.007083183               penalty = 0.006043144           
+#>   number of blocks = 2                penalty = 0.300901              penalty = 0.256719              penalty = 0.2190244             penalty = 0.1868646             penalty = 0.1594269             penalty = 0.1360179             penalty = 0.1160461             penalty = 0.09900679                penalty = 0.08446941                penalty = 0.07206659                penalty = 0.0614849             penalty = 0.05245694                penalty = 0.04475457                penalty = 0.03818316                penalty = 0.03257665                penalty = 0.02779335                penalty = 0.02371239                penalty = 0.02023065                penalty = 0.01726014                penalty = 0.0147258             penalty = 0.01256358                penalty = 0.01071884                penalty = 0.009144969               penalty = 0.007802193               penalty = 0.006656581               penalty = 0.005679181               penalty = 0.004845294               penalty = 0.004133849               penalty = 0.003526867               penalty = 0.00300901                number of blocks = 3                penalty = 0.3002468             penalty = 0.2561609             penalty = 0.2185482             penalty = 0.1864583             penalty = 0.1590802             penalty = 0.1357222             penalty = 0.1157938             penalty = 0.09879153                penalty = 0.08428576                penalty = 0.0719099             penalty = 0.06135121                penalty = 0.05234288                penalty = 0.04465727                penalty = 0.03810014                penalty = 0.03250582                penalty = 0.02773292                penalty = 0.02366083                penalty = 0.02018666                penalty = 0.01722261                penalty = 0.01469378                penalty = 0.01253626                penalty = 0.01069553                penalty = 0.009125086               penalty = 0.00778523                penalty = 0.006642108               penalty = 0.005666833               penalty = 0.00483476                penalty = 0.004124861               penalty = 0.003519199               penalty = 0.003002468               number of blocks = 4                penalty = 0.4075854             penalty = 0.3477388             penalty = 0.2966795             penalty = 0.2531174             penalty = 0.2159517             penalty = 0.184243              penalty = 0.1571902             penalty = 0.1341096             penalty = 0.114418              penalty = 0.09761779                penalty = 0.08328436                penalty = 0.07105554                penalty = 0.0606223             penalty = 0.051721              penalty = 0.04412669                penalty = 0.03764747                penalty = 0.03211962                penalty = 0.02740342                penalty = 0.02337972                penalty = 0.01994683                penalty = 0.01701799                penalty = 0.0145192             penalty = 0.01238732                penalty = 0.01056846                penalty = 0.00901667                penalty = 0.007692733               penalty = 0.006563193               penalty = 0.005599505               penalty = 0.004777318               penalty = 0.004075854               number of blocks = 5                penalty = 0.5559088             penalty = 0.4742836             penalty = 0.4046435             penalty = 0.3452288             penalty = 0.2945381             penalty = 0.2512905             penalty = 0.2143929             penalty = 0.1829132             penalty = 0.1560556             penalty = 0.1331416             penalty = 0.1135922             penalty = 0.09691319                penalty = 0.08268322                penalty = 0.07054266                penalty = 0.06018473                penalty = 0.05134768                penalty = 0.04380819                penalty = 0.03737574                penalty = 0.03188778                penalty = 0.02720563                penalty = 0.02321097                penalty = 0.01980285                penalty = 0.01689516                penalty = 0.0144144             penalty = 0.01229791                penalty = 0.01049218                penalty = 0.008951589               penalty = 0.007637208               penalty = 0.00651582                penalty = 0.005559088               number of blocks = 6                penalty = 0.5559028             penalty = 0.4742784             penalty = 0.4046391             penalty = 0.345225              penalty = 0.2945349             penalty = 0.2512877             penalty = 0.2143906             penalty = 0.1829112             penalty = 0.1560539             penalty = 0.1331402             penalty = 0.1135909             penalty = 0.09691213                penalty = 0.08268232                penalty = 0.07054189                penalty = 0.06018408                penalty = 0.05134712                penalty = 0.04380771                penalty = 0.03737533                penalty = 0.03188743                penalty = 0.02720533                penalty = 0.02321071                penalty = 0.01980264                penalty = 0.01689497                penalty = 0.01441425                penalty = 0.01229777                penalty = 0.01049206                penalty = 0.008951491               penalty = 0.007637125               penalty = 0.006515749               penalty = 0.005559028           
 #> DONE
 ```
 
@@ -415,7 +452,7 @@ levels, or fix both the number of clusters and the sparsity level.
 
 my_NB_sparse_3     <- my_NB_sparse_unknown$get_model(3)
 my_NB_sparse_3_0.1 <- my_NB_sparse_unknown$get_model(3, 0.1)
-#> No model with this penalty in the collection. Returning model with closest penalty: 0.0987915298048486 Collection penalty values can be found via $sparsity
+#> No model with this penalty in the collection. Returning model with closest penalty: 0.0987915298048485 Collection penalty values can be found via $sparsity
 ```
 
 ### With zero-inflated data
@@ -450,7 +487,7 @@ The clustering inference may also be harder.
 
 aricode::ARI(my_NB_zi$clustering,
              apply(my_nb_data_zi$parameters$C, 1, which.max))
-#> [1] 0.6931915
+#> [1] 0.7294773
 ```
 
 ## References
