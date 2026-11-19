@@ -79,7 +79,7 @@ ZINormalBlockMeanUnknownClusters <- R6::R6Class(
         B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
         noise_covariance = private$res_covariance,
         fixed_tau = isTRUE(control$fixed_tau),
-        accelerate = !isFALSE(control$acceleration),
+        accelerate = private$use_acceleration(control),
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter

@@ -172,6 +172,12 @@ NormalBlockMeanBase <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    ## SQUAREM by default only for a full Sigma: with a diagonal or spherical
+    ## one the EM is exact and fast, and the acceleration only adds cost.
+    use_acceleration = function(control) {
+      if (is.null(control$acceleration)) private$res_covariance == "full"
+      else isTRUE(control$acceleration)
+    },
     ## heldout_loglik() (NormalBlockBase): mean C B'X_i of the new rows, and
     ## their Gaussian log-likelihoods with precision Omega. Zero-inflated
     ## mean-block models have a diagonal Omega, so each non-zero cell
