@@ -20,7 +20,10 @@
 #'
 #' @param data a [NormalBlockData] object
 #' @param blocks_mean number of clusters for the mean-block stage: an integer,
-#' a vector of integers to explore, or a p x q indicator matrix
+#' a vector of integers to explore, or a p x q indicator matrix. It can also be
+#' a mean-block model or collection already fitted on `data` (by
+#' `normal_block(data, ..., model = "mean")`), in which case the first stage
+#' is not refitted: a collection is reduced to its best model by `crit`.
 #' @param blocks_var idem for the variance-block stage, run on the residuals
 #' @param crit criterion used to pick a model when a range is explored,
 #' "ICL" (the default) or "BIC"
@@ -49,8 +52,12 @@ normal_block_sequential <- function(data, blocks_mean, blocks_var,
 
   pick <- function(fit) if (isNBcollection(fit)) fit$get_best_model(crit) else fit
 
-  fit_mean  <- pick(normal_block(data, blocks_mean, model = "mean",
-                                 zero_inflation = zero_inflation, control = control_mean))
+  fit_mean <- if (is_mean_fit(blocks_mean)) {
+    fitted_mean_stage(blocks_mean, data, zero_inflation, pick)
+  } else {
+    pick(normal_block(data, blocks_mean, model = "mean",
+                      zero_inflation = zero_inflation, control = control_mean))
+  }
   residuals <- data$Y * matrix(data$Y_scale, data$n, data$p, byrow = TRUE) - fitted(fit_mean)
 
   intercept <- matrix(1, data$n, 1, dimnames = list(NULL, "(Intercept)"))
@@ -61,6 +68,28 @@ normal_block_sequential <- function(data, blocks_mean, blocks_var,
 
   structure(list(mean = fit_mean, var = fit_var, residuals = residuals),
             class = "normal_block_sequential")
+}
+
+## A mean-block model or collection handed to normal_block_sequential() as its
+## first stage
+is_mean_fit <- function(x) {
+  inherits(x, "NormalBlockMeanBase") ||
+    (isNBcollection(x) && length(x$models) > 0 && inherits(x$models[[1]], "NormalBlockMeanBase"))
+}
+
+## Checks that an already fitted first stage matches `data` and
+## `zero_inflation`, and reduces a collection to its best model
+fitted_mean_stage <- function(fit, data, zero_inflation, pick) {
+  model <- if (isNBcollection(fit)) fit$models[[1]] else fit
+  raw <- function(d) d$Y * matrix(d$Y_scale, d$n, d$p, byrow = TRUE)
+  stopifnot(
+    "the mean-block fit must have been obtained on `data` (same observations and variables)" =
+      model$data$n == data$n && model$data$p == data$p &&
+      isTRUE(all.equal(raw(model$data), raw(data), check.attributes = FALSE)),
+    "`zero_inflation` must match the mean-block fit" =
+      zero_inflation == grepl("^ZI", class(model)[1])
+  )
+  pick(fit)
 }
 
 #' @title Print a Sequential Mean-then-Variance Fit

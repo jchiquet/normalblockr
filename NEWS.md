@@ -1,5 +1,14 @@
 # normalblockr (development version)
 
+## Sequential fits from an already fitted mean-block model
+
+* `normal_block_sequential()` accepts, as `blocks_mean`, a mean-block model or
+  collection already fitted on the same data: the first stage is then not
+  refitted (a collection is reduced to its best model by `crit`), which
+  avoids fitting the mean-block collection twice when it is also analysed on
+  its own. A fit on other data, or with another zero-inflation setting, is
+  refused.
+
 ## Held-out log-likelihood and cross-validation
 
 * New method `heldout_loglik(newdata)` on every fitted model: the exact
