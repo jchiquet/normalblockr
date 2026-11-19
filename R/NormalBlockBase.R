@@ -373,7 +373,7 @@ NormalBlockBase <- R6::R6Class(
     #' @param edge.color Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.
     #' @param node.labels vector of character. The labels of the nodes. The default will use the column names ot the response matrix.
     #' @param remove.isolated if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.
-    #' @param layout an optional igraph layout. Only relevant for igraph output.
+    #' @param layout an igraph layout function, applied to the absolute values of the edge weights, or a matrix of node coordinates. Only relevant for igraph output.
     #' @param plot logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.
     plot_network = function(type            = c("partial_cor", "support"),
                             output          = c("igraph", "corrplot"),
@@ -410,9 +410,17 @@ NormalBlockBase <- R6::R6Class(
           igraph::E(G)$width <- 15*abs(igraph::E(G)$weight)
 
         if (remove.isolated) {
-          G <- igraph::delete.vertices(G, which(igraph::degree(G) == 0))
+          G <- igraph::delete_vertices(G, which(igraph::degree(G) == 0))
         }
-        if (plot) plot(G, layout = layout)
+        if (plot) {
+          ## force-directed layouts require positive weights
+          if (is.function(layout)) {
+            G_abs <- G
+            igraph::E(G_abs)$weight <- abs(igraph::E(G_abs)$weight)
+            layout <- layout(G_abs)
+          }
+          plot(G, layout = layout)
+        }
       }
       if (output == "corrplot") {
         if (plot) {

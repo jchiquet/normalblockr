@@ -1,5 +1,13 @@
 # normalblockr (development version)
 
+## Network plots with force-directed layouts
+
+* `plot_network()` computes the layout on the absolute values of the edge
+  weights, so that force-directed layouts such as
+  `igraph::layout_with_fr` work with signed partial correlations (they used to
+  fail or to ignore the weights). `layout` may also be a matrix of
+  coordinates.
+
 ## Sequential fits from an already fitted mean-block model
 
 * `normal_block_sequential()` accepts, as `blocks_mean`, a mean-block model or

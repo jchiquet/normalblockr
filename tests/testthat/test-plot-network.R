@@ -1,0 +1,13 @@
+test_that("plot_network() accepts force-directed layouts despite signed edge weights", {
+  set.seed(3)
+  ex    <- generate_normal_block_var_data(n = 100, p = 20, d = 1, q = 4)
+  data  <- NormalBlockData$new(ex$Y, ex$X)
+  model <- normal_block(data, blocks = ex$parameters$C, control = NB_control(verbose = FALSE))
+  pdf(NULL)
+  on.exit(dev.off())
+  expect_true(any(model$latent_network("partial_cor") < 0))
+  expect_no_error(model$plot_network(layout = igraph::layout_with_fr))
+  expect_no_error(model$plot_network(layout = igraph::layout_in_circle, remove.isolated = TRUE))
+  coords <- matrix(rnorm(2 * model$q), model$q, 2)
+  expect_no_error(model$plot_network(layout = coords))
+})

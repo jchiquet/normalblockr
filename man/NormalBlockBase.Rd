@@ -443,7 +443,7 @@ matrix instead of plotting it, use `$latent_network()`.
       \item{\code{edge.color}}{Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.}
       \item{\code{remove.isolated}}{if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.}
       \item{\code{node.labels}}{vector of character. The labels of the nodes. The default will use the column names ot the response matrix.}
-      \item{\code{layout}}{an optional igraph layout. Only relevant for igraph output.}
+      \item{\code{layout}}{an igraph layout function, applied to the absolute values of the edge weights, or a matrix of node coordinates. Only relevant for igraph output.}
       \item{\code{plot}}{logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.}
     }
     \if{html}{\out{</div>}}
