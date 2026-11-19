@@ -140,9 +140,10 @@ normal_block <- function(data,
 #' `collection$refine()` later if needed.
 #' @param acceleration whether the (V)EM is accelerated by SQUAREM
 #' (Varadhan & Roland, 2008), an extrapolation built on two successive (V)EM
-#' steps and accepted only if it does not lower the objective. Default `TRUE`;
-#' it is never attempted when `sparsity > 0`. Set to `FALSE` to run plain
-#' (V)EM, e.g. to measure what the acceleration buys.
+#' steps and accepted only if it does not lower the objective. Default `NULL`:
+#' on, except for mean-block models with a diagonal or spherical Sigma, whose
+#' EM is exact and fast. `TRUE` or `FALSE` forces it. Never used when
+#' `sparsity > 0`.
 #' @return A named list of parameters to pass to [normal_block()]'s `control`
 #' argument.
 #' @export
@@ -160,7 +161,7 @@ NB_control <- function(
     heuristic            = FALSE,
     noise_covariance     = NULL,
     refine               = TRUE,
-    acceleration         = TRUE) {
+    acceleration         = NULL) {
 
   if (!is.null(sparsity_weights))
     stopifnot(all(is.matrix(sparsity_weights), isSymmetric(sparsity_weights)))
