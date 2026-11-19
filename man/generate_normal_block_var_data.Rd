@@ -56,3 +56,8 @@ A named list with the following element
 \description{
 A function to draw data from the normal block model (see details). The function returns both the generated data and the corresponding model parameters, in a list.
 }
+\examples{
+ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+dim(ex$Y)
+colSums(ex$parameters$C) # sizes of the clusters
+}

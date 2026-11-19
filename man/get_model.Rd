@@ -34,3 +34,10 @@ see [normal_block()]}
 Creates the appropriate normal-block model (or collection of models)
 depending on the parametrization.
 }
+\examples{
+ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+## the model is created but not fitted, unlike with normal_block()
+model <- get_model(data, blocks = 3, control = NB_control(verbose = FALSE))
+class(model)
+}

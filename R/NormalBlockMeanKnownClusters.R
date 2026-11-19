@@ -54,18 +54,19 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
 
 
     B_estimator = function(Omega = private$Omega){
-      return(self$data$XtXm1 %*% self$data$XtY %*% Omega %*% private$C %*% solve(t(private$C) %*% Omega %*% private$C))
+      OC <- Omega %*% private$C
+      return(t(solve(crossprod(private$C, OC), t(self$data$XtXm1 %*% self$data$XtY %*% OC))))
     },
 
     Sigma_estimator = function(B = private$B){
-      R     <- self$data$Y - self$data$X %*% B %*% t(private$C)
+      R     <- self$data$Y - tcrossprod(self$data$X %*% B, private$C)
       Sigma <- crossprod(R) / self$n
       return(Sigma)
     },
 
     compute_loglik = function(B = private$B, Omega = private$Omega){
       log_det_Omega <- as.numeric(determinant(Omega, logarithm = TRUE)$modulus)
-      R <- self$data$Y - self$data$X %*% B %*% t(private$C)
+      R <- self$data$Y - tcrossprod(self$data$X %*% B, private$C)
       l <- - self$n * self$p * log(2 * pi) / 2 + self$n * log_det_Omega / 2 - sum((R %*% Omega) * R) / 2
       ## penalized objective (see the C++ core): $loglik adds the penalty back
       if (self$sparsity > 0) l <- l - self$sparsity * sum(abs(self$sparsity_weights * Omega))
@@ -131,7 +132,7 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
       ## mean-block model: mu_i = C B' X_i, i.e. X B C' in matrix form
-      private$rescale_to_original(self$data$X %*% private$B %*% t(private$C))
+      private$rescale_to_original(tcrossprod(self$data$X %*% private$B, private$C))
     },
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()

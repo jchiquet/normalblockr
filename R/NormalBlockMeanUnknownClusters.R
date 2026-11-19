@@ -67,7 +67,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
     B_estimator = function(Omega = private$Omega,
                            tau = private$C,
                            Psi = private$Psi){
-      return(self$data$XtXm1 %*% self$data$XtY %*% Omega %*% tau %*% solve(Psi))
+      return(t(solve(Psi, t(self$data$XtXm1 %*% self$data$XtY %*% Omega %*% tau))))
     },
 
     Lambda_estimator = function(B = private$B,
@@ -79,7 +79,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
     diag_val1 <- as.vector(tau %*% diag_M)
     term1 <- diag(diag_val1, nrow = self$data$p, ncol = self$data$p)
 
-    diag_val2 <- diag(tau %*% M %*% t(tau))
+    diag_val2 <- rowSums((tau %*% M) * tau)
     term2 <- diag(diag_val2, nrow = self$data$p, ncol = self$data$p)
 
     return((term1 - term2) / self$data$n)
@@ -88,7 +88,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
     Sigma_estimator = function(Omega = private$Omega, B = private$B,
                                tau = private$C, Lambda = private$Lambda){
 
-      R_bar <- self$data$Y - self$data$X %*% B %*% t(tau)
+      R_bar <- self$data$Y - tcrossprod(self$data$X %*% B, tau)
 
       Sigma <- (crossprod(R_bar) / self$data$n) + Lambda
       return(Sigma)
@@ -247,7 +247,7 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function(){
       ## mean-block model: mu_i = C B' X_i, i.e. X B C' in matrix form
-      private$rescale_to_original(self$data$X %*% private$B %*% t(private$C))
+      private$rescale_to_original(tcrossprod(self$data$X %*% private$B, private$C))
     },
     #' @field var_par a list with the variational parameter: tau (posterior group probabilities)
     var_par    = function() list(tau = private$C),

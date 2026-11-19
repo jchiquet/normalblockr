@@ -14,7 +14,8 @@ class NormalBlockMeanKnownClusters : public NormalBlockMeanBase {
   // B = (X'X)^-1 X'Y Omega C (C' Omega C)^-1, then Sigma from the residuals.
   void M_step() override {
     arma::mat CtOC = (C_.t() * Omega_) * C_;
-    B_ = (((data_.XtXm1 * data_.XtY) * Omega_) * C_) * arma::inv(CtOC);
+    B_ = arma::solve(CtOC, (((data_.XtXm1 * data_.XtY) * Omega_) * C_).t(),
+                     arma::solve_opts::likely_sympd).t();
     arma::mat R = data_.Y - (data_.X * B_) * C_.t();
     Omega_ = omega_from_residuals(R, arma::vec());
   }

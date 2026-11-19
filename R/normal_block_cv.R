@@ -95,6 +95,12 @@ normal_block_cv <- function(data, blocks, model = c("var", "mean"), zero_inflati
 #' @param x an object of class `normal_block_cv`, from [normal_block_cv()]
 #' @param ... not used, only here for S3 compatibility
 #' @return Invisibly returns `x`.
+#' @examples
+#' ex   <- generate_normal_block_var_data(n = 60, p = 15, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex$Y, ex$X)
+#' set.seed(1)
+#' cv <- normal_block_cv(data, blocks = 2:4, folds = 3)
+#' print(cv)
 #' @export
 print.normal_block_cv <- function(x, ...) {
   cat("Cross-validated log-likelihood,", length(unique(attr(x, "folds"))), "folds",
@@ -111,6 +117,12 @@ print.normal_block_cv <- function(x, ...) {
 #' @param x an object of class `normal_block_cv`, from [normal_block_cv()]
 #' @param ... not used, only here for S3 compatibility
 #' @return a [`ggplot2::ggplot`] graph
+#' @examples
+#' ex   <- generate_normal_block_var_data(n = 60, p = 15, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex$Y, ex$X)
+#' set.seed(1)
+#' cv <- normal_block_cv(data, blocks = 2:4, folds = 3)
+#' plot(cv)
 #' @export
 plot.normal_block_cv <- function(x, ...) {
   d <- as.data.frame(unclass(x))

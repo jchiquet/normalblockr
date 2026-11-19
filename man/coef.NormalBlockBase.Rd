@@ -22,3 +22,9 @@ mean-block models, one column per cluster, on the scale of the fit (the
 original one by default), since a profile is shared by variables of
 different scales.
 }
+\examples{
+ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+coef(model)[, 1:5]
+}

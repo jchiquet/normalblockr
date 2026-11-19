@@ -1,5 +1,15 @@
 # normalblockr (development version)
 
+## Examples and linear algebra
+
+* Examples for `coef()`, `sigma()`, `fitted()`, `predict()`, `isNB()`,
+  `NB_control()`, `get_model()`, the two data generators, and the print,
+  plot and summary methods that lacked them.
+* The update of the cluster profiles of the mean-block models solves a
+  linear system with a symmetric positive definite matrix instead of
+  inverting it, and products with a transposed matrix use `crossprod()` and
+  `tcrossprod()`. Results are unchanged.
+
 ## Named extractors
 
 * `coef()`, `sigma()`, `fitted()` and `predict()` keep the names of the

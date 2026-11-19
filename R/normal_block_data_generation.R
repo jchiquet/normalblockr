@@ -133,6 +133,10 @@ generate_normal_block_var_param <- function(X = matrix(rnorm(100*p), 100, p),
 #'    - Sigma: covariance matrix of the groups
 #'    - kappa: vector of ZI inflation probabilities (one per variable)
 #'
+#' @examples
+#' ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' dim(ex$Y)
+#' colSums(ex$parameters$C) # sizes of the clusters
 #' @importFrom igraph sample_pa sample_sbm sample_gnp as_adjacency_matrix
 #' @importFrom stats rbinom rmultinom rnorm runif var
 #' @export
@@ -184,7 +188,7 @@ generate_normal_block_mean_param <- function(X = matrix(rnorm(100*p), 100, p),
   C     <- generate_blocks(p, q, alpha)
 
   # Signal
-  signal <- X %*% B %*% t(C)
+  signal <- tcrossprod(X %*% B, C)
   signal_norm_sq <- sum(signal^2)
 
   # SNR = ||signal||_F^2 / E[||noise||_F^2] with E[||noise||_F^2] = n * trace(Sigma)
@@ -229,6 +233,10 @@ generate_normal_block_mean_param <- function(X = matrix(rnorm(100*p), 100, p),
 #'    - Sigma: covariance matrix of the variables
 #'    - kappa: vector of ZI inflation probabilities (one per variable)
 #'
+#' @examples
+#' ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 2, q = 3)
+#' dim(ex$Y)
+#' ex$parameters$B # one regression profile per cluster
 #' @importFrom igraph sample_pa sample_sbm sample_gnp as_adjacency_matrix
 #' @importFrom stats rbinom rmultinom rnorm runif var
 #' @export
@@ -248,7 +256,7 @@ generate_normal_block_mean_data <-
     param <- generate_normal_block_mean_param(X, p, q, kappa, omega_structure,
                                               alpha, SNR, u_v)
 
-    Y <- X %*% param$B %*% t(param$C) + MASS::mvrnorm(n, rep(0, p), param$Sigma)
+    Y <- tcrossprod(X %*% param$B, param$C) + MASS::mvrnorm(n, rep(0, p), param$Sigma)
 
     if(any(param$kappa > 0)) {
       zero_location <- matrix(rbinom(n * p,  1, rep(param$kappa, each = n)), n, p)

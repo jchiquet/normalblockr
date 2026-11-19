@@ -86,7 +86,7 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function() {
       private$rescale_to_original(
-        (self$data$X %*% private$B %*% t(private$C)) * self$data$zeros_bar)
+        tcrossprod(self$data$X %*% private$B, private$C) * self$data$zeros_bar)
     },
     #' @field model_par a list with model parameters: B, Omega and kappa (zero-inflation probabilities)
     model_par = function() c(super$model_par, list(kappa = private$kappa)),

@@ -52,3 +52,8 @@ A named list with the following element
 \description{
 A function to draw data from the normal block model (see details). The function returns both the generated data and the corresponding model parameters, in a list.
 }
+\examples{
+ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 2, q = 3)
+dim(ex$Y)
+ex$parameters$B # one regression profile per cluster
+}

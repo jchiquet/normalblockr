@@ -51,7 +51,8 @@ class NormalBlockMeanUnknownClusters : public NormalBlockMeanBase {
 
   void M_step() override {
     Psi_ = psi_from(Omega_, tau_);
-    B_   = ((((data_.XtXm1 * data_.XtY) * Omega_) * tau_) * arma::inv(Psi_));
+    B_   = arma::solve(Psi_, (((data_.XtXm1 * data_.XtY) * Omega_) * tau_).t(),
+                       arma::solve_opts::likely_sympd).t();
     lambda_ = lambda_from(B_, tau_);
 
     arma::mat R_bar = data_.Y - (data_.X * B_) * tau_.t();

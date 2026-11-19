@@ -20,3 +20,9 @@ A n*p prediction matrix for new observations
 Predicts the mean of the observations Y for new covariates X:
 B' X for the variance-block models, C B' X for the mean-block models.
 }
+\examples{
+ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+predict(model, ex_data$X[1:3, , drop = FALSE])[, 1:5]
+}

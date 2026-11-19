@@ -9,6 +9,11 @@
 #' normal-block model (variance-block or mean-block family).
 #' @param object An R object.
 #' @return A boolean telling whether object inherits from the NormalBlockBase class.
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+#' isNB(model)
 #' @export
 isNB <- function(object) {inherits(object, "NormalBlockBase")}
 
@@ -22,6 +27,11 @@ isNB <- function(object) {inherits(object, "NormalBlockBase")}
 #' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return A d x p (variance-block) or d x q (mean-block) matrix.
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+#' coef(model)[, 1:5]
 #' @export
 coef.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
@@ -43,6 +53,11 @@ coef.NormalBlockBase <- function(object, ...){
 #' @param ... not used, only here for S3 compatibility
 #' @return The covariance matrix, of size q x q or p x p depending on the model.
 #' @importFrom stats sigma
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+#' sigma(model)
 #' @export
 sigma.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
@@ -56,6 +71,11 @@ sigma.NormalBlockBase <- function(object, ...){
 #' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return A matrix of fitted values extracted from the object.
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+#' head(fitted(model)[, 1:5])
 #' @export
 fitted.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
@@ -70,6 +90,11 @@ fitted.NormalBlockBase <- function(object, ...){
 #' @param new_X New set of covariates.
 #' @param ... not used, only here for S3 compatibility
 #' @return A n*p prediction matrix for new observations
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+#' predict(model, ex_data$X[1:3, , drop = FALSE])[, 1:5]
 #' @export
 predict.NormalBlockBase <- function(object, new_X, ...){
   stopifnot(isNB(object))
@@ -173,6 +198,11 @@ summary.NormalBlockBase <- function(object, ...) {
 #' @param x An object of class `summary.NormalBlockBase`.
 #' @param ... not used, only here for S3 compatibility
 #' @return Invisibly returns `x`.
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+#' print(summary(model))
 #' @export
 print.summary.NormalBlockBase <- function(x, ...) {
   cat(paste0("A ", x$who_am_I, ".\n"))
