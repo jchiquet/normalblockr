@@ -174,7 +174,7 @@ NormalBlockMeanBase <- R6::R6Class(
   private = list(
     ## SQUAREM by default only for a full Sigma: with a diagonal or spherical
     ## one, the EM is exact and converges in a few dozen iterations, and the
-    ## rejected extrapolations only add cost (1.3 to 2 times the time, the
+    ## rejected extrapolations only add cost (1.1 to 2.2 times the time, the
     ## same iterations; experiments/complexity.R of the JSS article). An
     ## explicit NB_control(acceleration = TRUE/FALSE) is always honoured.
     use_acceleration = function(control) {
