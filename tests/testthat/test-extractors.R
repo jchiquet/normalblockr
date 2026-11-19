@@ -39,3 +39,10 @@ test_that("print() and summary() end the model type with a period, without a spa
   expect_false(any(grepl(" \\.$", capture.output(print(m)))))
   expect_false(any(grepl(" \\.$", capture.output(print(summary(m))))))
 })
+
+test_that("coef() of a variance-block model is on the original scale of Y", {
+  Y <- ex_var$Y * matrix(c(1, 10), nrow(ex_var$Y), ncol(ex_var$Y), byrow = TRUE)
+  data <- NormalBlockData$new(Y, ex_var$X, scale = TRUE)
+  m <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+  expect_equal(predict(m, ex_var$X), ex_var$X %*% coef(m), ignore_attr = TRUE)
+})

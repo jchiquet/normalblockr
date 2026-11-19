@@ -6,6 +6,10 @@
   covariates and of the variables, and name the clusters `Cluster_1`, ...
   (as in the network plots), so that results can be indexed by name, e.g.
   `coef(model)[, "ERBB2"]`.
+* `coef()` of a variance-block model returns B on the original scale of Y.
+  It returned it on the rescaled scale of the fit (the default for this
+  family), unlike `fitted()` and `predict()`. The cluster profiles of a
+  mean-block model stay on the scale of the fit, the original one by default.
 * The help page of `predict()` covers both families.
 * `print()` and `summary()` no longer leave a space before the final period.
 

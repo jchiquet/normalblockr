@@ -13,15 +13,25 @@
 isNB <- function(object) {inherits(object, "NormalBlockBase")}
 
 #' @title Extract Model Coefficients
-#' @description Extract coefficients from a normal-block model.
+#' @description Extract the regression coefficients B of a normal-block model.
+#' For the variance-block models, one column per variable, on the original
+#' scale of Y even when the variables were rescaled for the fit. For the
+#' mean-block models, one column per cluster, on the scale of the fit (the
+#' original one by default), since a profile is shared by variables of
+#' different scales.
 #' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
-#' @return A matrix of coefficients extracted from the model.
+#' @return A d x p (variance-block) or d x q (mean-block) matrix.
 #' @export
 coef.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
   B <- object$model_par$B
-  cols <- if (inherits(object, "NormalBlockVarBase")) colnames(object$data$Y) else cluster_names(ncol(B))
+  if (inherits(object, "NormalBlockVarBase")) {
+    B <- B * matrix(object$data$Y_scale, nrow(B), ncol(B), byrow = TRUE)
+    cols <- colnames(object$data$Y)
+  } else {
+    cols <- cluster_names(ncol(B))
+  }
   with_dimnames(B, colnames(object$data$X), cols)
 }
 
