@@ -38,7 +38,7 @@ clip_probabilities <- function(x, zero = .Machine$double.eps) {
 ensure_pd <- function(M, floor = 1e-6) {
   M <- (M + t(M)) / 2
   eig <- eigen(M, symmetric = TRUE)
-  eig$vectors %*% diag(pmax(eig$values, floor), nrow(M)) %*% t(eig$vectors)
+  tcrossprod(eig$vectors * rep(pmax(eig$values, floor), each = nrow(M)), eig$vectors)
 }
 
 # Graphical-lasso estimate of a precision matrix from its covariance estimate,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockMeanCollectionClusters.R
 \name{NormalBlockMeanCollectionClusters}
 \alias{NormalBlockMeanCollectionClusters}
-\title{Collection of Mean-Block Models over a Range of Cluster Counts}
+\title{Collection of Normal-Block-Mean Models over a Range of Cluster Counts}
 \description{
 R6 class for a collection of mean-block models ([NormalBlockMeanBase])
 with different numbers of clusters (q). Inherits its scaffolding

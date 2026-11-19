@@ -2,7 +2,7 @@
 ##  CLASS ZINormalBlockMeanUnknownClusters #############
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Zero-Inflated Mean-Block Model with Unknown Clustering
+#' Zero-Inflated Normal-Block-Mean Model with Unknown Clustering
 #'
 #' R6 class for a zero-inflated Normal-Block-Mean model with a fixed number of
 #' clusters (but unknown clustering), inferred by variational EM. Sigma is
@@ -95,7 +95,7 @@ ZINormalBlockMeanUnknownClusters <- R6::R6Class(
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function() {
       private$rescale_to_original(
-        (self$data$X %*% private$B %*% t(private$C)) * self$data$zeros_bar)
+        tcrossprod(self$data$X %*% private$B, private$C) * self$data$zeros_bar)
     },
     #' @field var_par a list with the variational parameter: tau (posterior group probabilities)
     var_par = function() list(tau = private$C),

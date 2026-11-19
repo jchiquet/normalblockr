@@ -3,7 +3,7 @@
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#' Collection of Normal-Block Models over a Sparsity Path
+#' Collection of Normal-Block-Var Models over a Sparsity Path
 #'
 #' R6 class for a collection of normal-block models with a fixed clustering
 #' (blocks) and different sparsity levels.

@@ -2,7 +2,7 @@
 ##  CLASS ZINormalBlockMeanKnownClusters ###############
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Zero-Inflated Mean-Block Model with Known Clustering
+#' Zero-Inflated Normal-Block-Mean Model with Known Clustering
 #'
 #' R6 class for a zero-inflated Normal-Block-Mean model with a known
 #' clustering. Sigma is diagonal or spherical here. See
@@ -86,7 +86,7 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
     #' @field fitted Y values predicted by the model, in Y's original units
     fitted = function() {
       private$rescale_to_original(
-        (self$data$X %*% private$B %*% t(private$C)) * self$data$zeros_bar)
+        tcrossprod(self$data$X %*% private$B, private$C) * self$data$zeros_bar)
     },
     #' @field model_par a list with model parameters: B, Omega and kappa (zero-inflation probabilities)
     model_par = function() c(super$model_par, list(kappa = private$kappa)),

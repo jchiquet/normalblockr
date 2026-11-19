@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockVarBase ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Base Class for Variance-Block Models
+#' Base Class for Normal-Block-Var Models
 #'
 #' R6 abstract class for the sparse Normal-Block models, where the clustering
 #' structures the latent covariance.
@@ -345,7 +345,7 @@ NormalBlockVarBase <- R6::R6Class(
     },
 
     heuristic_Sigmaq_from_Sigma = function(Sigma){
-      Sigma_q <- (t(private$C) %*% Sigma %*% private$C) / outer(colSums(private$C), colSums(private$C))
+      Sigma_q <- crossprod(private$C, Sigma %*% private$C) / outer(colSums(private$C), colSums(private$C))
       ## NA when a cluster is empty (colSums(C) == 0 there -> division by 0)
       if (anyNA(Sigma_q)) {
         diag(Sigma_q)[is.na(diag(Sigma_q))] <- mean(diag(Sigma_q)[!is.na(diag(Sigma_q))])

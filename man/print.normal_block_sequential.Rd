@@ -18,3 +18,9 @@ Invisibly returns `x`.
 Reports both stages and, when \pkg{aricode} is available, how
 related the two partitions are.
 }
+\examples{
+ex   <- generate_normal_block_mean_data(n = 80, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+fit  <- normal_block_sequential(data, blocks_mean = 3, blocks_var = 2)
+print(fit)
+}

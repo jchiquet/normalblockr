@@ -17,3 +17,9 @@ Invisibly returns `x`.
 \description{
 Print method for objects returned by [summary.NormalBlockBase()].
 }
+\examples{
+ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
+print(summary(model))
+}

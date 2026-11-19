@@ -1,4 +1,4 @@
-#' Normal-block model
+#' Fit Normal-Block Models
 #'
 #' Fit a normal-block model with a variational or heuristic algorithm
 #' @param data NormalBlockData object, contains the matrix of responses (Y, n x p) and the design matrix (X, n x d), must be created with NormalBlockData$new.
@@ -79,7 +79,7 @@ normal_block <- function(data,
   fit
 }
 
-#' NB_control
+#' Control Parameters for Normal-Block Models
 #'
 #' Control the model settings and various optimization parameters
 #'
@@ -133,6 +133,13 @@ normal_block <- function(data,
 #' `sparsity > 0`.
 #' @return A named list of parameters to pass to [normal_block()]'s `control`
 #' argument.
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' ## silent fits, without the split and merge search
+#' ctrl <- NB_control(verbose = FALSE, refine = FALSE)
+#' collection <- normal_block(data, blocks = 2:4, control = ctrl)
+#' collection$criteria
 #' @export
 NB_control <- function(
     niter                = 500,
@@ -192,6 +199,12 @@ NB_control <- function(
 #' @param control a list-like structure for detailed control on parameters should be
 #' generated with NB_control() for collections of sparse models
 #' @param data contains the matrix of responses (Y) and the design matrix (X).
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' ## the model is created but not fitted, unlike with normal_block()
+#' model <- get_model(data, blocks = 3, control = NB_control(verbose = FALSE))
+#' class(model)
 #' @export
 get_model <- function(data,
                       blocks,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockVarBase.R
 \name{NormalBlockVarBase}
 \alias{NormalBlockVarBase}
-\title{Base Class for Variance-Block Models}
+\title{Base Class for Normal-Block-Var Models}
 \description{
 R6 abstract class for the sparse Normal-Block models, where the clustering
 structures the latent covariance.

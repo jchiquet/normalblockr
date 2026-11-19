@@ -3,7 +3,7 @@
 \docType{data}
 \name{brca_rppa}
 \alias{brca_rppa}
-\title{Breast cancer proteomics data (TCGA, RPPA)}
+\title{Breast Cancer Proteomics Data (TCGA, RPPA)}
 \format{
 A list with 3 elements:
 \describe{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/normal_block_sequential.R
 \name{normal_block_sequential}
 \alias{normal_block_sequential}
-\title{Cluster variables in the mean, then in the residual covariance}
+\title{Cluster Variables in the Mean, then in the Residual Covariance}
 \usage{
 normal_block_sequential(
   data,

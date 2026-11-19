@@ -2,7 +2,7 @@
 % Please edit documentation in R/ZINormalBlockMeanKnownClusters.R
 \name{ZINormalBlockMeanKnownClusters}
 \alias{ZINormalBlockMeanKnownClusters}
-\title{Zero-Inflated Mean-Block Model with Known Clustering}
+\title{Zero-Inflated Normal-Block-Mean Model with Known Clustering}
 \description{
 R6 class for a zero-inflated Normal-Block-Mean model with a known
 clustering. Sigma is diagonal or spherical here. See

@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockMeanBase ##########################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Base Class for Mean-Block Models
+#' Base Class for Normal-Block-Mean Models
 #'
 #' R6 abstract class for the Normal-Block models where the clustering
 #' structures the mean (mu_i = C B' X_i).
@@ -76,7 +76,7 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @param new_X new set of covariates.
     #' @return A n*p prediction matrix for new observations
     predict = function(new_X) {
-      private$rescale_to_original(new_X %*% private$B %*% t(private$C))
+      private$rescale_to_original(tcrossprod(new_X %*% private$B, private$C))
     },
 
     #' @description Seed this model's starting parameters from another,
@@ -177,12 +177,12 @@ NormalBlockMeanBase <- R6::R6Class(
     ## their Gaussian log-likelihoods with precision Omega. Zero-inflated
     ## mean-block models have a diagonal Omega, so each non-zero cell
     ## contributes independently.
-    heldout_mean = function(X, C) X %*% private$B %*% t(C),
+    heldout_mean = function(X, C) tcrossprod(X %*% private$B, C),
     heldout_rows = function(R, C, observed) {
       Omega <- private$Omega
       if (is.null(observed)) {
         cO <- chol(Omega)
-        quad <- rowSums((R %*% t(cO))^2)
+        quad <- rowSums(tcrossprod(R, cO)^2)
         return(-0.5 * (ncol(R) * log(2 * pi) - 2 * sum(log(diag(cO))) + quad))
       }
       w <- matrix(diag(Omega), nrow(R), ncol(R), byrow = TRUE)

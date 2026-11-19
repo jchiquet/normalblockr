@@ -2,7 +2,7 @@
 ##  SEQUENTIAL MEAN-THEN-VARIANCE FIT ##################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Cluster variables in the mean, then in the residual covariance
+#' Cluster Variables in the Mean, then in the Residual Covariance
 #'
 #' Fits the two model families one after the other: a mean-block model
 #' ([NormalBlockMeanBase]) groups the variables by how they respond to the
@@ -96,6 +96,11 @@ fitted_mean_stage <- function(fit, data, zero_inflation, pick) {
 #' @param x an object of class `normal_block_sequential`
 #' @param ... not used, only here for S3 compatibility
 #' @return Invisibly returns `x`.
+#' @examples
+#' ex   <- generate_normal_block_mean_data(n = 80, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex$Y, ex$X)
+#' fit  <- normal_block_sequential(data, blocks_mean = 3, blocks_var = 2)
+#' print(fit)
 #' @export
 print.normal_block_sequential <- function(x, ...) {
   cat("A sequential mean-then-variance normal-block fit\n")

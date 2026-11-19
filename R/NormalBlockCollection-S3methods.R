@@ -87,6 +87,11 @@ summary.NormalBlockCollection <- function(object, ...) {
 #' @param x An object of class `summary.NormalBlockCollection`.
 #' @param ... not used, only here for S3 compatibility
 #' @return Invisibly returns `x`.
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' collection <- normal_block(data, blocks = 2:4, control = NB_control(verbose = FALSE))
+#' print(summary(collection))
 #' @export
 print.summary.NormalBlockCollection <- function(x, ...) {
   cat("A", x$who_am_I, "\n")

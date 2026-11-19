@@ -2,7 +2,7 @@
 % Please edit documentation in R/normal_block_cv.R
 \name{normal_block_cv}
 \alias{normal_block_cv}
-\title{Cross-validated log-likelihood of normal-block models}
+\title{Cross-Validated Log-Likelihood of Normal-Block Models}
 \usage{
 normal_block_cv(
   data,

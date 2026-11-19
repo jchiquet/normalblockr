@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockVarUnknownClusters ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Normal-Block Model with Unknown Clustering
+#' Normal-Block-Var Model with Unknown Clustering
 #'
 #' R6 class for a normal-block model with a fixed number of clusters (but
 #' unknown clustering).
