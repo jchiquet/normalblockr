@@ -1,5 +1,14 @@
 # normalblockr (development version)
 
+## Named extractors
+
+* `coef()`, `sigma()`, `fitted()` and `predict()` keep the names of the
+  covariates and of the variables, and name the clusters `Cluster_1`, ...
+  (as in the network plots), so that results can be indexed by name, e.g.
+  `coef(model)[, "ERBB2"]`.
+* The help page of `predict()` covers both families.
+* `print()` and `summary()` no longer leave a space before the final period.
+
 ## Network plots with force-directed layouts
 
 * `plot_network()` computes the layout without the edge weights, so that

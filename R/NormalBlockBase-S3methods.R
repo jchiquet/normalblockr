@@ -20,7 +20,9 @@ isNB <- function(object) {inherits(object, "NormalBlockBase")}
 #' @export
 coef.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
-  object$model_par$B
+  B <- object$model_par$B
+  cols <- if (inherits(object, "NormalBlockVarBase")) colnames(object$data$Y) else cluster_names(ncol(B))
+  with_dimnames(B, colnames(object$data$X), cols)
 }
 
 #' @title Extract the Covariance Matrix
@@ -34,7 +36,9 @@ coef.NormalBlockBase <- function(object, ...){
 #' @export
 sigma.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
-  chol2inv(chol(object$model_par$Omega))
+  S <- chol2inv(chol(object$model_par$Omega))
+  nodes <- if (inherits(object, "NormalBlockVarBase")) cluster_names(ncol(S)) else colnames(object$data$Y)
+  with_dimnames(S, nodes, nodes)
 }
 
 #' @title Extract Fitted Values
@@ -45,22 +49,21 @@ sigma.NormalBlockBase <- function(object, ...){
 #' @export
 fitted.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
-  object$fitted
+  with_dimnames(object$fitted, rownames(object$data$Y), colnames(object$data$Y))
 }
 
 
-#' @title Predict Method for Variance-Block Models
-#' @description Predicts observations Y for new covariates X. Specific to the
-#' variance-block family: the mean-block models have their own formula
-#' (mu = C B' X).
-#' @param object An object of class NormalBlockVarBase.
+#' @title Predict Method for Normal-Block Models
+#' @description Predicts the mean of the observations Y for new covariates X:
+#' B' X for the variance-block models, C B' X for the mean-block models.
+#' @param object An object of class NormalBlockBase.
 #' @param new_X New set of covariates.
 #' @param ... not used, only here for S3 compatibility
 #' @return A n*p prediction matrix for new observations
 #' @export
 predict.NormalBlockBase <- function(object, new_X, ...){
   stopifnot(isNB(object))
-  object$predict(new_X)
+  with_dimnames(object$predict(new_X), rownames(new_X), colnames(object$data$Y))
 }
 
 #' @title Extract Log-Likelihood of a Normal-Block Model
@@ -162,7 +165,7 @@ summary.NormalBlockBase <- function(object, ...) {
 #' @return Invisibly returns `x`.
 #' @export
 print.summary.NormalBlockBase <- function(x, ...) {
-  cat("A", x$who_am_I, ".\n")
+  cat(paste0("A ", x$who_am_I, ".\n"))
   cat("===========================================================================\n")
   print(as.data.frame(round(x$criteria, digits = 3), row.names = ""))
   cat("===========================================================================\n")
@@ -191,4 +194,15 @@ plot.NormalBlockBase <- function(x, ...) {
   p <- x$plot()
   print(p)
   invisible(p)
+}
+
+## names of the clusters, as in the network plots
+cluster_names <- function(q) paste0("Cluster_", seq_len(q))
+
+## names the dimensions of a matrix when they match its size
+with_dimnames <- function(M, rows = NULL, cols = NULL) {
+  M <- as.matrix(M)
+  if (length(rows) == nrow(M)) rownames(M) <- rows
+  if (length(cols) == ncol(M)) colnames(M) <- cols
+  M
 }
