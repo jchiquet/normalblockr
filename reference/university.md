@@ -78,9 +78,9 @@ out <- normal_block(nb_data, 2:15)
      number of blocks = 14           
      number of blocks = 15           
 
-#> Warning: diagonal normal-block-var model with 15 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000309, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
-#> Warning: diagonal normal-block-var model with 13 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000597, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
-#> Warning: diagonal normal-block-var model with 11 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000388, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+#> Warning: diagonal normal-block-var model with 14 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000378, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+#> Warning: diagonal normal-block-var model with 11 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000515, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+#> Warning: diagonal normal-block-var model with 10 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000304, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
 #>   refine(): improved 14 of 14 models
 #> 
 #> DONE

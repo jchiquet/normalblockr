@@ -2,6 +2,13 @@
 
 ## normalblockr (development version)
 
+### Printing
+
+- [`summary()`](https://rdrr.io/r/base/summary.html) of a model and
+  [`print()`](https://rdrr.io/r/base/print.html) of a sequential fit
+  wrap their long lines (cluster sizes, description of each stage) at
+  the console width.
+
 ### Examples and linear algebra
 
 - Examples for [`coef()`](https://rdrr.io/r/stats/coef.html),

@@ -81,9 +81,11 @@ fit  <- normal_block_sequential(data, blocks_mean = 3, blocks_var = 2)
 fit
 #> A sequential mean-then-variance normal-block fit
 #> ===========================================================================
-#>   mean-block stage    : 3 clusters -- diagonal normal-block-mean model with 3 unknown blocks 
-#>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2 unknown blocks 
-#>   ARI between the two partitions: -0.063 
+#>   mean-block stage    : 3 clusters -- diagonal normal-block-mean model with 3
+#>                         unknown blocks
+#>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2
+#>                         unknown blocks
+#>   ARI between the two partitions: -0.018 
 #>   (near 0 means the two structures are unrelated, as is usual)
 #> ===========================================================================
 #> * Useful fields

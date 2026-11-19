@@ -43,6 +43,11 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="printing-development-version">Printing<a class="anchor" aria-label="anchor" href="#printing-development-version"></a></h3>
+<ul><li>
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of a model and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of a sequential fit wrap their long lines (cluster sizes, description of each stage) at the console width.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="examples-and-linear-algebra-development-version">Examples and linear algebra<a class="anchor" aria-label="anchor" href="#examples-and-linear-algebra-development-version"></a></h3>
 <ul><li>Examples for <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="https://rdrr.io/r/stats/sigma.html" class="external-link">sigma()</a></code>, <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, <code><a href="../reference/isNB.html">isNB()</a></code>, <code><a href="../reference/NB_control.html">NB_control()</a></code>, <code><a href="../reference/get_model.html">get_model()</a></code>, the two data generators, and the print, plot and summary methods that lacked them.</li>
 <li>The update of the cluster profiles of the mean-block models solves a linear system with a symmetric positive definite matrix instead of inverting it, and products with a transposed matrix use <code><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">crossprod()</a></code> and <code><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">tcrossprod()</a></code>. Results are unchanged.</li>

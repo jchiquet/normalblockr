@@ -35,6 +35,6 @@ print(summary(model))
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
 #>        48 3       3        0 -415.005   830.01 1015.954 1015.954 1022.546    10
 #> ===========================================================================
-#> * Cluster sizes: 4, 8, 8 
+#> * Cluster sizes: 4, 8, 8
 #> * Network: 3 edge(s), density = 1
 ```
