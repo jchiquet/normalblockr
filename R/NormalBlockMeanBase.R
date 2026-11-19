@@ -108,14 +108,9 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @param in_place should the split be applied to the object itself, or
     #' should a copy be sent? Default FALSE (send a copy)
     #' @param rule how the members of the cluster are divided: `"kmeans"`
-    #' runs a 2-means on their own fitted mean trajectories `X B_ols` (each
-    #' variable's unconstrained least-squares profile, the quantity the
-    #' initial clustering is computed on); `"noise"` cuts them at the median of
-    #' their noise variance `1 / diag(Omega)`. Default `NULL`, resolved to
-    #' `"noise"` for this family: with it, `refine()` removes slightly more
-    #' deviance on every seed of `brca_rppa` (about 1.7%) and `onema` (under
-    #' 1%), the two rules tie on simulated data, and the selected q never
-    #' differs (`inst/mean_block_analyses/split_rule_comparison.R`).
+    #' runs a 2-means on their fitted mean trajectories `X B_ols`; `"noise"`
+    #' cuts them at the median of their noise variance `1 / diag(Omega)`.
+    #' Default `NULL`, i.e. `"noise"` for this family.
     #' @return A new [`NormalBlockMeanBase`] object
     split = function(index, in_place = FALSE, rule = NULL) {
       ## split2 moves to the new cluster q + 1, split1 stays in `index`
@@ -193,7 +188,7 @@ NormalBlockMeanBase <- R6::R6Class(
       w <- matrix(diag(Omega), nrow(R), ncol(R), byrow = TRUE)
       rowSums(ifelse(observed, 0.5 * log(w / (2 * pi)) - 0.5 * w * R^2, 0))
     },
-    ## kmeans first: benchmarked better than ward2 for this family
+    ## heuristics tried by best_of_inits()
     default_inits     = c("kmeans", "ward2", "spectral"),
     ## split() rule used by refine() unless told otherwise (see split())
     default_split_rule = "noise",

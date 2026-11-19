@@ -7,10 +7,7 @@
 R6 class for a collection of mean-block models ([NormalBlockMeanBase]) with
 a fixed clustering (or a fixed number of blocks) and different sparsity
 levels applied to the p x p precision matrix of the variables. Mirrors
-[NormalBlockVarCollectionSparsity], StARS included: the network relates
-the variables, so its edges do not depend on cluster labels, and the
-subsample fits simply hold the clustering fixed (the known one, or the MAP
-partition of the least penalized model).
+[NormalBlockVarCollectionSparsity], StARS included.
 }
 \examples{
 ex <- generate_normal_block_mean_data(n = 60, p = 20, d = 1, q = 3)
