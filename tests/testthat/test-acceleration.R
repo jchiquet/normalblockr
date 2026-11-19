@@ -16,9 +16,34 @@ fit_both <- function(data, blocks, model) {
   })
 }
 
-test_that("NB_control() carries the acceleration switch, on by default", {
-  expect_true(NB_control()$acceleration)
+test_that("NB_control() carries the acceleration switch, resolved per family by default", {
+  expect_null(NB_control()$acceleration)
   expect_false(NB_control(acceleration = FALSE)$acceleration)
+})
+
+test_that("by default, SQUAREM runs for the variance-block family and a full Sigma, not for a diagonal one", {
+  same_trace <- function(a, b) isTRUE(all.equal(a$objective, b$objective))
+  fit <- function(data, blocks, model, acc, nc = NULL) {
+    set.seed(1)
+    normal_block(data, blocks, model = model,
+                 control = NB_control(verbose = FALSE, acceleration = acc, noise_covariance = nc))
+  }
+  ## variance-block: the default is the accelerated fit
+  C_var <- testdata_var$parameters$C
+  expect_true(same_trace(fit(data_var, C_var, "var", NULL), fit(data_var, C_var, "var", TRUE)))
+  ## mean-block: the rule itself (on these data the EM converges in two or
+  ## three iterations, with or without SQUAREM, so traces cannot tell)
+  C_mean <- testdata_mean$parameters$C
+  uses <- function(nc, acc) {
+    m <- NormalBlockMeanKnownClusters$new(data_mean, C_mean,
+           control = NB_control(verbose = FALSE, noise_covariance = nc))
+    m$.__enclos_env__$private$use_acceleration(NB_control(acceleration = acc))
+  }
+  expect_false(uses("diagonal", NULL))
+  expect_false(uses("spherical", NULL))
+  expect_true(uses("full", NULL))
+  expect_true(uses("diagonal", TRUE))
+  expect_false(uses("full", FALSE))
 })
 
 test_that("variance-block, known clusters: plain EM is monotone and reaches the accelerated optimum in more iterations", {

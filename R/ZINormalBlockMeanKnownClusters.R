@@ -71,7 +71,7 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
         zeros_bar = self$data$zeros_bar, zi_cond_mean = private$ZI_cond_mean,
         C = private$C, B0 = init$B, Omega0 = init$Omega,
         noise_covariance = private$res_covariance,
-        accelerate = !isFALSE(control$acceleration),
+        accelerate = private$use_acceleration(control),
         niter = control$niter, threshold = control$threshold
       )
       private$niter <- res$niter

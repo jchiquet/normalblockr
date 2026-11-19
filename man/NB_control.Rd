@@ -18,7 +18,7 @@ NB_control(
   heuristic = FALSE,
   noise_covariance = NULL,
   refine = TRUE,
-  acceleration = TRUE
+  acceleration = NULL
 )
 }
 \arguments{
@@ -92,9 +92,12 @@ typically multiplies the cost of the collection by 3 to 6. Set it to
 
 \item{acceleration}{whether the (V)EM is accelerated by SQUAREM
 (Varadhan & Roland, 2008), an extrapolation built on two successive (V)EM
-steps and accepted only if it does not lower the objective. Default `TRUE`;
-it is never attempted when `sparsity > 0`. Set to `FALSE` to run plain
-(V)EM, e.g. to measure what the acceleration buys.}
+steps and accepted only if it does not lower the objective. Default `NULL`,
+resolved at fit time: on for variance-block models and for mean-block
+models with a full Sigma, off for mean-block models with a diagonal or
+spherical Sigma, whose EM is exact and converges in a few dozen iterations,
+so that the rejected extrapolations only add cost. `TRUE` or `FALSE`
+forces it for every model. It is never attempted when `sparsity > 0`.}
 }
 \value{
 A named list of parameters to pass to [normal_block()]'s `control`

@@ -1,5 +1,14 @@
 # normalblockr (development version)
 
+## SQUAREM off by default for a diagonal or spherical mean-block Sigma
+
+* `NB_control(acceleration = NULL)` is the new default, resolved at fit time:
+  SQUAREM runs for variance-block models and for mean-block models with a
+  full Sigma, not for mean-block models with a diagonal or spherical Sigma.
+  Their EM is exact and converges in a few dozen iterations, so the
+  extrapolations, all rejected, only cost time (1.3 to 2 times, for the same
+  iterations, on simulated data). `TRUE` or `FALSE` still forces it.
+
 ## Held-out log-likelihood and cross-validation
 
 * New method `heldout_loglik(newdata)` on every fitted model: the exact
