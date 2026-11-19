@@ -2,6 +2,28 @@
 
 ## normalblockr (development version)
 
+### Named extractors
+
+- [`coef()`](https://rdrr.io/r/stats/coef.html),
+  [`sigma()`](https://rdrr.io/r/stats/sigma.html),
+  [`fitted()`](https://rdrr.io/r/stats/fitted.values.html) and
+  [`predict()`](https://rdrr.io/r/stats/predict.html) keep the names of
+  the covariates and of the variables, and name the clusters
+  `Cluster_1`, … (as in the network plots), so that results can be
+  indexed by name, e.g. `coef(model)[, "ERBB2"]`.
+- [`coef()`](https://rdrr.io/r/stats/coef.html) of a variance-block
+  model returns B on the original scale of Y. It returned it on the
+  rescaled scale of the fit (the default for this family), unlike
+  [`fitted()`](https://rdrr.io/r/stats/fitted.values.html) and
+  [`predict()`](https://rdrr.io/r/stats/predict.html). The cluster
+  profiles of a mean-block model stay on the scale of the fit, the
+  original one by default.
+- The help page of [`predict()`](https://rdrr.io/r/stats/predict.html)
+  covers both families.
+- [`print()`](https://rdrr.io/r/base/print.html) and
+  [`summary()`](https://rdrr.io/r/base/summary.html) no longer leave a
+  space before the final period.
+
 ### Network plots with force-directed layouts
 
 - `plot_network()` computes the layout without the edge weights, so that

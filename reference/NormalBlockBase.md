@@ -601,7 +601,7 @@ User friendly print method
 
 #### Usage
 
-    NormalBlockBase$print(model = paste("A", self$who_am_I, ".\n"))
+    NormalBlockBase$print(model = paste0("A ", self$who_am_I, ".\n"))
 
 #### Arguments
 

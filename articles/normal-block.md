@@ -192,7 +192,7 @@ A summary of the results is accessible via
 ``` r
 
 print(my_NB)
-#> A diagonal normal-block-var model with fixed blocks .
+#> A diagonal normal-block-var model with fixed blocks.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
 #>       126 3       3        0 -1635.17  3270.34 3850.592 3850.592 3857.183     7
@@ -227,7 +227,7 @@ my_NB <- normal_block(data = my_data,
 #> 
 #> DONE
 print(my_NB)
-#> A diagonal normal-block-var model with 3 unknown blocks .
+#> A diagonal normal-block-var model with 3 unknown blocks.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity    loglik deviance     BIC     ICL     EBIC niter
 #>       128 3       3        0 -1678.676 3357.351 3944.98 3944.98 3951.572     7

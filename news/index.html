@@ -43,6 +43,16 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="named-extractors-development-version">Named extractors<a class="anchor" aria-label="anchor" href="#named-extractors-development-version"></a></h3>
+<ul><li>
+<code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="https://rdrr.io/r/stats/sigma.html" class="external-link">sigma()</a></code>, <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> keep the names of the covariates and of the variables, and name the clusters <code>Cluster_1</code>, … (as in the network plots), so that results can be indexed by name, e.g. <code>coef(model)[, "ERBB2"]</code>.</li>
+<li>
+<code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> of a variance-block model returns B on the original scale of Y. It returned it on the rescaled scale of the fit (the default for this family), unlike <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>. The cluster profiles of a mean-block model stay on the scale of the fit, the original one by default.</li>
+<li>The help page of <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> covers both families.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> no longer leave a space before the final period.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="network-plots-with-force-directed-layouts-development-version">Network plots with force-directed layouts<a class="anchor" aria-label="anchor" href="#network-plots-with-force-directed-layouts-development-version"></a></h3>
 <ul><li>
 <code>plot_network()</code> computes the layout without the edge weights, so that force-directed layouts such as <code><a href="https://r.igraph.org/reference/layout_with_fr.html" class="external-link">igraph::layout_with_fr</a></code> work with signed partial correlations (they used to fail). <code>layout</code> may also be a matrix of coordinates. The default style is more legible: grey nodes whose area grows with the size of the cluster, labels of constant size, thinner edges.</li>

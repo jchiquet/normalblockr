@@ -112,7 +112,7 @@ models <- normal_block(data, blocks = 2:4, sparsity = TRUE, model = "mean",
 models$plot("BIC")
 
 models$get_best_model("BIC")
-#> A full normal-block-mean model with 2 unknown blocks .
+#> A full normal-block-mean model with 2 unknown blocks.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
 #>       192 2     169    0.052 -2367.11 4734.221 5525.228 5525.228 6537.785     7

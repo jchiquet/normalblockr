@@ -97,7 +97,7 @@ C_go     <- model.matrix(~ 0 + go_term)
 NB_go    <- normal_block(nb_data, blocks = C_go, model = "mean",
                          control = NB_control(verbose = FALSE))
 NB_go
-#> A diagonal normal-block-mean model with fixed blocks .
+#> A diagonal normal-block-mean model with fixed blocks.
 #> ===========================================================================
 #>  nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
 #>       303 28       0        0 -72448.57 144897.1 147381.7 147381.7 147381.7

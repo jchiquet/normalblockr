@@ -126,7 +126,7 @@ plot(NB_prot_group)
 ``` r
 
 print(NB_prot_group)
-#> A diagonal normal-block-var model with fixed blocks .
+#> A diagonal normal-block-var model with fixed blocks.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
 #>       999 6      15        0 -70387.84 140775.7 146616.3 146616.3 146670    14

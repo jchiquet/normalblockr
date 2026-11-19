@@ -76,7 +76,7 @@ subclass)
 - [`fitted(`*`<NormalBlockBase>`*`)`](fitted.NormalBlockBase.md) :
   Extract Fitted Values
 - [`predict(`*`<NormalBlockBase>`*`)`](predict.NormalBlockBase.md) :
-  Predict Method for Variance-Block Models
+  Predict Method for Normal-Block Models
 - [`sigma(`*`<NormalBlockBase>`*`)`](sigma.NormalBlockBase.md) : Extract
   the Covariance Matrix
 - [`print(`*`<NormalBlockBase>`*`)`](print.NormalBlockBase.md) : Print a

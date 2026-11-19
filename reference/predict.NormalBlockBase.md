@@ -1,8 +1,7 @@
-# Predict Method for Variance-Block Models
+# Predict Method for Normal-Block Models
 
-Predicts observations Y for new covariates X. Specific to the
-variance-block family: the mean-block models have their own formula (mu
-= C B' X).
+Predicts the mean of the observations Y for new covariates X: B' X for
+the variance-block models, C B' X for the mean-block models.
 
 ## Usage
 
@@ -15,7 +14,7 @@ predict(object, new_X, ...)
 
 - object:
 
-  An object of class NormalBlockVarBase.
+  An object of class NormalBlockBase.
 
 - new_X:
 
