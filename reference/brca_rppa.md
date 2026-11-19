@@ -1,4 +1,4 @@
-# Breast cancer proteomics data (TCGA, RPPA)
+# Breast Cancer Proteomics Data (TCGA, RPPA)
 
 Reverse-phase protein array (RPPA) measurements of 163 proteins across
 346 breast cancer tumor samples from The Cancer Genome Atlas (TCGA),

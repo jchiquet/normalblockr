@@ -68,6 +68,22 @@
     <p>Invisibly returns `x`.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">ex_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="generate_normal_block_var_data.html">generate_normal_block_var_data</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span>, p <span class="op">=</span> <span class="fl">20</span>, d <span class="op">=</span> <span class="fl">1</span>, q <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">ex_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">ex_data</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">collection</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">4</span>, control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">collection</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A diagonal normal-block-var model with unknown q </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     q ranging from 2 to 4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        44 2       1        0 -641.534 1283.067 1454.280 1454.280 1455.666     7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        48 3       3        0 -538.911 1077.823 1263.767 1263.767 1270.359    10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        53 4       6        0 -515.052 1030.104 1234.693 1235.180 1251.328    52</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -1,4 +1,4 @@
-# Cross-validated log-likelihood of normal-block models
+# Cross-Validated Log-Likelihood of Normal-Block Models
 
 Splits the observations into folds, fits \[normal_block()\] on all but
 one fold and evaluates the held-out log-likelihood of the left-out fold
@@ -71,8 +71,8 @@ cv <- normal_block_cv(data, blocks = 2:4, folds = 3)
 cv
 #> Cross-validated log-likelihood, 3 folds (larger is better)
 #>  q    loglik       se
-#>  2 -1640.221 32.06930
-#>  3 -1598.375 29.03992
-#>  4 -1582.373 28.29224
+#>  2 -1656.672 35.21652
+#>  3 -1603.544 30.41645
+#>  4 -1592.258 28.89820
 #> Best: q = 3 (one-standard-error rule; maximum at q = 4)
 ```

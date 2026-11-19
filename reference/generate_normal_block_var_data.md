@@ -1,4 +1,4 @@
-# Generate Normal Block Var Data
+# Simulate Data from a Normal-Block-Var Model
 
 A function to draw data from the normal block model (see details). The
 function returns both the generated data and the corresponding model
@@ -89,3 +89,13 @@ matrix of regression coefficients - C: matrix of group membership - D:
 diagonal matrix of variance of the variables - Omega: precision matrix
 of the groups - Sigma: covariance matrix of the groups - kappa: vector
 of ZI inflation probabilities (one per variable)
+
+## Examples
+
+``` r
+ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+dim(ex$Y)
+#> [1] 50 20
+colSums(ex$parameters$C) # sizes of the clusters
+#> [1]  3 10  7
+```

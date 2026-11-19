@@ -71,6 +71,23 @@ related the two partitions are.</p>
     <p>Invisibly returns `x`.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">ex</span>   <span class="op">&lt;-</span> <span class="fu"><a href="generate_normal_block_mean_data.html">generate_normal_block_mean_data</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">80</span>, p <span class="op">=</span> <span class="fl">20</span>, d <span class="op">=</span> <span class="fl">1</span>, q <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">ex</span><span class="op">$</span><span class="va">Y</span>, <span class="va">ex</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span>  <span class="op">&lt;-</span> <span class="fu"><a href="normal_block_sequential.html">normal_block_sequential</a></span><span class="op">(</span><span class="va">data</span>, blocks_mean <span class="op">=</span> <span class="fl">3</span>, blocks_var <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A sequential mean-then-variance normal-block fit</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   mean-block stage    : 3 clusters -- diagonal normal-block-mean model with 3 unknown blocks </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2 unknown blocks </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ARI between the two partitions: -0.04 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   (near 0 means the two structures are unrelated, as is usual)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> * Useful fields</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     $mean, $var (both ordinary fitted models), $residuals </span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

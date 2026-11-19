@@ -1,4 +1,4 @@
-# Collection of Normal-Block Models over Cluster Counts and Sparsity Levels
+# Collection of Normal-Block-Var Models over Cluster Counts and Sparsity Levels
 
 R6 class for a collection of normal-block models with different number
 of clusters (q) and different sparsity levels.

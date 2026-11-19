@@ -1,4 +1,4 @@
-# Cluster variables in the mean, then in the residual covariance
+# Cluster Variables in the Mean, then in the Residual Covariance
 
 Fits the two model families one after the other: a mean-block model
 (\[NormalBlockMeanBase\]) groups the variables by how they respond to
@@ -83,7 +83,7 @@ fit
 #> ===========================================================================
 #>   mean-block stage    : 3 clusters -- diagonal normal-block-mean model with 3 unknown blocks 
 #>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2 unknown blocks 
-#>   ARI between the two partitions: 0.028 
+#>   ARI between the two partitions: -0.063 
 #>   (near 0 means the two structures are unrelated, as is usual)
 #> ===========================================================================
 #> * Useful fields

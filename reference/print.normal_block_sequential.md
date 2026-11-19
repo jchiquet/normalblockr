@@ -23,3 +23,21 @@ print(x, ...)
 ## Value
 
 Invisibly returns \`x\`.
+
+## Examples
+
+``` r
+ex   <- generate_normal_block_mean_data(n = 80, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+fit  <- normal_block_sequential(data, blocks_mean = 3, blocks_var = 2)
+print(fit)
+#> A sequential mean-then-variance normal-block fit
+#> ===========================================================================
+#>   mean-block stage    : 3 clusters -- diagonal normal-block-mean model with 3 unknown blocks 
+#>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2 unknown blocks 
+#>   ARI between the two partitions: -0.04 
+#>   (near 0 means the two structures are unrelated, as is usual)
+#> ===========================================================================
+#> * Useful fields
+#>     $mean, $var (both ordinary fitted models), $residuals 
+```

@@ -1,4 +1,4 @@
-# Zero-Inflated Mean-Block Model with Known Clustering
+# Zero-Inflated Normal-Block-Mean Model with Known Clustering
 
 R6 class for a zero-inflated Normal-Block-Mean model with a known
 clustering. Sigma is diagonal or spherical here. See
@@ -117,5 +117,5 @@ model <- normal_block(data, blocks = ex$parameters$C, model = "mean",
 #> 
 #> DONE
 model$clustering
-#>  [1] 2 2 3 2 3 3 1 2 1 3 2 2 2 2 3 2 1 3 3 3
+#>  [1] 3 3 2 2 1 2 2 2 2 2 1 2 2 2 3 2 2 2 1 2
 ```

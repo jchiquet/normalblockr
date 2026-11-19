@@ -1,4 +1,4 @@
-# University webpages text data (CMU "4 Universities" / WebKB)
+# University Webpages Text Data (CMU "4 Universities" / WebKB)
 
 Term-frequency data derived from the student personal webpages of the
 CMU "World Wide Knowledge Base" (WebKB) project's "4 Universities"
@@ -77,7 +77,11 @@ out <- normal_block(nb_data, 2:15)
      number of blocks = 13           
      number of blocks = 14           
      number of blocks = 15           
-     refine(): improved 14 of 14 models
+
+#> Warning: diagonal normal-block-var model with 15 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000309, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+#> Warning: diagonal normal-block-var model with 13 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000597, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+#> Warning: diagonal normal-block-var model with 11 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000388, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+#>   refine(): improved 14 of 14 models
 #> 
 #> DONE
 # }

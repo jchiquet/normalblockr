@@ -2,6 +2,25 @@
 
 ## normalblockr (development version)
 
+### Examples and linear algebra
+
+- Examples for [`coef()`](https://rdrr.io/r/stats/coef.html),
+  [`sigma()`](https://rdrr.io/r/stats/sigma.html),
+  [`fitted()`](https://rdrr.io/r/stats/fitted.values.html),
+  [`predict()`](https://rdrr.io/r/stats/predict.html),
+  [`isNB()`](../reference/isNB.md),
+  [`NB_control()`](../reference/NB_control.md),
+  [`get_model()`](../reference/get_model.md), the two data generators,
+  and the print, plot and summary methods that lacked them.
+- The update of the cluster profiles of the mean-block models solves a
+  linear system with a symmetric positive definite matrix instead of
+  inverting it, and products with a transposed matrix use
+  [`crossprod()`](https://rdrr.io/r/base/crossprod.html) and
+  [`tcrossprod()`](https://rdrr.io/r/base/crossprod.html). Results are
+  unchanged.
+- Help page titles in title case, and named after the two families of
+  the article (Normal-Block-Var, Normal-Block-Mean).
+
 ### Named extractors
 
 - [`coef()`](https://rdrr.io/r/stats/coef.html),

@@ -1,4 +1,4 @@
-# Generate Normal Block Mean Data
+# Simulate Data from a Normal-Block-Mean Model
 
 A function to draw data from the normal block model (see details). The
 function returns both the generated data and the corresponding model
@@ -82,3 +82,15 @@ matrix of regression coefficients - C: matrix of group membership -
 Omega: precision matrix of the variables - Sigma: covariance matrix of
 the variables - kappa: vector of ZI inflation probabilities (one per
 variable)
+
+## Examples
+
+``` r
+ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 2, q = 3)
+dim(ex$Y)
+#> [1] 50 20
+ex$parameters$B # one regression profile per cluster
+#>            [,1]        [,2]      [,3]
+#> [1,] 0.03036216 0.005725867 0.3458427
+#> [2,] 0.83310326 0.230729538 0.3682426
+```

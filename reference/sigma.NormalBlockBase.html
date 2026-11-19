@@ -74,6 +74,18 @@ for the mean-block models.</p>
     <p>The covariance matrix, of size q x q or p x p depending on the model.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">ex_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="generate_normal_block_var_data.html">generate_normal_block_var_data</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span>, p <span class="op">=</span> <span class="fl">20</span>, d <span class="op">=</span> <span class="fl">1</span>, q <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">ex_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">ex_data</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">3</span>, control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/sigma.html" class="external-link">sigma</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Cluster_1   Cluster_2     Cluster_3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cluster_1  6.229576e-01 -0.34215315 -9.907212e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cluster_2 -3.421532e-01  0.35311703 -4.111713e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cluster_3 -9.907212e-05 -0.04111713  2.547881e-01</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

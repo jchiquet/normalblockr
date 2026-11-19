@@ -1,4 +1,4 @@
-# Collection of Mean-Block Models over a Sparsity Path
+# Collection of Normal-Block-Mean Models over a Sparsity Path
 
 R6 class for a collection of mean-block models (\[NormalBlockMeanBase\])
 with a fixed clustering (or a fixed number of blocks) and different
@@ -88,11 +88,11 @@ data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 3, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 5))
 #> Fitting a normal-block-mean model with sparsity path 
-#>   penalty = 2.722819           
-     penalty = 0.861031           
-     penalty = 0.2722819           
-     penalty = 0.0861031           
-     penalty = 0.02722819           
+#>   penalty = 5.060078           
+     penalty = 1.600137           
+     penalty = 0.5060078           
+     penalty = 0.1600137           
+     penalty = 0.05060078           
 
 #> DONE
 models$plot(c("BIC", "EBIC"))

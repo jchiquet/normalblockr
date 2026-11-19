@@ -4,16 +4,17 @@
 
 Main entry points for fitting a Normal-Block model and simulating data
 
-- [`normal_block()`](normal_block.md) : Normal-block model
+- [`normal_block()`](normal_block.md) : Fit Normal-Block Models
 - [`normal_block_sequential()`](normal_block_sequential.md) : Cluster
-  variables in the mean, then in the residual covariance
-- [`normal_block_cv()`](normal_block_cv.md) : Cross-validated
-  log-likelihood of normal-block models
-- [`NB_control()`](NB_control.md) : NB_control
+  Variables in the Mean, then in the Residual Covariance
+- [`normal_block_cv()`](normal_block_cv.md) : Cross-Validated
+  Log-Likelihood of Normal-Block Models
+- [`NB_control()`](NB_control.md) : Control Parameters for Normal-Block
+  Models
 - [`generate_normal_block_var_data()`](generate_normal_block_var_data.md)
-  : Generate Normal Block Var Data
+  : Simulate Data from a Normal-Block-Var Model
 - [`generate_normal_block_mean_data()`](generate_normal_block_mean_data.md)
-  : Generate Normal Block Mean Data
+  : Simulate Data from a Normal-Block-Mean Model
 
 ## Model and data classes
 
@@ -26,43 +27,44 @@ of q and/or sparsity penalties.
 - [`NormalBlockData`](NormalBlockData.md) : Data Container for
   Normal-Block Models
 - [`NormalBlockVarKnownClusters`](NormalBlockVarKnownClusters.md) :
-  Normal-Block Model with Known Clustering
+  Normal-Block-Var Model with Known Clustering
 - [`NormalBlockVarUnknownClusters`](NormalBlockVarUnknownClusters.md) :
-  Normal-Block Model with Unknown Clustering
+  Normal-Block-Var Model with Unknown Clustering
 - [`NormalBlockMeanKnownClusters`](NormalBlockMeanKnownClusters.md) :
-  Mean-Block Model with Known Clustering
+  Normal-Block-Mean Model with Known Clustering
 - [`NormalBlockMeanUnknownClusters`](NormalBlockMeanUnknownClusters.md)
-  : Mean-Block Model with Unknown Clustering
+  : Normal-Block-Mean Model with Unknown Clustering
 - [`ZINormalBlockVarKnownClusters`](ZINormalBlockVarKnownClusters.md) :
-  Zero-Inflated Normal-Block Model with Known Clustering
+  Zero-Inflated Normal-Block-Var Model with Known Clustering
 - [`ZINormalBlockVarUnknownClusters`](ZINormalBlockVarUnknownClusters.md)
-  : Zero-Inflated Normal-Block Model with Unknown Clustering
+  : Zero-Inflated Normal-Block-Var Model with Unknown Clustering
 - [`ZINormalBlockMeanKnownClusters`](ZINormalBlockMeanKnownClusters.md)
-  : Zero-Inflated Mean-Block Model with Known Clustering
+  : Zero-Inflated Normal-Block-Mean Model with Known Clustering
 - [`ZINormalBlockMeanUnknownClusters`](ZINormalBlockMeanUnknownClusters.md)
-  : Zero-Inflated Mean-Block Model with Unknown Clustering
+  : Zero-Inflated Normal-Block-Mean Model with Unknown Clustering
 - [`NormalBlockVarCollectionClusters`](NormalBlockVarCollectionClusters.md)
-  : Collection of Normal-Block Models over a Range of Cluster Counts
+  : Collection of Normal-Block-Var Models over a Range of Cluster Counts
 - [`NormalBlockVarCollectionSparsity`](NormalBlockVarCollectionSparsity.md)
-  : Collection of Normal-Block Models over a Sparsity Path
+  : Collection of Normal-Block-Var Models over a Sparsity Path
 - [`NormalBlockVarCollectionClustersSparsity`](NormalBlockVarCollectionClustersSparsity.md)
-  : Collection of Normal-Block Models over Cluster Counts and Sparsity
-  Levels
+  : Collection of Normal-Block-Var Models over Cluster Counts and
+  Sparsity Levels
 - [`NormalBlockMeanCollectionClusters`](NormalBlockMeanCollectionClusters.md)
-  : Collection of Mean-Block Models over a Range of Cluster Counts
+  : Collection of Normal-Block-Mean Models over a Range of Cluster
+  Counts
 - [`NormalBlockMeanCollectionSparsity`](NormalBlockMeanCollectionSparsity.md)
-  : Collection of Mean-Block Models over a Sparsity Path
+  : Collection of Normal-Block-Mean Models over a Sparsity Path
 - [`NormalBlockMeanCollectionClustersSparsity`](NormalBlockMeanCollectionClustersSparsity.md)
-  : Collection of Mean-Block Models over Cluster Counts and Sparsity
-  Levels
+  : Collection of Normal-Block-Mean Models over Cluster Counts and
+  Sparsity Levels
 
 ## Data sets
 
-- [`brca_rppa`](brca_rppa.md) : Breast cancer proteomics data (TCGA,
+- [`brca_rppa`](brca_rppa.md) : Breast Cancer Proteomics Data (TCGA,
   RPPA)
-- [`onema`](onema.md) : French stream fish community data (ONEMA / OFB
-  electrofishing surveys)
-- [`university`](university.md) : University webpages text data (CMU "4
+- [`onema`](onema.md) : French Stream Fish Community Data (ONEMA / OFB
+  Electrofishing Surveys)
+- [`university`](university.md) : University Webpages Text Data (CMU "4
   Universities" / WebKB)
 
 ## S3 methods
@@ -116,9 +118,9 @@ reference; not part of the user-facing API
 - [`NormalBlockBase`](NormalBlockBase.md) : Root Base Class for
   Normal-Block Models
 - [`NormalBlockVarBase`](NormalBlockVarBase.md) : Base Class for
-  Variance-Block Models
+  Normal-Block-Var Models
 - [`NormalBlockMeanBase`](NormalBlockMeanBase.md) : Base Class for
-  Mean-Block Models
+  Normal-Block-Mean Models
 - [`NormalBlockCollection`](NormalBlockCollection.md) : Base Class for a
   Collection of Normal-Block Models
 - [`NormalBlockCollectionClusters`](NormalBlockCollectionClusters.md) :

@@ -1,4 +1,4 @@
-# Collection of Mean-Block Models over Cluster Counts and Sparsity Levels
+# Collection of Normal-Block-Mean Models over Cluster Counts and Sparsity Levels
 
 R6 class for a collection of mean-block models (\[NormalBlockMeanBase\])
 over both a range of cluster counts (q) and a sparsity path, i.e. one
@@ -93,20 +93,20 @@ models <- normal_block(data, blocks = 2:4, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 4))
 #> Fitting a collection of normal-block-mean models with different values of q and different penalties 
 #>   number of blocks = 2           
-     penalty = 5.199311           
-     penalty = 1.120158           
-     penalty = 0.2413306           
-     penalty = 0.05199311           
+     penalty = 3.808205           
+     penalty = 0.8204528           
+     penalty = 0.1767612           
+     penalty = 0.03808205           
      number of blocks = 3           
-     penalty = 5.199311           
-     penalty = 1.120158           
-     penalty = 0.2413306           
-     penalty = 0.05199311           
+     penalty = 3.808205           
+     penalty = 0.8204528           
+     penalty = 0.1767612           
+     penalty = 0.03808205           
      number of blocks = 4           
-     penalty = 5.199311           
-     penalty = 1.120158           
-     penalty = 0.2413306           
-     penalty = 0.05199311           
+     penalty = 3.808205           
+     penalty = 0.8204528           
+     penalty = 0.1767612           
+     penalty = 0.03808205           
 
 #> DONE
 models$plot("BIC")
@@ -114,8 +114,10 @@ models$plot("BIC")
 models$get_best_model("BIC")
 #> A full normal-block-mean model with 2 unknown blocks.
 #> ===========================================================================
-#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>       192 2     169    0.052 -2367.11 4734.221 5525.228 5525.228 6537.785     7
+#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+#>        83 2      60     0.82 -2237.827 4475.654 4820.378 4820.378 5179.866
+#>  niter
+#>      9
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

@@ -1,4 +1,4 @@
-# Collection of Normal-Block Models over a Sparsity Path
+# Collection of Normal-Block-Var Models over a Sparsity Path
 
 R6 class for a collection of normal-block models with a fixed clustering
 (blocks) and different sparsity levels.
@@ -99,5 +99,5 @@ data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = ex$parameters$C, sparsity = TRUE,
                        control = NB_control(verbose = FALSE, n_sparsity_penalties = 5))
 models$get_best_model("BIC")$sparsity
-#> [1] 0.0025237
+#> [1] 0.06648302
 ```

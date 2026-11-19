@@ -23,3 +23,13 @@ plot(x, ...)
 ## Value
 
 a \[\`ggplot2::ggplot\`\] graph
+
+## Examples
+
+``` r
+ex   <- generate_normal_block_var_data(n = 60, p = 15, d = 1, q = 3)
+data <- NormalBlockData$new(ex$Y, ex$X)
+set.seed(1)
+cv <- normal_block_cv(data, blocks = 2:4, folds = 3)
+plot(cv)
+```

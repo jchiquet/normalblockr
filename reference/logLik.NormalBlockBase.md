@@ -34,5 +34,5 @@ ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 logLik(model)
-#> 'log Lik.' -667.7569 (df=48)
+#> 'log Lik.' -640.7911 (df=48)
 ```

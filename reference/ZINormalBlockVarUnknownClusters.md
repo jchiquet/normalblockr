@@ -1,4 +1,4 @@
-# Zero-Inflated Normal-Block Model with Unknown Clustering
+# Zero-Inflated Normal-Block-Var Model with Unknown Clustering
 
 R6 class for a zero-inflated normal-block model with a fixed number of
 clusters (but unknown clustering).
@@ -129,5 +129,5 @@ data <- NormalBlockData$new(ex$Y, ex$X)
 model <- normal_block(data, blocks = 3, zero_inflation = TRUE,
                       control = NB_control(verbose = FALSE))
 model$clustering
-#>  [1] 1 1 2 1 2 3 1 1 1 2 1 3 3 3 1 3 1 2 2 3
+#>  [1] 2 3 2 2 3 1 2 3 1 2 1 1 1 2 1 2 1 2 2 3
 ```

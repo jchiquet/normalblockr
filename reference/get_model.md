@@ -47,3 +47,15 @@ get_model(
 
   which model family to fit, "var" (the default) or "mean" – see
   \[normal_block()\]
+
+## Examples
+
+``` r
+ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+## the model is created but not fitted, unlike with normal_block()
+model <- get_model(data, blocks = 3, control = NB_control(verbose = FALSE))
+class(model)
+#> [1] "NormalBlockVarUnknownClusters" "NormalBlockVarBase"           
+#> [3] "NormalBlockBase"               "R6"                           
+```

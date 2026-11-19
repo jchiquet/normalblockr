@@ -1,4 +1,4 @@
-# NB_control
+# Control Parameters for Normal-Block Models
 
 Control the model settings and various optimization parameters
 
@@ -120,3 +120,22 @@ NB_control(
 
 A named list of parameters to pass to \[normal_block()\]'s \`control\`
 argument.
+
+## Examples
+
+``` r
+ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+## silent fits, without the split and merge search
+ctrl <- NB_control(verbose = FALSE, refine = FALSE)
+collection <- normal_block(data, blocks = 2:4, control = ctrl)
+collection$criteria
+#>   nb_param q n_edges sparsity    loglik  deviance      BIC      ICL     EBIC
+#> 1       44 2       1        0 -562.3405 1124.6810 1295.894 1295.894 1297.280
+#> 2       48 3       3        0 -467.6143  935.2286 1121.173 1121.173 1127.765
+#> 3       53 4       6        0 -467.6177  935.2355 1139.824 1139.824 1156.459
+#>   niter
+#> 1    11
+#> 2     7
+#> 3    34
+```

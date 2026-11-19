@@ -1,4 +1,4 @@
-# Mean-Block Model with Unknown Clustering
+# Normal-Block-Mean Model with Unknown Clustering
 
 R6 class for a Normal-Block-Mean model with a fixed number of clusters
 (but unknown clustering), inferred by variational EM.
@@ -120,5 +120,5 @@ model <- normal_block(data, blocks = 3, model = "mean")
 #> 
 #> DONE
 model$clustering
-#>  [1] 1 3 2 2 1 2 1 1 1 3 2 1 2 1 1 1 2 1 1 2
+#>  [1] 3 1 3 1 1 1 1 1 3 3 1 1 1 1 1 3 3 1 1 3
 ```

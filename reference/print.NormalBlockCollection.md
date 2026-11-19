@@ -41,6 +41,4 @@ print(models)
 #>     $models, $criteria
 #> * Useful methods
 #>     print(), summary(), plot(), $get_best_model()
-#> * Warning: the deviance increases with q at q = 4, 5 
-#>     (nested models: a sign of poor local optima). Try $refine().
 ```
