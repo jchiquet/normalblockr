@@ -209,7 +209,7 @@ print.summary.NormalBlockBase <- function(x, ...) {
   cat("===========================================================================\n")
   print(as.data.frame(round(x$criteria, digits = 3), row.names = ""))
   cat("===========================================================================\n")
-  cat("* Cluster sizes:", paste(x$cluster_sizes, collapse = ", "), "\n")
+  cat_wrapped(paste(x$cluster_sizes, collapse = ", "), label = "* Cluster sizes: ")
   cat("* Network: ", x$n_edges, " edge(s), density = ",
       if (is.na(x$density)) NA else round(x$density, 3), "\n", sep = "")
   invisible(x)

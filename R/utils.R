@@ -293,3 +293,10 @@ clustering_path_for_family <- function(mydata, q_list, family = c("var", "mean")
 # best_of_inits() in NormalBlockVarBase.R). identical() keeps this safe when
 # clustering_init is a list or an explicit clustering.
 uses_best_of_inits <- function(control) identical(control$clustering_init, "best_of_inits")
+
+## prints text wrapped at the console width, after a label kept as is;
+## continuation lines are indented
+cat_wrapped <- function(text, label = "", indent = 4) {
+  cat(strwrap(text, width = getOption("width"),
+              initial = label, prefix = strrep(" ", indent)), sep = "\n")
+}

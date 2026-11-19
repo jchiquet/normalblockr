@@ -105,8 +105,8 @@ fitted_mean_stage <- function(fit, data, zero_inflation, pick) {
 print.normal_block_sequential <- function(x, ...) {
   cat("A sequential mean-then-variance normal-block fit\n")
   cat("===========================================================================\n")
-  cat("  mean-block stage    :", x$mean$q, "clusters --", x$mean$who_am_I, "\n")
-  cat("  variance-block stage:", x$var$q, "clusters --", x$var$who_am_I, "\n")
+  cat_wrapped(paste(x$mean$q, "clusters --", x$mean$who_am_I), label = "  mean-block stage    : ", indent = 24)
+  cat_wrapped(paste(x$var$q, "clusters --", x$var$who_am_I), label = "  variance-block stage: ", indent = 24)
   if (requireNamespace("aricode", quietly = TRUE))
     cat("  ARI between the two partitions:",
         round(aricode::ARI(x$mean$clustering, x$var$clustering), 3),
