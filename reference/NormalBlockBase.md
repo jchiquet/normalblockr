@@ -573,7 +573,9 @@ plotting it, use \`\$latent_network()\`.
 
 - `layout`:
 
-  an optional igraph layout. Only relevant for igraph output.
+  an igraph layout function, applied to the graph without its edge
+  weights, or a matrix of node coordinates. Only relevant for igraph
+  output.
 
 - `plot`:
 

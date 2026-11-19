@@ -367,8 +367,6 @@ my_NB_sparse_low$plot_network()
 ``` r
 
 my_NB_sparse_high$plot_network()
-#> Warning: vertex attribute label.cex contains NAs. Replacing with default
-#> value 1
 ```
 
 ![](normal-block_files/figure-html/simulation1-NB-high-sparsity-plot-1.png)

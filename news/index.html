@@ -43,6 +43,11 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="network-plots-with-force-directed-layouts-development-version">Network plots with force-directed layouts<a class="anchor" aria-label="anchor" href="#network-plots-with-force-directed-layouts-development-version"></a></h3>
+<ul><li>
+<code>plot_network()</code> computes the layout without the edge weights, so that force-directed layouts such as <code><a href="https://r.igraph.org/reference/layout_with_fr.html" class="external-link">igraph::layout_with_fr</a></code> work with signed partial correlations (they used to fail). <code>layout</code> may also be a matrix of coordinates. The default style is more legible: grey nodes whose area grows with the size of the cluster, labels of constant size, thinner edges.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="sequential-fits-from-an-already-fitted-mean-block-model-development-version">Sequential fits from an already fitted mean-block model<a class="anchor" aria-label="anchor" href="#sequential-fits-from-an-already-fitted-mean-block-model-development-version"></a></h3>
 <ul><li>
 <code><a href="../reference/normal_block_sequential.html">normal_block_sequential()</a></code> accepts, as <code>blocks_mean</code>, a mean-block model or collection already fitted on the same data: the first stage is then not refitted (a collection is reduced to its best model by <code>crit</code>), which avoids fitting the mean-block collection twice when it is also analysed on its own. A fit on other data, or with another zero-inflation setting, is refused.</li>
