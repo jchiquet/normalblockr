@@ -83,7 +83,10 @@ often more informative than choosing one.</p>
 
 <dt id="arg-blocks-mean">blocks_mean<a class="anchor" aria-label="anchor" href="#arg-blocks-mean"></a></dt>
 <dd><p>number of clusters for the mean-block stage: an integer,
-a vector of integers to explore, or a p x q indicator matrix</p></dd>
+a vector of integers to explore, or a p x q indicator matrix. It can also be
+a mean-block model or collection already fitted on `data` (by
+`normal_block(data, ..., model = "mean")`), in which case the first stage
+is not refitted: a collection is reduced to its best model by `crit`.</p></dd>
 
 
 <dt id="arg-blocks-var">blocks_var<a class="anchor" aria-label="anchor" href="#arg-blocks-var"></a></dt>
@@ -119,9 +122,7 @@ stage to the other.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The second stage uses an intercept-only design on purpose: the covariate
 effects have already been removed by the first stage.</p>
-<p>This is a heuristic two-stage estimator, not a joint model. On simulated
-data carrying two genuinely distinct structures it recovers both exactly
-(see `inst/mean_block_analyses/sequential_mean_then_variance.R`).</p>
+<p>This is a heuristic two-stage estimator, not a joint model.</p>
     </div>
 
     <div class="section level2">
@@ -134,7 +135,7 @@ data carrying two genuinely distinct structures it recovers both exactly
 <span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   mean-block stage    : 3 clusters -- diagonal normal-block-mean model with 3 unknown blocks </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2 unknown blocks </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ARI between the two partitions: 0.026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ARI between the two partitions: 0.028 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   (near 0 means the two structures are unrelated, as is usual)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * Useful fields</span>

@@ -30,7 +30,11 @@ normal_block_sequential(
 - blocks_mean:
 
   number of clusters for the mean-block stage: an integer, a vector of
-  integers to explore, or a p x q indicator matrix
+  integers to explore, or a p x q indicator matrix. It can also be a
+  mean-block model or collection already fitted on \`data\` (by
+  \`normal_block(data, ..., model = "mean")\`), in which case the first
+  stage is not refitted: a collection is reduced to its best model by
+  \`crit\`.
 
 - blocks_var:
 
@@ -66,9 +70,7 @@ from one stage to the other.
 The second stage uses an intercept-only design on purpose: the covariate
 effects have already been removed by the first stage.
 
-This is a heuristic two-stage estimator, not a joint model. On simulated
-data carrying two genuinely distinct structures it recovers both exactly
-(see \`inst/mean_block_analyses/sequential_mean_then_variance.R\`).
+This is a heuristic two-stage estimator, not a joint model.
 
 ## Examples
 
@@ -81,7 +83,7 @@ fit
 #> ===========================================================================
 #>   mean-block stage    : 3 clusters -- diagonal normal-block-mean model with 3 unknown blocks 
 #>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2 unknown blocks 
-#>   ARI between the two partitions: 0.026 
+#>   ARI between the two partitions: 0.028 
 #>   (near 0 means the two structures are unrelated, as is usual)
 #> ===========================================================================
 #> * Useful fields

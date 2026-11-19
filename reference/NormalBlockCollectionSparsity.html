@@ -195,13 +195,10 @@ selection: "BIC" (default), "EBIC", "ICL" or "StARS".</p></dd>
 
 <p></p><hr><a id="method-NormalBlockCollectionSparsity-stability_selection"></a><div class="section">
 <h3 id="normalblockcollectionsparsity-stability-selection-"><code>NormalBlockCollectionSparsity$stability_selection()</code><a class="anchor" aria-label="anchor" href="#normalblockcollectionsparsity-stability-selection-"></a></h3>
-<p>Compute the stability path by stability selection (StARS,
-Liu et al. 2010): the whole penalty path is refitted on subsamples of
-the observations, with the clustering held fixed so that the networks
-are comparable across subsamples, and each edge's selection
-probability is recorded at every penalty. For a variance-block
-collection the network relates the q blocks; for a mean-block one,
-the p variables.</p><div class="section">
+<p>Computes the stability path (StARS, Liu et al. 2010): the
+penalty path is refitted on subsamples of the observations, with the
+clustering held fixed, and the selection frequency of each edge is
+recorded at every penalty.</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockCollectionSparsity</span><span class="op">$</span><span class="fu">stability_selection</span><span class="op">(</span></span>
 <span>  subsamples <span class="op">=</span> <span class="cn">NULL</span>,</span>

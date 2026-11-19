@@ -147,12 +147,10 @@ a model of the collection's family
 
 ### `NormalBlockCollectionSparsity$stability_selection()`
 
-Compute the stability path by stability selection (StARS, Liu et al.
-2010): the whole penalty path is refitted on subsamples of the
-observations, with the clustering held fixed so that the networks are
-comparable across subsamples, and each edge's selection probability is
-recorded at every penalty. For a variance-block collection the network
-relates the q blocks; for a mean-block one, the p variables.
+Computes the stability path (StARS, Liu et al. 2010): the penalty path
+is refitted on subsamples of the observations, with the clustering held
+fixed, and the selection frequency of each edge is recorded at every
+penalty.
 
 #### Usage
 

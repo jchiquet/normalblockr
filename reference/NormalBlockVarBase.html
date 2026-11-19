@@ -174,18 +174,10 @@ each penalty in a sparsity path from the previous one's solution.</p><div class=
 
 <p></p><hr><a id="method-NormalBlockVarBase-within_block_correlations"></a><div class="section">
 <h3 id="normalblockvarbase-within-block-correlations-"><code>NormalBlockVarBase$within_block_correlations()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-within-block-correlations-"></a></h3>
-<p>Diagnose whether the blocks are made of positively
-co-varying variables, as the model requires. Within block k, two
-variables j and l are noisy copies of the same latent signal, so their
-covariance is `Sigma_kk &gt; 0` and their correlation
-`Sigma_kk / sqrt((Sigma_kk + d_j) (Sigma_kk + d_l))` lies in (0, 1):
-the model cannot put two anticorrelated variables in the same block.
-This compares, for each block, the empirical correlations of the
-variables' residuals `Y - XB` (non-zero cells only for zero-inflated
-models) with the correlations the fitted model implies. Mostly useful
-for a known clustering (e.g. from an annotation): a block with many
-negative empirical correlations is misspecified, and should rather be
-split into blocks linked by a negative `Sigma_kl`.</p><div class="section">
+<p>Checks that the blocks gather positively co-varying
+variables, as the model requires (two variables of a block have a
+positive correlation). Compares, for each block, the empirical
+correlations of the residuals `Y - XB` with those implied by the model.</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">within_block_correlations</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
@@ -215,13 +207,9 @@ default FALSE (send a copy)</p></dd>
 
       <dt><code>rule</code></dt>
 <dd><p>how the members of the cluster are divided: `"kmeans"`
-runs a 2-means on their columns of residuals `Y - XB`, the geometry of
-the model (members of a block are noisy copies of a common latent
-signal, so they lie close to each other); `"noise"` cuts them at the
-median of their noise variance (the rule used before 0.4.0). Default
-`NULL`, resolved to `"kmeans"` for this family: on `brca_rppa` it lets
-`refine()` lower the deviance summed over q = 1..30 by 22,166 against
-18,588 for `"noise"`.</p></dd>
+runs a 2-means on their columns of residuals `Y - XB`; `"noise"` cuts
+them at the median of their noise variance. Default `NULL`, i.e.
+`"kmeans"` for this family.</p></dd>
 
 
 </dl><p></p></div>

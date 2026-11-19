@@ -402,7 +402,7 @@ of clusters.
 ``` r
 
 myNB_sparse_0.1   <- my_NB_sparse$get_model(0.1)
-#> No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658165 Collection penalty values can be found via $sparsity
+#> No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658166 Collection penalty values can be found via $sparsity
 myNB_sparse_BIC   <- my_NB_sparse$get_best_model("BIC")
 ```
 

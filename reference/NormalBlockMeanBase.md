@@ -168,13 +168,9 @@ affected.
 - `rule`:
 
   how the members of the cluster are divided: \`"kmeans"\` runs a
-  2-means on their own fitted mean trajectories \`X B_ols\` (each
-  variable's unconstrained least-squares profile, the quantity the
-  initial clustering is computed on); \`"noise"\` cuts them at the
-  median of their noise variance \`1 / diag(Omega)\`. Default \`NULL\`,
-  resolved to \`"noise"\` for this family: with it, \`refine()\` removes
-  slightly more deviance on every seed of \`brca_rppa\` (about 1.7 1
-  differs (\`inst/mean_block_analyses/split_rule_comparison.R\`).
+  2-means on their fitted mean trajectories \`X B_ols\`; \`"noise"\`
+  cuts them at the median of their noise variance \`1 / diag(Omega)\`.
+  Default \`NULL\`, i.e. \`"noise"\` for this family.
 
 #### Returns
 

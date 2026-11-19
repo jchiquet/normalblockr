@@ -102,7 +102,7 @@ NB_go
 #>  nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
 #>       303 28       0        0 -72448.57 144897.1 147381.7 147381.7 147381.7
 #>  niter
-#>     17
+#>     31
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

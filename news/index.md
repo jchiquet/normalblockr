@@ -2,6 +2,26 @@
 
 ## normalblockr (development version)
 
+### Sequential fits from an already fitted mean-block model
+
+- [`normal_block_sequential()`](../reference/normal_block_sequential.md)
+  accepts, as `blocks_mean`, a mean-block model or collection already
+  fitted on the same data: the first stage is then not refitted (a
+  collection is reduced to its best model by `crit`), which avoids
+  fitting the mean-block collection twice when it is also analysed on
+  its own. A fit on other data, or with another zero-inflation setting,
+  is refused.
+
+### SQUAREM off by default for a diagonal or spherical mean-block Sigma
+
+- `NB_control(acceleration = NULL)` is the new default, resolved at fit
+  time: SQUAREM runs for variance-block models and for mean-block models
+  with a full Sigma, not for mean-block models with a diagonal or
+  spherical Sigma. Their EM is exact and converges in a few dozen
+  iterations, so the extrapolations, almost always rejected, only cost
+  time (1.1 to 2.2 times, for the same iterations, on simulated data).
+  `TRUE` or `FALSE` still forces it.
+
 ### Held-out log-likelihood and cross-validation
 
 - New method `heldout_loglik(newdata)` on every fitted model: the exact

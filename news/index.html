@@ -43,6 +43,16 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
 <div class="section level3">
+<h3 id="sequential-fits-from-an-already-fitted-mean-block-model-development-version">Sequential fits from an already fitted mean-block model<a class="anchor" aria-label="anchor" href="#sequential-fits-from-an-already-fitted-mean-block-model-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/normal_block_sequential.html">normal_block_sequential()</a></code> accepts, as <code>blocks_mean</code>, a mean-block model or collection already fitted on the same data: the first stage is then not refitted (a collection is reduced to its best model by <code>crit</code>), which avoids fitting the mean-block collection twice when it is also analysed on its own. A fit on other data, or with another zero-inflation setting, is refused.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="squarem-off-by-default-for-a-diagonal-or-spherical-mean-block-sigma-development-version">SQUAREM off by default for a diagonal or spherical mean-block Sigma<a class="anchor" aria-label="anchor" href="#squarem-off-by-default-for-a-diagonal-or-spherical-mean-block-sigma-development-version"></a></h3>
+<ul><li>
+<code>NB_control(acceleration = NULL)</code> is the new default, resolved at fit time: SQUAREM runs for variance-block models and for mean-block models with a full Sigma, not for mean-block models with a diagonal or spherical Sigma. Their EM is exact and converges in a few dozen iterations, so the extrapolations, almost always rejected, only cost time (1.1 to 2.2 times, for the same iterations, on simulated data). <code>TRUE</code> or <code>FALSE</code> still forces it.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="held-out-log-likelihood-and-cross-validation-development-version">Held-out log-likelihood and cross-validation<a class="anchor" aria-label="anchor" href="#held-out-log-likelihood-and-cross-validation-development-version"></a></h3>
 <ul><li>New method <code>heldout_loglik(newdata)</code> on every fitted model: the exact log-likelihood of new observations at the fitted parameters and the MAP partition, on Y’s original scale. For variance-block models it is the marginal over the latent W, computed with the Woodbury identity and the determinant lemma (only q x q matrices are factorized); zero-inflated models add the zero-inflation probabilities and use the marginal of the non-zero cells. On the training data with a known clustering it equals the model’s log-likelihood, which the tests check for every variant.</li>
 <li>New function <code><a href="../reference/normal_block_cv.html">normal_block_cv()</a></code>: K-fold cross-validated log-likelihood of a collection over q, with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods. A criterion that rests on no penalty and compares families, shapes of Sigma and scalings on the same footing. It plateaus beyond the true q, so the selected q (attribute <code>best</code>) follows the one-standard-error rule.</li>

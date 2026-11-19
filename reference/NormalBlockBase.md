@@ -433,18 +433,10 @@ the current model
 
 ### `NormalBlockBase$heldout_loglik()`
 
-Log-likelihood of new observations under the fitted model, for held-out
-validation or cross-validation (see \[normal_block_cv()\]). The
-parameters stay at their fitted values and the partition at its MAP (for
-an unknown clustering); the observations are then independent, and each
-one's log-likelihood is exact: Gaussian for mean-block models, and for
-variance-block ones the marginal over the latent W, computed with the
-Woodbury identity and the determinant lemma so that only q x q matrices
-are factorized. Zero-inflated models add each cell's zero-inflation
-probability, from \`newdata\$X0\`, and use the marginal of the non-zero
-cells. The value is on Y's original scale (the Jacobian of the column
-rescaling is included), so it compares models fitted with and without
-rescaling.
+Log-likelihood of new observations at the fitted parameters and, for an
+unknown clustering, at the MAP partition (see \[normal_block_cv()\]). It
+is exact, computed for variance-block models with q x q matrices only
+(Woodbury identity), and given on Y's original scale.
 
 #### Usage
 

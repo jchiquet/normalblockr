@@ -431,18 +431,11 @@ try every pair.</p></dd>
 
 <p></p><hr><a id="method-NormalBlockBase-heldout_loglik"></a><div class="section">
 <h3 id="normalblockbase-heldout-loglik-"><code>NormalBlockBase$heldout_loglik()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-heldout-loglik-"></a></h3>
-<p>Log-likelihood of new observations under the fitted model,
-for held-out validation or cross-validation (see [normal_block_cv()]).
-The parameters stay at their fitted values and the partition at its
-MAP (for an unknown clustering); the observations are then
-independent, and each one's log-likelihood is exact: Gaussian for
-mean-block models, and for variance-block ones the marginal over the
-latent W, computed with the Woodbury identity and the determinant lemma
-so that only q x q matrices are factorized. Zero-inflated models add
-each cell's zero-inflation probability, from `newdata$X0`, and use the
-marginal of the non-zero cells. The value is on Y's original scale
-(the Jacobian of the column rescaling is included), so it compares
-models fitted with and without rescaling.</p><div class="section">
+<p>Log-likelihood of new observations at the fitted
+parameters and, for an unknown clustering, at the MAP partition (see
+[normal_block_cv()]). It is exact, computed for variance-block models
+with q x q matrices only (Woodbury identity), and given on Y's original
+scale.</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">heldout_loglik</span><span class="op">(</span><span class="va">newdata</span>, per_observation <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">

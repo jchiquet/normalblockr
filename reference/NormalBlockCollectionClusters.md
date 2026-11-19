@@ -20,12 +20,9 @@ and the split/merge \`refine()\` search). Concrete subclasses only build
 
 - `deviance_violations`:
 
-  the values of q whose deviance is higher than at the next smaller q of
-  the collection. The models are nested (a q-cluster model is a (q +
-  1)-cluster one with an empty cluster), so the deviance can only
-  decrease with q at the global optimum: every violation signals an
-  optimization stuck in a poorer local optimum, which \`refine()\` is
-  designed to repair. Empty when there is none.
+  the values of q whose deviance is higher than at the previous q of the
+  collection. The models being nested, each one signals a poor local
+  optimum, which \`refine()\` can repair.
 
 ## Methods
 

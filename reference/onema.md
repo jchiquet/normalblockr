@@ -80,12 +80,12 @@ out <- normal_block(nb_data, 2:15, control = NB_control(clustering_init = "ward2
      number of blocks = 12           
      number of blocks = 13           
 
-#> Warning: diagonal normal-block-var model with 13 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.00122, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+#> Warning: diagonal normal-block-var model with 13 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.00114, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
 #>   number of blocks = 14           
      number of blocks = 15           
 
-#> Warning: diagonal normal-block-var model with 6 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.0013, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
-#>   refine(): improved 11 of 14 models
+#> Warning: diagonal normal-block-var model with 6 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.00478, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+#>   refine(): improved 12 of 14 models
 #> 
 #> DONE
 # }

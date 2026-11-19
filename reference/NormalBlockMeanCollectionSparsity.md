@@ -3,10 +3,7 @@
 R6 class for a collection of mean-block models (\[NormalBlockMeanBase\])
 with a fixed clustering (or a fixed number of blocks) and different
 sparsity levels applied to the p x p precision matrix of the variables.
-Mirrors \[NormalBlockVarCollectionSparsity\], StARS included: the
-network relates the variables, so its edges do not depend on cluster
-labels, and the subsample fits simply hold the clustering fixed (the
-known one, or the MAP partition of the least penalized model).
+Mirrors \[NormalBlockVarCollectionSparsity\], StARS included.
 
 ## Super classes
 
@@ -91,11 +88,11 @@ data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 3, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 5))
 #> Fitting a normal-block-mean model with sparsity path 
-#>   penalty = 2.519595           
-     penalty = 0.7967658           
-     penalty = 0.2519595           
-     penalty = 0.07967658           
-     penalty = 0.02519595           
+#>   penalty = 2.722819           
+     penalty = 0.861031           
+     penalty = 0.2722819           
+     penalty = 0.0861031           
+     penalty = 0.02722819           
 
 #> DONE
 models$plot(c("BIC", "EBIC"))
