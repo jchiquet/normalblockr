@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockVarUnknownClusters.R
 \name{NormalBlockVarUnknownClusters}
 \alias{NormalBlockVarUnknownClusters}
-\title{Normal-Block Model with Unknown Clustering}
+\title{Normal-Block-Var Model with Unknown Clustering}
 \description{
 R6 class for a normal-block model with a fixed number of clusters (but
 unknown clustering).

@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockMeanBase.R
 \name{NormalBlockMeanBase}
 \alias{NormalBlockMeanBase}
-\title{Base Class for Mean-Block Models}
+\title{Base Class for Normal-Block-Mean Models}
 \description{
 R6 abstract class for the Normal-Block models where the clustering
 structures the mean (mu_i = C B' X_i).

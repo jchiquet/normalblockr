@@ -2,7 +2,7 @@
 % Please edit documentation in R/normal_block.R
 \name{normal_block}
 \alias{normal_block}
-\title{Normal-block model}
+\title{Fit Normal-Block Models}
 \usage{
 normal_block(
   data,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockMeanCollectionSparsity.R
 \name{NormalBlockMeanCollectionSparsity}
 \alias{NormalBlockMeanCollectionSparsity}
-\title{Collection of Mean-Block Models over a Sparsity Path}
+\title{Collection of Normal-Block-Mean Models over a Sparsity Path}
 \description{
 R6 class for a collection of mean-block models ([NormalBlockMeanBase]) with
 a fixed clustering (or a fixed number of blocks) and different sparsity

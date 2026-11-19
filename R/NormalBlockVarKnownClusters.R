@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockVarKnownClusters #############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Normal-Block Model with Known Clustering
+#' Normal-Block-Var Model with Known Clustering
 #'
 #' R6 class for a normal-block model with known clustering.
 #' @examples

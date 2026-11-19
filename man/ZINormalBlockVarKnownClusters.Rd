@@ -2,7 +2,7 @@
 % Please edit documentation in R/ZINormalBlockVarKnownClusters.R
 \name{ZINormalBlockVarKnownClusters}
 \alias{ZINormalBlockVarKnownClusters}
-\title{Zero-Inflated Normal-Block Model with Known Clustering}
+\title{Zero-Inflated Normal-Block-Var Model with Known Clustering}
 \description{
 R6 class for a zero-inflated normal-block model with a known clustering.
 }

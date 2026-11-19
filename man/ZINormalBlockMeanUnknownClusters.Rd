@@ -2,7 +2,7 @@
 % Please edit documentation in R/ZINormalBlockMeanUnknownClusters.R
 \name{ZINormalBlockMeanUnknownClusters}
 \alias{ZINormalBlockMeanUnknownClusters}
-\title{Zero-Inflated Mean-Block Model with Unknown Clustering}
+\title{Zero-Inflated Normal-Block-Mean Model with Unknown Clustering}
 \description{
 R6 class for a zero-inflated Normal-Block-Mean model with a fixed number of
 clusters (but unknown clustering), inferred by variational EM. Sigma is

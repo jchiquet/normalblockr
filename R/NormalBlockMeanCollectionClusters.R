@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockMeanCollectionClusters ############
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Collection of Mean-Block Models over a Range of Cluster Counts
+#' Collection of Normal-Block-Mean Models over a Range of Cluster Counts
 #'
 #' R6 class for a collection of mean-block models ([NormalBlockMeanBase])
 #' with different numbers of clusters (q). Inherits its scaffolding

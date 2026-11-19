@@ -1,4 +1,4 @@
-#' Normal-block model
+#' Fit Normal-Block Models
 #'
 #' Fit a normal-block model with a variational or heuristic algorithm
 #' @param data NormalBlockData object, contains the matrix of responses (Y, n x p) and the design matrix (X, n x d), must be created with NormalBlockData$new.
@@ -79,7 +79,7 @@ normal_block <- function(data,
   fit
 }
 
-#' NB_control
+#' Control Parameters for Normal-Block Models
 #'
 #' Control the model settings and various optimization parameters
 #'

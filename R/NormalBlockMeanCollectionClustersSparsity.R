@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockMeanCollectionClustersSparsity ##############
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Collection of Mean-Block Models over Cluster Counts and Sparsity Levels
+#' Collection of Normal-Block-Mean Models over Cluster Counts and Sparsity Levels
 #'
 #' R6 class for a collection of mean-block models ([NormalBlockMeanBase]) over
 #' both a range of cluster counts (q) and a sparsity path, i.e. one

@@ -2,7 +2,7 @@
 ##  CLASS ZINormalBlockVarUnknownClusters ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Zero-Inflated Normal-Block Model with Unknown Clustering
+#' Zero-Inflated Normal-Block-Var Model with Unknown Clustering
 #'
 #' R6 class for a zero-inflated normal-block model with a fixed number of
 #' clusters (but unknown clustering).

@@ -2,7 +2,7 @@
 ##  SEQUENTIAL MEAN-THEN-VARIANCE FIT ##################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Cluster variables in the mean, then in the residual covariance
+#' Cluster Variables in the Mean, then in the Residual Covariance
 #'
 #' Fits the two model families one after the other: a mean-block model
 #' ([NormalBlockMeanBase]) groups the variables by how they respond to the
