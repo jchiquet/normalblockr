@@ -373,7 +373,7 @@ NormalBlockBase <- R6::R6Class(
     #' @param edge.color Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.
     #' @param node.labels vector of character. The labels of the nodes. The default will use the column names ot the response matrix.
     #' @param remove.isolated if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.
-    #' @param layout an igraph layout function, applied to the absolute values of the edge weights, or a matrix of node coordinates. Only relevant for igraph output.
+    #' @param layout an igraph layout function, applied to the graph without its edge weights, or a matrix of node coordinates. Only relevant for igraph output.
     #' @param plot logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.
     plot_network = function(type            = c("partial_cor", "support"),
                             output          = c("igraph", "corrplot"),
@@ -396,29 +396,28 @@ NormalBlockBase <- R6::R6Class(
         } else {
           igraph::V(G)$label <- unlist(lapply(1:ncol(net), f <- function(x) paste0("Cluster_", x)))
         }
-        ## Nice nodes
-        V.deg <- igraph::degree(G)/sum(igraph::degree(G))
-        igraph::V(G)$label.cex <- V.deg / max(V.deg) + .5
-        igraph::V(G)$size <- tabulate(self$clustering, nbins = nrow(self$model_par$Omega)) * 100 / self$p
+        ## Nice nodes: a cluster's area grows with its number of variables
+        sizes <- if (inherits(self, "NormalBlockVarBase")) tabulate(self$clustering, nbins = ncol(net))
+                 else rep(1, ncol(net))
+        igraph::V(G)$size <- 6 + 14 * sqrt(sizes / max(sizes))
+        igraph::V(G)$color <- "grey90"
+        igraph::V(G)$frame.color <- "grey40"
+        igraph::V(G)$label.cex <- 0.8
         igraph::V(G)$label.color <- rgb(0, 0, .2, .8)
-        igraph::V(G)$frame.color <- "transparent" # NA triggers an igraph plot() warning; same (invisible) rendering
         ## Nice edges
         igraph::E(G)$color <- ifelse(igraph::E(G)$weight > 0, edge.color[1], edge.color[2])
         if (type == "support")
           igraph::E(G)$width <- abs(igraph::E(G)$weight)
         else
-          igraph::E(G)$width <- 15*abs(igraph::E(G)$weight)
+          igraph::E(G)$width <- 10*abs(igraph::E(G)$weight)
 
         if (remove.isolated) {
           G <- igraph::delete_vertices(G, which(igraph::degree(G) == 0))
         }
         if (plot) {
-          ## force-directed layouts require positive weights
-          if (is.function(layout)) {
-            G_abs <- G
-            igraph::E(G_abs)$weight <- abs(igraph::E(G_abs)$weight)
-            layout <- layout(G_abs)
-          }
+          ## layouts are computed without the (signed) edge weights
+          if (is.function(layout))
+            layout <- layout(igraph::delete_edge_attr(G, "weight"))
           plot(G, layout = layout)
         }
       }

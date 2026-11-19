@@ -2,11 +2,12 @@
 
 ## Network plots with force-directed layouts
 
-* `plot_network()` computes the layout on the absolute values of the edge
-  weights, so that force-directed layouts such as
-  `igraph::layout_with_fr` work with signed partial correlations (they used to
-  fail or to ignore the weights). `layout` may also be a matrix of
-  coordinates.
+* `plot_network()` computes the layout without the edge weights, so that
+  force-directed layouts such as `igraph::layout_with_fr` work with signed
+  partial correlations (they used to fail). `layout` may also be a matrix of
+  coordinates. The default style is more legible: grey nodes whose area
+  grows with the size of the cluster, labels of constant size, thinner
+  edges.
 
 ## Sequential fits from an already fitted mean-block model
 
