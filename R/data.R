@@ -1,4 +1,4 @@
-#' Breast cancer proteomics data (TCGA, RPPA)
+#' Breast Cancer Proteomics Data (TCGA, RPPA)
 #'
 #' Reverse-phase protein array (RPPA) measurements of 163 proteins across 346
 #' breast cancer tumor samples from The Cancer Genome Atlas (TCGA), along with
@@ -51,7 +51,7 @@
 #' table(brca_rppa$gene_annotation$go_bp_term)
 "brca_rppa"
 
-#' French stream fish community data (ONEMA / OFB electrofishing surveys)
+#' French Stream Fish Community Data (ONEMA / OFB Electrofishing Surveys)
 #'
 #' Fish biomass per species, aggregated by sampling station, together with
 #' environmental covariates for each station. Derived from the fish community
@@ -99,7 +99,7 @@
 #' }
 "onema"
 
-#' University webpages text data (CMU "4 Universities" / WebKB)
+#' University Webpages Text Data (CMU "4 Universities" / WebKB)
 #'
 #' Term-frequency data derived from the student personal webpages of the CMU
 #' "World Wide Knowledge Base" (WebKB) project's "4 Universities" dataset

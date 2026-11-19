@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockMeanBase ##########################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Base Class for Mean-Block Models
+#' Base Class for Normal-Block-Mean Models
 #'
 #' R6 abstract class for the Normal-Block models where the clustering
 #' structures the mean (mu_i = C B' X_i).

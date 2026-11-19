@@ -2,7 +2,7 @@
 % Please edit documentation in R/normal_block_data_generation.R
 \name{generate_normal_block_mean_data}
 \alias{generate_normal_block_mean_data}
-\title{Generate Normal Block Mean Data}
+\title{Simulate Data from a Normal-Block-Mean Model}
 \usage{
 generate_normal_block_mean_data(
   n = 100,

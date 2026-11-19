@@ -3,7 +3,7 @@
 \docType{data}
 \name{university}
 \alias{university}
-\title{University webpages text data (CMU "4 Universities" / WebKB)}
+\title{University Webpages Text Data (CMU "4 Universities" / WebKB)}
 \format{
 A list with 3 elements:
 \describe{

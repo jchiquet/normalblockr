@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockMeanCollectionSparsity ####################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Collection of Mean-Block Models over a Sparsity Path
+#' Collection of Normal-Block-Mean Models over a Sparsity Path
 #'
 #' R6 class for a collection of mean-block models ([NormalBlockMeanBase]) with
 #' a fixed clustering (or a fixed number of blocks) and different sparsity

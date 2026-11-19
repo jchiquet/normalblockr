@@ -2,7 +2,7 @@
 ##  CLASS ZINormalBlockMeanUnknownClusters #############
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Zero-Inflated Mean-Block Model with Unknown Clustering
+#' Zero-Inflated Normal-Block-Mean Model with Unknown Clustering
 #'
 #' R6 class for a zero-inflated Normal-Block-Mean model with a fixed number of
 #' clusters (but unknown clustering), inferred by variational EM. Sigma is

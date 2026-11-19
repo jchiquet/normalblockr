@@ -106,7 +106,7 @@ generate_normal_block_var_param <- function(X = matrix(rnorm(100*p), 100, p),
   )
 }
 
-#' Generate Normal Block Var Data
+#' Simulate Data from a Normal-Block-Var Model
 #'
 #' A function to draw data from the normal block model (see details). The function returns both the generated data and the corresponding model parameters, in a list.
 #'
@@ -208,7 +208,7 @@ generate_normal_block_mean_param <- function(X = matrix(rnorm(100*p), 100, p),
   )
 }
 
-#' Generate Normal Block Mean Data
+#' Simulate Data from a Normal-Block-Mean Model
 #'
 #' A function to draw data from the normal block model (see details). The function returns both the generated data and the corresponding model parameters, in a list.
 #'

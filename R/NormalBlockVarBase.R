@@ -2,7 +2,7 @@
 ##  CLASS NormalBlockVarBase ############################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Base Class for Variance-Block Models
+#' Base Class for Normal-Block-Var Models
 #'
 #' R6 abstract class for the sparse Normal-Block models, where the clustering
 #' structures the latent covariance.

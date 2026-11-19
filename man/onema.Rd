@@ -3,7 +3,7 @@
 \docType{data}
 \name{onema}
 \alias{onema}
-\title{French stream fish community data (ONEMA / OFB electrofishing surveys)}
+\title{French Stream Fish Community Data (ONEMA / OFB Electrofishing Surveys)}
 \format{
 A list with 2 elements:
 \describe{

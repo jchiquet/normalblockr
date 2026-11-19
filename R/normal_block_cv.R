@@ -2,7 +2,7 @@
 ##  CROSS-VALIDATED LOG-LIKELIHOOD #####################
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' Cross-validated log-likelihood of normal-block models
+#' Cross-Validated Log-Likelihood of Normal-Block Models
 #'
 #' Splits the observations into folds, fits [normal_block()] on all but one
 #' fold and evaluates the held-out log-likelihood of the left-out fold (see

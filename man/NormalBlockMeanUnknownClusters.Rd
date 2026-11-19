@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockMeanUnknownClusters.R
 \name{NormalBlockMeanUnknownClusters}
 \alias{NormalBlockMeanUnknownClusters}
-\title{Mean-Block Model with Unknown Clustering}
+\title{Normal-Block-Mean Model with Unknown Clustering}
 \description{
 R6 class for a Normal-Block-Mean model with a fixed number of clusters
 (but unknown clustering), inferred by variational EM.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/normal_block.R
 \name{NB_control}
 \alias{NB_control}
-\title{NB_control}
+\title{Control Parameters for Normal-Block Models}
 \usage{
 NB_control(
   niter = 500,

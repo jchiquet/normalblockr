@@ -9,6 +9,8 @@
   linear system with a symmetric positive definite matrix instead of
   inverting it, and products with a transposed matrix use `crossprod()` and
   `tcrossprod()`. Results are unchanged.
+* Help page titles in title case, and named after the two families of the
+  article (Normal-Block-Var, Normal-Block-Mean).
 
 ## Named extractors
 

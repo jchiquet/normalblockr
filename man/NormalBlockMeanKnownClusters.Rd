@@ -2,7 +2,7 @@
 % Please edit documentation in R/NormalBlockMeanKnownClusters.R
 \name{NormalBlockMeanKnownClusters}
 \alias{NormalBlockMeanKnownClusters}
-\title{Mean-Block Model with Known Clustering}
+\title{Normal-Block-Mean Model with Known Clustering}
 \description{
 R6 class for a Normal-Block-Mean model with a known clustering.
 }
