@@ -51,14 +51,8 @@ unknown blocks: a heuristic name ("ward2", "kmeans", "sbm" or
 matrix, or a list of either per q for a collection), or "best_of_inits" to
 try several heuristics per model and keep the best-ELBO fit (see
 [NormalBlockVarBase]'s `best_of_inits()`; not supported with `sparsity =
-TRUE`). Default `NULL`, resolved at fit time to "kmeans" for both
-model families. No heuristic dominates on every dataset, but kmeans
-followed by `refine` (below, on by default) gives the best fits overall:
-clearly so for mean-block models, and on two of the three benchmark
-datasets for variance-block ones, where "ward2" remains preferable for
-zero-inflated abundance data such as `onema` (see
-`inst/clustering_initialization_benchmark/var_init_study.R` in the package
-sources).}
+TRUE`). Default `NULL`, i.e. "kmeans" for both model families; "ward2"
+can work better on zero-inflated abundance data.}
 
 \item{verbose}{telling if information should be printed during optimization}
 
@@ -73,22 +67,15 @@ mean-block models, whose Sigma is the full p x p residual covariance, also
 accept "full". Default `NULL`, resolved per model family at fit time to
 "diagonal" -- except for a mean-block model with `sparsity > 0`, which
 implies "full" since a penalty on a diagonal precision matrix would have
-nothing to act on (explicitly asking for both is an error). The mean-block
-"diagonal"/"spherical" variants need no matrix inversion, hence no
-`n > p` requirement, and they select the number of clusters markedly
-better than a full Sigma once p approaches n: the p(p+1)/2 covariance
-parameters otherwise drown the mean structure BIC/ICL are weighing. Use
-"full" when the residual associations are themselves of interest.}
+nothing to act on (explicitly asking for both is an error). A full Sigma
+has many parameters and needs n > p; use it when the residual associations
+between variables are of interest.}
 
 \item{refine}{for collections over a range of cluster counts (both
 families): whether `optimize()` automatically calls `refine()` afterwards.
-Default `TRUE`: each model of the collection is fitted independently from
-its own heuristic clustering, and the split/merge search seeded from its
-neighbors repairs the poorer local optima this leaves (deviance increasing
-with q, selected q depending on the seed of a random initialization). It
-typically multiplies the cost of the collection by 3 to 6. Set it to
-`FALSE` to get the cold-started collection, and call
-`collection$refine()` later if needed.}
+Default `TRUE`: the split and merge search repairs the poor local optima
+that independent fits can leave, at a few times the cost of the
+collection. With `FALSE`, `collection$refine()` can be called later.}
 
 \item{acceleration}{whether the (V)EM is accelerated by SQUAREM
 (Varadhan & Roland, 2008), an extrapolation built on two successive (V)EM

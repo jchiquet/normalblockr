@@ -5,15 +5,10 @@
 #' Cross-validated log-likelihood of normal-block models
 #'
 #' Splits the observations into folds, fits [normal_block()] on all but one
-#' fold and evaluates the held-out log-likelihood of the left-out fold
-#' (`heldout_loglik()`, see [NormalBlockBase]), for every model of the
-#' collection. It gives a criterion to choose the number of clusters that
-#' does not rest on a penalty: the held-out log-likelihood is exact for both
-#' families (for variance-block models, the marginal over the latent W is
-#' computed with the Woodbury identity at the MAP partition), so it compares
-#' models of different families, shapes of Sigma or scalings on the same
-#' footing. Observations, not variables, are split: every fold sees all the
-#' variables, whose clustering is re-estimated on each training set.
+#' fold and evaluates the held-out log-likelihood of the left-out fold (see
+#' `heldout_loglik()` in [NormalBlockBase]), for every model of the
+#' collection. It selects the number of clusters without a penalty, and
+#' compares models of different families, shapes of Sigma or scalings.
 #'
 #' @param data a [NormalBlockData] object
 #' @param blocks as in [normal_block()]: a range of numbers of clusters, a
@@ -33,11 +28,9 @@
 #' (`se`, from the spread of the per-observation values); the
 #' per-observation values are kept in the `per_observation` attribute
 #' (n x number of models) and the folds in `folds`. Its `best` attribute
-#' is the q chosen by the one-standard-error rule (Breiman et al., 1984): the
-#' smallest q whose log-likelihood is within one standard error of the
-#' largest. The held-out log-likelihood typically plateaus beyond the true
-#' number of clusters, since superfluous clusters barely hurt prediction, so
-#' its plain maximum (attribute `best_max`) tends to over-select.
+#' is the q chosen by the one-standard-error rule, the smallest q within one
+#' standard error of the maximum; `best_max` is the maximum itself, which
+#' tends to over-select.
 #' @examples
 #' ex   <- generate_normal_block_var_data(n = 60, p = 15, d = 1, q = 3)
 #' data <- NormalBlockData$new(ex$Y, ex$X)

@@ -50,9 +50,7 @@ often more informative than choosing one.
 The second stage uses an intercept-only design on purpose: the covariate
 effects have already been removed by the first stage.
 
-This is a heuristic two-stage estimator, not a joint model. On simulated
-data carrying two genuinely distinct structures it recovers both exactly
-(see `inst/mean_block_analyses/sequential_mean_then_variance.R`).
+This is a heuristic two-stage estimator, not a joint model.
 }
 \examples{
 ex   <- generate_normal_block_mean_data(n = 80, p = 20, d = 1, q = 3)

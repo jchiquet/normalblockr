@@ -14,9 +14,7 @@
 #' The second stage uses an intercept-only design on purpose: the covariate
 #' effects have already been removed by the first stage.
 #'
-#' This is a heuristic two-stage estimator, not a joint model. On simulated
-#' data carrying two genuinely distinct structures it recovers both exactly
-#' (see `inst/mean_block_analyses/sequential_mean_then_variance.R`).
+#' This is a heuristic two-stage estimator, not a joint model.
 #'
 #' @param data a [NormalBlockData] object
 #' @param blocks_mean number of clusters for the mean-block stage: an integer,

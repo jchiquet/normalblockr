@@ -81,13 +81,10 @@ NormalBlockCollectionSparsity <- R6::R6Class(
       self$models[[id]]$clone()
     },
 
-    #' @description Compute the stability path by stability selection (StARS,
-    #' Liu et al. 2010): the whole penalty path is refitted on subsamples of
-    #' the observations, with the clustering held fixed so that the networks
-    #' are comparable across subsamples, and each edge's selection
-    #' probability is recorded at every penalty. For a variance-block
-    #' collection the network relates the q blocks; for a mean-block one,
-    #' the p variables.
+    #' @description Computes the stability path (StARS, Liu et al. 2010): the
+    #' penalty path is refitted on subsamples of the observations, with the
+    #' clustering held fixed, and the selection frequency of each edge is
+    #' recorded at every penalty.
     #' @param subsamples a list of vectors describing the subsamples. The number of vectors (or list length) determines the number of subsamples used in the stability selection. Automatically set to 10 subsamples with size `10*sqrt(n)` if `n >= 144` and `0.8*n` otherwise following Liu et al. (2010) recommendations.
     #' @param n_subsamples number of subsamples to create if the subsamples are not given
     stability_selection = function(subsamples = NULL, n_subsamples = 10) {

@@ -133,18 +133,10 @@ each penalty in a sparsity path from the previous one's solution.
 \if{html}{\out{<a id="method-NormalBlockVarBase-within_block_correlations"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-within_block_correlations}{}}}
 \subsection{\code{NormalBlockVarBase$within_block_correlations()}}{
-  Diagnose whether the blocks are made of positively
-co-varying variables, as the model requires. Within block k, two
-variables j and l are noisy copies of the same latent signal, so their
-covariance is `Sigma_kk > 0` and their correlation
-`Sigma_kk / sqrt((Sigma_kk + d_j) (Sigma_kk + d_l))` lies in (0, 1):
-the model cannot put two anticorrelated variables in the same block.
-This compares, for each block, the empirical correlations of the
-variables' residuals `Y - XB` (non-zero cells only for zero-inflated
-models) with the correlations the fitted model implies. Mostly useful
-for a known clustering (e.g. from an annotation): a block with many
-negative empirical correlations is misspecified, and should rather be
-split into blocks linked by a negative `Sigma_kl`.
+  Checks that the blocks gather positively co-varying
+variables, as the model requires (two variables of a block have a
+positive correlation). Compares, for each block, the empirical
+correlations of the residuals `Y - XB` with those implied by the model.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarBase$within_block_correlations()}
@@ -176,13 +168,9 @@ with fewer than two variables.
       \item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
 default FALSE (send a copy)}
       \item{\code{rule}}{how the members of the cluster are divided: `"kmeans"`
-runs a 2-means on their columns of residuals `Y - XB`, the geometry of
-the model (members of a block are noisy copies of a common latent
-signal, so they lie close to each other); `"noise"` cuts them at the
-median of their noise variance (the rule used before 0.4.0). Default
-`NULL`, resolved to `"kmeans"` for this family: on `brca_rppa` it lets
-`refine()` lower the deviance summed over q = 1..30 by 22,166 against
-18,588 for `"noise"`.}
+runs a 2-means on their columns of residuals `Y - XB`; `"noise"` cuts
+them at the median of their noise variance. Default `NULL`, i.e.
+`"kmeans"` for this family.}
     }
     \if{html}{\out{</div>}}
   }

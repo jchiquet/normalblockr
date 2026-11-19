@@ -155,11 +155,8 @@ NormalBlockCollectionClusters <- R6::R6Class(
     #' @field q_list number of blocks
     q_list = function() map_dbl(self$models, "q"),
     #' @field deviance_violations the values of q whose deviance is higher
-    #' than at the next smaller q of the collection. The models are nested (a
-    #' q-cluster model is a (q + 1)-cluster one with an empty cluster), so the
-    #' deviance can only decrease with q at the global optimum: every
-    #' violation signals an optimization stuck in a poorer local optimum,
-    #' which `refine()` is designed to repair. Empty when there is none.
+    #' than at the previous q of the collection. The models being nested, each
+    #' one signals a poor local optimum, which `refine()` can repair.
     deviance_violations = function() {
       ord <- order(self$q_list)
       dev <- self$criteria$deviance[ord]

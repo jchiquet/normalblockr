@@ -241,18 +241,11 @@ NormalBlockBase <- R6::R6Class(
       candidates
     },
 
-    #' @description Log-likelihood of new observations under the fitted model,
-    #' for held-out validation or cross-validation (see [normal_block_cv()]).
-    #' The parameters stay at their fitted values and the partition at its
-    #' MAP (for an unknown clustering); the observations are then
-    #' independent, and each one's log-likelihood is exact: Gaussian for
-    #' mean-block models, and for variance-block ones the marginal over the
-    #' latent W, computed with the Woodbury identity and the determinant lemma
-    #' so that only q x q matrices are factorized. Zero-inflated models add
-    #' each cell's zero-inflation probability, from `newdata$X0`, and use the
-    #' marginal of the non-zero cells. The value is on Y's original scale
-    #' (the Jacobian of the column rescaling is included), so it compares
-    #' models fitted with and without rescaling.
+    #' @description Log-likelihood of new observations at the fitted
+    #' parameters and, for an unknown clustering, at the MAP partition (see
+    #' [normal_block_cv()]). It is exact, computed for variance-block models
+    #' with q x q matrices only (Woodbury identity), and given on Y's original
+    #' scale.
     #' @param newdata a [NormalBlockData] object with the same variables and
     #' covariates (and zero-inflation covariates) as the training data.
     #' @param per_observation whether to return one value per observation
@@ -583,22 +576,9 @@ NormalBlockBase <- R6::R6Class(
     },
 
 
-    ## Registry of clustering heuristics used to turn the OLS/ZI residuals R
-    ## (n x p) into an initial clustering of the p variables into self$q
-    ## groups (a vector of length p with values in 1:q). One single table
-    ## instead of one ad hoc private method per algorithm, selectable via
-    ## NB_control(clustering_init = ...) ("ward2"/"kmeans"/"sbm"/"spectral").
-    ## Benchmarked separately per family (the two cluster genuinely different
-    ## quantities: residual covariance vs. mean trajectory); kmeans is the
-    ## default of both. For the mean-block family it consistently lands in a
-    ## better ELBO basin than ward2 or spectral (inst/mean_block_analyses/).
-    ## For the variance-block family no single method dominates on real data:
-    ## kmeans fits brca_rppa much better, ward2 the zero-inflated onema; and
-    ## a cold-started kmeans collection violates the monotonicity of the
-    ## deviance in q more often than a ward2 one. With refine(), on by
-    ## default since then, those violations disappear and kmeans gives the
-    ## best fits on two of the three datasets
-    ## (inst/clustering_initialization_benchmark/var_init_study.R).
+    ## Registry of clustering heuristics turning the residuals R (n x p) into
+    ## an initial clustering of the p variables into self$q groups, selected
+    ## by NB_control(clustering_init = ...); kmeans is the default.
     ## spectral clusters the eigenvectors of cov(R) (top q, each row rescaled
     ## to unit L2 norm, the classic Ng-Jordan-Weiss normalization).
     clustering_methods = list(

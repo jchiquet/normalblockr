@@ -33,9 +33,6 @@ NormalBlockVarBase <- R6::R6Class(
     initialize = function(data, q, sparsity = 0, control = NB_control(), zero_inflation = FALSE) {
       ## family defaults (see NormalBlockMeanBase for the other ones)
       data <- data$for_family("var")
-      ## kmeans, as for the mean-block family: with refine() (on by default),
-      ## it gives the best fits on brca_rppa and the university data, see
-      ## inst/clustering_initialization_benchmark/var_init_study.R
       if (is.null(control$clustering_init)) control$clustering_init <- "kmeans"
       if (is.null(control$noise_covariance)) control$noise_covariance <- "diagonal"
       stopifnot("noise_covariance = 'full' only applies to mean-block models, whose Sigma is the full p x p residual covariance" =
@@ -77,18 +74,10 @@ NormalBlockVarBase <- R6::R6Class(
       invisible(self)
     },
 
-    #' @description Diagnose whether the blocks are made of positively
-    #' co-varying variables, as the model requires. Within block k, two
-    #' variables j and l are noisy copies of the same latent signal, so their
-    #' covariance is `Sigma_kk > 0` and their correlation
-    #' `Sigma_kk / sqrt((Sigma_kk + d_j) (Sigma_kk + d_l))` lies in (0, 1):
-    #' the model cannot put two anticorrelated variables in the same block.
-    #' This compares, for each block, the empirical correlations of the
-    #' variables' residuals `Y - XB` (non-zero cells only for zero-inflated
-    #' models) with the correlations the fitted model implies. Mostly useful
-    #' for a known clustering (e.g. from an annotation): a block with many
-    #' negative empirical correlations is misspecified, and should rather be
-    #' split into blocks linked by a negative `Sigma_kl`.
+    #' @description Checks that the blocks gather positively co-varying
+    #' variables, as the model requires (two variables of a block have a
+    #' positive correlation). Compares, for each block, the empirical
+    #' correlations of the residuals `Y - XB` with those implied by the model.
     #' @return a data frame with one row per block: `block`, `size`, the mean
     #' and minimum of the empirical within-block correlations (`mean_cor`,
     #' `min_cor`), the proportion of negative ones (`prop_negative`), and the
@@ -121,13 +110,9 @@ NormalBlockVarBase <- R6::R6Class(
     #' @param in_place should the split applied to the object itself, or should a copy be sent?
     #' default FALSE (send a copy)
     #' @param rule how the members of the cluster are divided: `"kmeans"`
-    #' runs a 2-means on their columns of residuals `Y - XB`, the geometry of
-    #' the model (members of a block are noisy copies of a common latent
-    #' signal, so they lie close to each other); `"noise"` cuts them at the
-    #' median of their noise variance (the rule used before 0.4.0). Default
-    #' `NULL`, resolved to `"kmeans"` for this family: on `brca_rppa` it lets
-    #' `refine()` lower the deviance summed over q = 1..30 by 22,166 against
-    #' 18,588 for `"noise"`.
+    #' runs a 2-means on their columns of residuals `Y - XB`; `"noise"` cuts
+    #' them at the median of their noise variance. Default `NULL`, i.e.
+    #' `"kmeans"` for this family.
     #' @return A new [`NormalBlockVarBase`] object
     split = function(index, in_place = FALSE, rule = NULL) {
       ## update private fields related to group parameters
@@ -267,8 +252,7 @@ NormalBlockVarBase <- R6::R6Class(
         -0.5 * (sum(o) * log(2 * pi) + logdet + sum(d * r^2) - sum(w^2))
       }, numeric(1))
     },
-    ## heuristics tried by best_of_inits(), best first (see NB_control()'s
-    ## clustering_init and inst/clustering_initialization_benchmark/)
+    ## heuristics tried by best_of_inits()
     default_inits     = c("kmeans", "ward2", "spectral"),
     ## split() rule used by refine() unless told otherwise (see split())
     default_split_rule = "kmeans",
