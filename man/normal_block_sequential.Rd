@@ -18,7 +18,10 @@ normal_block_sequential(
 \item{data}{a [NormalBlockData] object}
 
 \item{blocks_mean}{number of clusters for the mean-block stage: an integer,
-a vector of integers to explore, or a p x q indicator matrix}
+a vector of integers to explore, or a p x q indicator matrix. It can also be
+a mean-block model or collection already fitted on `data` (by
+`normal_block(data, ..., model = "mean")`), in which case the first stage
+is not refitted: a collection is reduced to its best model by `crit`.}
 
 \item{blocks_var}{idem for the variance-block stage, run on the residuals}
 

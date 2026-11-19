@@ -75,3 +75,32 @@ test_that("the zero-inflated chain runs and shares one mask across both stages",
   expect_equal(fit$var$data$zeros, data$zeros)
   expect_true(all(fit$residuals[data$zeros == 1] == 0))
 })
+
+test_that("normal_block_sequential() can start from a mean-block fit, without refitting it", {
+  set.seed(3)
+  ex   <- generate_normal_block_mean_data(n = 80, p = 20, d = 1, q = 3)
+  data <- NormalBlockData$new(ex$Y, ex$X)
+  ctrl <- NB_control(verbose = FALSE)
+  coll <- normal_block(data, blocks = 2:4, model = "mean", control = ctrl)
+
+  ## from a collection: its best model by crit is the first stage, unchanged
+  set.seed(4)
+  fit <- normal_block_sequential(data, blocks_mean = coll, blocks_var = 2, crit = "BIC")
+  best <- coll$get_best_model("BIC")
+  expect_equal(fit$mean$clustering, best$clustering)
+  expect_equal(fit$mean$loglik, best$loglik)
+  expect_equal(fit$residuals, ex$Y - fitted(best), ignore_attr = TRUE)
+
+  ## from a single model: the same second stage as when the first is refitted
+  single <- normal_block(data, blocks = 3, model = "mean", control = ctrl)
+  set.seed(5)
+  from_fit <- normal_block_sequential(data, blocks_mean = single, blocks_var = 2)
+  expect_equal(from_fit$mean$loglik, single$loglik)
+  expect_equal(from_fit$var$q, 2)
+
+  ## a fit on other data, or with another zero-inflation setting, is refused
+  other <- NormalBlockData$new(ex$Y[1:40, ], ex$X[1:40, , drop = FALSE])
+  expect_error(normal_block_sequential(other, blocks_mean = single, blocks_var = 2), "obtained on `data`")
+  expect_error(normal_block_sequential(data, blocks_mean = single, blocks_var = 2, zero_inflation = TRUE),
+               "zero_inflation")
+})
