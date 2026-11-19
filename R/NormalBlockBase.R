@@ -394,7 +394,7 @@ NormalBlockBase <- R6::R6Class(
         if (!is.null(node.labels)) {
           igraph::V(G)$label <- node.labels
         } else {
-          igraph::V(G)$label <- unlist(lapply(1:ncol(net), f <- function(x) paste0("Cluster_", x)))
+          igraph::V(G)$label <- cluster_names(ncol(net))
         }
         ## Nice nodes: a cluster's area grows with its number of variables
         sizes <- if (inherits(self, "NormalBlockVarBase")) tabulate(self$clustering, nbins = ncol(net))
@@ -446,7 +446,7 @@ NormalBlockBase <- R6::R6Class(
     ## S3 methods ----------------------------
     #' @description User friendly print method
     #' @param model First line of the print output
-    print = function(model = paste("A", self$who_am_I, ".\n")) {
+    print = function(model = paste0("A ", self$who_am_I, ".\n")) {
       cat(model)
       cat("===========================================================================\n")
       print(as.data.frame(round(self$criteria, digits = 3), row.names = ""))

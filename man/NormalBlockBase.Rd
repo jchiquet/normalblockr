@@ -470,7 +470,7 @@ matrix instead of plotting it, use `$latent_network()`.
   User friendly print method
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockBase$print(model = paste("A", self$who_am_I, ".\\n"))}
+    \preformatted{NormalBlockBase$print(model = paste0("A ", self$who_am_I, ".\\n"))}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
