@@ -1,49 +1,27 @@
+## Submission
 
-This release hopefully fixes the ERROR currently shown on
-`r-devel-linux-x86_64-fedora-gcc`, where re-building
-`breast-cancer-proteomics.Rmd` aborts with
+normalblockr 1.0.0 is a major release. It accompanies a submission to the
+Journal of Statistical Software describing the package, whose replication
+code requires this version.
 
-    malloc(): unsorted double linked list corrupted
+Main changes since 0.3.0 (see NEWS.md):
 
-The abort signature has varied from run to run -- an earlier one on the same
-check was
+* model-selection criteria aligned with the literature (one BIC penalty per
+  group of parameters; ICL completing the partition only);
+* new penalty-free selection tools: held-out log-likelihood and K-fold
+  cross-validation (`normal_block_cv()`); StARS for both model families;
+* defaults unified across the two model families (initialization, rescaling
+  of the data, local search after fitting a collection);
+* extractors (`coef()`, `sigma()`, `fitted()`, `predict()`) consistently on
+  the original scale of the data, with names.
 
-    *** caught segfault ***
-    address 0x580, cause 'memory not mapped'
+## Test environments
 
-which is itself consistent with the diagnosis below: heap corruption, whose
-symptom depends on what the allocator happens to touch next.
-
-It is submitted sooner than the usual interval for that reason; please let
-us know if you would rather we wait.
-
-## The fix
-
-The crash is in the vignette's graphical-lasso section. Until now that step called back into R -- `glassoFast::glassoFast()` -- from inside the C++
-(V)EM loop, once per M-step, i.e. thousands of R re-entries from within a
-single `.Call()`. One memory-safety bug on that boundary had been found, and the crash signature matched what our own CI showed intermittently on Linux
-across several R versions.
-
-This new release removes that boundary: the graphical lasso is now implemented in the package's own C++ (`src/graphical_lasso.h`). There is no longer any call from C++ back into R inside the recursion.
-
-We were never able to reproduce the crash locally (it appeared on roughly one CI run in ten, across R versions and platforms, which is the expected profile of heap corruption), so we cannot demonstrate the fix directly on a failing case. The argument is that the suspected mechanism is gone. As supporting evidence, the vignette's full  pipeline has been run 40 times under `MALLOC_CHECK_=3` on the new code, without incident.
-
-## Other changes
-
-The release also adds a second model family (variables clustered by their
-regression response to the covariates rather than by their covariance). See
-NEWS.md.
-
-## Tested environments
-
-* locally on Ubuntu Linux 24.04, R-release, GCC (`R CMD check --as-cran`)
-
-* remotely with github-actions:
-  - Linux ubuntu 24.04, R-release
-  - Linux ubuntu 24.04, R-devel
-  - Linux ubuntu 24.04, R-oldrel-1
-  - macOS, R-release
-  - Windows Server, R-release
+* local: Ubuntu 24.04, R-release, GCC (`R CMD check --as-cran`)
+* win-builder: R-release, R-devel
+* mac-builder: R-release
+* GitHub Actions: Ubuntu 24.04 (R-release, R-devel, R-oldrel-1), macOS
+  (R-release), Windows (R-release)
 
 ## R CMD check results
 
@@ -57,7 +35,9 @@ libs), HTML Tidy not being installed here, and -- intermittently, when GitHub
 rate-limits us -- a 429 on the README's last-commit badge URL, which resolves
 normally otherwise.
 
-Should the incoming checks flag "Days since last update" (0.2.1 was published
-on 2026-09-03): this submission is early on purpose, to answer the check
-ERROR on r-devel-linux-x86_64-fedora-gcc described above. We are happy to
-wait if you would rather we did.
+## Previous submission
+
+The 0.3.0 ERROR on r-devel-linux-x86_64-fedora-gcc (`could not find function
+"initRefFields"`, through `sbm::estimateSimpleSBM()` and blockmodels'
+Reference Classes) came from an r-devel regression in `methods`, since
+resolved: all flavors are OK for 0.3.0.
