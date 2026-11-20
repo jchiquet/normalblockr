@@ -39,3 +39,14 @@ test_that("plot_network() does not error when the inferred clustering has an emp
   expect_length(tabulate(model$clustering, nbins = model$q), model$q)
   expect_no_error(model$plot_network(plot = FALSE))
 })
+
+test_that("the criteria plots name their x axis after the explored quantity", {
+  set.seed(3)
+  ex   <- generate_normal_block_var_data(n = 60, p = 15, d = 1, q = 3)
+  data <- NormalBlockData$new(ex$Y, ex$X)
+  ctrl <- NB_control(verbose = FALSE, refine = FALSE)
+  co <- normal_block(data, blocks = 2:4, control = ctrl)
+  expect_equal(co$plot()$labels$x, "q")
+  sp <- normal_block(data, blocks = ex$parameters$C, sparsity = TRUE, control = ctrl)
+  expect_equal(sp$plot()$labels$x, "sparsity")
+})
