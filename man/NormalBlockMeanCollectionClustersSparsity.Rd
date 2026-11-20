@@ -7,9 +7,7 @@
 R6 class for a collection of mean-block models ([NormalBlockMeanBase]) over
 both a range of cluster counts (q) and a sparsity path, i.e. one
 [NormalBlockMeanCollectionSparsity] per q. Mirrors
-[NormalBlockVarCollectionClustersSparsity], minus its SBM-path shortcut for
-the initial clustering (ill-suited to this family, see
-[NormalBlockMeanCollectionClusters]).
+[NormalBlockVarCollectionClustersSparsity].
 }
 \examples{
 ex <- generate_normal_block_mean_data(n = 60, p = 20, d = 1, q = 3)
@@ -25,7 +23,6 @@ models$get_best_model("BIC")
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
-    \item \href{#method-NormalBlockMeanCollectionClustersSparsity-initialize}{\code{NormalBlockMeanCollectionClustersSparsity$new()}}
     \item \href{#method-NormalBlockMeanCollectionClustersSparsity-clone}{\code{NormalBlockMeanCollectionClustersSparsity$clone()}}
   }
 }
@@ -36,37 +33,10 @@ models$get_best_model("BIC")
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClustersSparsity" data-id="get_best_model"><a href='../../normalblockr/html/NormalBlockCollectionClustersSparsity.html#method-NormalBlockCollectionClustersSparsity-get_best_model'><code>NormalBlockCollectionClustersSparsity$get_best_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClustersSparsity" data-id="get_model"><a href='../../normalblockr/html/NormalBlockCollectionClustersSparsity.html#method-NormalBlockCollectionClustersSparsity-get_model'><code>NormalBlockCollectionClustersSparsity$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClustersSparsity" data-id="initialize"><a href='../../normalblockr/html/NormalBlockCollectionClustersSparsity.html#method-NormalBlockCollectionClustersSparsity-initialize'><code>NormalBlockCollectionClustersSparsity$initialize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClustersSparsity" data-id="plot"><a href='../../normalblockr/html/NormalBlockCollectionClustersSparsity.html#method-NormalBlockCollectionClustersSparsity-plot'><code>NormalBlockCollectionClustersSparsity$plot()</code></a></span></li>
 </ul>
 </details>}}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanCollectionClustersSparsity-initialize"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionClustersSparsity-initialize}{}}}
-\subsection{\code{NormalBlockMeanCollectionClustersSparsity$new()}}{
-  Create a new [`NormalBlockMeanCollectionClustersSparsity`] object.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanCollectionClustersSparsity$new(
-  mydata,
-  q_list,
-  control = NB_control()
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
-      \item{\code{q_list}}{list of q values (number of groups) in the collection}
-      \item{\code{control}}{structured list of parameters to handle sparsity control}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A new [`NormalBlockMeanCollectionClustersSparsity`] object
-  }
-}
-
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockMeanCollectionClustersSparsity-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionClustersSparsity-clone}{}}}

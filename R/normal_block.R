@@ -70,7 +70,8 @@ normal_block <- function(data,
   ## Estimation/optimization
   if (control$verbose) cat("Fitting a", fit$who_am_I, "\n")
 
-  if (uses_best_of_inits(control) && !is.null(fit$best_of_inits)) {
+  ## a known clustering has no initialization to choose
+  if (uses_best_of_inits(control) && isNB(fit) && !is.matrix(blocks)) {
     fit <- fit$best_of_inits(control = control)
   } else {
     fit$optimize(control)
@@ -219,51 +220,16 @@ get_model <- function(data,
 
   changing_sparsity <- isTRUE(sparsity)
   unknown_q_list    <- !is.matrix(blocks) && length(blocks) > 1
-  is_collection     <- changing_sparsity || unknown_q_list
+  family <- if (model == "var") "Var" else "Mean"
 
-  if (model == "mean") {
-    stopifnot(
-      "zero-inflation is not available for a mean-block sparsity path: it needs a full Sigma, which zero-inflated mean-block models do not carry" =
-        !(zero_inflation && changing_sparsity)
-    )
-    if (changing_sparsity) {
-      return(if (unknown_q_list)
-               NormalBlockMeanCollectionClustersSparsity$new(data, blocks, control = control)
-             else
-               NormalBlockMeanCollectionSparsity$new(data, blocks, control = control))
-    }
-    if (unknown_q_list) {
-      return(NormalBlockMeanCollectionClusters$new(data, blocks, zero_inflation,
-                                                   sparsity = sparsity, control = control))
-    }
-    class_name <- if (is.matrix(blocks)) "NormalBlockMeanKnownClusters" else "NormalBlockMeanUnknownClusters"
-    if (zero_inflation) class_name <- paste0("ZI", class_name)
-    myClass <- eval(str2lang(class_name))
-    return(myClass$new(data, blocks, sparsity, control = control))
+  if (changing_sparsity || unknown_q_list) {
+    kind <- if (changing_sparsity && unknown_q_list) "CollectionClustersSparsity"
+            else if (changing_sparsity) "CollectionSparsity" else "CollectionClusters"
+    collection <- get(paste0("NormalBlock", family, kind))
+    if (changing_sparsity) return(collection$new(data, blocks, zero_inflation, control = control))
+    return(collection$new(data, blocks, zero_inflation, sparsity, control = control))
   }
-
-  if (is_collection) {
-    class_name <- if (changing_sparsity && unknown_q_list) {
-      "NormalBlockVarCollectionClustersSparsity"
-    } else if (changing_sparsity) {
-      "NormalBlockVarCollectionSparsity"
-    } else {
-      "NormalBlockVarCollectionClusters"
-    }
-  } else {
-    class_name <- if (is.matrix(blocks)) "NormalBlockVarKnownClusters" else "NormalBlockVarUnknownClusters"
-    if (zero_inflation) class_name <- paste0("ZI", class_name)
-  }
-
-  myClass <- eval(str2lang(class_name))
-  if (is_collection) {
-    if (changing_sparsity) {
-      model <- myClass$new(data, blocks, zero_inflation, control = control)
-    } else {
-      model <- myClass$new(data, blocks, zero_inflation, sparsity, control = control)
-    }
-  } else {
-    model <- myClass$new(data, blocks, sparsity, control = control)
-  }
-  model
+  class_name <- paste0(if (zero_inflation) "ZI", "NormalBlock", family,
+                       if (is.matrix(blocks)) "Known" else "Unknown", "Clusters")
+  get(class_name)$new(data, blocks, sparsity, control = control)
 }

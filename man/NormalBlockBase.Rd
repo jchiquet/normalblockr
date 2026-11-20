@@ -30,6 +30,10 @@ mean-block ([NormalBlockMeanBase]) model families.
 
     \item{\code{d}}{number of variables (dimensions in X)}
 
+    \item{\code{d0}}{number of zero-inflation covariates (dimensions in X0)}
+
+    \item{\code{who_am_I}}{a description of the model}
+
     \item{\code{q}}{number of blocks}
 
     \item{\code{n_edges}}{number of edges of the network (non null coefficient of the sparse precision matrix Omega)}
@@ -96,6 +100,7 @@ unknown clustering), named after the columns of Y}
     \item \href{#method-NormalBlockBase-update}{\code{NormalBlockBase$update()}}
     \item \href{#method-NormalBlockBase-optimize}{\code{NormalBlockBase$optimize()}}
     \item \href{#method-NormalBlockBase-best_of_inits}{\code{NormalBlockBase$best_of_inits()}}
+    \item \href{#method-NormalBlockBase-warm_start_from}{\code{NormalBlockBase$warm_start_from()}}
     \item \href{#method-NormalBlockBase-candidates_split}{\code{NormalBlockBase$candidates_split()}}
     \item \href{#method-NormalBlockBase-candidates_merge}{\code{NormalBlockBase$candidates_merge()}}
     \item \href{#method-NormalBlockBase-heldout_loglik}{\code{NormalBlockBase$heldout_loglik()}}
@@ -153,13 +158,9 @@ All possible parameters of the child classes
   Omega = NA,
   gamma = NA,
   mu = NA,
-  kappa = NA,
   alpha = NA,
   M = NA,
   S = NA,
-  Psi = NA,
-  Phi = NA,
-  Lambda = NA,
   ll_list = NA,
   warm_started = NA,
   clustering_init = NA
@@ -176,13 +177,9 @@ All possible parameters of the child classes
 models, variable-level for Normal Mean Block models) [all]}
       \item{\code{gamma}}{variance of posterior distribution of W [NBVar - known]}
       \item{\code{mu}}{mean for posterior distribution of W [NBVar - known]}
-      \item{\code{kappa}}{vector of zero-inflation probabilities [ZINBVar, ZINBMean]}
       \item{\code{alpha}}{vector of groups probabilities [NBVar]}
       \item{\code{M}}{variational mean for posterior distribution of W [NBVar - unknown]}
       \item{\code{S}}{variational diagonal of variances for posterior distribution of W [NBVar - unknown]}
-      \item{\code{Psi}}{variational expectation of C'Omega C, intermediary term in calculations [NBMean - unknown]}
-      \item{\code{Phi}}{variational correction term used in the Psi/ELBO computations [NBMean - unknown]}
-      \item{\code{Lambda}}{variational correction term used in the Sigma-hat update [NBMean - unknown]}
       \item{\code{ll_list}}{list of log-lik (elbo) values}
       \item{\code{warm_started}}{whether `optim_initialize()` should treat the model as
 already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
@@ -265,6 +262,31 @@ for the final full retraining of the `max_training` best candidates}
   \subsection{Returns}{
     a new, already-optimized model. Does not mutate the current
 object; reassign the result (`model <- model$best_of_inits()`).
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockBase-warm_start_from"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockBase-warm_start_from}{}}}
+\subsection{\code{NormalBlockBase$warm_start_from()}}{
+  Seed this model's starting parameters from another,
+already-optimized model of the same family and q, instead of a fresh
+heuristic clustering. Used by the sparsity paths to warm-start each
+penalty from the previous one's solution.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockBase$warm_start_from(other)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{other}}{a model of the same class, already optimized}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Update the current object in place with `other`'s parameters
   }
 }
 

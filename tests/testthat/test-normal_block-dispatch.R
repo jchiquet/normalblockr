@@ -49,3 +49,13 @@ test_that("normal_block() dispatches NormalBlockVarCollectionClustersSparsity fo
   m1 <- normal_block(data, blocks = c(2, 3), sparsity = TRUE, zero_inflation = FALSE, control = control)
   expect_s3_class(m1, "NormalBlockVarCollectionClustersSparsity")
 })
+
+test_that("best_of_inits applies to unknown clusterings only", {
+  boi <- NB_control(verbose = FALSE, clustering_init = "best_of_inits")
+  ## a known clustering is simply optimized
+  set.seed(1); known <- normal_block(data, blocks = C, control = boi)
+  set.seed(1); plain <- normal_block(data, blocks = C, control = NB_control(verbose = FALSE))
+  expect_s3_class(known, "NormalBlockVarKnownClusters")
+  expect_equal(known$loglik, plain$loglik)
+  expect_error(plain$best_of_inits(), "only applies to an unknown clustering")
+})

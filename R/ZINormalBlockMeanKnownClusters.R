@@ -29,8 +29,7 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`ZINormalBlockMeanKnownClusters`] object
     initialize = function(data, C, sparsity = 0, control = NB_control()) {
-      stopifnot("C must be a matrix" = is.matrix(C))
-      stopifnot("There cannot be empty clusters" = min(colSums(C)) > 0)
+      check_known_clustering(C, data$p)
       super$initialize(data, ncol(C), sparsity, control, zero_inflation = TRUE)
       private$C <- C
     }
@@ -40,27 +39,9 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-    ## zero-inflation coefficients: d0 per variable, informed by its n observations
-    penalty_groups = function() {
-      rbind(super$penalty_groups(), penalty_group("kappa", self$p * self$data$d0, self$n))
-    },
+    known_clusters = TRUE,
     ## split(rule = "kmeans"): masked least-squares profiles, as the initialization
     split_target = function() self$data$X %*% self$data$zi_ols_fit()$B,
-    optim_initialize = function() {
-      if (private$warm_started) list(B = private$B, Omega = private$Omega)
-      else private$get_heuristic_parameters()
-    },
-
-    get_heuristic_parameters = function() {
-      fit <- private$zi_mean_inference()
-      list(B     = private$heuristic_cluster_B_from_variable_B(fit$B, private$C),
-           Omega = fit$Omega)
-    },
-
-    heuristic_optimize = function(control) {
-      private$niter <- 0
-      private$get_heuristic_parameters()
-    },
 
     ## Runs the EM recursion via the Rcpp/Armadillo core (src/exports.cpp,
     ## ZINormalBlockMeanKnownClusters_fit).
@@ -83,17 +64,9 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field fitted Y values predicted by the model, in Y's original units
-    fitted = function() {
-      private$rescale_to_original(
-        tcrossprod(self$data$X %*% private$B, private$C) * self$data$zeros_bar)
-    },
     #' @field model_par the parameters of [NormalBlockMeanBase] (B, Omega),
     #' plus B0 (zero-inflation coefficients) and kappa (zero-inflation
     #' probabilities)
-    model_par = function() c(super$model_par, list(B0 = private$B0, kappa = private$kappa)),
-    #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function()
-    {paste("zero-inflated", private$res_covariance, "normal-block-mean model with fixed blocks")}
+    model_par = function() c(super$model_par, list(B0 = private$B0, kappa = private$kappa))
   )
 )

@@ -47,3 +47,11 @@ test_that("NormalBlockVarCollectionSparsity validates blocks and sparsity_penalt
     "strictly positive"
   )
 })
+
+test_that("known-cluster models check that C has one row per variable", {
+  data <- NormalBlockData$new(ex$Y, ex$X)
+  C_short <- ex$parameters$C[-1, ]
+  for (cls in list(NormalBlockVarKnownClusters, ZINormalBlockVarKnownClusters,
+                   NormalBlockMeanKnownClusters, ZINormalBlockMeanKnownClusters))
+    expect_error(cls$new(data, C = C_short), "one row per variable")
+})

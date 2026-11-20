@@ -5,13 +5,13 @@
 \title{Base Class for a Collection of Models over a Sparsity Path}
 \description{
 Shared scaffolding for [NormalBlockVarCollectionSparsity] and
-[NormalBlockMeanCollectionSparsity]: the warm-started path traversal, the
-penalty lookup and the criteria plot. Concrete subclasses derive the
-penalty grid in their `initialize()`. Model selection, StARS included
-(stability selection, Liu et al. 2010), is shared: a family only says how
-to refit its path on a subsample with the clustering held fixed
-(`private$subsample_path()`) and how to name the nodes of its network
-(`private$network_nodes()`).
+[NormalBlockMeanCollectionSparsity]: the penalty grid, the warm-started
+path traversal, the penalty lookup and the criteria plot. Model selection,
+StARS included (stability selection, Liu et al. 2010), is shared: a family
+only says on which covariance estimate the default penalty grid is read
+(`private$penalty_scale()`), how to refit its path on a subsample with the
+clustering held fixed (`private$subsample_path()`) and how to name the
+nodes of its network (`private$network_nodes()`).
 }
 \examples{
 # An internal abstract base class, never instantiated directly -- see
@@ -54,6 +54,7 @@ penalty (StARS), `NULL` until `stability_selection()` has run}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-NormalBlockCollectionSparsity-initialize}{\code{NormalBlockCollectionSparsity$new()}}
     \item \href{#method-NormalBlockCollectionSparsity-optimize}{\code{NormalBlockCollectionSparsity$optimize()}}
     \item \href{#method-NormalBlockCollectionSparsity-get_model}{\code{NormalBlockCollectionSparsity$get_model()}}
     \item \href{#method-NormalBlockCollectionSparsity-get_best_model}{\code{NormalBlockCollectionSparsity$get_best_model()}}
@@ -68,6 +69,39 @@ penalty (StARS), `NULL` until `stability_selection()` has run}
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
 </ul>
 </details>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockCollectionSparsity-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockCollectionSparsity-initialize}{}}}
+\subsection{\code{NormalBlockCollectionSparsity$new()}}{
+  Create a collection over a path of sparsity penalties.
+By default, `control$n_sparsity_penalties` values on a log scale, from
+the largest absolute (weighted) entry of a covariance estimate, which
+removes every edge, down to `control$min_ratio` times it.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockCollectionSparsity$new(
+  mydata,
+  blocks,
+  zero_inflation = FALSE,
+  control = NB_control()
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
+      \item{\code{blocks}}{either a clustering matrix (known, fixed clustering) or a single integer (number of blocks to infer)}
+      \item{\code{zero_inflation}}{whether the models of the path are zero-inflated}
+      \item{\code{control}}{structured list of parameters to handle sparsity control}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new collection object
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockCollectionSparsity-optimize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionSparsity-optimize}{}}}

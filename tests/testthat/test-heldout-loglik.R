@@ -95,3 +95,11 @@ test_that("normal_block_cv() stratifies its folds on a categorical design", {
   ## a test fold without some category still gets a held-out log-likelihood
   expect_no_error(NormalBlockData$new(ex$Y[1:5, ], X[1:5, , drop = FALSE]))
 })
+
+test_that("normal_block_cv() names the fold and the columns when a training set has a constant column", {
+  Y <- ex$Y; colnames(Y) <- paste0("v", seq_len(ncol(Y)))
+  Y[1:20, 4] <- 0; Y[21:60, 4] <- 1 + (1:40) / 10
+  d <- NormalBlockData$new(Y, ex$X)
+  folds <- rep(1:2, c(20, 40))
+  expect_error(normal_block_cv(d, 2, folds = folds), "fold 2 \\(training set\\).*v4")
+})

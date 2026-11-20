@@ -25,7 +25,9 @@ Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
 column-wise rescaling, if any). Use `model_par$B` instead for the
 coefficients on the internal fitting scale.}
 
-    \item{\code{d0}}{number of zi variables (dimensions in X0)}
+    \item{\code{fitted}}{Y values predicted by the model, in Y's original units:
+`X B`, plus the posterior mean of the latent block signals for (V)EM
+fits, with the observed zeros of zero-inflated models set to 0}
 
     \item{\code{model_par}}{a list with the model parameters: B (d x p regression
 coefficients), B0 (zero-inflation coefficients, if any), dm1 (inverse
@@ -50,7 +52,6 @@ different factors.}
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockVarBase-initialize}{\code{NormalBlockVarBase$new()}}
-    \item \href{#method-NormalBlockVarBase-warm_start_from}{\code{NormalBlockVarBase$warm_start_from()}}
     \item \href{#method-NormalBlockVarBase-within_block_correlations}{\code{NormalBlockVarBase$within_block_correlations()}}
     \item \href{#method-NormalBlockVarBase-split}{\code{NormalBlockVarBase$split()}}
     \item \href{#method-NormalBlockVarBase-merge}{\code{NormalBlockVarBase$merge()}}
@@ -71,6 +72,7 @@ different factors.}
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-warm_start_from'><code>NormalBlockBase$warm_start_from()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
@@ -105,31 +107,6 @@ is skipped entirely, since it would otherwise never be used downstream.}
   }
   \subsection{Returns}{
     A new [`NormalBlockVarBase`] object
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarBase-warm_start_from"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarBase-warm_start_from}{}}}
-\subsection{\code{NormalBlockVarBase$warm_start_from()}}{
-  Seed this model's starting parameters from another,
-already-optimized model with the same q, instead of a fresh heuristic
-clustering. Used by [NormalBlockVarCollectionSparsity] to warm-start
-each penalty in a sparsity path from the previous one's solution.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarBase$warm_start_from(other)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{other}}{a [NormalBlockVarBase] object, already optimized}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    Update the current object in place with `other`'s parameters
   }
 }
 

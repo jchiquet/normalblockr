@@ -92,16 +92,26 @@ NormalBlockData <- R6::R6Class(
     #' default, see the section "Rescaling Y" below and `for_family()`.
     #' @param zeros an optional 0/1 matrix of structural zeros, overriding the
     #' default `Y == 0`.
+    #' @param check_constant whether to refuse constant columns of Y, which
+    #' carry no information to cluster on. `FALSE` for data only used to
+    #' evaluate a fitted model (see `heldout_loglik()`).
     initialize = function(Y, X, X0 = NULL, formula = NULL, scale = NULL,
-                          zeros = NULL) {
+                          zeros = NULL, check_constant = TRUE) {
       stopifnot("Y and X must be matrices" = all(is.matrix(Y), is.matrix(X)))
       stopifnot("Y and X must have the same number of rows" = (nrow(Y) == nrow(X)))
       stopifnot("scale must be NULL, TRUE or FALSE" =
                   is.null(scale) || (is.logical(scale) && length(scale) == 1 && !is.na(scale)))
+      constant <- if (check_constant) which(apply(Y, 2, function(y) all(y == y[1]))) else integer(0)
+      if (length(constant) > 0) {
+        names_Y <- colnames(Y)
+        stop("Y has constant columns, which carry no information to cluster on: ",
+             paste(if (is.null(names_Y)) constant else names_Y[constant], collapse = ", "),
+             ". Remove them before fitting.", call. = FALSE)
+      }
       self$scale <- scale
-      ## the family default is resolved later (for_family()), from the
-      ## constructor's arguments: keep them, Y unscaled until then
-      if (is.null(scale)) private$args <- list(Y = Y, X = X, X0 = X0, formula = formula, zeros = zeros)
+      ## the constructor's arguments, kept for for_family(), subset() and
+      ## Y_original
+      private$args <- list(Y = Y, X = X, X0 = X0, formula = formula, zeros = zeros)
       if (isTRUE(scale)) {
         self$Y_scale <- pmax(apply(Y, 2, sd), .Machine$double.eps)
         self$Y <- Y / matrix(self$Y_scale, nrow(Y), ncol(Y), byrow = TRUE)
@@ -163,8 +173,23 @@ NormalBlockData <- R6::R6Class(
       if (is.null(private$scaled_copy))
         private$scaled_copy <- NormalBlockData$new(private$args$Y, private$args$X, private$args$X0,
                                                    private$args$formula, scale = TRUE,
-                                                   zeros = private$args$zeros)
+                                                   zeros = private$args$zeros, check_constant = FALSE)
       private$scaled_copy
+    },
+
+    #' @description The data restricted to some observations, with the same
+    #' covariates, formula, zeros and scale request (a rescaled Y is rescaled
+    #' again on these rows).
+    #' @param rows the observations to keep (indices or a logical vector)
+    #' @param check_constant as in `new()`
+    #' @return a [`NormalBlockData`] object
+    subset = function(rows, check_constant = TRUE) {
+      a <- private$args
+      NormalBlockData$new(a$Y[rows, , drop = FALSE], a$X[rows, , drop = FALSE],
+                          X0 = if (!is.null(a$X0)) a$X0[rows, , drop = FALSE],
+                          formula = a$formula, scale = self$scale,
+                          zeros = self$zeros[rows, , drop = FALSE],
+                          check_constant = check_constant)
     },
 
     #' @description Ordinary-least-squares fit of Y on X, with its residuals
@@ -214,7 +239,7 @@ NormalBlockData <- R6::R6Class(
         ## covariate contributes x * -Inf, which is +Inf wherever x < 0, and
         ## the linear predictor collapses to NaN.
         kappa <- if (no_zeros) matrix(0, self$n, self$p)
-                 else apply(self$X0 %*% B0, MARGIN = c(1, 2), FUN = sigmoid)
+                 else stats::plogis(self$X0 %*% B0)
         private$zi_cache <- list(
           B0 = B0, kappa = kappa,
           ZI_cond_mean = sum(xlogy(self$zeros, kappa)) +
@@ -233,9 +258,17 @@ NormalBlockData <- R6::R6Class(
     ols_cache     = NULL,
     zi_ols_cache  = NULL,
     zi_cache      = NULL,
-    ## for_family(): the constructor's arguments when scale = NULL, and the
-    ## rescaled copy built from them for the variance-block family
+    ## the constructor's arguments, and the rescaled copy built from them for
+    ## the variance-block family when scale = NULL (see for_family())
     args          = NULL,
     scaled_copy   = NULL
+  ),
+
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  ##  ACTIVE BINDINGS ----
+  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  active = list(
+    #' @field Y_original the matrix of responses as given, before any rescaling
+    Y_original = function() private$args$Y
   )
 )

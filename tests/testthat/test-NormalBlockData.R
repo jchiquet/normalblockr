@@ -32,11 +32,13 @@ test_that("scaling does not change which entries are zero (zeros/zeros_bar unaff
   expect_equal(data_scaled$nY, data_unscaled$nY)
 })
 
-test_that("a near-constant column does not produce Inf/NaN in Y or Y_scale", {
-  Yconst <- Y; Yconst[, 1] <- 1 # zero variance
-  data <- NormalBlockData$new(Yconst, X, scale = TRUE)
-  expect_true(all(is.finite(data$Y)))
-  expect_true(all(is.finite(data$Y_scale)))
+test_that("constant columns of Y are refused, and named", {
+  Yconst <- Y; Yconst[, c(1, 3)] <- 0
+  expect_error(NormalBlockData$new(Yconst, X), "constant columns.*: 1, 3")
+  colnames(Yconst) <- paste0("v", seq_len(ncol(Y)))
+  expect_error(NormalBlockData$new(Yconst, X, scale = TRUE), "v1, v3")
+  ## allowed for data only used to evaluate a fitted model
+  expect_silent(NormalBlockData$new(Yconst, X, check_constant = FALSE))
 })
 
 test_that("scale = NULL (default) defers to the family: rescaled for var, unscaled for mean", {
@@ -67,4 +69,22 @@ test_that("models fitted on default data use their family's scale, whatever the 
   ## a collection shares one data object across its models
   co <- normal_block(data, blocks = 1:2, control = ctrl)
   expect_identical(co$models[[1]]$data, co$models[[2]]$data)
+})
+
+test_that("subset() keeps X0, the zeros mask, the formula and the scale request; Y_original is Y as given", {
+  Xf <- cbind(X1 = rnorm(n), X2 = rnorm(n))
+  X0 <- cbind(Z1 = 1, Z2 = rnorm(n))
+  zeros <- matrix(rbinom(n * p, 1, 0.2), n, p)
+  d <- NormalBlockData$new(Y, Xf, X0 = X0, formula = ~ X1 | Z2, scale = TRUE, zeros = zeros)
+  expect_equal(d$Y_original, Y)
+  rows <- 3:30
+  s <- d$subset(rows)
+  expect_equal(s$Y_original, Y[rows, ])
+  expect_true(isTRUE(s$scale))
+  expect_equal(s$Y, NormalBlockData$new(Y[rows, ], Xf[rows, ], scale = TRUE)$Y)
+  expect_equal(s$X, d$X[rows, ], ignore_attr = TRUE)
+  expect_equal(s$X0, d$X0[rows, ], ignore_attr = TRUE)
+  expect_equal(s$zeros, zeros[rows, ])
+  expect_identical(s$formula, d$formula)
+  expect_null(NormalBlockData$new(Y, X)$subset(rows)$scale)
 })

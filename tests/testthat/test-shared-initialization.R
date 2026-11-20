@@ -12,7 +12,7 @@
 set.seed(99)
 sbm_ex   <- generate_normal_block_var_data(n = 60, p = 24, d = 1, q = 4)
 sbm_data <- NormalBlockData$new(sbm_ex$Y, sbm_ex$X)
-sbm_R    <- ols_residuals(sbm_data)
+sbm_R    <- sbm_data$ols_fit()$R
 
 test_that("ols_fit() is memoized and matches a fresh computation", {
   set.seed(1)
@@ -60,7 +60,7 @@ test_that("zi_ols_fit() is memoized and matches the free function", {
   expect_equal(fit, normalblockr:::zi_weighted_fit(d))
   expect_identical(d$zi_ols_fit(), fit)
   ## the masked residuals every zero-inflated heuristic starts from
-  expect_equal(normalblockr:::zi_residuals(d), fit$R)
+  expect_equal(d$zi_ols_fit()$R, fit$R)
 })
 
 test_that("every model in a collection shares one data object, hence one fit", {
@@ -79,7 +79,7 @@ test_that("a q-range collection shares the q-independent part of its heuristic",
   set.seed(4)
   ex <- generate_normal_block_var_data(n = 80, p = 25, d = 1, q = 3)
   d  <- NormalBlockData$new(ex$Y, ex$X)
-  R  <- normalblockr:::ols_residuals(d)
+  R  <- d$ols_fit()$R
   q_list <- 2:5
 
   ## ward2: one tree, cut at each q -- identical to cutting a per-q tree
@@ -111,7 +111,7 @@ test_that("sharing the heuristic leaves the fitted collection unchanged", {
 
   ## the same models, each cold-started from its own independently-built tree
   per_model <- lapply(q_list, function(q) {
-    cl <- cutree(normalblockr:::ward2_tree(normalblockr:::ols_residuals(d)), q)
+    cl <- cutree(normalblockr:::ward2_tree(d$ols_fit()$R), q)
     normal_block(d, blocks = q, control = NB_control(verbose = FALSE, clustering_init = cl))
   })
 

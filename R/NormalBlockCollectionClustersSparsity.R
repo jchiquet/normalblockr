@@ -6,9 +6,9 @@
 #'
 #' Shared scaffolding for [NormalBlockVarCollectionClustersSparsity] and
 #' [NormalBlockMeanCollectionClustersSparsity]: a collection of sparsity
-#' sub-collections, one per q. Everything family-agnostic (two-key model
-#' lookup, model selection over both axes, the criteria heatmap) lives here;
-#' subclasses only build `self$models` and name themselves.
+#' sub-collections, one per q in increasing order. Everything lives here
+#' (two-key model lookup, model selection over both axes, the criteria
+#' heatmap); subclasses only name the model family.
 #' @examples
 #' # An internal abstract base class, never instantiated directly -- see
 #' # normal_block() for how collections are created and fitted.
@@ -21,6 +21,29 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
+    #' @description Create a collection over a range of q, sorted
+    #' increasingly, with a sparsity path for each q.
+    #' @param mydata object of NormalBlockData class, with responses and design matrix
+    #' @param q_list values of q (number of clusters) in the collection
+    #' @param zero_inflation whether the models of the collection are zero-inflated
+    #' @param control structured list of parameters to handle sparsity control
+    #' @return A new collection object
+    initialize = function(mydata, q_list, zero_inflation = FALSE, control = NB_control()) {
+      check_q_list(q_list, mydata$p)
+      self$control <- control
+      self$control$zero_inflation <- zero_inflation
+      ord <- order(q_list)
+      inits <- clustering_inits(mydata, q_list, private$family, zero_inflation, control)[ord]
+      path_class <- get(paste0("NormalBlock", if (private$family == "var") "Var" else "Mean",
+                               "CollectionSparsity"))
+      self$models <- map2(q_list[ord], inits, function(q, init) {
+        control$clustering_init <- init
+        path_class$new(mydata, q, zero_inflation, control)
+      })
+      private$progress_field <- "q"
+      private$progress_label <- "number of blocks"
+    },
+
     #' @description returns a collection of models corresponding to given q
     #' or one single model if penalty is also given
     #' @param q number of blocks asked by user.
@@ -82,6 +105,7 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
+    family = NA_character_, # "var" or "mean", set by the subclasses
     scope = function() "over q and sparsity penalties"
   ),
   active = list(

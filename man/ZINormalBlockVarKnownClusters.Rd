@@ -22,10 +22,6 @@ model$clustering
     \item{\code{posterior_par}}{a list with the parameters of posterior distribution W | Y}
 
     \item{\code{model_par}}{the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities)}
-
-    \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
-
-    \item{\code{who_am_I}}{a method to print what model is being fitted}
   }
   \if{html}{\out{</div>}}
 }
@@ -50,9 +46,9 @@ model$clustering
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-warm_start_from'><code>NormalBlockBase$warm_start_from()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="merge"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-merge'><code>NormalBlockVarBase$merge()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="split"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-split'><code>NormalBlockVarBase$split()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-warm_start_from'><code>NormalBlockVarBase$warm_start_from()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="within_block_correlations"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-within_block_correlations'><code>NormalBlockVarBase$within_block_correlations()</code></a></span></li>
 </ul>
 </details>}}

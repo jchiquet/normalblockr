@@ -112,3 +112,31 @@ test_that("NB_control(refine = TRUE) makes optimize() call refine() automaticall
                sapply(coll_manual$models, function(m) m$deviance))
 })
 
+
+test_that("a collection is sorted by q, with a per-q clustering_init list kept aligned", {
+  data <- NormalBlockData$new(Y, X)
+  cl3 <- normalblockr:::get_clusters(C)
+  cl2 <- cl3; cl2[cl2 == 3] <- 2
+  ctrl <- NB_control(verbose = FALSE, refine = FALSE, clustering_init = list(cl3, cl2))
+  for (family in c("var", "mean")) {
+    coll <- get_model(data, c(3, 2), model = family, control = ctrl)
+    expect_equal(coll$q_list, c(2, 3))
+    expect_equal(unname(coll$get_model(2)$clustering), cl2)
+    expect_equal(unname(coll$get_model(3)$clustering), cl3)
+  }
+  path <- get_model(data, c(3, 2), sparsity = TRUE,
+                    control = NB_control(verbose = FALSE, n_sparsity_penalties = 2))
+  expect_equal(path$q_list, c(2, 3))
+})
+
+test_that("refine() discards a candidate whose trial fit fails instead of aborting", {
+  data  <- NormalBlockData$new(Y, X)
+  model <- normal_block(data, 2, control = NB_control(verbose = FALSE))
+  good  <- model$split(1)
+  bad   <- model$split(1)
+  penv  <- bad$.__enclos_env__$private
+  unlockBinding("optimizer", penv)
+  penv$optimizer <- function(control) stop("degenerate")
+  kept  <- model$.__enclos_env__$private$trial_fits(list(good, bad, good$clone()), 2)
+  expect_length(kept, 2)
+})

@@ -22,6 +22,11 @@ structures the mean (mu_i = C B' X_i).
 profile per cluster) and Omega (p x p precision matrix of the
 residuals), on the scale of the fit (see [coef()] and [sigma()]).}
 
+    \item{\code{fitted}}{Y values predicted by the model, in Y's original units:
+`X B C'` (with the posterior cluster probabilities as C when the
+clustering is unknown), with the observed zeros of zero-inflated models
+set to 0}
+
     \item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
   }
   \if{html}{\out{</div>}}
@@ -31,7 +36,6 @@ residuals), on the scale of the fit (see [coef()] and [sigma()]).}
   \itemize{
     \item \href{#method-NormalBlockMeanBase-initialize}{\code{NormalBlockMeanBase$new()}}
     \item \href{#method-NormalBlockMeanBase-predict}{\code{NormalBlockMeanBase$predict()}}
-    \item \href{#method-NormalBlockMeanBase-warm_start_from}{\code{NormalBlockMeanBase$warm_start_from()}}
     \item \href{#method-NormalBlockMeanBase-split}{\code{NormalBlockMeanBase$split()}}
     \item \href{#method-NormalBlockMeanBase-merge}{\code{NormalBlockMeanBase$merge()}}
     \item \href{#method-NormalBlockMeanBase-clone}{\code{NormalBlockMeanBase$clone()}}
@@ -50,6 +54,7 @@ residuals), on the scale of the fit (see [coef()] and [sigma()]).}
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>NormalBlockBase$plot_network()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-warm_start_from'><code>NormalBlockBase$warm_start_from()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
@@ -106,32 +111,6 @@ probabilities as C when the clustering is unknown (as in `$fitted`).
   }
   \subsection{Returns}{
     A n*p prediction matrix for new observations
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanBase-warm_start_from"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-warm_start_from}{}}}
-\subsection{\code{NormalBlockMeanBase$warm_start_from()}}{
-  Seed this model's starting parameters from another,
-already-optimized model with the same q, instead of the heuristic
-clustering-derived values set at construction time. Used by
-[NormalBlockMeanCollectionSparsity] to warm-start each penalty of a
-sparsity path from the previous one's solution.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanBase$warm_start_from(other)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{other}}{a [NormalBlockMeanBase] object, already optimized}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    Update the current object in place with `other`'s parameters
   }
 }
 

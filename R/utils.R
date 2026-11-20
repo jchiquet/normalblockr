@@ -10,24 +10,21 @@ as_indicator <- function(clustering) {
   Z
 }
 
-# removes machine's 0 to elements equal to  1 in x
-check_one_boundary <- function(x, zero = .Machine$double.eps) {
+# Validates a known clustering: a p x q indicator matrix without empty column
+check_known_clustering <- function(C, p) {
+  stopifnot("C must be a matrix" = is.matrix(C),
+            "C must have one row per variable (column of Y)" = nrow(C) == p,
+            "There cannot be empty clusters" = ncol(C) > 0 && min(colSums(C)) > 0)
+  invisible(C)
+}
+
+# keeps variational probabilities (tau) away from the {0, 1} boundaries, NaN
+# set to `zero` (mirrors clip_probabilities() in src/utils_arma.h)
+clip_probabilities <- function(x, zero = .Machine$double.eps) {
   x[is.nan(x)] <- zero
   x[x >= 1 - zero] <- 1 - zero
+  x[x < zero] <- zero
   x
-}
-
-# adds machine's 0 to elements equal to 0 in x
-check_zero_boundary <- function(x, zero = .Machine$double.eps) {
-  x[is.nan(x)] <- zero
-  x[x < zero]  <- zero
-  x
-}
-
-# keeps variational probabilities (tau) away from the {0, 1} boundaries
-# (mirrors clip_probabilities() in src/utils_arma.h)
-clip_probabilities <- function(x, zero = .Machine$double.eps) {
-  check_zero_boundary(check_one_boundary(x, zero), zero)
 }
 
 # Projects a symmetric matrix onto the PD cone by flooring its eigenvalues.
@@ -46,17 +43,21 @@ NB_GLASSO_THRESHOLD <- 1e-6
 
 # Graphical-lasso estimate of a precision matrix from its covariance estimate
 # (in-package solver, src/graphical_lasso.h), with a plain inversion as the
-# fallback when the solver can't produce a finite answer.
-glasso_omega <- function(Sigma, rho) {
-  glasso_out <- graphical_lasso_fit(Sigma, rho)
-  if (anyNA(glasso_out$wi)) {
+# fallback when the solver can't produce a finite answer. With `warm` (a
+# previous solve's state, or `list()` for none), the solve is warm started
+# and the result is a list with the precision matrix and the state to carry
+# over (NULL after a fallback).
+glasso_omega <- function(Sigma, rho, thr = 1e-4, warm = NULL, quiet = !is.null(warm)) {
+  glasso_out <- graphical_lasso_fit(Sigma, rho, thr = thr, w_init = warm$w, wi_init = warm$wi)
+  failed <- anyNA(glasso_out$wi)
+  if (failed && !quiet)
     warning("GLasso fails, the penalty is probably too small and the system badly ",
             "conditionned \n reciprocal condition number =", rcond(Sigma),
             "\n We send back the original matrix and its inverse (unpenalized).",
             call. = FALSE)
-    return(chol2inv(chol(Sigma)))
-  }
-  Matrix::symmpart(glasso_out$wi)
+  Omega <- if (failed) chol2inv(chol(Sigma)) else Matrix::symmpart(glasso_out$wi)
+  if (is.null(warm)) return(Omega)
+  list(Omega = Omega, warm = if (!failed) list(w = glasso_out$w, wi = glasso_out$wi))
 }
 
 # One or several groups of free parameters for the BIC penalty: `nu`
@@ -73,42 +74,14 @@ xlogx <- function(x) ifelse(x < .Machine$double.eps, 0, x * log(x))
 # computes xlogy, setting it to 0 if x = 0
 xlogy <- function(x,y) ifelse(x < .Machine$double.eps, 0, x * log(y))
 
-# computes softmax
-softmax <- function(x) {
-  b <- max(x)
-  exp(x - b) / sum(exp(x - b))
-}
-
 # gets cluster labels from probability matrix
 get_clusters <- function(tau) {
   apply(tau, 1, which.max)
 }
 
-# for a list of edges, give corresponding (node1, node2) list.
-edge_to_node <- function(x, n = max(x)) {
-  x <- x - 1 ## easier for arithmetic to number edges starting from 0
-  n.node <- round((1 + sqrt(1 + 8*n)) / 2) ## n.node * (n.node -1) / 2 = n (if integer)
-  j.grid <- cumsum(0:n.node)
-  j <- findInterval(x, vec = j.grid)
-  i <- x - j.grid[j]
-  ## Renumber i and j starting from 1 to stick with R convention
-  data.frame(node1 = i + 1, node2 = j + 1)
-}
-
-sigmoid <- function(x){
-  return(1 / (1 + exp(-x)))
-}
-
-# OLS residuals of Y on X, used to seed the clustering heuristics; shared
-# across a collection's models instead of recomputing per q.
-ols_residuals <- function(data) {
-  B <- data$XtXm1 %*% data$XtY
-  data$Y - data$X %*% B
-}
-
 # Iteratively reweighted least squares fit of B under a zero-inflation mask
-# (weights = zeros_bar, dm1 re-estimated between iterates). Shared by
-# zi_residuals() and NormalBlockVarBase's zi_diag_normal_inference(). Each
+# (weights = zeros_bar, dm1 re-estimated between iterates), memoized by
+# NormalBlockData$zi_ols_fit(). Each
 # column of B is solved independently (the mask varies by row and column);
 # ginv() rather than solve() since a design level can be all-zero for some
 # variable, making XtWX singular. ssq is floored away from 0 to keep dm1
@@ -130,10 +103,6 @@ zi_weighted_fit <- function(data) {
   }
   list(B = B, dm1 = dm1, R = data$zeros_bar * (data$Y - data$X %*% B))
 }
-
-# Zero-inflation analogue of ols_residuals(): kappa isn't computed here since
-# the residual only depends on the weighted fit of B, not on kappa.
-zi_residuals <- function(data) data$zi_ols_fit()$R
 
 # Ward.D2 clustering tree of the p columns of R by pairwise correlation
 # distance (1 - cor); shared by the "ward2" heuristic, its fallback for any
@@ -272,12 +241,33 @@ clustering_path_for_family <- function(mydata, q_list, family = c("var", "mean")
   if (!method %in% c("sbm", "ward2", "spectral", "kmeans")) return(NULL)
 
   R <- if (family == "var") {
-    if (zero_inflation) zi_residuals(mydata) else ols_residuals(mydata)
+    if (zero_inflation) mydata$zi_ols_fit()$R else mydata$ols_fit()$R
   } else {
     B <- if (zero_inflation) mydata$zi_ols_fit()$B else mydata$ols_fit()$B
     mydata$X %*% B
   }
   clustering_path_for_collection(R, q_list, method)
+}
+
+# Checks the values of q of a collection
+check_q_list <- function(q_list, p) {
+  stopifnot("each nb_blocks value can only be present once in nb_blocks" =
+              length(q_list) == length(unique(q_list)),
+            "There cannot be more blocks than there are entities to cluster." =
+              max(q_list) <= p)
+}
+
+# The initial clustering of each model of a collection over q_list, in the
+# order of q_list: the shared path of the requested heuristic when there is
+# one, else the element of a list of explicit clusterings (one per q), else
+# control$clustering_init itself (a heuristic name, or NULL), for every q.
+clustering_inits <- function(mydata, q_list, family, zero_inflation, control) {
+  path <- clustering_path_for_family(mydata, q_list, family, zero_inflation, control)
+  lapply(seq_along(q_list), function(i) {
+    if (!is.null(path)) path[[i]]
+    else if (is.list(control$clustering_init)) control$clustering_init[[i]]
+    else control$clustering_init
+  })
 }
 
 # Whether NB_control(clustering_init = "best_of_inits") was requested (see

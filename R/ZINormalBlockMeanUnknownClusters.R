@@ -37,37 +37,8 @@ ZINormalBlockMeanUnknownClusters <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-    ## zero-inflation coefficients (d0 per variable, informed by its n
-    ## observations) and cluster proportions (informed by the p variables)
-    penalty_groups = function() {
-      rbind(super$penalty_groups(),
-            penalty_group("kappa", self$p * self$data$d0, self$n),
-            penalty_group("alpha", self$q - 1, self$p))
-    },
     ## split(rule = "kmeans"): masked least-squares profiles, as the initialization
     split_target = function() self$data$X %*% self$data$zi_ols_fit()$B,
-    optim_initialize = function() {
-      if (private$warm_started) list(B = private$B, Omega = private$Omega, tau = private$C)
-      else private$get_heuristic_parameters()
-    },
-
-    get_heuristic_parameters = function() {
-      fit <- private$zi_mean_inference()
-      ## cluster the fitted mean trajectory rather than B itself, as in the
-      ## non-ZI class -- see NormalBlockMeanUnknownClusters
-      if (anyNA(private$C))
-        private$C <- private$heuristic_clustering(self$data$X %*% fit$B)
-      tau <- check_one_boundary(check_zero_boundary(private$C))
-      tau <- tau / rowSums(tau)
-      list(B     = private$heuristic_cluster_B_from_variable_B(fit$B, tau),
-           Omega = fit$Omega, tau = tau)
-    },
-
-    heuristic_optimize = function(control) {
-      private$niter <- 0
-      init <- private$get_heuristic_parameters()
-      list(B = init$B, Omega = init$Omega, C = init$tau, alpha = colMeans(init$tau))
-    },
 
     ## Runs the VEM recursion via the Rcpp/Armadillo core (src/exports.cpp,
     ## ZINormalBlockMeanUnknownClusters_fit).
@@ -92,22 +63,11 @@ ZINormalBlockMeanUnknownClusters <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field fitted Y values predicted by the model, in Y's original units
-    fitted = function() {
-      private$rescale_to_original(
-        tcrossprod(self$data$X %*% private$B, private$C) * self$data$zeros_bar)
-    },
     #' @field var_par a list with the variational parameter: tau (posterior group probabilities)
     var_par = function() list(tau = private$C),
     #' @field model_par the parameters of [NormalBlockMeanBase] (B, Omega),
     #' plus B0 (zero-inflation coefficients), kappa (zero-inflation
     #' probabilities) and alpha (cluster proportions)
-    model_par = function() c(super$model_par, list(B0 = private$B0, kappa = private$kappa, alpha = private$alpha)),
-    #' @field entropy entropy of the variational distribution of the
-    #' clustering, `-sum(tau * log(tau))`
-    entropy = function() if (private$approx) NA else -sum(xlogx(private$C)),
-    #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function()
-    {paste("zero-inflated", private$res_covariance, "normal-block-mean model with", self$q, "unknown blocks")}
+    model_par = function() c(super$model_par, list(B0 = private$B0, kappa = private$kappa, alpha = private$alpha))
   )
 )

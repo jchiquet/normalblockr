@@ -25,8 +25,7 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`NormalBlockMeanKnownClusters`] object
     initialize = function(data, C, sparsity = 0, control = NB_control()) {
-      stopifnot("C must be a matrix" = is.matrix(C))
-      stopifnot("There cannot be empty clusters" = min(colSums(C)) > 0)
+      check_known_clustering(C, data$p)
       super$initialize(data, ncol(C), sparsity, control)
       private$C <- C
     }
@@ -36,21 +35,7 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-    optim_initialize = function() {
-      if (private$warm_started) {
-        list(B = private$B, Omega = private$Omega)
-      } else {
-        private$get_heuristic_parameters()
-      }
-    },
-
-    get_heuristic_parameters = function(){
-      reg_res   <- private$multivariate_normal_inference()
-      Omega     <- private$omega_from_sigma(reg_res$Sigma)
-      B         <- private$heuristic_cluster_B_from_variable_B(reg_res$B,
-                                                               private$C)
-      list(B = B, Omega = Omega)
-    },
+    known_clusters = TRUE,
 
 
     B_estimator = function(Omega = private$Omega){
@@ -71,15 +56,6 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
       ## penalized objective (see the C++ core): $loglik adds the penalty back
       if (self$sparsity > 0) l <- l - self$sparsity * sum(abs(self$sparsity_weights * Omega))
       return(as.numeric(l))
-    },
-
-    ## Moment-based fit (NB_control(heuristic = TRUE)): the heuristic
-    ## initialization is the moment estimate, so there is nothing to iterate.
-    ## No likelihood is computed, hence no ll_list (see NormalBlockBase's
-    ## `loglik`, NA in this mode).
-    heuristic_optimize = function(control) {
-      private$niter <- 0
-      private$get_heuristic_parameters()
     },
 
     ## Runs the EM recursion via the Rcpp/Armadillo core (src/exports.cpp,
@@ -123,19 +99,5 @@ NormalBlockMeanKnownClusters <- R6::R6Class(
       list(B = B, Omega = Omega, ll_list = ll_list)
     }
 
-  ),
-
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  ##  ACTIVE BINDINGS ----
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  active = list(
-    #' @field fitted Y values predicted by the model, in Y's original units
-    fitted = function(){
-      ## mean-block model: mu_i = C B' X_i, i.e. X B C' in matrix form
-      private$rescale_to_original(tcrossprod(self$data$X %*% private$B, private$C))
-    },
-    #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function()
-    {paste(private$res_covariance, "normal-block-mean model with fixed blocks")}
   )
 )

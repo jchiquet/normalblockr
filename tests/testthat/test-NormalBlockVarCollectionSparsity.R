@@ -57,3 +57,11 @@ test_that("optimize() warm-starts each penalty from the previous one, reducing t
   ## warm-starting changes the optimization path, not the optimum it converges to
   expect_equal(sapply(warm$models, function(m) m$BIC), sapply(cold$models, function(m) m$BIC), tolerance = 1e-2)
 })
+
+test_that("the default penalty grid ignores the entries a zero weight leaves unpenalized", {
+  W <- matrix(1, q, q); diag(W) <- 0; W[1, 2] <- W[2, 1] <- 0
+  path <- get_model(data, C, sparsity = TRUE,
+                    control = NB_control(verbose = FALSE, sparsity_weights = W, n_sparsity_penalties = 3))
+  expect_length(path$sparsity, 3)
+  expect_true(all(is.finite(path$sparsity) & path$sparsity > 0))
+})

@@ -5,13 +5,13 @@
 #' Base Class for a Collection of Models over a Sparsity Path
 #'
 #' Shared scaffolding for [NormalBlockVarCollectionSparsity] and
-#' [NormalBlockMeanCollectionSparsity]: the warm-started path traversal, the
-#' penalty lookup and the criteria plot. Concrete subclasses derive the
-#' penalty grid in their `initialize()`. Model selection, StARS included
-#' (stability selection, Liu et al. 2010), is shared: a family only says how
-#' to refit its path on a subsample with the clustering held fixed
-#' (`private$subsample_path()`) and how to name the nodes of its network
-#' (`private$network_nodes()`).
+#' [NormalBlockMeanCollectionSparsity]: the penalty grid, the warm-started
+#' path traversal, the penalty lookup and the criteria plot. Model selection,
+#' StARS included (stability selection, Liu et al. 2010), is shared: a family
+#' only says on which covariance estimate the default penalty grid is read
+#' (`private$penalty_scale()`), how to refit its path on a subsample with the
+#' clustering held fixed (`private$subsample_path()`) and how to name the
+#' nodes of its network (`private$network_nodes()`).
 #' @examples
 #' # An internal abstract base class, never instantiated directly -- see
 #' # normal_block() for how collections are created and fitted.
@@ -26,6 +26,47 @@ NormalBlockCollectionSparsity <- R6::R6Class(
   public = list(
     #' @field data object of NormalBlockData class, with responses and design matrix
     data = NA,
+
+    #' @description Create a collection over a path of sparsity penalties.
+    #' By default, `control$n_sparsity_penalties` values on a log scale, from
+    #' the largest absolute (weighted) entry of a covariance estimate, which
+    #' removes every edge, down to `control$min_ratio` times it.
+    #' @param mydata object of NormalBlockData class, with responses and design matrix
+    #' @param blocks either a clustering matrix (known, fixed clustering) or a single integer (number of blocks to infer)
+    #' @param zero_inflation whether the models of the path are zero-inflated
+    #' @param control structured list of parameters to handle sparsity control
+    #' @return A new collection object
+    initialize = function(mydata, blocks, zero_inflation = FALSE, control = NB_control()) {
+      self$data    <- mydata
+      self$control <- control
+      self$control$zero_inflation <- zero_inflation
+      private$blocks_ <- blocks
+      stopifnot("blocks must be either a clustering matrix or a fixed number of blocks" =
+                  is.matrix(blocks) | length(blocks) == 1)
+
+      if (!is.null(control$sparsity_penalties)) {
+        stopifnot("All penalties must be strictly positive" =
+                    (min(control$sparsity_penalties) > 0))
+        sparsity <- control$sparsity_penalties
+      } else {
+        scale <- private$penalty_scale(mydata, blocks, zero_inflation, control)
+        ## a zero weight leaves its entry unpenalized
+        scale <- scale[is.finite(scale)]
+        if (length(scale) > 0) {
+          max_pen  <- max(scale)
+          sparsity <- 10^seq(log10(max_pen), log10(max_pen * control$min_ratio),
+                             len = control$n_sparsity_penalties)
+        } else {
+          sparsity <- rep(0, len = control$n_sparsity_penalties)
+        }
+      }
+
+      private$sparsity_ <- sort(sparsity, decreasing = TRUE)
+      self$models <- map(private$sparsity_, function(lambda)
+        get_model(mydata, blocks, lambda, zero_inflation, control, model = private$family))
+      private$progress_field <- "sparsity"
+      private$progress_label <- "penalty"
+    },
 
     #' @description optimizes every model in the sparsity path, warm-starting
     #' each one (after the first) from the previous, adjacent penalty's
@@ -100,9 +141,7 @@ NormalBlockCollectionSparsity <- R6::R6Class(
       nodes <- private$network_nodes()
       upper <- upper.tri(diag(length(nodes)))
       nets <- lapply(subsamples, function(rows) {
-        d <- self$data
-        sub_data <- NormalBlockData$new(Y = d$Y[rows, , drop = FALSE], X = d$X[rows, , drop = FALSE],
-                                        X0 = d$X0[rows, , drop = FALSE], scale = d$scale)
+        sub_data <- self$data$subset(rows, check_constant = FALSE)
         path <- private$subsample_path(sub_data, control_stabs)
         path$optimize(control_stabs)
         do.call(cbind, lapply(path$models, function(m) as.matrix(m$latent_network("support"))[upper]))
@@ -128,7 +167,7 @@ NormalBlockCollectionSparsity <- R6::R6Class(
     #' @param log.x logical: should the x-axis be represented in log-scale? Default is `TRUE`.
     #' @return a [`ggplot2::ggplot`] graph
     plot = function(criteria = c("deviance", "BIC", "EBIC", "ICL"), log.x = TRUE) {
-      stopifnot(!is.null(self$criteria[criteria]))
+      stopifnot(!anyNA(self$criteria[criteria]))
       p <- private$plot_criteria_path("sparsity", criteria)
       if (log.x) p <- p + ggplot2::scale_x_log10()
       p
@@ -144,6 +183,10 @@ NormalBlockCollectionSparsity <- R6::R6Class(
     scope = function() paste("over sparsity penalties, with",
                              if (is.matrix(private$blocks_)) "fixed blocks" else "fixed q"),
     stab_path = NULL, # stability path, filled in by stability_selection()
+    family    = NA_character_, # "var" or "mean", set by the subclasses
+    ## family hook for the default penalty grid: the absolute entries of a
+    ## covariance estimate divided by their sparsity weights
+    penalty_scale  = function(data, blocks, zero_inflation, control) stop("not implemented for this family"),
     ## family hooks for stability_selection(): the same penalty path refitted
     ## on a subsample with the clustering held fixed, and the network's nodes
     subsample_path = function(data, control) stop("not implemented for this family"),

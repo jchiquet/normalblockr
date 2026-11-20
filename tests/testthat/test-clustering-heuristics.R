@@ -121,7 +121,7 @@ test_that("spectral() caps its eigenvector count at cov(R)'s numerical rank", {
   ## the cap never binds there, so behaviour for that family doesn't change
   exv   <- generate_normal_block_var_data(n = 100, p = 30, d = 1, q = 4)
   datav <- NormalBlockData$new(exv$Y, exv$X)
-  Rv    <- ols_residuals(datav)
+  Rv    <- datav$ols_fit()$R
   expect_equal(sum(eigen(cov(Rv), symmetric = TRUE, only.values = TRUE)$values > 1e-8 * max(eigen(cov(Rv), symmetric = TRUE, only.values = TRUE)$values)),
                ncol(Rv))
 })
