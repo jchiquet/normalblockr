@@ -93,7 +93,8 @@ normal_block <- function(data,
 #' of tau sequentially and maximizes the ELBO exactly in each, so it can
 #' never decrease the ELBO.
 #' @param threshold the (V)EM stops when the objective (log-likelihood or
-#' ELBO) increases by less than this.
+#' ELBO) increases by less than this. A negative value runs exactly `niter`
+#' iterations, without the warning issued when `niter` is reached.
 #' @param sparsity_weights a symmetric matrix of weights applied to the
 #' penalty, entry by entry: q x q (variance-block) or p x p (mean-block). By
 #' default, 1 off the diagonal and 0 on it (the diagonal is not penalized).

@@ -25,7 +25,8 @@ NB_control(
 \item{niter}{maximal number of (V)EM iterations.}
 
 \item{threshold}{the (V)EM stops when the objective (log-likelihood or
-ELBO) increases by less than this.}
+ELBO) increases by less than this. A negative value runs exactly `niter`
+iterations, without the warning issued when `niter` is reached.}
 
 \item{fixed_point_niter}{number of sweeps of the tau update for
 Normal-Block-Mean models with unknown clusters. Each sweep visits the rows

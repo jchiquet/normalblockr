@@ -601,9 +601,11 @@ NormalBlockBase <- R6::R6Class(
     },
 
     ## Warns when the (V)EM hit the niter cap without reaching threshold
-    ## (heuristic fits have no ll_list/niter to check, so stay silent).
+    ## (heuristic fits have no ll_list/niter to check, so stay silent; a
+    ## negative threshold asks for exactly niter iterations).
     warn_if_not_converged = function() {
-      if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())
+      if (is.na(private$niter) || private$niter < private$niter_max || private$threshold < 0)
+        return(invisible())
       last_increment <- abs(diff(private$ll_list))[private$niter]
       if (last_increment >= private$threshold)
         warning(sprintf(
