@@ -1,6 +1,6 @@
 # normalblockr 1.0.0
 
-## Changes of default behaviour since 0.3.0
+## Changes of default behavior since 0.3.0
 
 Users of 0.3.0 will see different results on the same calls:
 
@@ -24,7 +24,7 @@ Users of 0.3.0 will see different results on the same calls:
   `"ward2"` for variance-block models), and collections over a range of q
   are polished by the split and merge search of `refine()` after their
   cold-started fit (`NB_control(refine = TRUE)`; `FALSE` restores the former
-  behaviour). `"ward2"` remains a good choice for zero-inflated abundances.
+  behavior). `"ward2"` remains a good choice for zero-inflated abundances.
 * **SQUAREM off for mean-block models with a diagonal or spherical Sigma.**
   Their EM is exact and converges in a few dozen iterations, so the
   extrapolations only cost time. `NB_control(acceleration = NULL)`, the new
@@ -90,7 +90,7 @@ Users of 0.3.0 will see different results on the same calls:
   zero-inflation design `X0` and the `scale` request.
 * `plot_network()` computes the layout without the signed edge weights, so
   that force-directed layouts such as `igraph::layout_with_fr` work; `layout`
-  may also be a matrix of coordinates. Mean-block networks are labelled with
+  may also be a matrix of coordinates. Mean-block networks are labeled with
   the variable names.
 * `model_par` exposes the cluster proportions `alpha` of mean-block models
   with an unknown clustering, and `B0` of zero-inflated mean-block models, as
@@ -106,7 +106,7 @@ Users of 0.3.0 will see different results on the same calls:
   candidate whose fit fails is discarded by `refine()` instead of aborting
   it.
 * `generate_normal_block_var_data()` and `generate_normal_block_mean_data()`
-  honour `alpha`, and could put a variable in two clusters when the first
+  honor `alpha`, and could put a variable in two clusters when the first
   draw left a cluster empty. Data simulated for a given seed are unchanged
   otherwise.
 * StARS subsamples keep an explicit `zeros` mask and the formula.
