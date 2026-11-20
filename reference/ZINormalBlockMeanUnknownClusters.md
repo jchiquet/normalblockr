@@ -112,9 +112,9 @@ ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 Y <- ex$Y; Y[runif(length(Y)) < 0.2] <- 0
 data <- NormalBlockData$new(Y, ex$X)
 model <- normal_block(data, blocks = 3, model = "mean", zero_inflation = TRUE)
-#> Fitting a zero-inflated diagonal normal-block-mean model with 3 unknown blocks 
+#> Fitting a zero-inflated diagonal normal-block-mean model with 3 unknown clusters 
 #> 
 #> DONE
 model$clustering
-#>  [1] 3 1 1 1 3 1 1 2 3 2 3 2 3 3 3 2 2 3 3 3
+#>  [1] 2 3 2 3 2 3 3 1 2 1 2 1 2 2 2 1 1 2 2 2
 ```

@@ -62,9 +62,9 @@ Y <- log(1 + university$frequencies[, university$terms])
 nb_data <- NormalBlockData$new(Y, X = matrix(1, nrow(Y), 1))
 # \donttest{
 out <- normal_block(nb_data, 2:6, control = NB_control(verbose = FALSE))
-#> Warning: diagonal normal-block-var model with 6 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000144, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+#> Warning: diagonal normal-block-var model with 6 unknown clusters: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000144, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many clusters -- see plot_loglik() to check.
 out$get_best_model("ICL")
-#> A diagonal normal-block-var model with 6 unknown blocks.
+#> A diagonal normal-block-var model with 6 unknown clusters.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
 #>       226 6      15        0 -71159.77 142319.5 143717.8 143717.8 143771.5

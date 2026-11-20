@@ -115,7 +115,7 @@ between the 6 blocks, not the grouping itself.
 ``` r
 
 NB_prot_group <- normal_block(data_subtype, blocks = group)
-#> Fitting a diagonal normal-block-var model with fixed blocks 
+#> Fitting a diagonal normal-block-var model with fixed clusters 
 #> 
 #> DONE
 plot(NB_prot_group)
@@ -126,7 +126,7 @@ plot(NB_prot_group)
 ``` r
 
 print(NB_prot_group)
-#> A diagonal normal-block-var model with fixed blocks.
+#> A diagonal normal-block-var model with fixed clusters.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
 #>       999 6      15        0 -70387.84 140775.7 146616.3 146616.3 146670    14
@@ -174,7 +174,7 @@ what it changes in the next section.[^2]
 
 NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30, control = NB_control(refine = FALSE))
 #> Fitting a collection of diagonal normal-block-var models over q 
-#>   number of blocks = 1                number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8                number of blocks = 9                number of blocks = 10               number of blocks = 11               number of blocks = 12               number of blocks = 13               number of blocks = 14               number of blocks = 15               number of blocks = 16               number of blocks = 17               number of blocks = 18               number of blocks = 19               number of blocks = 20               number of blocks = 21               number of blocks = 22               number of blocks = 23               number of blocks = 24               number of blocks = 25               number of blocks = 26               number of blocks = 27               number of blocks = 28               number of blocks = 29               number of blocks = 30           
+#>   number of clusters = 1              number of clusters = 2              number of clusters = 3              number of clusters = 4              number of clusters = 5              number of clusters = 6              number of clusters = 7              number of clusters = 8              number of clusters = 9              number of clusters = 10             number of clusters = 11             number of clusters = 12             number of clusters = 13             number of clusters = 14             number of clusters = 15             number of clusters = 16             number of clusters = 17             number of clusters = 18             number of clusters = 19             number of clusters = 20             number of clusters = 21             number of clusters = 22             number of clusters = 23             number of clusters = 24             number of clusters = 25             number of clusters = 26             number of clusters = 27             number of clusters = 28             number of clusters = 29             number of clusters = 30           
 #> DONE
 ```
 
@@ -305,37 +305,37 @@ the graphical-lasso penalty on $`\Omega`$ explored over a path of values
 
 group_selected <- model.matrix(~ 0 + factor(selected_NB_refined$clustering))
 NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE, control = NB_control(min_ratio=0.001))
-#> Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed blocks 
+#> Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed clusters 
 #>   penalty = 0.4842032             penalty = 0.3815745             penalty = 0.3006984             penalty = 0.2369643             penalty = 0.1867388             penalty = 0.1471588           
-#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
 #> = 0.000773, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many blocks -- see plot_loglik() to check.
+#> especially with many clusters -- see plot_loglik() to check.
 #>   penalty = 0.115968           
-#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
 #> = 0.000721, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many blocks -- see plot_loglik() to check.
+#> especially with many clusters -- see plot_loglik() to check.
 #>   penalty = 0.09138812           
-#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
 #> = 0.000365, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many blocks -- see plot_loglik() to check.
+#> especially with many clusters -- see plot_loglik() to check.
 #>   penalty = 0.07201807                penalty = 0.05675357                penalty = 0.04472444                penalty = 0.03524493                penalty = 0.02777464           
-#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
 #> = 0.000157, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many blocks -- see plot_loglik() to check.
+#> especially with many clusters -- see plot_loglik() to check.
 #>   penalty = 0.0218877           
-#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
 #> = 0.000496, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many blocks -- see plot_loglik() to check.
+#> especially with many clusters -- see plot_loglik() to check.
 #>   penalty = 0.01724852           
-#> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
+#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment
 #> = 0.00093, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many blocks -- see plot_loglik() to check.
+#> especially with many clusters -- see plot_loglik() to check.
 #>   penalty = 0.01359263                penalty = 0.01071162                penalty = 0.008441254               penalty = 0.006652099               penalty = 0.005242162               penalty = 0.004131066               penalty = 0.003255471               penalty = 0.002565462               penalty = 0.002021703               penalty = 0.001593195               penalty = 0.001255512               penalty = 0.0009894014              penalty = 0.0007796941              penalty = 0.000614435               penalty = 0.0004842032           
 #> DONE
 ```

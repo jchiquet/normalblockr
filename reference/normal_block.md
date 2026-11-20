@@ -70,11 +70,11 @@ ex_data <- generate_normal_block_var_data(n = 100, p = 30, d = 1, q = 3)
 data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 my_normal_block <- normal_block(data, blocks = 1:5)
 #> Fitting a collection of diagonal normal-block-var models over q 
-#>   number of blocks = 1           
-     number of blocks = 2           
-     number of blocks = 3           
-     number of blocks = 4           
-     number of blocks = 5           
+#>   number of clusters = 1           
+     number of clusters = 2           
+     number of clusters = 3           
+     number of clusters = 4           
+     number of clusters = 5           
      refine(): improved 1 of 5 models
 #> 
 #> DONE
@@ -88,14 +88,14 @@ ex_data_zi <- generate_normal_block_var_data(n = 50, p = 30, d = 1, q = 3,
                                              kappa = rep(0.5, 30))
 zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)
 my_zi_block <- normal_block(zidata, blocks = 3, zero_inflation = TRUE)
-#> Fitting a zero-inflated diagonal normal-block-var model with 3 unknown blocks 
+#> Fitting a zero-inflated diagonal normal-block-var model with 3 unknown clusters 
 #> 
 #> DONE
 ## a mean-block model (clustering in the mean rather than the covariance)
 ex_mean <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 mean_data <- NormalBlockData$new(ex_mean$Y, ex_mean$X)
 my_mean_block <- normal_block(mean_data, blocks = 3, model = "mean")
-#> Fitting a diagonal normal-block-mean model with 3 unknown blocks 
+#> Fitting a diagonal normal-block-mean model with 3 unknown clusters 
 #> 
 #> DONE
 coef(my_mean_block)

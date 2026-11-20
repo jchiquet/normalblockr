@@ -90,7 +90,7 @@ The objects of this class are cloneable with this method.
 ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 model <- normal_block(data, blocks = ex$parameters$C, model = "mean")
-#> Fitting a diagonal normal-block-mean model with fixed blocks 
+#> Fitting a diagonal normal-block-mean model with fixed clusters 
 #> 
 #> DONE
 model$plot()

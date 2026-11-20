@@ -34,9 +34,9 @@ print(fit)
 #> A sequential mean-then-variance normal-block fit
 #> ===========================================================================
 #>   mean-block stage    : 3 clusters -- diagonal normal-block-mean model with 3
-#>                         unknown blocks
+#>                         unknown clusters
 #>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2
-#>                         unknown blocks
+#>                         unknown clusters
 #>   ARI between the two partitions: -0.015 
 #>   (near 0 means the two structures are unrelated, as is usual)
 #> ===========================================================================

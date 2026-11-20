@@ -191,7 +191,7 @@ what it changes in the next section:
 out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE,
                     control = NB_control(clustering_init = "ward2", refine = FALSE))
 #> Fitting a collection of zero-inflated diagonal normal-block-var models over q 
-#>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8           
+#>   number of clusters = 2              number of clusters = 3              number of clusters = 4              number of clusters = 5              number of clusters = 6              number of clusters = 7              number of clusters = 8           
 #> DONE
 ```
 
@@ -320,15 +320,15 @@ inter-cluster association network (see Tous and Chiquet 2026).
 out_sp <- normal_block(data, blocks = myModel$q, sparsity = TRUE, zero_inflation = TRUE)
 #> Fitting a collection of zero-inflated diagonal normal-block-var models over sparsity penalties, with fixed q 
 #>   penalty = 0.02839098           
-#> Warning: zero-inflated diagonal normal-block-var model with 4 unknown blocks:
+#> Warning: zero-inflated diagonal normal-block-var model with 4 unknown clusters:
 #> (V)EM stopped at the niter cap (500) without reaching the convergence threshold
 #> (last increment = 0.000476, threshold = 1.0e-04). Consider raising `niter` in
-#> NB_control(), especially with many blocks -- see plot_loglik() to check.
+#> NB_control(), especially with many clusters -- see plot_loglik() to check.
 #>   penalty = 0.02422227           
-#> Warning: zero-inflated diagonal normal-block-var model with 4 unknown blocks:
+#> Warning: zero-inflated diagonal normal-block-var model with 4 unknown clusters:
 #> (V)EM stopped at the niter cap (500) without reaching the convergence threshold
 #> (last increment = 0.000138, threshold = 1.0e-04). Consider raising `niter` in
-#> NB_control(), especially with many blocks -- see plot_loglik() to check.
+#> NB_control(), especially with many clusters -- see plot_loglik() to check.
 #>   penalty = 0.02066567                penalty = 0.01763128                penalty = 0.01504244                penalty = 0.01283373                penalty = 0.01094932                penalty = 0.009341612               penalty = 0.007969963               penalty = 0.006799716               penalty = 0.005801299               penalty = 0.004949482               penalty = 0.004222739               penalty = 0.003602705               penalty = 0.003073712               penalty = 0.002622392               penalty = 0.002237341               penalty = 0.001908827               penalty = 0.00162855                penalty = 0.001389427               penalty = 0.001185414               penalty = 0.001011357               penalty = 0.0008628574              penalty = 0.0007361622              penalty = 0.0006280699              penalty = 0.0005358491              penalty = 0.0004571692              penalty = 0.0003900421              penalty = 0.0003327714              penalty = 0.0002839098           
 #> DONE
 out_sp$plot(c("BIC", "EBIC"))

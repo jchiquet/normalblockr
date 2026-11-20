@@ -106,7 +106,7 @@ Y <- ex$Y; Y[runif(length(Y)) < 0.2] <- 0
 data <- NormalBlockData$new(Y, ex$X)
 model <- normal_block(data, blocks = ex$parameters$C, model = "mean",
                       zero_inflation = TRUE)
-#> Fitting a zero-inflated diagonal normal-block-mean model with fixed blocks 
+#> Fitting a zero-inflated diagonal normal-block-mean model with fixed clusters 
 #> 
 #> DONE
 model$clustering

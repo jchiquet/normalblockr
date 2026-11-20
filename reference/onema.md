@@ -69,7 +69,7 @@ nb_data <- NormalBlockData$new(Y, X)
 out <- normal_block(nb_data, 2:6, zero_inflation = TRUE,
                     control = NB_control(clustering_init = "ward2", verbose = FALSE))
 out$get_best_model("ICL")
-#> A zero-inflated diagonal normal-block-var model with 5 unknown blocks.
+#> A zero-inflated diagonal normal-block-var model with 5 unknown clusters.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
 #>       157 5      10        0 -13631.76 27263.52 28195.15 28209.76 28227.33

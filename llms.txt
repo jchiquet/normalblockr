@@ -98,7 +98,7 @@ m_known <- normal_block(data, blocks = group)
 ```
 
 ``` R
-Fitting a diagonal normal-block-var model with fixed blocks 
+Fitting a diagonal normal-block-var model with fixed clusters 
 
 DONE
 ```
@@ -109,7 +109,7 @@ m_known
 ```
 
 ``` R
-A diagonal normal-block-var model with fixed blocks.
+A diagonal normal-block-var model with fixed clusters.
 ===========================================================================
  nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
       999 6      15        0 -70387.84 140775.7 146616.3 146616.3 146670    14
@@ -135,25 +135,25 @@ m_unknown <- normal_block(data, blocks = 2:20)
 
 ``` R
 Fitting a collection of diagonal normal-block-var models over q 
-     number of blocks = 2           
-     number of blocks = 3           
-     number of blocks = 4           
-     number of blocks = 5           
-     number of blocks = 6           
-     number of blocks = 7           
-     number of blocks = 8           
-     number of blocks = 9           
-     number of blocks = 10           
-     number of blocks = 11           
-     number of blocks = 12           
-     number of blocks = 13           
-     number of blocks = 14           
-     number of blocks = 15           
-     number of blocks = 16           
-     number of blocks = 17           
-     number of blocks = 18           
-     number of blocks = 19           
-     number of blocks = 20           
+     number of clusters = 2           
+     number of clusters = 3           
+     number of clusters = 4           
+     number of clusters = 5           
+     number of clusters = 6           
+     number of clusters = 7           
+     number of clusters = 8           
+     number of clusters = 9           
+     number of clusters = 10           
+     number of clusters = 11           
+     number of clusters = 12           
+     number of clusters = 13           
+     number of clusters = 14           
+     number of clusters = 15           
+     number of clusters = 16           
+     number of clusters = 17           
+     number of clusters = 18           
+     number of clusters = 19           
+     number of clusters = 20           
      refine(): improved 16 of 19 models
 
 DONE
@@ -172,7 +172,7 @@ m_unknown$get_best_model("EBIC")
 ```
 
 ``` R
-A diagonal normal-block-var model with 19 unknown blocks.
+A diagonal normal-block-var model with 19 unknown clusters.
 ===========================================================================
  nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
      1186 19     171        0 -66245.44 132490.9 139411.2 139411.2 140418.2
@@ -199,7 +199,7 @@ m_sparse <- normal_block(data, blocks = group, sparsity = TRUE)
 ```
 
 ``` R
-Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed blocks 
+Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed clusters 
      penalty = 0.2565018           
      penalty = 0.2188391           
      penalty = 0.1867065           
@@ -260,13 +260,13 @@ m_zi    <- normal_block(data_zi, blocks = 2:8, zero_inflation = TRUE)
 
 ``` R
 Fitting a collection of zero-inflated diagonal normal-block-var models over q 
-     number of blocks = 2           
-     number of blocks = 3           
-     number of blocks = 4           
-     number of blocks = 5           
-     number of blocks = 6           
-     number of blocks = 7           
-     number of blocks = 8           
+     number of clusters = 2           
+     number of clusters = 3           
+     number of clusters = 4           
+     number of clusters = 5           
+     number of clusters = 6           
+     number of clusters = 7           
+     number of clusters = 8           
      refine(): improved 6 of 7 models
 
 DONE
@@ -278,7 +278,7 @@ m_zi$get_best_model("ICL")
 ```
 
 ``` R
-A zero-inflated diagonal normal-block-var model with 4 unknown blocks.
+A zero-inflated diagonal normal-block-var model with 4 unknown clusters.
 ===========================================================================
  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
       197 4       6        0 -13523.7  27047.4 28220.75 28241.19 28237.38     8

@@ -175,7 +175,7 @@ input to
 
 my_NB <- normal_block(data = my_data,
                       blocks = my_nb_data$parameters$C)
-#> Fitting a diagonal normal-block-var model with fixed blocks 
+#> Fitting a diagonal normal-block-var model with fixed clusters 
 #> 
 #> DONE
 ```
@@ -196,7 +196,7 @@ A summary of the results is accessible via
 ``` r
 
 print(my_NB)
-#> A diagonal normal-block-var model with fixed blocks.
+#> A diagonal normal-block-var model with fixed clusters.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
 #>       126 3       3        0 -1635.17  3270.34 3850.592 3850.592 3857.183     7
@@ -222,7 +222,7 @@ predicted means.
 ``` r
 
 summary(my_NB)
-#> A diagonal normal-block-var model with fixed blocks.
+#> A diagonal normal-block-var model with fixed clusters.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
 #>       126 3       3        0 -1635.17  3270.34 3850.592 3850.592 3857.183     7
@@ -274,11 +274,11 @@ simply be fixed via the `blocks` argument.
 
 my_NB <- normal_block(data = my_data,
                       blocks = 3)
-#> Fitting a diagonal normal-block-var model with 3 unknown blocks 
+#> Fitting a diagonal normal-block-var model with 3 unknown clusters 
 #> 
 #> DONE
 print(my_NB)
-#> A diagonal normal-block-var model with 3 unknown blocks.
+#> A diagonal normal-block-var model with 3 unknown clusters.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity    loglik deviance     BIC     ICL     EBIC niter
 #>       128 3       3        0 -1678.676 3357.351 3944.98 3944.98 3951.572     7
@@ -314,7 +314,7 @@ of Normal-Block models, one per number of clusters.
 my_NB_unknown <- normal_block(data = my_data,
                               blocks = 2:5)
 #> Fitting a collection of diagonal normal-block-var models over q 
-#>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                refine(): improved 4 of 4 models
+#>   number of clusters = 2              number of clusters = 3              number of clusters = 4              number of clusters = 5              refine(): improved 4 of 4 models
 #> 
 #> DONE
 ```
@@ -421,13 +421,13 @@ network, pass that value to the `sparsity` argument:
 my_NB_sparse_low <- normal_block(data = my_data,
                                  blocks = my_nb_data$parameters$C,
                                  sparsity = 0.1)
-#> Fitting a diagonal normal-block-var model with fixed blocks 
+#> Fitting a diagonal normal-block-var model with fixed clusters 
 #> 
 #> DONE
 my_NB_sparse_high <- normal_block(data = my_data,
                                   blocks = my_nb_data$parameters$C,
                                   sparsity = 10)
-#> Fitting a diagonal normal-block-var model with fixed blocks 
+#> Fitting a diagonal normal-block-var model with fixed clusters 
 #> 
 #> DONE
 ```
@@ -476,7 +476,7 @@ of clusters.
 ``` r
 
 myNB_sparse_0.1   <- my_NB_sparse$get_model(0.1)
-#> No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658166 Collection penalty values can be found via $sparsity
+#> No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658165 Collection penalty values can be found via $sparsity
 myNB_sparse_BIC   <- my_NB_sparse$get_best_model("BIC")
 ```
 
@@ -557,7 +557,7 @@ for the model and a real-data example.
 my_NB_zi <- normal_block(data = my_data_zi,
                          blocks = 5,
                          zero_inflation = TRUE)
-#> Fitting a zero-inflated diagonal normal-block-var model with 5 unknown blocks 
+#> Fitting a zero-inflated diagonal normal-block-var model with 5 unknown clusters 
 #> 
 #> DONE
 ```

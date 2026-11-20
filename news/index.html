@@ -94,6 +94,7 @@
 <ul><li>Every help page has a running example; help titles follow the two families of the article (Normal-Block-Var, Normal-Block-Mean).</li>
 <li>
 <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of a model and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of a sequential fit wrap their long lines at the console width; the descriptions of the collections are the same for both families.</li>
+<li>Printed outputs speak of clusters of variables rather than blocks.</li>
 <li>Vignettes and README build a known clustering with <code>model.matrix(~ 0 + factor(labels))</code>.</li>
 <li>The update of the mean-block cluster profiles solves a linear system instead of inverting a matrix. Results are unchanged.</li>
 <li>
