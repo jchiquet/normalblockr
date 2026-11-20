@@ -73,7 +73,8 @@ Users of 0.3.0 will see different results on the same calls:
   signals, since a block can only gather positively co-varying variables.
 * New fields `penalty_terms` and `penalty` (the BIC penalty, group by
   group), `NormalBlockData$for_family()` (the data a family is fitted on),
-  and `sparsity_details` on mean-block sparsity paths.
+  `NormalBlockData$subset()` and `$Y_original`, and `sparsity_details` on
+  mean-block sparsity paths.
 * The graphical lasso (`src/graphical_lasso.h`) is shared verbatim with
   PLNmodels. It solves the problem scaled to a unit diagonal, which makes it
   converge on covariances whose variances span orders of magnitude, shifts an
@@ -94,6 +95,23 @@ Users of 0.3.0 will see different results on the same calls:
 * `model_par` exposes the cluster proportions `alpha` of mean-block models
   with an unknown clustering, and `B0` of zero-inflated mean-block models, as
   in the variance-block family.
+* `NB_control(clustering_init = "best_of_inits")` with a known clustering
+  crashed: the known clustering is now simply fitted.
+* A sparsity path of variance-block models failed when `sparsity_weights`
+  left some pairs unpenalized; such pairs are now ignored by the default
+  penalty grid.
+* A constant column of Y made the variance-block fit diverge, and `refine()`
+  then failed: `NormalBlockData$new()` now refuses such columns, naming them
+  (`normal_block_cv()` names the fold where it happens). A split or merge
+  candidate whose fit fails is discarded by `refine()` instead of aborting
+  it.
+* `generate_normal_block_var_data()` and `generate_normal_block_mean_data()`
+  honour `alpha`, and could put a variable in two clusters when the first
+  draw left a cluster empty. Data simulated for a given seed are unchanged
+  otherwise.
+* StARS subsamples keep an explicit `zeros` mask and the formula.
+* A collection over an unsorted range of q is ordered by q.
+* Known clusterings are checked to have one row per variable.
 
 ## Other changes
 
@@ -106,6 +124,15 @@ Users of 0.3.0 will see different results on the same calls:
   `model.matrix(~ 0 + factor(labels))`.
 * The update of the mean-block cluster profiles solves a linear system
   instead of inverting a matrix. Results are unchanged.
+* `NB_control(threshold = )` negative runs exactly `niter` iterations,
+  without the warning about the iteration cap.
+* `fixed_tau` is read from the control list by both families (the public
+  `$fixed_tau` field of variance-block models is removed); `update()` loses
+  the arguments `Psi`, `Phi`, `Lambda` and `kappa`, which it stored but never
+  used.
+* The packages dplyr, tidyr, tibble and scales are no longer imported, and
+  Metrics is no longer suggested. The code shared by the two families and by
+  their variants lives in their base classes; results are unchanged.
 
 # normalblockr 0.3.0
 
