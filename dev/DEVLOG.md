@@ -20,7 +20,8 @@ subfolders `mean_block/` and `initialization/`), with their results.
 - **ICL = BIC + 2 H(tau)** only. The former ICL also added the Gaussian
   entropy of W, which made it differ from the BIC for a known clustering,
   depend on the scale of the data, and select q much worse (variance-block
-  ICL 60% -> 89% of correct selections on separable simulated data,
+  ICL 63% -> 89% of correct selections on separable simulated data with
+  1.0.0; the exact ICL, W integrated out, does no better: 78%,
   `criteria_selection_study.R`).
 - **EBIC** `BIC + 2|E| log(dim)`, dim = q (var) or p (mean, which used q
   before 1.0.0).
@@ -49,8 +50,8 @@ resolved per family.
   `diagnostic_mean_block_real_data.R`).
 - Variance-block (`var_init_study.R`): heuristics equivalent on simulations;
   on real data kmeans + refine() best on brca (deviance gap to the best fit
-  summed over q: 2,383 vs 8,599 for ward2), close on university, but ward2
-  better on zero-inflated onema (183 vs 567). The 0.3.0 default was ward2,
+  summed over q: 2,409 vs 8,624 for ward2 with 1.0.0), close on university, but ward2
+  better on zero-inflated onema (197 vs 590), where best_of_inits is best. The 0.3.0 default was ward2,
   chosen on cold-started collections, where kmeans had more deviance
   monotonicity violations and a seed-dependent ICL choice: refine() is what
   fixes that, so do not turn refine off by default without revisiting the
