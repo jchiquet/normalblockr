@@ -1,35 +1,15 @@
 ###############################################################################
-## NormalBlockVarCollectionSparsity (R/NormalBlockVarCollectionSparsity.R):
-## a sparsity path at fixed q (known or unknown clusters), StARS stability
-## selection, and the M-step warm-starting each penalty from the previous
-## one's converged parameters (fewer total EM iterations, same BIC path).
-## Use pre-save testdata (seed are hard to handle in testhat)
+## NormalBlockVarCollectionSparsity (R/NormalBlockCollectionSparsity.R): a
+## sparsity path at fixed q, each penalty warm-started from the previous one's
+## converged parameters, and its default penalty grid. StARS is in
+## test-stability-selection.R.
+## Frozen fixture (seeds are unreliable inside testthat)
 testdata <- readRDS("testdata/testdata_normal.RDS")
 Y <- testdata$Y
 X <- testdata$X
 C <- testdata$parameters$C ; q <- ncol(C)
 
 data <- NormalBlockData$new(Y, X)
-
-test_that("normal block with changing sparsity, integrated inference", {
-  model <- normalblockr:::NormalBlockVarCollectionSparsity$new(data, q, control = NB_control(verbose = FALSE))
-  model$optimize()
-  model$stability_selection()
-  model_StARS <- model$get_best_model("StARS")
-  expect_gt(model_StARS$loglik, -2635)
-})
-
-
-test_that("normal block with fixed clusters, spherical residual covariance and heuristic inference", {
-  model <- normalblockr:::NormalBlockVarCollectionSparsity$new(data, C,
-                                                   control = NB_control(noise_covariance = "spherical",
-                                                                        heuristic = TRUE,
-                                                                        verbose = FALSE))
-  model$optimize()
-  model$stability_selection()
-  model_StARS <- model$get_best_model("StARS")
-  expect_lt(sqrt(mean((model_StARS$fitted - Y)^2)), 2.4)
-})
 
 test_that("optimize() warm-starts each penalty from the previous one, reducing total EM iterations without changing the BIC path", {
   ## n_sparsity_penalties = 15: the warm-start advantage grows with the

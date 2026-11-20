@@ -55,3 +55,14 @@ test_that("known-cluster models check that C has one row per variable", {
                    NormalBlockMeanKnownClusters, ZINormalBlockMeanKnownClusters))
     expect_error(cls$new(data, C = C_short), "one row per variable")
 })
+
+test_that("normal_block() and NB_control() refuse malformed arguments", {
+  data <- NormalBlockData$new(ex$Y, ex$X)
+  expect_error(normal_block(data, blocks = c(1, 2, 1, 2, 1, 2, 1, 2)), "vector of cluster labels")
+  expect_error(NB_control(noise_covariance = "block"), "noise_covariance must be one of")
+  expect_error(NB_control(clustering_init = "random"), "must name a known heuristic")
+  expect_error(normal_block(data, blocks = 2, model = "var",
+                            control = NB_control(verbose = FALSE, noise_covariance = "full")),
+               "only applies to mean-block models")
+  expect_error(normal_block(data, blocks = 2:3, control = NB_control(clustering_init = list(rep(1:2, 4)))))
+})

@@ -16,12 +16,9 @@ fit_both <- function(data, blocks, model) {
   })
 }
 
-test_that("NB_control() carries the acceleration switch, resolved per family by default", {
+test_that("by default, SQUAREM runs for the variance-block family and a full Sigma, not for a diagonal one", {
   expect_null(NB_control()$acceleration)
   expect_false(NB_control(acceleration = FALSE)$acceleration)
-})
-
-test_that("by default, SQUAREM runs for the variance-block family and a full Sigma, not for a diagonal one", {
   same_trace <- function(a, b) isTRUE(all.equal(a$objective, b$objective))
   fit <- function(data, blocks, model, acc, nc = NULL) {
     set.seed(1)
@@ -75,4 +72,26 @@ test_that("zero-inflated models accept the switch", {
   fits <- fit_both(data_zi, zi$parameters$C, "var")
   expect_true(all(diff(fits$plain$objective) > -1e-8))
   expect_equal(fits$plain$loglik, fits$acc$loglik, tolerance = 1e-5)
+})
+
+test_that("mean-block, full Sigma: from the same start, SQUAREM reaches at least the plain recursion's ELBO", {
+  Y <- testdata_mean$Y; C <- testdata_mean$parameters$C; q <- ncol(C)
+  data <- data_mean
+  ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C),
+                     noise_covariance = "full")
+  init <- NormalBlockMeanUnknownClusters$new(data, q, control = ctrl
+            )$.__enclos_env__$private$optim_initialize()
+
+  fit <- function(accelerate) {
+    NormalBlockMeanUnknownClusters_fit(
+      Y = data$Y, X = data$X, B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
+      sparsity = 0, sparsity_weights = matrix(1, ncol(Y), ncol(Y)) - diag(ncol(Y)),
+      noise_covariance = "full", fixed_point_niter = 5, niter = 50, threshold = 1e-6,
+      accelerate = accelerate)
+  }
+  plain <- fit(FALSE)
+  accel <- fit(TRUE)
+
+  expect_gte(tail(accel$objective, 1), tail(plain$objective, 1) - 1e-6)
+  expect_true(all(diff(accel$objective) >= -1e-6)) # still monotone
 })

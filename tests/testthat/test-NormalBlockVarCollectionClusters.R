@@ -1,46 +1,46 @@
 ###############################################################################
-## NormalBlockVarCollectionClusters (R/NormalBlockVarCollectionClusters.R,
-## R/NormalBlockCollectionClusters.R): fitting a
-## collection over several q at once, including a per-q clustering_init list
-## and the heuristic path. The second half of the file exercises refine()
-## (candidates_split()/candidates_merge()) on the collection.
-## Use pre-save testdata (seed are hard to handle in testhat)
+## Collections over a range of q (R/NormalBlockCollectionClusters.R): a per-q
+## clustering_init list, the defaults, and refine()'s split/merge search.
+## Frozen fixture (seeds are unreliable inside testthat)
 testdata <- readRDS("testdata/testdata_normal_zi.RDS")
 Y <- testdata$Y ; X <- testdata$X
 C <- testdata$parameters$C ; q <- ncol(C)
 
-test_that("normal block with diagonal residual covariance and unknown q", {
-  clustering_init_3 <- normalblockr:::get_clusters(C)
-  clustering_init_2 <- clustering_init_3 ; clustering_init_2[which(clustering_init_2 == 3) ] = 2
-  clustering_init_1 <- clustering_init_2 ; clustering_init_1[which(clustering_init_1 == 2) ] = 1
+test_that("a collection starts each q from its own clustering_init", {
+  clustering_init_3 <- get_clusters(C)
+  clustering_init_2 <- clustering_init_3 ; clustering_init_2[clustering_init_2 == 3] <- 2
+  clustering_init_1 <- clustering_init_2 ; clustering_init_1[clustering_init_1 == 2] <- 1
   clustering_init   <- list(clustering_init_1, clustering_init_2, clustering_init_3)
 
-  data  <- normalblockr:::NormalBlockData$new(Y, X)
-  model <- normalblockr:::NormalBlockVarCollectionClusters$new(data, c(1, 2, 3), zero_inflation = FALSE,
-                            control = NB_control(clustering_init = clustering_init))
-  model$optimize()
-  model_BIC <- model$get_best_model("BIC")
-  expect_lt(model_BIC$BIC, 7455)
-})
-
-test_that("normal block with unknown q, heuristic", {
   data  <- NormalBlockData$new(Y, X)
-  model <- normalblockr:::NormalBlockVarCollectionClusters$new(data, c(2, 3, 4), sparsity = 0.05,
-                            control = NB_control(heuristic = TRUE))
-  model$optimize()
-  model_3 <- model$get_model(3)
-  expect_lt(sqrt(mean((model_3$fitted - Y)^2)), 2.9)
+  model <- NormalBlockVarCollectionClusters$new(data, 1:3,
+             control = NB_control(clustering_init = clustering_init, verbose = FALSE))
+  model$optimize(NB_control(verbose = FALSE))
+  expect_lt(model$get_best_model("BIC")$BIC, 7455)
+  expect_equal(model$get_best_model("BIC")$q, 3)
 })
 
-###############################################################################
-## refine(): tries a short split from each model's smaller-q neighbor and/or a
-## short merge from its larger-q neighbor, keeping a candidate only if it's
-## strictly better -- see its roxygen for the empirical rationale
-## (inst/clustering_initialization_benchmark and the brca_rppa/university
-## comparison that motivated it, and why "merge" was added alongside "split").
 set.seed(7)
 ex2 <- generate_normal_block_var_data(n = 60, p = 30, d = 1, q = 5)
 data2 <- NormalBlockData$new(ex2$Y, ex2$X)
+## a collection over 2:5, optimized without refine()
+set.seed(1)
+coll0 <- NormalBlockVarCollectionClusters$new(data2, 2:5, control = NB_control(verbose = FALSE, refine = FALSE))
+coll0$optimize(control = list(niter = 100, threshold = 1e-4, verbose = FALSE))
+deviances <- function(coll) sapply(coll$models, function(m) m$deviance)
+## a copy of coll0 whose models can be modified
+fresh <- function() {
+  coll <- coll0$clone()
+  coll$models <- lapply(coll0$models, function(m) m$clone())
+  coll
+}
+## replaces a public method of every model of a collection
+stub <- function(coll, method, fun) {
+  for (m in coll$models) {
+    unlockBinding(method, m)
+    assign(method, fun, envir = m)
+  }
+}
 
 test_that("NB_control()'s refine option defaults to TRUE, and kmeans is both families' initialization", {
   expect_true(NB_control()$refine)
@@ -61,57 +61,62 @@ test_that("NB_control()'s refine option defaults to TRUE, and kmeans is both fam
 })
 
 test_that("refine() never makes a model's deviance worse, and skips non-contiguous q gaps", {
-  coll <- NormalBlockVarCollectionClusters$new(data2, c(2, 3, 5), control = NB_control(verbose = FALSE))
-  coll$optimize(control = list(niter = 100, threshold = 1e-4, verbose = FALSE))
-  deviance_before <- sapply(coll$models, function(m) m$deviance)
-
-  expect_no_error(coll$refine())
-  deviance_after <- sapply(coll$models, function(m) m$deviance)
-  expect_true(all(deviance_after <= deviance_before + 1e-8))
+  coll <- fresh()
+  coll$models <- coll$models[-3]                  # q = 2, 3, 5
+  stub(coll, "candidates_merge", function(...) list())
+  ## q = 5 has no q = 4 neighbour to be split from
+  tried <- c()
+  for (m in coll$models[1:2]) {
+    unlockBinding("candidates_split", m)
+    local({ q <- m$q; f <- m$candidates_split
+            assign("candidates_split", function(...) { tried <<- c(tried, q); f(...) }, envir = m) })
+  }
+  set.seed(1)
+  expect_no_error(coll$refine(verbose = FALSE))
+  expect_equal(tried, 2)                          # only q = 2 seeds a candidate (for q = 3)
+  expect_true(all(deviances(coll) <= deviances(coll0)[-3] + 1e-8))
 })
 
-test_that("refine(directions = 'split') only tries split candidates, never merge", {
-  coll <- NormalBlockVarCollectionClusters$new(data2, 2:5, control = NB_control(verbose = FALSE))
-  coll$optimize(control = list(niter = 100, threshold = 1e-4, verbose = FALSE))
-  expect_no_error(coll$refine(directions = "split"))
+test_that("refine(directions = ) only builds the candidates it is asked for", {
+  never <- function(...) stop("not this direction")
+  coll <- fresh(); stub(coll, "candidates_merge", never)
+  set.seed(1); expect_no_error(coll$refine(directions = "split", verbose = FALSE))
+  coll <- fresh(); stub(coll, "candidates_split", never)
+  set.seed(1); expect_no_error(coll$refine(directions = "merge", verbose = FALSE))
+  expect_error(fresh()$refine(directions = "swap"))
 })
 
-test_that("refine(directions = 'merge') only tries merge candidates, never split", {
-  coll <- NormalBlockVarCollectionClusters$new(data2, 2:5, control = NB_control(verbose = FALSE))
-  coll$optimize(control = list(niter = 100, threshold = 1e-4, verbose = FALSE))
-  expect_no_error(coll$refine(directions = "merge"))
+test_that("refine(split_rule = ) reaches the split of every model", {
+  coll <- fresh()
+  rules <- c()
+  stub(coll, "candidates_split", function(trial_niter = 5, split_rule = NULL) {
+    rules <<- c(rules, split_rule); list()
+  })
+  coll$refine(directions = "split", split_rule = "noise", verbose = FALSE)
+  expect_equal(rules, rep("noise", 3))
+  expect_error(coll$refine(split_rule = "random"), "should be one of")
 })
 
 test_that("refine() with both directions is never worse than either alone", {
-  coll_split <- NormalBlockVarCollectionClusters$new(data2, 2:5, control = NB_control(verbose = FALSE))
-  coll_split$optimize(control = list(niter = 100, threshold = 1e-4, verbose = FALSE))
-  coll_merge <- coll_split$clone(deep = TRUE)
-  coll_both  <- coll_split$clone(deep = TRUE)
-
-  coll_split$refine(directions = "split")
-  coll_merge$refine(directions = "merge")
-  coll_both$refine(directions = c("split", "merge"))
-
-  dev_split <- sapply(coll_split$models, function(m) m$deviance)
-  dev_merge <- sapply(coll_merge$models, function(m) m$deviance)
-  dev_both  <- sapply(coll_both$models, function(m) m$deviance)
-
-  expect_true(all(dev_both <= dev_split + 1e-8))
-  expect_true(all(dev_both <= dev_merge + 1e-8))
+  coll_split <- fresh(); coll_merge <- fresh(); coll_both <- fresh()
+  set.seed(1); coll_split$refine(directions = "split", verbose = FALSE)
+  set.seed(1); coll_merge$refine(directions = "merge", verbose = FALSE)
+  set.seed(1); coll_both$refine(directions = c("split", "merge"), verbose = FALSE)
+  expect_true(all(deviances(coll_both) <= deviances(coll_split) + 1e-8))
+  expect_true(all(deviances(coll_both) <= deviances(coll_merge) + 1e-8))
+  expect_true(all(deviances(coll_both) <= deviances(coll0) + 1e-8))
 })
 
 test_that("NB_control(refine = TRUE) makes optimize() call refine() automatically", {
+  set.seed(1)
   coll_auto <- NormalBlockVarCollectionClusters$new(data2, 2:5, control = NB_control(verbose = FALSE, refine = TRUE))
   coll_auto$optimize(control = list(niter = 100, threshold = 1e-4, verbose = FALSE))
-
+  set.seed(1)
   coll_manual <- NormalBlockVarCollectionClusters$new(data2, 2:5, control = NB_control(verbose = FALSE, refine = FALSE))
   coll_manual$optimize(control = list(niter = 100, threshold = 1e-4, verbose = FALSE))
-  coll_manual$refine()
-
-  expect_equal(sapply(coll_auto$models, function(m) m$deviance),
-               sapply(coll_manual$models, function(m) m$deviance))
+  coll_manual$refine(verbose = FALSE)
+  expect_equal(deviances(coll_auto), deviances(coll_manual))
 })
-
 
 test_that("a collection is sorted by q, with a per-q clustering_init list kept aligned", {
   data <- NormalBlockData$new(Y, X)

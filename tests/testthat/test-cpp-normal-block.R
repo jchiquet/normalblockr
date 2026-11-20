@@ -1,13 +1,10 @@
 ###############################################################################
-## These tests check that the Rcpp/RcppArmadillo (V)EM core
-## (NormalBlockVarKnownClusters_fit / NormalBlockVarUnknownClusters_fit, src/exports.cpp)
-## reproduces *exactly* (up to numerical precision) the EM/VEM recursion
-## already implemented in R (NormalBlockVarKnownClusters / NormalBlockVarUnknownClusters), starting from the
-## same initial parameters, both unpenalized (sparsity = 0, plain inversion)
-## and penalized (sparsity > 0, in-package graphical lasso, see
-## src/omega_estimation.h and src/graphical_lasso.h). The R6 heuristic initialization
-## (private method optim_initialize) is reached into via R6's `.__enclos_env__`
-## so that both implementations start from the very same point.
+## The R6 plumbing of the variance-block models: calling the Rcpp/Armadillo
+## cores (NormalBlockVarKnownClusters_fit / NormalBlockVarUnknownClusters_fit,
+## src/exports.cpp) directly from the R6 initialization
+## (private$optim_initialize(), reached through `.__enclos_env__`) gives what
+## the R6 object gets through optimize(), unpenalized (sparsity = 0) or
+## penalized (in-package graphical lasso).
 ## Use pre-save testdata (seed are hard to handle in testhat)
 testdata <- readRDS("testdata/testdata_normal.RDS")
 Y <- testdata$Y

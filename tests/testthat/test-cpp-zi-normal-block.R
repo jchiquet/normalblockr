@@ -1,18 +1,10 @@
 ###############################################################################
-## These tests check that calling the Rcpp/RcppArmadillo zero-inflated (V)EM
-## core directly (ZINormalBlockVarKnownClusters_fit / ZINormalBlockVarUnknownClusters_fit,
-## src/exports.cpp) reproduces *closely* (up to numerical precision) what the
-## R6 wrapper (ZINormalBlockVarKnownClusters / ZINormalBlockVarUnknownClusters) gets by calling the very
-## same functions through EM_optimize(), starting from the same initial
-## parameters, both unpenalized (sparsity = 0) and penalized (sparsity > 0,
-## in-package graphical lasso). The B-update (and, for unknown clusters,
-## the M-update) is exactly quadratic despite the zero-inflation mask, so the
-## C++ side solves it directly (see src/zi_closed_form_solvers.h) instead of
-## going through an iterative optimizer -- hence the comparable tolerance to
-## the non zero-inflated tests (test-cpp-normal-block.R). The R6 heuristic
-## initialization (private method optim_initialize) is reached into via R6's
-## `.__enclos_env__` so that both implementations start from the very same
-## point.
+## The R6 plumbing of the zero-inflated variance-block models: calling the
+## Rcpp/Armadillo cores (ZINormalBlockVarKnownClusters_fit /
+## ZINormalBlockVarUnknownClusters_fit, src/exports.cpp) directly from the R6
+## initialization (private$optim_initialize(), reached through
+## `.__enclos_env__`) gives what the R6 object gets through optimize(),
+## unpenalized (sparsity = 0) or penalized (in-package graphical lasso).
 ## Use pre-saved zero-inflated testdata (seed are hard to handle in testthat)
 testdata <- readRDS("testdata/testdata_normal_zi.RDS")
 Y <- testdata$Y

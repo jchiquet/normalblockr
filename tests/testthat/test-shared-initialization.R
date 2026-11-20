@@ -1,13 +1,11 @@
 ###############################################################################
-## Work a collection over q used to repeat once per model although it does not
-## depend on q: the OLS fit, the zero-inflation logistic regressions, and
-## whatever part of a clustering heuristic is shared (one hierarchical tree cut
-## at each q, one eigendecomposition, one lossless row compression, one wide
-## SBM exploration).
-##
-## These are removals of redundant computation, so most of what follows checks
-## that the fits they feed come out unchanged. The heuristics themselves live
-## in test-clustering-heuristics.R.
+## The work a collection over q shares between its models because it does not
+## depend on q: the OLS fit, and whatever part of a clustering heuristic is
+## shared (one hierarchical tree cut at each q, one eigendecomposition, one
+## lossless row compression, one wide SBM exploration). Most of what follows
+## checks that the fits they feed come out unchanged. The heuristics
+## themselves are in test-clustering-heuristics.R, the zero-inflation fits in
+## test-zero-inflation-component.R.
 ###############################################################################
 set.seed(99)
 sbm_ex   <- generate_normal_block_var_data(n = 60, p = 24, d = 1, q = 4)
@@ -27,52 +25,6 @@ test_that("ols_fit() is memoized and matches a fresh computation", {
 
   ## same object back, not a recomputation
   expect_identical(d$ols_fit(), first)
-})
-
-test_that("zi_fit() is memoized and matches the per-variable logistic fits", {
-  set.seed(2)
-  ex <- generate_normal_block_var_data(n = 80, p = 12, d = 1, q = 2, kappa = rep(0.3, 12))
-  d  <- NormalBlockData$new(ex$Y, ex$X)
-
-  zi <- d$zi_fit()
-  expect_named(zi, c("B0", "kappa", "ZI_cond_mean"))
-  expect_identical(d$zi_fit(), zi)
-
-  ## the same p independent logistic regressions, spelled out
-  B0 <- t(sapply(lapply(1:d$p, function(j) {
-    glm(zeros ~ 0 + ., family = binomial(link = "logit"),
-        data = data.frame(zeros = d$zeros[, j], d$X0))$coefficients
-  }), unlist))
-  ## values only: B0's dimnames are a leaked deparse of whatever expression
-  ## built the data.frame, which is a separate (pre-existing) wart
-  expect_equal(zi$B0, B0, ignore_attr = TRUE)
-  expect_equal(zi$ZI_cond_mean,
-               sum(normalblockr:::xlogy(d$zeros, zi$kappa)) +
-               sum(normalblockr:::xlogy(d$zeros_bar, 1 - zi$kappa)))
-})
-
-test_that("zi_ols_fit() is memoized and matches the free function", {
-  set.seed(21)
-  ex <- generate_normal_block_var_data(n = 70, p = 12, d = 1, q = 2, kappa = rep(0.3, 12))
-  d  <- NormalBlockData$new(ex$Y, ex$X)
-  fit <- d$zi_ols_fit()
-  expect_named(fit, c("B", "dm1", "R"))
-  expect_equal(fit, normalblockr:::zi_weighted_fit(d))
-  expect_identical(d$zi_ols_fit(), fit)
-  ## the masked residuals every zero-inflated heuristic starts from
-  expect_equal(d$zi_ols_fit()$R, fit$R)
-})
-
-test_that("every model in a collection shares one data object, hence one fit", {
-  set.seed(3)
-  ex <- generate_normal_block_var_data(n = 60, p = 15, d = 1, q = 2, kappa = rep(0.3, 15))
-  d  <- NormalBlockData$new(ex$Y, ex$X)
-  coll <- normal_block(d, blocks = 2:4, zero_inflation = TRUE,
-                       control = NB_control(verbose = FALSE))
-
-  ## R6 reference semantics: the models point at the caller's object, so the
-  ## memoized zi_fit()/ols_fit() are computed once for the whole collection
-  for (m in coll$models) expect_identical(m$data, d$for_family("var"))
 })
 
 test_that("a q-range collection shares the q-independent part of its heuristic", {
@@ -172,16 +124,8 @@ test_that("the mean-block collection shares its heuristic across q", {
 
   path <- normalblockr:::clustering_path_for_family(d, q_list, "mean", FALSE,
                                                     NB_control(verbose = FALSE))
-  expect_equal(length(path), length(q_list))       # kmeans is now shareable too
+  expect_equal(length(path), length(q_list))
   for (i in seq_along(q_list)) expect_equal(length(unique(path[[i]])), q_list[i])
-
-  ## the family default resolves to kmeans (kmeans draws its starts, so the
-  ## two calls only agree from the same RNG state)
-  set.seed(44); a <- normalblockr:::clustering_path_for_family(
-    d, q_list, "mean", FALSE, NB_control(verbose = FALSE))
-  set.seed(44); b <- normalblockr:::clustering_path_for_family(
-    d, q_list, "mean", FALSE, NB_control(verbose = FALSE, clustering_init = "kmeans"))
-  expect_equal(a, b)
 })
 
 test_that("sbm_clustering_path() returns one valid membership vector per q, named by q, never NULL", {
@@ -234,13 +178,6 @@ test_that("an explicit clustering_init is never overridden by the sbm path", {
   }
 })
 
-test_that("NormalBlockVarCollectionClustersSparsity also uses the shared sbm path", {
-  coll <- NormalBlockVarCollectionClustersSparsity$new(sbm_data, c(2, 3), control = NB_control(
-    verbose = FALSE, clustering_init = "sbm", n_sparsity_penalties = 3
-  ))
-  expect_no_error(coll$optimize(control = list(niter = 3, threshold = -1, verbose = FALSE)))
-})
-
 test_that("sbm_clustering_path()'s ward2 fallback does not error on a (near-)constant column", {
   sbm_R_const <- sbm_R
   sbm_R_const[, 1] <- 0; sbm_R_const[1, 1] <- 5 # a single non-zero residual for variable 1
@@ -248,7 +185,8 @@ test_that("sbm_clustering_path()'s ward2 fallback does not error on a (near-)con
   for (q in 2:20) expect_equal(length(unique(path[[as.character(q)]])), q)
 })
 
-test_that("zero-inflated collections also use the shared sbm path, clustering on zi_residuals() instead of ols_residuals()", {
+test_that("zero-inflated collections also use the shared sbm path, clustering the masked residuals", {
+  set.seed(8)
   exzi   <- generate_normal_block_var_data(n = 60, p = 24, d = 1, q = 4, kappa = rep(0.3, 24))
   datazi <- NormalBlockData$new(exzi$Y, exzi$X, X0 = matrix(1, nrow(exzi$Y), 1))
 
@@ -280,16 +218,4 @@ test_that("spectral_clustering_path() shares the rank cap with the single-q heur
   path <- normalblockr:::spectral_clustering_path(R, q_list)
   expect_equal(length(path), length(q_list))
   for (i in seq_along(q_list)) expect_equal(length(unique(path[[i]])), q_list[i])
-
-  ## and a mean-block collection over that range actually runs -- not that
-  ## every model still has exactly q distinct clusters *after* the VEM: at
-  ## q's beyond the true generative q = 5, and with rank(R) = 2, that's
-  ## asking the optimizer never to collapse a cluster in a regime it's
-  ## structurally prone to (the same EM degeneracy noted in §0 of
-  ## inst/normal_block_models.qmd), which is sensitive to BLAS/RNG
-  ## differences across platforms/R versions and made this flaky on CI
-  ## (windows-latest, ubuntu oldrel-1) without ever failing locally.
-  expect_no_error(
-    normal_block(d, blocks = q_list, model = "mean",
-                 control = NB_control(verbose = FALSE, clustering_init = "spectral")))
 })

@@ -242,9 +242,11 @@ test_that("a diverging warm start is a real failure mode, not a hypothetical", {
   junk <- ok$w * 1e6                       # a wildly mis-scaled "previous" solve
   warm <- graphical_lasso_fit(S, rho, w_init = junk, wi_init = solve(junk))
 
-  ## whatever the warm attempt does, a cold solve on the same problem is fine
+  ## the warm attempt fails, while a cold solve on the same problem is fine
+  expect_true(ok$converged)
   expect_false(anyNA(ok$wi))
-  expect_true(is.matrix(warm$wi))
+  expect_false(warm$converged)
+  expect_true(anyNA(warm$wi))
 })
 
 ###############################################################################

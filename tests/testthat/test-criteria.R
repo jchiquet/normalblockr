@@ -5,7 +5,7 @@
 ## 2015), the ICL completes only the discrete partition (Biernacki, Celeux &
 ## Govaert 2000), and the EBIC uses the dimension of the network. These are
 ## structural checks: they do not depend on the quality of the fit.
-ctrl <- NB_control(verbose = FALSE, niter = 20)
+ctrl <- NB_control(verbose = FALSE, niter = 20, threshold = -1)
 
 set.seed(1)
 ex_var  <- generate_normal_block_var_data(n = 60, p = 15, d = 2, q = 3)
@@ -13,6 +13,8 @@ dat_var <- NormalBlockData$new(ex_var$Y, ex_var$X)
 ex_mean  <- generate_normal_block_mean_data(n = 60, p = 15, d = 2, q = 3)
 dat_mean <- NormalBlockData$new(ex_mean$Y, ex_mean$X)
 C_known <- ex_var$parameters$C
+set.seed(3)
+fit_unknown <- normal_block(dat_var, blocks = 3, control = ctrl)
 
 check_bic <- function(fit) {
   pen <- fit$penalty_terms
@@ -22,7 +24,7 @@ check_bic <- function(fit) {
 }
 
 test_that("variance-block, unknown clusters: alpha is charged log(p), the rest log(n)", {
-  fit <- normal_block(dat_var, blocks = 3, control = ctrl)
+  fit <- fit_unknown
   check_bic(fit)
   pen <- fit$penalty_terms
   n <- fit$n; p <- fit$p; q <- fit$q; d <- fit$d
@@ -33,14 +35,14 @@ test_that("variance-block, unknown clusters: alpha is charged log(p), the rest l
 
 test_that("a spherical noise variance is charged log(n * p)", {
   fit <- normal_block(dat_var, blocks = 3,
-                      control = NB_control(verbose = FALSE, niter = 20, noise_covariance = "spherical"))
+                      control = NB_control(verbose = FALSE, niter = 20, threshold = -1, noise_covariance = "spherical"))
   pen <- fit$penalty_terms
   expect_equal(pen[pen$group == "noise", c("nu", "N")],
                data.frame(nu = 1L, N = fit$n * fit$p), ignore_attr = TRUE)
 })
 
 test_that("ICL completes the partition only: ICL = BIC + 2 H(tau), and ICL = BIC for known clusters", {
-  fit <- normal_block(dat_var, blocks = 3, control = ctrl)
+  fit <- fit_unknown
   tau <- fit$var_par$tau
   expect_equal(fit$entropy, -sum(ifelse(tau < .Machine$double.eps, 0, tau * log(tau))))
   expect_equal(fit$ICL, fit$BIC + 2 * fit$entropy)
@@ -52,6 +54,7 @@ test_that("ICL completes the partition only: ICL = BIC + 2 H(tau), and ICL = BIC
 })
 
 test_that("mean-block: cluster profiles are charged log(n * p), alpha log(p)", {
+  set.seed(4)
   fit <- normal_block(dat_mean, blocks = 3, model = "mean", control = ctrl)
   check_bic(fit)
   pen <- fit$penalty_terms
