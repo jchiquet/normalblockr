@@ -61,7 +61,11 @@ NormalBlockBase <- R6::R6Class(
             stop("Cluster-indicating matrix must have as many rows as Y has columns")
           if (ncol(cl0) != q)
             stop("Cluster-indicating matrix must have q columns")
-          if (min(colSums(cl0)) < 1)
+          ## an indicator matrix needs a member per cluster; a matrix of
+          ## posterior probabilities (e.g. the tau a stability selection
+          ## starts from) only needs some mass in each cluster
+          hard <- all(cl0 == 0 | cl0 == 1)
+          if (min(colSums(cl0)) < (if (hard) 1 else .Machine$double.eps))
             stop("There cannot be empty clusters in the initial clustering matrix.")
         }
         private$C <- cl0

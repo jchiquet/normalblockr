@@ -66,3 +66,17 @@ test_that("normal_block() and NB_control() refuse malformed arguments", {
                "only applies to mean-block models")
   expect_error(normal_block(data, blocks = 2:3, control = NB_control(clustering_init = list(rep(1:2, 4)))))
 })
+
+test_that("an initial clustering given as probabilities may have a nearly empty cluster", {
+  set.seed(2)
+  ex <- generate_normal_block_var_data(n = 40, p = 12, d = 1, q = 3)
+  d  <- NormalBlockData$new(ex$Y, ex$X)
+  tau <- ex$parameters$C * (1 - 2e-3) + 1e-3
+  tau[, 3] <- 1e-4; tau <- tau / rowSums(tau)   # cluster 3 carries less than one variable
+  expect_lt(sum(tau[, 3]), 1)
+  m <- NormalBlockVarUnknownClusters$new(d, 3, control = NB_control(clustering_init = tau, fixed_tau = TRUE, verbose = FALSE))
+  expect_no_error(m$optimize(NB_control(fixed_tau = TRUE, verbose = FALSE)))
+  ## an indicator matrix still needs a member in every cluster
+  C <- ex$parameters$C; C[, 3] <- 0
+  expect_error(NormalBlockVarUnknownClusters$new(d, 3, control = NB_control(clustering_init = C)), "empty clusters")
+})
