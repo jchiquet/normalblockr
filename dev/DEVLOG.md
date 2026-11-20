@@ -37,15 +37,15 @@ criterion over-selects (mean-block 76-92% over-selection on separable
 datasets, variance-block 27%). On real data the exact ICL on the original
 scale (Jacobian included) favors rescaling for the variance-block family
 (`brca_rppa`, `onema`; also the cross-validated log-likelihood,
-`var_scale_cv_real_data.R`: +2,080 on brca, +169 on onema, n.s. on
-university) and raw data for the mean-block family. Hence `scale = NULL`,
+`var_scale_cv_real_data.R`, rerun with 1.0.0: +2,074 (se 124) on brca,
++83 (se 66, n.s.) on onema, n.s. on university) and raw data for the mean-block family. Hence `scale = NULL`,
 resolved per family.
 
 ## Initialization: kmeans + refine() for both families (1.0.0, #65)
 
 - Mean-block: kmeans is the best of the four heuristics on `brca_rppa`,
-  `onema`, a simulation, and Nestor's M2 grid (mean ARI 0.90 at SNR 0.3,
-  0.97 at SNR 1.5; sbm close, ward2/spectral behind) (`nestor_protocol.R`,
+  `onema`, a simulation, and Nestor's M2 grid (mean ARI 0.87 at SNR 0.3,
+  0.98 at SNR 1.5 with 1.0.0; sbm close, ward2/spectral behind) (`nestor_protocol.R`,
   `diagnostic_mean_block_real_data.R`).
 - Variance-block (`var_init_study.R`): heuristics equivalent on simulations;
   on real data kmeans + refine() best on brca (deviance gap to the best fit
@@ -76,8 +76,8 @@ resolved per family.
 ## Mean-block noise covariance: diagonal by default
 
 A full Sigma's p(p+1)/2 parameters drown the mean structure: BIC picks the
-true q 9-10/12 with a diagonal Sigma against 5-8/12 with a full one at
-n/p = 1.3, even on data generated with a full Sigma; the ARI at the true q is
+true q 9-10/12 with a diagonal Sigma against 5/12 with a full one at
+n/p = 1.3 (1.0.0), even on data generated with a full Sigma; the ARI at the true q is
 the same (`covariance_shape_selection_study.R`). On brca, q = 1 -> 15 buys a
 full Sigma 514 units of deviance against 97,056 for a diagonal one
 (`deviance_monotonicity.R`). `sparsity > 0` implies "full"; zero-inflated
@@ -141,7 +141,7 @@ inverse), hence no sparsity.
 On a positive control the two structures are recovered exactly (ARI = 1 on
 each); on brca the two partitions are unrelated (ARI 0.017, q = 50 in the
 mean, 19 in the covariance), while the covariance clustering is close to the
-direct one (ARI 0.715) (`sequential_mean_then_variance.R`).
+direct one (ARI 0.715; with 1.0.0: ARI 0.018 and 0.644, q = 65 and 20) (`sequential_mean_then_variance.R`).
 
 ## Profiling (2026-09, -O2 builds)
 
