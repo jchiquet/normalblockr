@@ -5,10 +5,10 @@
 \title{Base Class for a Collection of Models over a Range of Cluster Counts}
 \description{
 Shared scaffolding for [NormalBlockVarCollectionClusters] and
-[NormalBlockMeanCollectionClusters]: everything that does not depend on the
-model family (model lookup, model selection, the criteria plot and the
-split/merge `refine()` search). Concrete subclasses only build `self$models`
-in their `initialize()` and name themselves through `who_am_I`.
+[NormalBlockMeanCollectionClusters]: the models of the collection, one per
+q in increasing order, model lookup and selection, the criteria plot and
+the split/merge `refine()` search. Concrete subclasses only name the model
+family.
 }
 \examples{
 # An internal abstract base class, never instantiated directly -- see

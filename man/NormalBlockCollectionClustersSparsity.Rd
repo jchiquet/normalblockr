@@ -6,9 +6,9 @@
 \description{
 Shared scaffolding for [NormalBlockVarCollectionClustersSparsity] and
 [NormalBlockMeanCollectionClustersSparsity]: a collection of sparsity
-sub-collections, one per q. Everything family-agnostic (two-key model
-lookup, model selection over both axes, the criteria heatmap) lives here;
-subclasses only build `self$models` and name themselves.
+sub-collections, one per q in increasing order. Everything lives here
+(two-key model lookup, model selection over both axes, the criteria
+heatmap); subclasses only name the model family.
 }
 \examples{
 # An internal abstract base class, never instantiated directly -- see

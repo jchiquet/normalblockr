@@ -14,12 +14,12 @@ test_that("zero inflated normal block with diagonal residual covariance and unkn
   model$optimize()
   expect_lt(model$BIC, 5700)
   expect_gt(model$loglik, -2700)
-  expect_lt(Metrics::rmse(model$fitted, Y), 3)
+  expect_lt(sqrt(mean((model$fitted - Y)^2)), 3)
 
   model <- ZINormalBlockVarUnknownClusters$new(data, q, sparsity = 2)
   model$optimize()
   expect_gt(model$loglik, -2700)
-  expect_lt(Metrics::rmse(model$fitted, Y), 3)
+  expect_lt(sqrt(mean((model$fitted - Y)^2)), 3)
 
 })
 
@@ -29,17 +29,17 @@ test_that("zero inflated normal block with spherical residual covariance and unk
   model <- ZINormalBlockVarUnknownClusters$new(data, q, control = ctrl)
   model$optimize()
   expect_gt(model$loglik, -2700)
-  expect_lt(Metrics::rmse(model$fitted, Y), 3)
+  expect_lt(sqrt(mean((model$fitted - Y)^2)), 3)
 
   model <- ZINormalBlockVarUnknownClusters$new(data, q, sparsity = 0.1, control = ctrl)
   model$optimize()
   expect_gt(model$loglik, -2700)
-  expect_lt(Metrics::rmse(model$fitted, Y), 3)
+  expect_lt(sqrt(mean((model$fitted - Y)^2)), 3)
 })
 
 test_that("zero inflated normal block with unknown clusters, heuristic", {
   model <- ZINormalBlockVarUnknownClusters$new(data, q, sparsity = 2,
                                   control = NB_control(heuristic = TRUE))
   model$optimize()
-  expect_lt(Metrics::rmse(model$fitted, Y), 3)
+  expect_lt(sqrt(mean((model$fitted - Y)^2)), 3)
 })

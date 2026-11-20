@@ -14,9 +14,9 @@ test_that("normal block with diagonal residual covariance and unknown clusters",
   model <- NormalBlockVarUnknownClusters$new(data, q)
   model$optimize()
   expect_gt(model$loglik, -2620)
-  expect_lt(Metrics::rmse(model$fitted, Y), 1.1)
+  expect_lt(sqrt(mean((model$fitted - Y)^2)), 1.1)
   expect_equal(model$sparsity, 0)
-  expect_equal(matching_group_scores(model$clustering, get_clusters(C)), 1)
+  expect_equal(aricode::ARI(model$clustering, get_clusters(C)), 1)
 
   model_sparse <- NormalBlockVarUnknownClusters$new(data, q, sparsity = 0.05)
   model_sparse$optimize()
@@ -36,8 +36,8 @@ test_that("normal block with spherical residual covariance and unknown clusters"
   model <- NormalBlockVarUnknownClusters$new(data, q, control = ctrl)
   model$optimize()
   expect_gt(model$loglik, -2650)
-  expect_lt(Metrics::rmse(model$fitted, Y), 1.1)
-  expect_equal(matching_group_scores(model$clustering, get_clusters(C)), 1)
+  expect_lt(sqrt(mean((model$fitted - Y)^2)), 1.1)
+  expect_equal(aricode::ARI(model$clustering, get_clusters(C)), 1)
 
   model <- NormalBlockVarUnknownClusters$new(data, q, sparsity = 0.05, control = ctrl)
   model$optimize()
@@ -50,6 +50,6 @@ test_that("normal block with unknown clusters, heuristic", {
   model <- NormalBlockVarUnknownClusters$new(data, q, sparsity = 0.05,
                           control = NB_control(heuristic = TRUE))
   model$optimize()
-  expect_lt(Metrics::rmse(model$fitted, Y), 2.4)
-  expect_equal(matching_group_scores(model$clustering, get_clusters(C)), 1)
+  expect_lt(sqrt(mean((model$fitted - Y)^2)), 2.4)
+  expect_equal(aricode::ARI(model$clustering, get_clusters(C)), 1)
 })

@@ -24,5 +24,5 @@ test_that("normal block with spherical residual covariance and unknown clusters 
                                               control = NB_control(heuristic = TRUE))
   model$optimize()
   model_1 <- model$get_model(3, 0.1)
-  expect_lt(Metrics::rmse(model_1$fitted, Y), 2.4)
+  expect_lt(sqrt(mean((model_1$fitted - Y)^2)), 2.4)
 })

@@ -86,9 +86,11 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
       ## otherwise round down to zero and make it fail
       if (is.null(n_intervals))
         n_intervals <- max(2, round(0.1 * length(unique(self$criteria$sparsity))))
-      df <- self$criteria %>% dplyr::mutate(pen_binned = cut(sparsity, breaks = n_intervals)) %>%
-        dplyr::group_by(pen_binned, q) %>% dplyr::summarize(avg_crit = mean(.data[[criterion]]), .groups = "drop")
-      p  <- ggplot2::ggplot(df, ggplot2::aes(x = pen_binned, y = q, fill = avg_crit)) +
+      crit <- self$criteria
+      crit$pen_binned <- cut(crit$sparsity, breaks = n_intervals)
+      df <- stats::aggregate(crit[criterion], by = crit[c("pen_binned", "q")], FUN = mean)
+      names(df)[3] <- "avg_crit"
+      p  <- ggplot2::ggplot(df, ggplot2::aes(x = .data$pen_binned, y = .data$q, fill = .data$avg_crit)) +
         ggplot2::geom_tile() +
         ggplot2::scale_fill_viridis_c() +
         ggplot2::theme_minimal() +
@@ -113,9 +115,9 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
     q_list = function() map_dbl(self$models, "q"),
     #' @field sparsity list of penalties used for each q
     sparsity = function(){
-      self$criteria %>%
-        dplyr::group_by(q) %>%
-        dplyr::summarize(sparsity = paste(round(sparsity, 2), collapse = ", "))
+      crit <- self$criteria
+      stats::aggregate(list(sparsity = crit$sparsity), by = list(q = crit$q),
+                       FUN = function(s) paste(round(s, 2), collapse = ", "))
     }
   )
 )

@@ -29,7 +29,7 @@ test_that("normal block with unknown q, heuristic", {
                             control = NB_control(heuristic = TRUE))
   model$optimize()
   model_3 <- model$get_model(3)
-  expect_lt(Metrics::rmse(model_3$fitted, Y), 2.9)
+  expect_lt(sqrt(mean((model_3$fitted - Y)^2)), 2.9)
 })
 
 ###############################################################################

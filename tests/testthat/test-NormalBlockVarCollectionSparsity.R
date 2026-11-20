@@ -28,7 +28,7 @@ test_that("normal block with fixed clusters, spherical residual covariance and h
   model$optimize()
   model$stability_selection()
   model_StARS <- model$get_best_model("StARS")
-  expect_lt(Metrics::rmse(model_StARS$fitted, Y), 2.4)
+  expect_lt(sqrt(mean((model_StARS$fitted - Y)^2)), 2.4)
 })
 
 test_that("optimize() warm-starts each penalty from the previous one, reducing total EM iterations without changing the BIC path", {

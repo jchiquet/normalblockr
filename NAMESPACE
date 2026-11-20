@@ -41,23 +41,20 @@ export(isNB)
 export(normal_block)
 export(normal_block_cv)
 export(normal_block_sequential)
-import(dplyr)
-import(ggplot2)
-import(purrr)
-importFrom(Matrix,
-  Matrix,
-  symmpart
-)
 importFrom(R6,R6Class)
 importFrom(Rcpp,sourceCpp)
-importFrom(corrplot,corrplot)
+importFrom(ggplot2,.data)
 importFrom(igraph,
   as_adjacency_matrix,
   sample_gnp,
   sample_pa,
   sample_sbm
 )
-importFrom(scales,pretty_breaks)
+importFrom(purrr,
+  map,
+  map2,
+  map_dbl
+)
 importFrom(stats,
   BIC,
   fitted,
@@ -69,6 +66,4 @@ importFrom(stats,
   sigma,
   var
 )
-importFrom(tibble,tibble)
-importFrom(tidyr,gather)
 useDynLib(normalblockr, .registration = TRUE)

@@ -227,9 +227,9 @@ NormalBlockBase <- R6::R6Class(
       # rather than self$q: the (V)EM can converge to an empty cluster,
       # in which case self$q overcounts and every split would otherwise look
       # invalid, silently stalling explore_forward() before n_clusters_range[2].
-      clustering_sizes <- map(candidates, "clustering") %>% map(table)
-      min_sizes  <- clustering_sizes %>% map_dbl(min)
-      n_clusters <- clustering_sizes %>% map_dbl(length)
+      clustering_sizes <- map(map(candidates, "clustering"), table)
+      min_sizes  <- map_dbl(clustering_sizes, min)
+      n_clusters <- map_dbl(clustering_sizes, length)
       n_live <- length(unique(self$clustering))
       candidates <- candidates[min_sizes > 1 & n_clusters == n_live + 1]
       private$trial_fits(candidates, trial_niter)
@@ -346,7 +346,7 @@ NormalBlockBase <- R6::R6Class(
       obj_facet  <- if (obj_is_neg) "log10(-objective)" else "objective"
       obj_value  <- if (obj_is_neg) log10(-obj) else obj
 
-      dplot <- tibble::tibble(iteration = seq_along(obj), value = obj_value, facet = obj_facet)
+      dplot <- data.frame(iteration = seq_along(obj), value = obj_value, facet = obj_facet)
       last_increment <- abs(diff(ll))[length(obj)]
       converged <- !is.na(private$threshold) && last_increment < private$threshold
       subtitle  <- if (is.na(private$niter_max)) {
@@ -359,14 +359,14 @@ NormalBlockBase <- R6::R6Class(
       }
 
       if (show_increment) {
-        dplot <- dplyr::bind_rows(
+        dplot <- rbind(
           dplot,
-          tibble::tibble(iteration = seq_along(obj), value = log10(abs(diff(ll))), facet = "log10(|increment|)")
+          data.frame(iteration = seq_along(obj), value = log10(abs(diff(ll))), facet = "log10(|increment|)")
         )
       }
       dplot$facet <- factor(dplot$facet, levels = c(obj_facet, "log10(|increment|)"))
 
-      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = iteration, y = value)) +
+      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = .data$iteration, y = .data$value)) +
         ggplot2::geom_line() + ggplot2::geom_point(size = .8) +
         ggplot2::ggtitle(label = "(V)EM optimization", subtitle = subtitle) +
         ggplot2::xlab("iteration") + ggplot2::ylab(NULL) +
@@ -378,7 +378,7 @@ NormalBlockBase <- R6::R6Class(
           p <- p + ggplot2::geom_hline(
             data = data.frame(facet = factor("log10(|increment|)", levels = levels(dplot$facet)),
                               yintercept = log10(private$threshold)),
-            ggplot2::aes(yintercept = yintercept),
+            ggplot2::aes(yintercept = .data$yintercept),
             linetype = "dashed", colour = "red", alpha = .6
           )
       }

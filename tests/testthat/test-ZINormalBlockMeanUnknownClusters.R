@@ -50,7 +50,7 @@ test_that("a collection over a range of q runs, selects and refines", {
   coll <- normal_block(datazi, 2:5, model = "mean", zero_inflation = TRUE,
                        control = NB_control(verbose = FALSE, threshold = 1e-8, niter = 1000))
   expect_s3_class(coll, "NormalBlockMeanCollectionClusters")
-  expect_true(all(map_lgl(coll$models, inherits, "ZINormalBlockMeanUnknownClusters")))
+  expect_true(all(vapply(coll$models, inherits, logical(1), "ZINormalBlockMeanUnknownClusters")))
   expect_equal(nrow(coll$criteria), 4L)
   expect_true(all(is.finite(coll$criteria$BIC)))
   expect_equal(coll$get_best_model("ICL")$q, 3L)

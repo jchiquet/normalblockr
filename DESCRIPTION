@@ -29,16 +29,12 @@ LazyData: true
 Depends: R (>= 4.1.0)
 Imports:
     Matrix,
-    dplyr,
-    tidyr,
-    tibble,
     purrr,
     R6,
     ggplot2,
     igraph,
     sbm,
     corrplot,
-    scales,
     MASS,
     stats,
     Rcpp
@@ -49,7 +45,6 @@ Suggests:
     testthat (>= 3.0.0),
     aricode,
     covr,
-    Metrics,
     rmarkdown,
     pheatmap,
     paletteer,
