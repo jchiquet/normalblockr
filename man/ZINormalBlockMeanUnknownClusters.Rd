@@ -26,9 +26,12 @@ model$clustering
 
     \item{\code{var_par}}{a list with the variational parameter: tau (posterior group probabilities)}
 
-    \item{\code{model_par}}{a list with model parameters: B, Omega and kappa (zero-inflation probabilities)}
+    \item{\code{model_par}}{the parameters of [NormalBlockMeanBase] (B, Omega),
+plus B0 (zero-inflation coefficients), kappa (zero-inflation
+probabilities) and alpha (cluster proportions)}
 
-    \item{\code{entropy}}{Entropy of the conditional distribution}
+    \item{\code{entropy}}{entropy of the variational distribution of the
+clustering, `-sum(tau * log(tau))`}
 
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }

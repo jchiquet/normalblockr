@@ -29,7 +29,7 @@ model$clustering
   \describe{
     \item{\code{var_par}}{a list with variational parameters}
 
-    \item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omega (blocks precision matrix), kappa (zero-inflation probabilities)}
+    \item{\code{model_par}}{the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities) and alpha (cluster proportions)}
 
     \item{\code{entropy}}{entropy of the variational distribution of the
 clustering, `-sum(tau * log(tau))` (W is integrated out, not completed:

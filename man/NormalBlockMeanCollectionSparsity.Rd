@@ -19,13 +19,6 @@ models$plot(c("BIC", "EBIC"))
 \section{Super classes}{
 \code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{\link[normalblockr:NormalBlockCollectionSparsity]{NormalBlockCollectionSparsity}} -> \code{NormalBlockMeanCollectionSparsity}
 }
-\section{Active bindings}{
-  \if{html}{\out{<div class="r6-active-bindings">}}
-  \describe{
-    \item{\code{who_am_I}}{a method to print what model is being fitted}
-  }
-  \if{html}{\out{</div>}}
-}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{

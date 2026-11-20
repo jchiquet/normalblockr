@@ -77,9 +77,11 @@ for the mean-block family (network between variables).}
 
     \item{\code{sparsity_term}}{(sparsity_term term in log-likelihood due to sparsity)}
 
-    \item{\code{memberships}}{cluster memberships}
+    \item{\code{memberships}}{the p x q matrix of cluster memberships: indicators
+for a known clustering, posterior probabilities (tau) otherwise}
 
-    \item{\code{clustering}}{given as the list of elements contained in each cluster}
+    \item{\code{clustering}}{the cluster label of each variable (MAP for an
+unknown clustering), named after the columns of Y}
 
     \item{\code{cluster_sizes}}{given as a vector of cluster sizes}
 
@@ -191,7 +193,7 @@ rather than recomputing a fresh heuristic initialization. Set by
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    Update the current [`normal`] object
+    Update the current object in place
   }
 }
 
@@ -348,9 +350,11 @@ rather than their sum.}
 \if{html}{\out{<a id="method-NormalBlockBase-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockBase-predict}{}}}
 \subsection{\code{NormalBlockBase$predict()}}{
-  Predicts observations Y for new covariates X, in Y's
-original units (like `$fitted`, so that predicting on the training X
-reproduces it).
+  Predicts the mean of Y for new covariates X, in Y's
+original units. For the variance-block family, `X B`: the latent block
+signals average out, so that on the training X it differs from
+`$fitted`, which adds their posterior mean. The mean-block family
+overrides it.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockBase$predict(new_X)}
@@ -372,8 +376,9 @@ reproduces it).
 \if{html}{\out{<a id="method-NormalBlockBase-latent_network"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockBase-latent_network}{}}}
 \subsection{\code{NormalBlockBase$latent_network()}}{
-  Extract interaction network in the latent space, as a
-matrix rather than a plot -- see `$plot_network()` to plot it instead.
+  Extract the network encoded by Omega, as a matrix rather
+than a plot (see `$plot_network()`): between clusters for the
+variance-block family, between variables for the mean-block family.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockBase$latent_network(type = c("partial_cor", "support", "precision"))}
@@ -382,12 +387,15 @@ matrix rather than a plot -- see `$plot_network()` to plot it instead.
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{type}}{edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)}
+      \item{\code{type}}{edge value in the network: "support" (binary edges),
+"precision" (entries of the precision matrix, on the scale of the fit)
+or "partial_cor" (partial correlations)}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    a square matrix of size `self$q`
+    a sparse square matrix, q x q (variance-block) or p x p
+(mean-block), with named rows and columns
   }
 }
 
@@ -420,8 +428,8 @@ absolute increment between iterations and the convergence `threshold`
 \if{html}{\out{<a id="method-NormalBlockBase-plot_network"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockBase-plot_network}{}}}
 \subsection{\code{NormalBlockBase$plot_network()}}{
-  plot the latent network. To extract the network as a
-matrix instead of plotting it, use `$latent_network()`.
+  Plot the network encoded by Omega (see
+`$latent_network()` to extract it as a matrix).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockBase$plot_network(
@@ -438,11 +446,14 @@ matrix instead of plotting it, use `$latent_network()`.
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{type}}{edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).}
+      \item{\code{type}}{edge value in the network: "partial_cor" (partial
+correlations) or "support" (binary edges).}
       \item{\code{output}}{Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)}
       \item{\code{edge.color}}{Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.}
       \item{\code{remove.isolated}}{if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.}
-      \item{\code{node.labels}}{vector of character. The labels of the nodes. The default will use the column names ot the response matrix.}
+      \item{\code{node.labels}}{vector of character. The labels of the nodes. By
+default, the cluster names (variance-block) or the variable names
+(mean-block), as in `$latent_network()`.}
       \item{\code{layout}}{an igraph layout function, applied to the graph without its edge weights, or a matrix of node coordinates. Only relevant for igraph output.}
       \item{\code{plot}}{logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.}
     }

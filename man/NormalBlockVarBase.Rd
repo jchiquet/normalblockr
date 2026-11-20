@@ -27,7 +27,11 @@ coefficients on the internal fitting scale.}
 
     \item{\code{d0}}{number of zi variables (dimensions in X0)}
 
-    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
+    \item{\code{model_par}}{a list with the model parameters: B (d x p regression
+coefficients), B0 (zero-inflation coefficients, if any), dm1 (inverse
+noise variances of the variables) and Omega (q x q precision matrix of
+the latent block signals), on the scale of the fit. Use
+`$B_original`/`$dm1_original` for B and dm1 on Y's original scale.}
 
     \item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
 

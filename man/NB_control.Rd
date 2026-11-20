@@ -22,39 +22,44 @@ NB_control(
 )
 }
 \arguments{
-\item{niter}{number of iterations in model optimization}
+\item{niter}{maximal number of (V)EM iterations.}
 
-\item{threshold}{loglikelihood / elbo threshold under which optimization stops}
+\item{threshold}{the (V)EM stops when the objective (log-likelihood or
+ELBO) increases by less than this.}
 
 \item{fixed_point_niter}{number of sweeps of the tau update for
-Normal-Block-Mean with unknown clusters. Each sweep visits the rows of
-tau sequentially and maximizes the ELBO exactly in each, so it can never
-decrease the ELBO.}
+Normal-Block-Mean models with unknown clusters. Each sweep visits the rows
+of tau sequentially and maximizes the ELBO exactly in each, so it can
+never decrease the ELBO.}
 
-\item{sparsity_weights}{weights with which the penalty should be applied in case
-sparsity is required, non-0 values on the diagonal mean diagonal shall be
-penalized too (default is non-penalized diagonal and 1s off-diagonal)}
+\item{sparsity_weights}{a symmetric matrix of weights applied to the
+penalty, entry by entry: q x q (variance-block) or p x p (mean-block). By
+default, 1 off the diagonal and 0 on it (the diagonal is not penalized).}
 
-\item{sparsity_penalties}{list of penalties the user wants to test, other parameters
-are only used if penalties is not specified}
+\item{sparsity_penalties}{the penalties of a sparsity path (`sparsity =
+TRUE`). By default, `n_sparsity_penalties` values from the smallest
+penalty that removes every edge down to `min_ratio` times it, on a log
+scale.}
 
-\item{n_sparsity_penalties}{number of penalties to test.}
+\item{n_sparsity_penalties}{number of penalties of the default path.}
 
-\item{min_ratio}{ratio for sparsity between max penalty (0 edge penalty) and min penalty to test}
+\item{min_ratio}{ratio between the smallest and the largest penalty of the
+default path.}
 
-\item{fixed_tau}{whether tau should be fixed at clustering_init during optimization
-useful for calls to fixed_q models in stability_selection}
+\item{fixed_tau}{whether the posterior cluster probabilities stay at their
+initial value (`clustering_init`) during the optimization; used to refit
+a sparsity path with its clustering held fixed (stability selection).}
 
 \item{clustering_init}{how to obtain the initial clustering of the q
 unknown blocks: a heuristic name ("ward2", "kmeans", "sbm" or
 "spectral"), an actual clustering (a vector of labels or a p x q indicator
 matrix, or a list of either per q for a collection), or "best_of_inits" to
 try several heuristics per model and keep the best-ELBO fit (see
-[NormalBlockVarBase]'s `best_of_inits()`; not supported with `sparsity =
+[NormalBlockBase]'s `best_of_inits()`; not supported with `sparsity =
 TRUE`). Default `NULL`, i.e. "kmeans" for both model families; "ward2"
 can work better on zero-inflated abundance data.}
 
-\item{verbose}{telling if information should be printed during optimization}
+\item{verbose}{whether to print the progress of the optimization.}
 
 \item{heuristic}{whether to use the heuristic approach (moment-based, no (V)EM
 recursion) instead of the full (V)EM. Default is FALSE. In heuristic mode, no

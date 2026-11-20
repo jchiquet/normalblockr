@@ -21,7 +21,7 @@ model$clustering
   \describe{
     \item{\code{posterior_par}}{a list with the parameters of posterior distribution W | Y}
 
-    \item{\code{model_par}}{a list with model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix), kappa (zero-inflation probabilities)}
+    \item{\code{model_par}}{the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities)}
 
     \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 
@@ -75,7 +75,7 @@ model$clustering
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{data}}{object of NormalBlockData class, with responses and design matrix}
-      \item{\code{C}}{clustering matrix C_jk = 1 if species j belongs to cluster k}
+      \item{\code{C}}{p x q clustering matrix, C_jk = 1 if variable j belongs to cluster k}
       \item{\code{sparsity}}{to apply on variance matrix when calling GLASSO}
       \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
     }

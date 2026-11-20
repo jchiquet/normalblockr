@@ -21,11 +21,13 @@ model$clustering
   \describe{
     \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 
+    \item{\code{model_par}}{the parameters of [NormalBlockMeanBase] (B, Omega),
+plus alpha (cluster proportions)}
+
     \item{\code{var_par}}{a list with the variational parameter: tau (posterior group probabilities)}
 
-    \item{\code{entropy}}{Entropy of the conditional distribution
-The only latent variable is the clustering, so the entropy of the
-variational distribution reduces to -sum(tau * log(tau)).}
+    \item{\code{entropy}}{entropy of the variational distribution of the
+clustering, `-sum(tau * log(tau))`}
 
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }

@@ -24,7 +24,9 @@ model$clustering
   \describe{
     \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
 
-    \item{\code{model_par}}{a list with model parameters: B, Omega and kappa (zero-inflation probabilities)}
+    \item{\code{model_par}}{the parameters of [NormalBlockMeanBase] (B, Omega),
+plus B0 (zero-inflation coefficients) and kappa (zero-inflation
+probabilities)}
 
     \item{\code{who_am_I}}{a method to print what model is being fitted}
   }
@@ -75,7 +77,7 @@ model$clustering
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{data}}{object of NormalBlockData class, with responses and design matrix}
-      \item{\code{C}}{clustering matrix C_jk = 1 if species j belongs to cluster k}
+      \item{\code{C}}{p x q clustering matrix, C_jk = 1 if variable j belongs to cluster k}
       \item{\code{sparsity}}{unused here, kept for signature symmetry (must be 0)}
       \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
     }

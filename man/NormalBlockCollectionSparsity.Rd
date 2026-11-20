@@ -31,6 +31,8 @@ to refit its path on a subsample with the clustering held fixed
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
+    \item{\code{sparsity_details}}{number, range and ratio of the penalties of the path}
+
     \item{\code{q}}{number of blocks}
 
     \item{\code{blocks}}{group matrix or number of blocks}

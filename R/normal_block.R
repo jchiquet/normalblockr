@@ -1,44 +1,47 @@
 #' Fit Normal-Block Models
 #'
-#' Fit a normal-block model with a variational or heuristic algorithm
-#' @param data NormalBlockData object, contains the matrix of responses (Y, n x p) and the design matrix (X, n x d), must be created with NormalBlockData$new.
-#' @param blocks either a integer (number of blocks), a vector of integer (list of possible number of block)
-#'  or a p * q matrix (for indicating block membership when its known)
-#' @param sparsity either TRUE to run the optimization for different sparsity penalty values
-#' OR float to run model with a single sparsity penalty value
-#' @param zero_inflation boolean to indicate if Y is zero-inflated and adjust fitted model as a consequence
-#' @param model which model family to fit: "var" (the default) structures the
-#' clustering in the latent covariance (see [NormalBlockVarBase]), "mean"
-#' structures it in the mean (mu_i = C B' X_i, see [NormalBlockMeanBase]).
-#' The mean-block family covers the same collections as the variance-block
-#' one ([NormalBlockMeanCollectionClusters],
-#' [NormalBlockMeanCollectionSparsity] and their crossing,
-#' [NormalBlockMeanCollectionClustersSparsity]) -- each q simply fit
-#' independently, without the variance-block family's SBM-path shortcut.
-#' Zero-inflation is supported ([ZINormalBlockMeanKnownClusters],
-#' [ZINormalBlockMeanUnknownClusters], and collections of those over a range
-#' of q), with a diagonal or spherical Sigma only, hence not along a sparsity
-#' path -- see [NormalBlockMeanBase].
-#' @param control a list-like structure for detailed control on parameters should be
-#' generated with NB_control().
-#' @return an R6 object with one of the model classes (or a collection of model objects).
+#' Fits a Normal-Block model, or a collection of them, by (variational) EM.
+#' The arguments select the model: the family (`model`), whether the
+#' clustering is known (`blocks`), whether the network is penalized
+#' (`sparsity`) and whether Y is zero-inflated (`zero_inflation`).
+#' @param data a [NormalBlockData] object, holding the responses (Y, n x p)
+#' and the covariates (X, n x d).
+#' @param blocks the clustering of the variables: a p x q indicator matrix
+#' for a known clustering (e.g. `model.matrix(~ 0 + factor(labels))`), a
+#' single integer q for an unknown clustering into q clusters, or a vector of
+#' distinct integers for a collection over these values of q.
+#' @param sparsity the graphical-lasso penalty on Omega: `0` (the default)
+#' for none, a positive number for a single penalty, or `TRUE` for a
+#' collection along a path of penalties (see [NB_control()]).
+#' @param zero_inflation whether to model an excess of exact zeros in Y.
+#' @param control a list of settings, built with [NB_control()].
+#' @param model the model family: `"var"` (the default) clusters the
+#' variables by how they covary, and infers a network between clusters (see
+#' [NormalBlockVarBase]); `"mean"` clusters them by how they respond to the
+#' covariates, `mu_i = C B' X_i` (see [NormalBlockMeanBase]). Every
+#' combination of the other arguments is available for both families, except
+#' a penalty together with zero-inflation for the mean-block family, whose
+#' zero-inflated models have a diagonal or spherical Sigma.
+#' @return a fitted model (an R6 object, see the classes listed in the
+#' reference index), or a collection of fitted models.
 #' @examples
-#' ## Normal Data
-#' ex_data <- generate_normal_block_var_data(n=100, p=30, d=1, q=3)
+#' ## Variance-block models over a range of q
+#' ex_data <- generate_normal_block_var_data(n = 100, p = 30, d = 1, q = 3)
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
-#' my_normal_block <- normal_block(data, blocks = 1:6)
+#' my_normal_block <- normal_block(data, blocks = 1:5)
 #' my_normal_block$plot(c("deviance", "BIC", "ICL"))
-#' Y_hat <- my_normal_block$get_best_model()$fitted
-#' plot(data$Y, Y_hat, log = "xy"); abline(0,1)
-#' ## Normal Data with Zero Inflation
-#' ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
+#' best <- my_normal_block$get_best_model("ICL")
+#' plot(ex_data$Y, fitted(best)); abline(0, 1)
+#' ## the same with zero-inflation
+#' ex_data_zi <- generate_normal_block_var_data(n = 50, p = 30, d = 1, q = 3,
+#'                                              kappa = rep(0.5, 30))
 #' zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)
-#' my_normal_block <- normal_block(zidata, blocks = 1:6, zero_inflation = TRUE)
-#' ## Mean-Block model (clustering in the mean rather than the covariance)
-#' ex_mean <- generate_normal_block_mean_data(n=50, p=20, d=1, q=3)
+#' my_zi_block <- normal_block(zidata, blocks = 3, zero_inflation = TRUE)
+#' ## a mean-block model (clustering in the mean rather than the covariance)
+#' ex_mean <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 #' mean_data <- NormalBlockData$new(ex_mean$Y, ex_mean$X)
 #' my_mean_block <- normal_block(mean_data, blocks = 3, model = "mean")
-#'
+#' coef(my_mean_block)
 #' @export
 normal_block <- function(data,
                          blocks,
@@ -83,30 +86,35 @@ normal_block <- function(data,
 #'
 #' Control the model settings and various optimization parameters
 #'
-#' @param niter number of iterations in model optimization
+#' @param niter maximal number of (V)EM iterations.
 #' @param fixed_point_niter number of sweeps of the tau update for
-#' Normal-Block-Mean with unknown clusters. Each sweep visits the rows of
-#' tau sequentially and maximizes the ELBO exactly in each, so it can never
-#' decrease the ELBO.
-#' @param threshold loglikelihood / elbo threshold under which optimization stops
-#' @param sparsity_weights weights with which the penalty should be applied in case
-#' sparsity is required, non-0 values on the diagonal mean diagonal shall be
-#' penalized too (default is non-penalized diagonal and 1s off-diagonal)
-#' @param sparsity_penalties list of penalties the user wants to test, other parameters
-#' are only used if penalties is not specified
-#' @param n_sparsity_penalties number of penalties to test.
-#' @param min_ratio ratio for sparsity between max penalty (0 edge penalty) and min penalty to test
-#' @param fixed_tau whether tau should be fixed at clustering_init during optimization
-#' useful for calls to fixed_q models in stability_selection
+#' Normal-Block-Mean models with unknown clusters. Each sweep visits the rows
+#' of tau sequentially and maximizes the ELBO exactly in each, so it can
+#' never decrease the ELBO.
+#' @param threshold the (V)EM stops when the objective (log-likelihood or
+#' ELBO) increases by less than this.
+#' @param sparsity_weights a symmetric matrix of weights applied to the
+#' penalty, entry by entry: q x q (variance-block) or p x p (mean-block). By
+#' default, 1 off the diagonal and 0 on it (the diagonal is not penalized).
+#' @param sparsity_penalties the penalties of a sparsity path (`sparsity =
+#' TRUE`). By default, `n_sparsity_penalties` values from the smallest
+#' penalty that removes every edge down to `min_ratio` times it, on a log
+#' scale.
+#' @param n_sparsity_penalties number of penalties of the default path.
+#' @param min_ratio ratio between the smallest and the largest penalty of the
+#' default path.
+#' @param fixed_tau whether the posterior cluster probabilities stay at their
+#' initial value (`clustering_init`) during the optimization; used to refit
+#' a sparsity path with its clustering held fixed (stability selection).
 #' @param clustering_init how to obtain the initial clustering of the q
 #' unknown blocks: a heuristic name ("ward2", "kmeans", "sbm" or
 #' "spectral"), an actual clustering (a vector of labels or a p x q indicator
 #' matrix, or a list of either per q for a collection), or "best_of_inits" to
 #' try several heuristics per model and keep the best-ELBO fit (see
-#' [NormalBlockVarBase]'s `best_of_inits()`; not supported with `sparsity =
+#' [NormalBlockBase]'s `best_of_inits()`; not supported with `sparsity =
 #' TRUE`). Default `NULL`, i.e. "kmeans" for both model families; "ward2"
 #' can work better on zero-inflated abundance data.
-#' @param verbose telling if information should be printed during optimization
+#' @param verbose whether to print the progress of the optimization.
 #' @param noise_covariance shape of the residual covariance. Variance-block
 #' models accept "diagonal" (variable-specific) or "spherical" (common);
 #' mean-block models, whose Sigma is the full p x p residual covariance, also
@@ -187,18 +195,10 @@ NB_control <- function(
 
 #' Create a Normal-Block Model Object
 #'
-#' Creates the appropriate normal-block model (or collection of models)
-#' depending on the parametrization.
-#' @param blocks either an integer (number of blocks), a vector of integer (list of possible number of block)
-#'  or a p * q matrix (for indicating block membership when its known)
-#' @param sparsity boolean to say whether the model should have a changing penalty
-#' OR float to run model with a single penalty value
-#' @param zero_inflation boolean to indicate if Y is zero-inflated and adjust fitted model as a consequence
-#' @param model which model family to fit, "var" (the default) or "mean" --
-#' see [normal_block()]
-#' @param control a list-like structure for detailed control on parameters should be
-#' generated with NB_control() for collections of sparse models
-#' @param data contains the matrix of responses (Y) and the design matrix (X).
+#' Creates, without fitting it, the model (or collection of models) that
+#' [normal_block()] would fit for the same arguments.
+#' @inheritParams normal_block
+#' @return an R6 object: a model or a collection of models, not optimized yet.
 #' @examples
 #' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)

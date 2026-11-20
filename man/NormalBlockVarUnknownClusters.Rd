@@ -26,7 +26,7 @@ model$clustering
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix))}
+    \item{\code{model_par}}{the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus alpha (cluster proportions)}
 
     \item{\code{var_par}}{a list with the matrices of the variational parameters: M (means), S (variances), tau (posterior group probabilities)}
 

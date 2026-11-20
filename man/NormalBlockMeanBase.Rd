@@ -18,7 +18,9 @@ structures the mean (mu_i = C B' X_i).
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`): use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
+    \item{\code{model_par}}{a list with the model parameters: B (d x q, one
+profile per cluster) and Omega (p x p precision matrix of the
+residuals), on the scale of the fit (see [coef()] and [sigma()]).}
 
     \item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
   }
@@ -72,7 +74,7 @@ structures the mean (mu_i = C B' X_i).
       \item{\code{data}}{object of NormalBlockData class, with responses and design matrix}
       \item{\code{q}}{number of block/cluster}
       \item{\code{sparsity}}{sparsity penalty on the network density}
-      \item{\code{control}}{structured list of more specific parameters, to generate with NB_Mean_control}
+      \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
       \item{\code{zero_inflation}}{whether the concrete subclass models zero-inflation;
 set by the ZI subclasses themselves, not meant to be set by the end user.}
     }
@@ -87,10 +89,9 @@ set by the ZI subclasses themselves, not meant to be set by the end user.}
 \if{html}{\out{<a id="method-NormalBlockMeanBase-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-predict}{}}}
 \subsection{\code{NormalBlockMeanBase$predict()}}{
-  Predicts observations Y for new covariates X, in Y's
-original units. The mean-block mean is mu_i = C B' X_i, so the
-cluster-level predictor has to be mapped back to the variables
-through C.
+  Predicts the mean of Y for new covariates X, in Y's
+original units: mu_i = C B' X_i, with the posterior cluster
+probabilities as C when the clustering is unknown (as in `$fitted`).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanBase$predict(new_X)}
@@ -115,7 +116,8 @@ through C.
   Seed this model's starting parameters from another,
 already-optimized model with the same q, instead of the heuristic
 clustering-derived values set at construction time. Used by
-[split()]/[merge()].
+[NormalBlockMeanCollectionSparsity] to warm-start each penalty of a
+sparsity path from the previous one's solution.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanBase$warm_start_from(other)}

@@ -31,6 +31,9 @@ and provide their own `get_best_model()`, delegating the (row of
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
+    \item{\code{who_am_I}}{a description of the collection: the kind of models it
+holds and what varies across them}
+
     \item{\code{criteria}}{a data frame with the values of some criteria for the collection of models}
 
     \item{\code{loglik}}{not defined for a collection: accessing it raises an informative error. Use `logLik()` for every model's log-likelihood, or `$get_best_model()$loglik` for a single one.}

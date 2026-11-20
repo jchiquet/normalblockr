@@ -24,10 +24,8 @@ check_zero_boundary <- function(x, zero = .Machine$double.eps) {
   x
 }
 
-# equivalent of check_zero_boundary(check_one_boundary(x)), used to keep
-# variational probabilities (tau) away from the {0, 1} boundaries (mirrors
-# clip_probabilities() in src/utils_arma.h). Previously spelled out at both
-# call sites (NormalBlockVarUnknownClusters.R/ZINormalBlockVarUnknownClusters.R).
+# keeps variational probabilities (tau) away from the {0, 1} boundaries
+# (mirrors clip_probabilities() in src/utils_arma.h)
 clip_probabilities <- function(x, zero = .Machine$double.eps) {
   check_zero_boundary(check_one_boundary(x, zero), zero)
 }
@@ -41,18 +39,14 @@ ensure_pd <- function(M, floor = 1e-6) {
   tcrossprod(eig$vectors * rep(pmax(eig$values, floor), each = nrow(M)), eig$vectors)
 }
 
-# Graphical-lasso estimate of a precision matrix from its covariance estimate,
-# with a plain inversion as the fallback when the solver can't produce a finite
-# answer. Wraps the in-package solver (src/graphical_lasso.h) so that the R
-# reference implementations and the C++ (V)EM cores run the very same code --
-# tests/testthat/test-cpp-*.R compare the two at 1e-8, which only holds if they
-# share this step exactly.
-# Convergence threshold the (V)EM's M-step uses for the graphical lasso.
-# MUST match nb_omega::kGlassoThreshold (src/omega_estimation.h): the two
-# recursions are compared trace-for-trace at 1e-8 in test-cpp-*.R, so any
-# drift between them shows up there rather than silently.
+# Convergence threshold of the graphical lasso in the M-step. Must match
+# nb_omega::kGlassoThreshold (src/omega_estimation.h): the R reference
+# recursions are compared with the C++ cores in test-cpp-*.R.
 NB_GLASSO_THRESHOLD <- 1e-6
 
+# Graphical-lasso estimate of a precision matrix from its covariance estimate
+# (in-package solver, src/graphical_lasso.h), with a plain inversion as the
+# fallback when the solver can't produce a finite answer.
 glasso_omega <- function(Sigma, rho) {
   glasso_out <- graphical_lasso_fit(Sigma, rho)
   if (anyNA(glasso_out$wi)) {
@@ -152,10 +146,9 @@ ward2_tree <- function(R) {
   stats::hclust(stats::dist(1 - cor_R), method = "ward.D2")
 }
 
-# Clusters R into every q in q_list from a SINGLE sbm::estimateSimpleSBM
-# exploration over [min(q_list), max(q_list)] rather than one per q (see
-# inst/normal_block_models.qmd, "Implementation notes", for the cost/quality
-# comparison). The exploration is adaptive and may stop before exploreMax, or
+# Clusters R into every q in q_list from a single sbm::estimateSimpleSBM
+# exploration over [min(q_list), max(q_list)] rather than one per q. The
+# exploration is adaptive and may stop before exploreMax, or
 # return an empty block for some q; either falls back to a shared ward2
 # clustering for that q. Returns a list of membership vectors, named by q.
 sbm_clustering_path <- function(R, q_list) {
@@ -184,8 +177,7 @@ sbm_clustering_path <- function(R, q_list) {
 # ||R e_j - R e_k|| = ||D V' (e_j - e_k)||, so D V' (rank(R) x p) is an exact
 # stand-in. Worth it because the matrix handed to the heuristics is often a
 # tall, low-rank embedding: the mean-block family clusters X %*% B, whose rank
-# is d (measured 200 x 60 -> 1 x 60 at d = 1), and OLS residuals still drop
-# from n to p rows. Correlation-based heuristics cannot use this -- cor() over
+# is d, and OLS residuals still drop from n to p rows. Correlation-based heuristics cannot use this -- cor() over
 # rank(R) rows is a different quantity -- so it is applied inside the kmeans
 # method rather than to every heuristic.
 compress_columns <- function(R, tol = 1e-10) {
@@ -244,9 +236,8 @@ spectral_clustering_path <- function(R, q_list) {
 
 # Precomputes, for a collection over q_list, whatever part of the requested
 # clustering heuristic is shared across q, and returns one clustering per q
-# (named by q). Returns NULL when nothing can be shared. "best_of_inits" is
-# the model's own business, and an explicit clustering needs no help -- and
-# every model then runs its own heuristic_clustering() as before.
+# (named by q). Returns NULL when nothing can be shared ("best_of_inits", an
+# explicit clustering): every model then runs its own heuristic_clustering().
 #
 # `R` is the matrix the family hands to its clustering heuristics: the
 # residuals for variance-block models, the fitted mean trajectory for
@@ -290,7 +281,7 @@ clustering_path_for_family <- function(mydata, q_list, family = c("var", "mean")
 }
 
 # Whether NB_control(clustering_init = "best_of_inits") was requested (see
-# best_of_inits() in NormalBlockVarBase.R). identical() keeps this safe when
+# best_of_inits() in NormalBlockBase.R). identical() keeps this safe when
 # clustering_init is a list or an explicit clustering.
 uses_best_of_inits <- function(control) identical(control$clustering_init, "best_of_inits")
 
