@@ -120,6 +120,7 @@ NormalBlockCollection <- R6::R6Class(
                                                colour = .data$criterion)) +
         ggplot2::geom_line() + ggplot2::geom_point() +
         ggplot2::ggtitle(label = "Model selection criteria", subtitle = "Lower is better") +
+        ggplot2::labs(x = x_var) +
         ggplot2::theme_bw()
       if (length(vline_crit) > 0) {
         dvlines <- data.frame(
