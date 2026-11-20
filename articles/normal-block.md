@@ -208,8 +208,55 @@ print(my_NB)
 #>     print(), summary(), plot(), coef(), sigma(), fitted(), predict()
 ```
 
+[`summary()`](https://rdrr.io/r/base/summary.html) adds the cluster
+sizes and the density of the network, and the usual extractors give the
+estimated parameters: [`coef()`](https://rdrr.io/r/stats/coef.html) the
+regression coefficients B (one column per variable, on the original
+scale of $`Y`$), [`sigma()`](https://rdrr.io/r/stats/sigma.html) the
+covariance of the latent cluster signals ($`\Omega^{-1}`$, one row and
+column per cluster),
+[`fitted()`](https://rdrr.io/r/stats/fitted.values.html) and
+[`predict()`](https://rdrr.io/r/stats/predict.html) the fitted and
+predicted means.
+
+``` r
+
+summary(my_NB)
+#> A diagonal normal-block-var model with fixed blocks.
+#> ===========================================================================
+#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
+#>       126 3       3        0 -1635.17  3270.34 3850.592 3850.592 3857.183     7
+#> ===========================================================================
+#> * Cluster sizes: 16, 13, 11
+#> * Network: 3 edge(s), density = 1
+coef(my_NB)[, 1:6]
+#>           [,1]      [,2]      [,3]      [,4]      [,5]      [,6]
+#> [1,] 0.6153132 0.2775232 1.0324903 0.8410484 0.8888033 0.6505552
+#> [2,] 0.1145370 0.7598555 0.1277465 1.0402634 0.3243935 1.1249223
+sigma(my_NB)
+#>            Cluster_1  Cluster_2  Cluster_3
+#> Cluster_1  0.4892297 -0.3007892 -0.3000946
+#> Cluster_2 -0.3007892  0.3970011  0.2186517
+#> Cluster_3 -0.3000946  0.2186517  0.3593416
+```
+
+Within a cluster, the model makes every pair of variables co-vary
+positively. `within_block_correlations()` compares the empirical
+correlations of the residuals with those the model implies, block by
+block, to check this on a given clustering:
+
+``` r
+
+my_NB$within_block_correlations()
+#>   block size  mean_cor   min_cor prop_negative model_cor
+#> 1     1   16 0.8710036 0.8043687             0 0.8339883
+#> 2     2   13 0.8022988 0.6400912             0 0.7602762
+#> 3     3   11 0.7991360 0.7233014             0 0.7693202
+```
+
 The inter-cluster association network can be visualized with the
-`plot_network()` function.
+`plot_network()` function, or extracted as a matrix with
+`latent_network()`.
 
 ``` r
 
@@ -272,11 +319,35 @@ my_NB_unknown <- normal_block(data = my_data,
 #> DONE
 ```
 
-`my_NB_unknown` is a collection of Normal-Block models. A specific one
-can be selected either by its number of clusters or as the best model
-for a given criterion (BIC, deviance, EBIC or ICL). The value of each
-criterion, for every model in the collection, can be visualized with
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html).
+Each model of the collection is first fitted from its own initial
+clustering (a $`k`$-means on the residuals, see
+[`NB_control()`](https://jchiquet.github.io/normalblockr/reference/NB_control.md)),
+then the whole collection is polished by `refine()`: for every $`q`$, it
+tries to split a cluster of the model with $`q-1`$ clusters and to merge
+two clusters of the model with $`q+1`$, and keeps a candidate when it
+lowers the deviance. Since the models are nested, a deviance that
+increases with $`q`$ signals a poor local optimum:
+[`print()`](https://rdrr.io/r/base/print.html) reports such cases
+(`deviance_violations`).
+
+``` r
+
+my_NB_unknown
+#> A collection of diagonal normal-block-var models over q 
+#> ===========================================================================
+#>   4 model(s) explored
+#>     q ranging from 2 to 5 
+#> ===========================================================================
+#> * Useful fields
+#>     $models, $criteria
+#> * Useful methods
+#>     print(), summary(), plot(), $get_best_model()
+```
+
+A specific model can be selected either by its number of clusters or as
+the best model for a given criterion (BIC, ICL or EBIC). The value of
+each criterion, for every model in the collection, can be visualized
+with [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
 ``` r
 
@@ -386,10 +457,8 @@ one per sparsity penalty.
 
 my_NB_sparse <- normal_block(data = my_data,
                              blocks = my_nb_data$parameters$C,
-                             sparsity = TRUE)
-#> Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed blocks 
-#>   penalty = 0.3003413             penalty = 0.2562416             penalty = 0.2186171             penalty = 0.1865171             penalty = 0.1591304             penalty = 0.1357649             penalty = 0.1158303             penalty = 0.09882265                penalty = 0.08431231                penalty = 0.07193255                penalty = 0.06137054                penalty = 0.05235937                penalty = 0.04467133                penalty = 0.03811214                penalty = 0.03251606                penalty = 0.02774165                penalty = 0.02366829                penalty = 0.02019302                penalty = 0.01722804                penalty = 0.01469841                penalty = 0.01254021                penalty = 0.0106989             penalty = 0.00912796                penalty = 0.007787682               penalty = 0.0066442             penalty = 0.005668618               penalty = 0.004836282               penalty = 0.004126161               penalty = 0.003520308               penalty = 0.003003413           
-#> DONE
+                             sparsity = TRUE,
+                             control = NB_control(verbose = FALSE))
 ```
 
 The different criteria can then be plotted as a function of the penalty,
@@ -411,6 +480,19 @@ myNB_sparse_0.1   <- my_NB_sparse$get_model(0.1)
 myNB_sparse_BIC   <- my_NB_sparse$get_best_model("BIC")
 ```
 
+The penalty can also be chosen by stability selection (StARS, Liu et al.
+(2010)): the whole path is refitted on subsamples of the observations,
+with the clustering held fixed, and the selected penalty is the smallest
+one whose network is stable enough (0.9 by default).
+
+``` r
+
+set.seed(1)
+myNB_sparse_StARS <- my_NB_sparse$get_best_model("StARS")
+myNB_sparse_StARS$n_edges
+#> [1] 3
+```
+
 Both the sparsity penalty and the number of clusters can also be left to
 vary jointly.
 
@@ -418,10 +500,8 @@ vary jointly.
 
 my_NB_sparse_unknown <-  normal_block(data = my_data,
                                       blocks = 2:6,
-                                      sparsity = TRUE)
-#> Fitting a collection of diagonal normal-block-var models over q and sparsity penalties 
-#>   number of blocks = 2                penalty = 0.300901              penalty = 0.256719              penalty = 0.2190244             penalty = 0.1868646             penalty = 0.1594269             penalty = 0.1360179             penalty = 0.1160461             penalty = 0.09900679                penalty = 0.08446941                penalty = 0.07206659                penalty = 0.0614849             penalty = 0.05245694                penalty = 0.04475457                penalty = 0.03818316                penalty = 0.03257665                penalty = 0.02779335                penalty = 0.02371239                penalty = 0.02023065                penalty = 0.01726014                penalty = 0.0147258             penalty = 0.01256358                penalty = 0.01071884                penalty = 0.009144969               penalty = 0.007802193               penalty = 0.006656581               penalty = 0.005679181               penalty = 0.004845294               penalty = 0.004133849               penalty = 0.003526867               penalty = 0.00300901                number of blocks = 3                penalty = 0.3002468             penalty = 0.2561609             penalty = 0.2185482             penalty = 0.1864583             penalty = 0.1590802             penalty = 0.1357222             penalty = 0.1157938             penalty = 0.09879153                penalty = 0.08428576                penalty = 0.0719099             penalty = 0.06135121                penalty = 0.05234288                penalty = 0.04465727                penalty = 0.03810014                penalty = 0.03250582                penalty = 0.02773292                penalty = 0.02366083                penalty = 0.02018666                penalty = 0.01722261                penalty = 0.01469378                penalty = 0.01253626                penalty = 0.01069553                penalty = 0.009125086               penalty = 0.00778523                penalty = 0.006642108               penalty = 0.005666833               penalty = 0.00483476                penalty = 0.004124861               penalty = 0.003519199               penalty = 0.003002468               number of blocks = 4                penalty = 0.4075854             penalty = 0.3477388             penalty = 0.2966795             penalty = 0.2531174             penalty = 0.2159517             penalty = 0.184243              penalty = 0.1571902             penalty = 0.1341096             penalty = 0.114418              penalty = 0.09761779                penalty = 0.08328436                penalty = 0.07105554                penalty = 0.0606223             penalty = 0.051721              penalty = 0.04412669                penalty = 0.03764747                penalty = 0.03211962                penalty = 0.02740342                penalty = 0.02337972                penalty = 0.01994683                penalty = 0.01701799                penalty = 0.0145192             penalty = 0.01238732                penalty = 0.01056846                penalty = 0.00901667                penalty = 0.007692733               penalty = 0.006563193               penalty = 0.005599505               penalty = 0.004777318               penalty = 0.004075854               number of blocks = 5                penalty = 0.5559088             penalty = 0.4742836             penalty = 0.4046435             penalty = 0.3452288             penalty = 0.2945381             penalty = 0.2512905             penalty = 0.2143929             penalty = 0.1829132             penalty = 0.1560556             penalty = 0.1331416             penalty = 0.1135922             penalty = 0.09691319                penalty = 0.08268322                penalty = 0.07054266                penalty = 0.06018473                penalty = 0.05134768                penalty = 0.04380819                penalty = 0.03737574                penalty = 0.03188778                penalty = 0.02720563                penalty = 0.02321097                penalty = 0.01980285                penalty = 0.01689516                penalty = 0.0144144             penalty = 0.01229791                penalty = 0.01049218                penalty = 0.008951589               penalty = 0.007637208               penalty = 0.00651582                penalty = 0.005559088               number of blocks = 6                penalty = 0.5559028             penalty = 0.4742784             penalty = 0.4046391             penalty = 0.345225              penalty = 0.2945349             penalty = 0.2512877             penalty = 0.2143906             penalty = 0.1829112             penalty = 0.1560539             penalty = 0.1331402             penalty = 0.1135909             penalty = 0.09691213                penalty = 0.08268232                penalty = 0.07054189                penalty = 0.06018408                penalty = 0.05134712                penalty = 0.04380771                penalty = 0.03737533                penalty = 0.03188743                penalty = 0.02720533                penalty = 0.02321071                penalty = 0.01980264                penalty = 0.01689497                penalty = 0.01441425                penalty = 0.01229777                penalty = 0.01049206                penalty = 0.008951491               penalty = 0.007637125               penalty = 0.006515749               penalty = 0.005559028           
-#> DONE
+                                      sparsity = TRUE,
+                                      control = NB_control(verbose = FALSE))
 ```
 
 The result is a collection of Normal-Block models with different numbers
@@ -467,15 +547,17 @@ my_NB_sparse_3_0.1 <- my_NB_sparse_unknown$get_model(3, 0.1)
 The process is similar with zero-inflated data, but
 `zero_inflation = TRUE` must be passed to
 [`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md).
-The example below uses a fixed number of blocks and no penalty on the
-network.
+The example below uses the simulated number of blocks and no penalty on
+the network. See
+[`vignette("zero-inflated-normal-block")`](https://jchiquet.github.io/normalblockr/articles/zero-inflated-normal-block.md)
+for the model and a real-data example.
 
 ``` r
 
 my_NB_zi <- normal_block(data = my_data_zi,
-                         blocks = 4,
+                         blocks = 5,
                          zero_inflation = TRUE)
-#> Fitting a zero-inflated diagonal normal-block-var model with 4 unknown blocks 
+#> Fitting a zero-inflated diagonal normal-block-var model with 5 unknown blocks 
 #> 
 #> DONE
 ```
@@ -495,10 +577,14 @@ The clustering inference may also be harder.
 
 aricode::ARI(my_NB_zi$clustering,
              apply(my_nb_data_zi$parameters$C, 1, which.max))
-#> [1] 0.7294773
+#> [1] 0.9110079
 ```
 
 ## References
+
+Liu, Han, Kathryn Roeder, and Larry Wasserman. 2010. “Stability Approach
+to Regularization Selection (StARS) for High Dimensional Graphical
+Models.” *Advances in Neural Information Processing Systems* 23.
 
 Tous, Jeanne, and Julien Chiquet. 2026. “An Integrated Method for
 Clustering and Association Network Inference.” *Computational Statistics
