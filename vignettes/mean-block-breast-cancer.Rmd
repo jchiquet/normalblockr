@@ -108,16 +108,24 @@ The model groups 163 proteins into a few dozen clusters, i.e. only a handful of 
 table(selected$clustering)
 ```
 
-Each cluster's profile across the five subtypes is a column of `coef()`; a heatmap of that matrix is the most direct summary of what the model found.
+Each cluster's profile across the five subtypes is a column of `coef()`. A heatmap of these profiles, clusters ordered by a hierarchical clustering of their profiles, is the most direct summary of what the model found. The profiles differ above all by their overall level, since a cluster shares its whole profile, level included; centred on their mean, they show the contrasts between subtypes.
 
-```{r, cluster-profiles, fig.width=7, fig.height=4}
+```{r, cluster-profiles, fig.width=8, fig.height=3}
+library(ggplot2)
 profiles <- coef(selected)
-rownames(profiles) <- levels(brca_rppa$covariates$PAM50_SUBTYPE)
-colnames(profiles) <- paste0("cluster ", seq_len(ncol(profiles)))
-image(seq_len(nrow(profiles)), seq_len(ncol(profiles)), profiles,
-      axes = FALSE, xlab = "", ylab = "", col = hcl.colors(20, "RdBu", rev = TRUE))
-axis(1, seq_len(nrow(profiles)), rownames(profiles), las = 2, cex.axis = .7)
-axis(2, seq_len(ncol(profiles)), colnames(profiles), las = 2, cex.axis = .7)
+subtypes <- sub("PAM50_SUBTYPE", "", rownames(profiles))
+ord <- hclust(dist(t(profiles)), "ward.D2")$order
+as_long <- function(M) data.frame(
+  subtype = factor(rep(subtypes, ncol(M)), levels = rev(subtypes)),
+  cluster = factor(rep(seq_len(ncol(M)), each = nrow(M)), levels = ord),
+  value   = as.vector(M))
+heatmap <- function(M, title) ggplot(as_long(M), aes(cluster, subtype, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "#2166AC", mid = "white", high = "#B2182B", name = NULL) +
+  labs(x = "clusters", y = NULL, subtitle = title) + theme_minimal() +
+  theme(axis.text.x = element_blank(), panel.grid = element_blank())
+heatmap(profiles, "cluster profiles")
+heatmap(sweep(profiles, 2, colMeans(profiles)), "profiles centred on their mean")
 ```
 
 # Choosing the shape of the residual covariance
@@ -126,7 +134,7 @@ Everything above used the default residual covariance, `"diagonal"` (one varianc
 
 The default is deliberate. A full $\Sigma$ costs $p(p+1)/2 \approx 13{,}000$ parameters here, which drown the handful of mean parameters that BIC and ICL are trying to weigh[^1]
 
-[^1]: In a simulation study over 12 replicates, selecting $q$ by BIC was correct 10/12 times with a diagonal $\Sigma$ against 6/12 with a full one at $n/p \approx 1.3$, *even when the data were generated with a full* $\Sigma$. The quality of the clustering at a fixed $q$ was the same either way, it is the choice of $q$ that suffers.
+[^1]: In a simulation study over 12 replicates, selecting $q$ by BIC was correct 10/12 times with a diagonal $\Sigma$ against 5/12 with a full one at $n/p \approx 1.3$, *even when the data were generated with a full* $\Sigma$. The quality of the clustering at a fixed $q$ was the same either way, it is the choice of $q$ that suffers.
 
 ```{r, covariance-shapes}
 shapes <- c("diagonal", "spherical", "full")
@@ -155,8 +163,10 @@ NB_sparse$model_par$Omega |> dim()
 paste0(NB_sparse$n_edges, " edges out of ", choose(ncol(Y), 2), " possible ones.")
 ```
 
-```{r, sparse-network, fig.width=6, fig.height=6}
-NB_sparse$plot_network(output = "corrplot")
+The network relates the proteins themselves; drawn without its isolated proteins, it reads as a few small modules:
+
+```{r, sparse-network, fig.width=7, fig.height=6}
+NB_sparse$plot_network(remove.isolated = TRUE, layout = igraph::layout_with_fr)
 ```
 
 Passing `sparsity = TRUE` instead of a single value explores a whole path of penalties and returns a collection, selected by BIC or EBIC as usual. Be aware that each penalty triggers a graphical lasso on a $p \times p$ matrix at *every* EM iteration: on this dataset a full path costs a couple of orders of magnitude more than the single fit above, which is why a fixed penalty is used here.
