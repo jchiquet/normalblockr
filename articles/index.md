@@ -2,7 +2,7 @@
 
 ### All vignettes
 
-- [Normal-Block models: clustering variables by their covariance -- a
+- [Normal-Block models: clustering variables by their covariance — a
   worked example with breast cancer proteomics
   data](https://jchiquet.github.io/normalblockr/articles/breast-cancer-proteomics.md):
 - [Mean-Block models: clustering variables by their response to

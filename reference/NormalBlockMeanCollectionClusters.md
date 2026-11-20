@@ -52,11 +52,7 @@ ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 2:5, model = "mean")
 #> Fitting a collection of diagonal normal-block-mean models over q 
-#>   number of clusters = 2           
-     number of clusters = 3           
-     number of clusters = 4           
-     number of clusters = 5           
-     refine(): improved 3 of 4 models
+#>   refine(): improved 3 of 4 models
 #> 
 #> DONE
 models$plot(c("BIC", "ICL"))

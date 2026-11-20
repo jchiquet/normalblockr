@@ -46,7 +46,8 @@ Fix the seed to make the results reproducible.
 set.seed(1)
 ```
 
-Simulate data with `generate_normal_block_data()`.
+Data are simulated with
+[`generate_normal_block_var_data()`](https://jchiquet.github.io/normalblockr/reference/generate_normal_block_var_data.md).
 
 ### Fix simulation parameters
 
@@ -57,7 +58,7 @@ Several parameters need to be defined to simulate the data:
 n = 100 # Number of samples (number of rows in the matrix of observations)
 p = 40  # Number of entities observed (number of columns in the matrix of observations)
 d = 2   # Number of covariates
-q = 3   # Number of clusters
+q = 6   # Number of clusters
 kappa = 0 # Mean zero-inflation probability (can also be a vector to define one ZI-probability for each variable). kappa = 0 means that there is no zero-inflation.
 omega_structure = "erdos-renyi" # Network structure.
 u_v = c(0.3, 0.1) # Parameters to generate an association matrix from a graph, details given in the bibliography.
@@ -198,8 +199,8 @@ A summary of the results is accessible via
 print(my_NB)
 #> A diagonal normal-block-var model with fixed clusters.
 #> ===========================================================================
-#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>       126 3       3        0 -1635.17  3270.34 3850.592 3850.592 3857.183     7
+#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL    EBIC niter
+#>       141 6      15        0 -3018.334 6036.668 6685.997 6685.997 6739.75    11
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 
@@ -224,20 +225,30 @@ predicted means.
 summary(my_NB)
 #> A diagonal normal-block-var model with fixed clusters.
 #> ===========================================================================
-#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>       126 3       3        0 -1635.17  3270.34 3850.592 3850.592 3857.183     7
+#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL    EBIC niter
+#>       141 6      15        0 -3018.334 6036.668 6685.997 6685.997 6739.75    11
 #> ===========================================================================
-#> * Cluster sizes: 16, 13, 11
-#> * Network: 3 edge(s), density = 1
+#> * Cluster sizes: 8, 4, 2, 11, 8, 7
+#> * Network: 15 edge(s), density = 1
 coef(my_NB)[, 1:6]
-#>           [,1]      [,2]      [,3]      [,4]      [,5]      [,6]
-#> [1,] 0.6153132 0.2775232 1.0324903 0.8410484 0.8888033 0.6505552
-#> [2,] 0.1145370 0.7598555 0.1277465 1.0402634 0.3243935 1.1249223
+#>           [,1]        [,2]      [,3]      [,4]      [,5]      [,6]
+#> [1,] 0.5197270 0.133801167 0.2137110 0.1418543 0.2401034 0.2453367
+#> [2,] 0.3284179 0.004461164 0.4911172 0.1063739 0.4263735 0.3967010
 sigma(my_NB)
-#>            Cluster_1  Cluster_2  Cluster_3
-#> Cluster_1  0.4892297 -0.3007892 -0.3000946
-#> Cluster_2 -0.3007892  0.3970011  0.2186517
-#> Cluster_3 -0.3000946  0.2186517  0.3593416
+#>              Cluster_1   Cluster_2    Cluster_3  Cluster_4    Cluster_5
+#> Cluster_1  0.625145335 -0.45789157 -0.330340796  0.4161182  0.004651783
+#> Cluster_2 -0.457891568  0.60628347  0.292195595 -0.4287843 -0.045843878
+#> Cluster_3 -0.330340796  0.29219560  0.579505187 -0.3188967 -0.003757869
+#> Cluster_4  0.416118245 -0.42878429 -0.318896689  0.6200838 -0.153078180
+#> Cluster_5  0.004651783 -0.04584388 -0.003757869 -0.1530782  0.482793595
+#> Cluster_6 -0.314160969  0.24460537  0.036044440 -0.3342293  0.105034825
+#>             Cluster_6
+#> Cluster_1 -0.31416097
+#> Cluster_2  0.24460537
+#> Cluster_3  0.03604444
+#> Cluster_4 -0.33422931
+#> Cluster_5  0.10503483
+#> Cluster_6  0.54858562
 ```
 
 Within a cluster, the model makes every pair of variables co-vary
@@ -249,9 +260,12 @@ block, to check this on a given clustering:
 
 my_NB$within_block_correlations()
 #>   block size  mean_cor   min_cor prop_negative model_cor
-#> 1     1   16 0.8710036 0.8043687             0 0.8339883
-#> 2     2   13 0.8022988 0.6400912             0 0.7602762
-#> 3     3   11 0.7991360 0.7233014             0 0.7693202
+#> 1     1    8 0.7728622 0.6740550             0 0.7674209
+#> 2     2    4 0.7707950 0.7116610             0 0.7572499
+#> 3     3    2 0.7695656 0.7695656             0 0.7676822
+#> 4     4   11 0.8170062 0.7463831             0 0.8141878
+#> 5     5    8 0.6946831 0.6030269             0 0.6857087
+#> 6     6    7 0.7171248 0.6187491             0 0.7111590
 ```
 
 The inter-cluster association network can be visualized with the
@@ -273,15 +287,17 @@ simply be fixed via the `blocks` argument.
 ``` r
 
 my_NB <- normal_block(data = my_data,
-                      blocks = 3)
-#> Fitting a diagonal normal-block-var model with 3 unknown clusters 
+                      blocks = q)
+#> Fitting a diagonal normal-block-var model with 6 unknown clusters 
 #> 
 #> DONE
 print(my_NB)
-#> A diagonal normal-block-var model with 3 unknown clusters.
+#> A diagonal normal-block-var model with 6 unknown clusters.
 #> ===========================================================================
-#>  nb_param q n_edges sparsity    loglik deviance     BIC     ICL     EBIC niter
-#>       128 3       3        0 -1678.676 3357.351 3944.98 3944.98 3951.572     7
+#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+#>       146 6      15        0 -3086.581 6173.162 6840.935 6840.935 6894.688
+#>  niter
+#>     13
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 
@@ -312,9 +328,9 @@ of Normal-Block models, one per number of clusters.
 ``` r
 
 my_NB_unknown <- normal_block(data = my_data,
-                              blocks = 2:5)
+                              blocks = 2:8)
 #> Fitting a collection of diagonal normal-block-var models over q 
-#>   number of clusters = 2              number of clusters = 3              number of clusters = 4              number of clusters = 5              refine(): improved 4 of 4 models
+#>   refine(): improved 5 of 7 models
 #> 
 #> DONE
 ```
@@ -335,14 +351,20 @@ increases with $`q`$ signals a poor local optimum:
 my_NB_unknown
 #> A collection of diagonal normal-block-var models over q 
 #> ===========================================================================
-#>   4 model(s) explored
-#>     q ranging from 2 to 5 
+#>   7 model(s) explored
+#>     q ranging from 2 to 8 
 #> ===========================================================================
 #> * Useful fields
 #>     $models, $criteria
 #> * Useful methods
 #>     print(), summary(), plot(), $get_best_model()
+#> * Warning: the deviance increases with q at q = 7, 8 
+#>     (nested models: a sign of poor local optima that refine() did not repair).
 ```
+
+Here, a violation remains at q = 7, 8, at the edge of the explored
+range, where refine() can only seed the model from its smaller
+neighbour; it does not affect the selected model.
 
 A specific model can be selected either by its number of clusters or as
 the best model for a given criterion (BIC, ICL or EBIC). The value of
@@ -363,8 +385,10 @@ when a specific number of clusters is required, and with
 
 ``` r
 
-myNB_3   <- my_NB_unknown$get_model(3)
+myNB_6   <- my_NB_unknown$get_model(6)
 myNB_BIC <- my_NB_unknown$get_best_model("BIC")
+myNB_BIC$q
+#> [1] 6
 ```
 
 The criteria above rest on penalties. Cross-validation offers a
@@ -380,28 +404,26 @@ error of the best.
 ``` r
 
 set.seed(1)
-my_NB_cv <- normal_block_cv(my_data, blocks = 2:5, folds = 5)
+my_NB_cv <- normal_block_cv(my_data, blocks = 2:8, folds = 5)
 my_NB_cv
 #> Cross-validated log-likelihood, 5 folds (larger is better)
-#>  q    loglik        se
-#>  2 -6985.293 111.34704
-#>  3 -6435.029  54.40782
-#>  4 -6356.279  49.64443
-#>  5 -6348.556  48.71834
-#> Best: q = 4 (one-standard-error rule; maximum at q = 5)
+#>  q    loglik       se
+#>  2 -7411.048 85.71043
+#>  3 -7077.635 76.53842
+#>  4 -6775.717 67.59015
+#>  5 -6553.907 50.90229
+#>  6 -6493.623 49.79544
+#>  7 -6498.672 49.55779
+#>  8 -6496.936 49.39431
+#> Best: q = 6 (one-standard-error rule; maximum at q = 6)
 plot(my_NB_cv)
 ```
 
 ![](normal-block_files/figure-html/simulation1-NB3-cv-1.png)
 
-Here every criterion selects more than the 3 simulated clusters,
-cross-validation least of all. This is the default column rescaling of
-$`Y`$ at work: on data simulated from the model itself, whose variables
-carry their block’s signal with the same weight, rescaling makes the
-model misspecified. Fitting
-`NormalBlockData$new(my_nb_data$Y, my_nb_data$X, scale = FALSE)`
-instead, BIC, ICL and cross-validation all select $`q = 3`$. On real
-data the rescaling usually helps the variance-block model (see
+Here BIC, ICL and cross-validation all recover the 6 simulated clusters.
+By default the columns of $`Y`$ are rescaled for the variance-block
+model, which usually helps on real data (see
 [`?NormalBlockData`](https://jchiquet.github.io/normalblockr/reference/NormalBlockData.md)).
 
 #### Playing with sparsity
@@ -410,48 +432,35 @@ By default, no penalty is applied to the association network. A penalty
 can be added via the `sparsity` argument of
 [`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md),
 with any of the parametrizations seen above (fixed clustering, fixed
-number of clusters, or unknown number of clusters). The example below
-uses a fixed clustering.
+number of clusters, or unknown number of clusters). The examples below
+use the known clustering, so that the inferred network can be compared
+with the simulated one, which has 9 edges out of 15 possible ones.
 
 To use a fixed $`\ell_1`$ penalty (Tous and Chiquet 2026) on the
-network, pass that value to the `sparsity` argument:
+network, pass that value to the `sparsity` argument. The larger the
+penalty, the sparser the network:
 
 ``` r
 
 my_NB_sparse_low <- normal_block(data = my_data,
                                  blocks = my_nb_data$parameters$C,
-                                 sparsity = 0.1)
-#> Fitting a diagonal normal-block-var model with fixed clusters 
-#> 
-#> DONE
+                                 sparsity = 0.05,
+                                 control = NB_control(verbose = FALSE))
 my_NB_sparse_high <- normal_block(data = my_data,
                                   blocks = my_nb_data$parameters$C,
-                                  sparsity = 10)
-#> Fitting a diagonal normal-block-var model with fixed clusters 
-#> 
-#> DONE
+                                  sparsity = 0.2,
+                                  control = NB_control(verbose = FALSE))
+c(low = my_NB_sparse_low$n_edges, high = my_NB_sparse_high$n_edges)
+#>  low high 
+#>   12    8
 ```
 
-The larger the penalty, the sparser the network.
-
-``` r
-
-my_NB_sparse_low$plot_network()
-```
-
-![](normal-block_files/figure-html/simulation1-NB-low-sparsity-plot-1.png)
-
-``` r
-
-my_NB_sparse_high$plot_network()
-```
-
-![](normal-block_files/figure-html/simulation1-NB-high-sparsity-plot-1.png)
-It is usually hard to know a priori which sparsity penalty is best.
+It is usually hard to know a priori which penalty is best.
 [`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
-can instead explore a range of sparsity levels by simply setting
-`sparsity = TRUE`, which returns a collection of Normal-Block models,
-one per sparsity penalty.
+can instead explore a range of penalties by setting `sparsity = TRUE`,
+which returns a collection of Normal-Block models, one per penalty. The
+criteria can then be plotted as a function of the penalty, using
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
 ``` r
 
@@ -459,87 +468,71 @@ my_NB_sparse <- normal_block(data = my_data,
                              blocks = my_nb_data$parameters$C,
                              sparsity = TRUE,
                              control = NB_control(verbose = FALSE))
-```
-
-The different criteria can then be plotted as a function of the penalty,
-using [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
-
-``` r
-
 plot(my_NB_sparse)
 ```
 
-![](normal-block_files/figure-html/simulation1-NB-changing-sparsity-plot-1.png)
-Penalty selection can be done similarly to the selection of the number
-of clusters.
+![](normal-block_files/figure-html/simulation1-NB-changing-sparsity-1.png)
+
+A penalty is selected as a number of clusters is, with
+[`get_model()`](https://jchiquet.github.io/normalblockr/reference/get_model.md)
+and `get_best_model()`. The penalized criteria tend to favour weak
+penalties, hence dense networks. Stability selection (StARS) refits the
+path on subsamples of the observations, the clustering being held fixed,
+and keeps the smallest penalty whose network is stable enough; it is
+usually better suited to reading the network.
 
 ``` r
 
-myNB_sparse_0.1   <- my_NB_sparse$get_model(0.1)
-#> No model with this penalty in the collection. Returning model with closest penalty: 0.0988226469658165 Collection penalty values can be found via $sparsity
 myNB_sparse_BIC   <- my_NB_sparse$get_best_model("BIC")
-```
-
-The penalty can also be chosen by stability selection (StARS, Liu et al.
-(2010)): the whole path is refitted on subsamples of the observations,
-with the clustering held fixed, and the selected penalty is the smallest
-one whose network is stable enough (0.9 by default).
-
-``` r
-
 set.seed(1)
 myNB_sparse_StARS <- my_NB_sparse$get_best_model("StARS")
-myNB_sparse_StARS$n_edges
-#> [1] 3
+c(BIC = myNB_sparse_BIC$n_edges, StARS = myNB_sparse_StARS$n_edges)
+#>   BIC StARS 
+#>    14    15
 ```
 
-Both the sparsity penalty and the number of clusters can also be left to
-vary jointly.
+The edges selected by StARS can be compared with those of the simulated
+network:
 
 ``` r
 
-my_NB_sparse_unknown <-  normal_block(data = my_data,
-                                      blocks = 2:6,
-                                      sparsity = TRUE,
-                                      control = NB_control(verbose = FALSE))
+true_net  <- my_nb_data$parameters$Omega != 0
+stars_net <- as.matrix(myNB_sparse_StARS$latent_network("support")) != 0
+table(simulated = true_net[upper.tri(true_net)], StARS = stars_net[upper.tri(stars_net)])
+#>          StARS
+#> simulated TRUE
+#>     FALSE    6
+#>     TRUE     9
 ```
-
-The result is a collection of Normal-Block models with different numbers
-of clusters and different penalties.
 
 ``` r
 
-my_NB_sparse_unknown$who_am_I
-#> [1] "collection of diagonal normal-block-var models over q and sparsity penalties"
+myNB_sparse_StARS$plot_network(layout = igraph::layout_with_fr)
 ```
 
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) allows each
-criterion to be analysed as a function of both the number of clusters
-and the penalty. By default, the penalties tested are computed by
-[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
-separately for each number of clusters, and can differ from one to
-another – which is what the blanks in the plot come from.
+![](normal-block_files/figure-html/simulation1-NB-stars-network-1.png)
+
+The penalty and the number of clusters can also vary jointly, by passing
+a range of values to `blocks` together with `sparsity = TRUE`.
+`get_model(q)` then returns the path of penalties for $`q`$ clusters,
+from which a penalty is selected as above.
 
 ``` r
 
-plot(my_NB_sparse_unknown, "BIC")
-```
-
-![](normal-block_files/figure-html/simulation1-NB-sparse_unknown-plot-1.png)
-
-Model selection is also done using
-[`get_model()`](https://jchiquet.github.io/normalblockr/reference/get_model.md)
-and `get_best_model()`. With
-[`get_model()`](https://jchiquet.github.io/normalblockr/reference/get_model.md),
-one can fix only the number of clusters, getting back a collection of
-models with different sparsity levels, or fix both the number of
-clusters and the sparsity level.
-
-``` r
-
-my_NB_sparse_3     <- my_NB_sparse_unknown$get_model(3)
-my_NB_sparse_3_0.1 <- my_NB_sparse_unknown$get_model(3, 0.1)
-#> No model with this penalty in the collection. Returning model with closest penalty: 0.0987915298048486 Collection penalty values can be found via $sparsity
+my_NB_sparse_unknown <- normal_block(data = my_data,
+                                     blocks = 5:7,
+                                     sparsity = TRUE,
+                                     control = NB_control(verbose = FALSE))
+my_NB_sparse_unknown$get_model(6)
+#> A collection of diagonal normal-block-var models over sparsity penalties, with fixed q 
+#> ===========================================================================
+#>   30 model(s) explored
+#>     sparsity ranging from 0.00457 to 0.457 
+#> ===========================================================================
+#> * Useful fields
+#>     $models, $criteria
+#> * Useful methods
+#>     print(), summary(), plot(), $get_best_model()
 ```
 
 ### With zero-inflated data
@@ -577,14 +570,10 @@ The clustering inference may also be harder.
 
 aricode::ARI(my_NB_zi$clustering,
              apply(my_nb_data_zi$parameters$C, 1, which.max))
-#> [1] 0.9110079
+#> [1] 0.5816134
 ```
 
 ## References
-
-Liu, Han, Kathryn Roeder, and Larry Wasserman. 2010. “Stability Approach
-to Regularization Selection (StARS) for High Dimensional Graphical
-Models.” *Advances in Neural Information Processing Systems* 23.
 
 Tous, Jeanne, and Julien Chiquet. 2026. “An Integrated Method for
 Clustering and Association Network Inference.” *Computational Statistics

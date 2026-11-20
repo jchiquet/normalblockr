@@ -18,7 +18,7 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data</a></li>
     <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model (variance clustering) - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models (variance clustering): a worked example with fish biomass data</a></li>
@@ -87,6 +87,7 @@
 <li>StARS subsamples keep an explicit <code>zeros</code> mask and the formula.</li>
 <li>A collection over an unsorted range of q is ordered by q.</li>
 <li>Known clusterings are checked to have one row per variable.</li>
+<li>StARS on a variance-block sparsity path with an unknown clustering failed when the least penalized model had a nearly empty cluster: an initial clustering given as probabilities now only needs some mass in every cluster.</li>
 <li>Zero-inflated models with a spherical noise start from the spherical estimate of the noise variance, pooled over the non-zero cells (the variance-block ones started from per-variable variances).</li>
 </ul></div>
 <div class="section level3">
@@ -94,6 +95,7 @@
 <ul><li>Every help page has a running example; help titles follow the two families of the article (Normal-Block-Var, Normal-Block-Mean).</li>
 <li>
 <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of a model and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of a sequential fit wrap their long lines at the console width; the descriptions of the collections are the same for both families.</li>
+<li>The progress line of a collection, rewritten in place, is only printed in an interactive session (it made one long line in documents and logs). <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of a collection no longer suggests <code>refine()</code> for a deviance increase that <code>refine()</code> has already failed to repair.</li>
 <li>Printed outputs speak of clusters of variables rather than blocks.</li>
 <li>Vignettes and README build a known clustering with <code>model.matrix(~ 0 + factor(labels))</code>.</li>
 <li>The update of the mean-block cluster profiles solves a linear system instead of inverting a matrix. Results are unchanged.</li>

@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data • normalblockr</title>
+<title>Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data • normalblockr</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -32,7 +32,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data</a></li>
+<li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data</a></li>
     <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model (variance clustering) - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models (variance clustering): a worked example with fish biomass data</a></li>
@@ -59,7 +59,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data</h1>
+      <h1>Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data</h1>
                         <h4 data-toc-skip class="author">Julien Chiquet
 &amp; Jeanne Tous</h4>
             
@@ -251,7 +251,7 @@ and keeps the best-ELBO fit, at extra cost. Worth it when
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">NB_prot_subtype</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span>, control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>refine <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a collection of diagonal normal-block-var models over q </span></span>
-<span><span class="co">#&gt;   number of clusters = 1              number of clusters = 2              number of clusters = 3              number of clusters = 4              number of clusters = 5              number of clusters = 6              number of clusters = 7              number of clusters = 8              number of clusters = 9              number of clusters = 10             number of clusters = 11             number of clusters = 12             number of clusters = 13             number of clusters = 14             number of clusters = 15             number of clusters = 16             number of clusters = 17             number of clusters = 18             number of clusters = 19             number of clusters = 20             number of clusters = 21             number of clusters = 22             number of clusters = 23             number of clusters = 24             number of clusters = 25             number of clusters = 26             number of clusters = 27             number of clusters = 28             number of clusters = 29             number of clusters = 30           </span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -366,56 +366,41 @@ are available as alternative starting points.</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Ω</mi><annotation encoding="application/x-tex">\Omega</annotation></semantics></math>
 of the ICL-selected model above is dense (no penalty was applied), which
 makes it hard to read directly. Treating that clustering as fixed, we
-can refit the model once more with the graphical-lasso penalty on
+refit the model with the graphical-lasso penalty on
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Ω</mi><annotation encoding="application/x-tex">\Omega</annotation></semantics></math>
-explored over a path of values (<code>sparsity = TRUE</code>), and pick
-the sparsity level with the best BIC.</p>
+explored over a path of values (<code>sparsity = TRUE</code>). Along
+such a path, some fits may stop at the iteration cap with a warning;
+they are not shown here.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">group_selected</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">selected_NB_refined</span><span class="op">$</span><span class="va">clustering</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">NB_prot_sparse</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="va">group_selected</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>min_ratio<span class="op">=</span><span class="fl">0.001</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed clusters </span></span>
-<span><span class="co">#&gt;   penalty = 0.4842032             penalty = 0.3815745             penalty = 0.3006984             penalty = 0.2369643             penalty = 0.1867388             penalty = 0.1471588           </span></span>
-<span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at</span></span>
-<span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000773, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
-<span><span class="co">#&gt; especially with many clusters -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.115968           </span></span>
-<span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at</span></span>
-<span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000721, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
-<span><span class="co">#&gt; especially with many clusters -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.09138812           </span></span>
-<span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at</span></span>
-<span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000365, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
-<span><span class="co">#&gt; especially with many clusters -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.07201807                penalty = 0.05675357                penalty = 0.04472444                penalty = 0.03524493                penalty = 0.02777464           </span></span>
-<span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at</span></span>
-<span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000157, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
-<span><span class="co">#&gt; especially with many clusters -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.0218877           </span></span>
-<span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at</span></span>
-<span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.000496, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
-<span><span class="co">#&gt; especially with many clusters -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.01724852           </span></span>
-<span><span class="co">#&gt; Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at</span></span>
-<span><span class="co">#&gt; the niter cap (500) without reaching the convergence threshold (last increment</span></span>
-<span><span class="co">#&gt; = 0.00093, threshold = 1.0e-04). Consider raising `niter` in NB_control(),</span></span>
-<span><span class="co">#&gt; especially with many clusters -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.01359263                penalty = 0.01071162                penalty = 0.008441254               penalty = 0.006652099               penalty = 0.005242162               penalty = 0.004131066               penalty = 0.003255471               penalty = 0.002565462               penalty = 0.002021703               penalty = 0.001593195               penalty = 0.001255512               penalty = 0.0009894014              penalty = 0.0007796941              penalty = 0.000614435               penalty = 0.0004842032           </span></span>
-<span><span class="co">#&gt; DONE</span></span></code></pre></div>
+<span><span class="va">NB_prot_sparse</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data_subtype</span>, blocks <span class="op">=</span> <span class="va">group_selected</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                               control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>min_ratio <span class="op">=</span> <span class="fl">0.001</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">NB_prot_sparse</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EBIC"</span>, <span class="st">"deviance"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="breast-cancer-proteomics_files/figure-html/plotting-criteria-sparse-1.png" class="r-plt" alt="" width="672"></p>
+<p>The criteria favour weak penalties, hence dense networks: the EBIC
+keeps many of the possible edges.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sparse_best</span> <span class="op">&lt;-</span> <span class="va">NB_prot_sparse</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"EBIC"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"BIC selects a penalty of "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">sparse_best</span><span class="op">$</span><span class="va">sparsity</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "BIC selects a penalty of 0.0172."</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sparse_ebic</span> <span class="op">&lt;-</span> <span class="va">NB_prot_sparse</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"EBIC"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"EBIC keeps "</span>, <span class="va">sparse_ebic</span><span class="op">$</span><span class="va">n_edges</span>, <span class="st">" edges out of "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Special.html" class="external-link">choose</a></span><span class="op">(</span><span class="va">sparse_ebic</span><span class="op">$</span><span class="va">q</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "EBIC keeps 180 edges out of 378."</span></span></code></pre></div>
+<p>Stability selection (StARS) is better suited to reading the network.
+It refits the path on subsamples of the observations, the clustering
+being held fixed, and keeps the smallest penalty whose network is stable
+enough:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sparse_best</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span>output <span class="op">=</span> <span class="st">"corrplot"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">sparse_stars</span> <span class="op">&lt;-</span> <span class="va">NB_prot_sparse</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"StARS"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"StARS keeps "</span>, <span class="va">sparse_stars</span><span class="op">$</span><span class="va">n_edges</span>, <span class="st">" edges."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "StARS keeps 51 edges."</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sparse_stars</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span>node.labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">sparse_stars</span><span class="op">$</span><span class="va">q</span><span class="op">)</span>, remove.isolated <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                          layout <span class="op">=</span> <span class="fu">igraph</span><span class="fu">::</span><span class="va"><a href="https://r.igraph.org/reference/layout_with_fr.html" class="external-link">layout_with_fr</a></span><span class="op">)</span></span></code></pre></div>
 <p><img src="breast-cancer-proteomics_files/figure-html/plot-network-sparse-1.png" class="r-plt" alt="" width="576"></p>
+<p>The width of an edge is proportional to the absolute partial
+correlation between the two clusters, positive in red and negative in
+turquoise, and the size of a node to that of its cluster; isolated
+clusters are not drawn.</p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

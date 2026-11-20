@@ -191,7 +191,7 @@ what it changes in the next section:
 out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE,
                     control = NB_control(clustering_init = "ward2", refine = FALSE))
 #> Fitting a collection of zero-inflated diagonal normal-block-var models over q 
-#>   number of clusters = 2              number of clusters = 3              number of clusters = 4              number of clusters = 5              number of clusters = 6              number of clusters = 7              number of clusters = 8           
+#> 
 #> DONE
 ```
 
@@ -310,54 +310,38 @@ sort(round(kappa_hat, 2))[1:5]                    # almost always present in som
 
 ## Sparsifying the association network
 
-Once a number of clusters is chosen, the same sparsity options as in the
-non-zero-inflated case apply: fitting at the selected `q` with
-`sparsity = TRUE` explores a path of $`\ell_1`$ penalties on the
-inter-cluster association network (see Tous and Chiquet 2026).
+Once a model is chosen, its network between clusters can be sparsified
+as in the non-zero-inflated case (see Tous and Chiquet 2026). Treating
+the selected clustering as known, `sparsity = TRUE` explores a path of
+$`\ell_1`$ penalties on the network:
 
 ``` r
 
-out_sp <- normal_block(data, blocks = myModel$q, sparsity = TRUE, zero_inflation = TRUE)
-#> Fitting a collection of zero-inflated diagonal normal-block-var models over sparsity penalties, with fixed q 
-#>   penalty = 0.02839098           
-#> Warning: zero-inflated diagonal normal-block-var model with 4 unknown clusters:
-#> (V)EM stopped at the niter cap (500) without reaching the convergence threshold
-#> (last increment = 0.000476, threshold = 1.0e-04). Consider raising `niter` in
-#> NB_control(), especially with many clusters -- see plot_loglik() to check.
-#>   penalty = 0.02422227           
-#> Warning: zero-inflated diagonal normal-block-var model with 4 unknown clusters:
-#> (V)EM stopped at the niter cap (500) without reaching the convergence threshold
-#> (last increment = 0.000138, threshold = 1.0e-04). Consider raising `niter` in
-#> NB_control(), especially with many clusters -- see plot_loglik() to check.
-#>   penalty = 0.02066567                penalty = 0.01763128                penalty = 0.01504244                penalty = 0.01283373                penalty = 0.01094932                penalty = 0.009341612               penalty = 0.007969963               penalty = 0.006799716               penalty = 0.005801299               penalty = 0.004949482               penalty = 0.004222739               penalty = 0.003602705               penalty = 0.003073712               penalty = 0.002622392               penalty = 0.002237341               penalty = 0.001908827               penalty = 0.00162855                penalty = 0.001389427               penalty = 0.001185414               penalty = 0.001011357               penalty = 0.0008628574              penalty = 0.0007361622              penalty = 0.0006280699              penalty = 0.0005358491              penalty = 0.0004571692              penalty = 0.0003900421              penalty = 0.0003327714              penalty = 0.0002839098           
-#> DONE
-out_sp$plot(c("BIC", "EBIC"))
+C_selected <- model.matrix(~ 0 + factor(myModel$clustering))
+out_sp <- normal_block(data, blocks = C_selected, sparsity = TRUE, zero_inflation = TRUE,
+                       control = NB_control(verbose = FALSE))
+out_sp$plot(c("BIC", "EBIC", "deviance"))
 ```
 
 ![](zero-inflated-normal-block_files/figure-html/sparsify-zi-1.png)
 
+With only 6 possible edges, each edge costs little in BIC and EBIC,
+which pick one of the weakest penalties, at the end of the path.
+Stability selection (StARS) is more informative here: it refits the path
+on subsamples of the stations, the clustering being held fixed, and
+keeps the smallest penalty whose network is stable enough.
+
 ``` r
 
-out_sp$plot(c("ICL", "deviance"))
+set.seed(1)
+sparse_zi <- out_sp$get_best_model("StARS")
+paste0("StARS keeps ", sparse_zi$n_edges, " edges out of ", choose(myModel$q, 2), ".")
+#> [1] "StARS keeps 3 edges out of 6."
 ```
 
-![](zero-inflated-normal-block_files/figure-html/sparsify-zi-2.png)
-
-Unlike `deviance`, which decreases monotonically as the penalty relaxes
-(a less penalized network is always at least as expressive),
-`BIC`/`EBIC` can bump up locally along the path: each extra edge costs a
-fixed `log(n)` in the parameter-count penalty, and whenever its actual
-gain in deviance is smaller than that, the criterion increases even
-though both the deviance and the parameter count keep moving in the
-expected direction. This is the intended behavior of a penalized
-criterion, not a bug in the parameter count.
-
-The association network at the best ICL penalty can then be visualized
-directly:
-
 ``` r
 
-out_sp$get_best_model("ICL")$plot_network()
+sparse_zi$plot_network(node.labels = seq_len(sparse_zi$q), layout = igraph::layout_with_fr)
 ```
 
 ![](zero-inflated-normal-block_files/figure-html/network-zi-1.png)

@@ -194,21 +194,39 @@ table(selected$clustering)
 ```
 
 Each cluster’s profile across the five subtypes is a column of
-[`coef()`](https://rdrr.io/r/stats/coef.html); a heatmap of that matrix
-is the most direct summary of what the model found.
+[`coef()`](https://rdrr.io/r/stats/coef.html). A heatmap of these
+profiles, clusters ordered by a hierarchical clustering of their
+profiles, is the most direct summary of what the model found. The
+profiles differ above all by their overall level, since a cluster shares
+its whole profile, level included; centred on their mean, they show the
+contrasts between subtypes.
 
 ``` r
 
+library(ggplot2)
 profiles <- coef(selected)
-rownames(profiles) <- levels(brca_rppa$covariates$PAM50_SUBTYPE)
-colnames(profiles) <- paste0("cluster ", seq_len(ncol(profiles)))
-image(seq_len(nrow(profiles)), seq_len(ncol(profiles)), profiles,
-      axes = FALSE, xlab = "", ylab = "", col = hcl.colors(20, "RdBu", rev = TRUE))
-axis(1, seq_len(nrow(profiles)), rownames(profiles), las = 2, cex.axis = .7)
-axis(2, seq_len(ncol(profiles)), colnames(profiles), las = 2, cex.axis = .7)
+subtypes <- sub("PAM50_SUBTYPE", "", rownames(profiles))
+ord <- hclust(dist(t(profiles)), "ward.D2")$order
+as_long <- function(M) data.frame(
+  subtype = factor(rep(subtypes, ncol(M)), levels = rev(subtypes)),
+  cluster = factor(rep(seq_len(ncol(M)), each = nrow(M)), levels = ord),
+  value   = as.vector(M))
+heatmap <- function(M, title) ggplot(as_long(M), aes(cluster, subtype, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "#2166AC", mid = "white", high = "#B2182B", name = NULL) +
+  labs(x = "clusters", y = NULL, subtitle = title) + theme_minimal() +
+  theme(axis.text.x = element_blank(), panel.grid = element_blank())
+heatmap(profiles, "cluster profiles")
 ```
 
 ![](mean-block-breast-cancer_files/figure-html/cluster-profiles-1.png)
+
+``` r
+
+heatmap(sweep(profiles, 2, colMeans(profiles)), "profiles centred on their mean")
+```
+
+![](mean-block-breast-cancer_files/figure-html/cluster-profiles-2.png)
 
 ## Choosing the shape of the residual covariance
 
@@ -269,9 +287,12 @@ paste0(NB_sparse$n_edges, " edges out of ", choose(ncol(Y), 2), " possible ones.
 #> [1] "15 edges out of 13203 possible ones."
 ```
 
+The network relates the proteins themselves; drawn without its isolated
+proteins, it reads as a few small modules:
+
 ``` r
 
-NB_sparse$plot_network(output = "corrplot")
+NB_sparse$plot_network(remove.isolated = TRUE, layout = igraph::layout_with_fr)
 ```
 
 ![](mean-block-breast-cancer_files/figure-html/sparse-network-1.png)
@@ -296,7 +317,7 @@ Clustering and Association Network Inference.” *Computational Statistics
 <https://doi.org/10.1016/j.csda.2026.108347>.
 
 [^1]: In a simulation study over 12 replicates, selecting $`q`$ by BIC
-    was correct 10/12 times with a diagonal $`\Sigma`$ against 6/12 with
+    was correct 10/12 times with a diagonal $`\Sigma`$ against 5/12 with
     a full one at $`n/p \approx 1.3`$, *even when the data were
     generated with a full* $`\Sigma`$. The quality of the clustering at
     a fixed $`q`$ was the same either way, it is the choice of $`q`$

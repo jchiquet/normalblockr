@@ -32,7 +32,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data</a></li>
+<li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data</a></li>
     <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model (variance clustering) - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models (variance clustering): a worked example with fish biomass data</a></li>
@@ -293,7 +293,7 @@ to show what it changes in the next section:</p>
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">8</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                    control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>clustering_init <span class="op">=</span> <span class="st">"ward2"</span>, refine <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Fitting a collection of zero-inflated diagonal normal-block-var models over q </span></span>
-<span><span class="co">#&gt;   number of clusters = 2              number of clusters = 3              number of clusters = 4              number of clusters = 5              number of clusters = 6              number of clusters = 7              number of clusters = 8           </span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>criteria <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"EBIC"</span>, <span class="st">"deviance"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -392,45 +392,31 @@ range:</p>
 <div class="section level2">
 <h2 id="sparsifying-the-association-network">Sparsifying the association network<a class="anchor" aria-label="anchor" href="#sparsifying-the-association-network"></a>
 </h2>
-<p>Once a number of clusters is chosen, the same sparsity options as in
-the non-zero-inflated case apply: fitting at the selected <code>q</code>
-with <code>sparsity = TRUE</code> explores a path of
+<p>Once a model is chosen, its network between clusters can be
+sparsified as in the non-zero-inflated case <span class="citation">(see
+Tous and Chiquet 2026)</span>. Treating the selected clustering as
+known, <code>sparsity = TRUE</code> explores a path of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ℓ</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\ell_1</annotation></semantics></math>
-penalties on the inter-cluster association network <span class="citation">(see Tous and Chiquet 2026)</span>.</p>
+penalties on the network:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out_sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="va">myModel</span><span class="op">$</span><span class="va">q</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fitting a collection of zero-inflated diagonal normal-block-var models over sparsity penalties, with fixed q </span></span>
-<span><span class="co">#&gt;   penalty = 0.02839098           </span></span>
-<span><span class="co">#&gt; Warning: zero-inflated diagonal normal-block-var model with 4 unknown clusters:</span></span>
-<span><span class="co">#&gt; (V)EM stopped at the niter cap (500) without reaching the convergence threshold</span></span>
-<span><span class="co">#&gt; (last increment = 0.000476, threshold = 1.0e-04). Consider raising `niter` in</span></span>
-<span><span class="co">#&gt; NB_control(), especially with many clusters -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.02422227           </span></span>
-<span><span class="co">#&gt; Warning: zero-inflated diagonal normal-block-var model with 4 unknown clusters:</span></span>
-<span><span class="co">#&gt; (V)EM stopped at the niter cap (500) without reaching the convergence threshold</span></span>
-<span><span class="co">#&gt; (last increment = 0.000138, threshold = 1.0e-04). Consider raising `niter` in</span></span>
-<span><span class="co">#&gt; NB_control(), especially with many clusters -- see plot_loglik() to check.</span></span>
-<span><span class="co">#&gt;   penalty = 0.02066567                penalty = 0.01763128                penalty = 0.01504244                penalty = 0.01283373                penalty = 0.01094932                penalty = 0.009341612               penalty = 0.007969963               penalty = 0.006799716               penalty = 0.005801299               penalty = 0.004949482               penalty = 0.004222739               penalty = 0.003602705               penalty = 0.003073712               penalty = 0.002622392               penalty = 0.002237341               penalty = 0.001908827               penalty = 0.00162855                penalty = 0.001389427               penalty = 0.001185414               penalty = 0.001011357               penalty = 0.0008628574              penalty = 0.0007361622              penalty = 0.0006280699              penalty = 0.0005358491              penalty = 0.0004571692              penalty = 0.0003900421              penalty = 0.0003327714              penalty = 0.0002839098           </span></span>
-<span><span class="co">#&gt; DONE</span></span>
-<span><span class="va">out_sp</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"EBIC"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">C_selected</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">myModel</span><span class="op">$</span><span class="va">clustering</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">out_sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="va">C_selected</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                       control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">out_sp</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIC"</span>, <span class="st">"EBIC"</span>, <span class="st">"deviance"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="zero-inflated-normal-block_files/figure-html/sparsify-zi-1.png" class="r-plt" alt="" width="700"></p>
+<p>With only 6 possible edges, each edge costs little in BIC and EBIC,
+which pick one of the weakest penalties, at the end of the path.
+Stability selection (StARS) is more informative here: it refits the path
+on subsamples of the stations, the clustering being held fixed, and
+keeps the smallest penalty whose network is stable enough.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out_sp</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ICL"</span>, <span class="st">"deviance"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="zero-inflated-normal-block_files/figure-html/sparsify-zi-2.png" class="r-plt" alt="" width="700"></p>
-<p>Unlike <code>deviance</code>, which decreases monotonically as the
-penalty relaxes (a less penalized network is always at least as
-expressive), <code>BIC</code>/<code>EBIC</code> can bump up locally
-along the path: each extra edge costs a fixed <code>log(n)</code> in the
-parameter-count penalty, and whenever its actual gain in deviance is
-smaller than that, the criterion increases even though both the deviance
-and the parameter count keep moving in the expected direction. This is
-the intended behavior of a penalized criterion, not a bug in the
-parameter count.</p>
-<p>The association network at the best ICL penalty can then be
-visualized directly:</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">sparse_zi</span> <span class="op">&lt;-</span> <span class="va">out_sp</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"StARS"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"StARS keeps "</span>, <span class="va">sparse_zi</span><span class="op">$</span><span class="va">n_edges</span>, <span class="st">" edges out of "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Special.html" class="external-link">choose</a></span><span class="op">(</span><span class="va">myModel</span><span class="op">$</span><span class="va">q</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"."</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "StARS keeps 3 edges out of 6."</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out_sp</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"ICL"</span><span class="op">)</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="zero-inflated-normal-block_files/figure-html/network-zi-1.png" class="r-plt" alt="" width="700"></p>
+<code class="sourceCode R"><span><span class="va">sparse_zi</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span>node.labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">sparse_zi</span><span class="op">$</span><span class="va">q</span><span class="op">)</span>, layout <span class="op">=</span> <span class="fu">igraph</span><span class="fu">::</span><span class="va"><a href="https://r.igraph.org/reference/layout_with_fr.html" class="external-link">layout_with_fr</a></span><span class="op">)</span></span></code></pre></div>
+<p><img src="zero-inflated-normal-block_files/figure-html/network-zi-1.png" class="r-plt" alt="" width="480"></p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

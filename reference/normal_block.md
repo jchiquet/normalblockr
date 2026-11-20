@@ -70,12 +70,7 @@ ex_data <- generate_normal_block_var_data(n = 100, p = 30, d = 1, q = 3)
 data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 my_normal_block <- normal_block(data, blocks = 1:5)
 #> Fitting a collection of diagonal normal-block-var models over q 
-#>   number of clusters = 1           
-     number of clusters = 2           
-     number of clusters = 3           
-     number of clusters = 4           
-     number of clusters = 5           
-     refine(): improved 1 of 5 models
+#>   refine(): improved 1 of 5 models
 #> 
 #> DONE
 my_normal_block$plot(c("deviance", "BIC", "ICL"))

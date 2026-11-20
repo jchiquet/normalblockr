@@ -1,4 +1,4 @@
-# Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data
+# Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data
 
 ## Preliminaries
 
@@ -174,7 +174,7 @@ what it changes in the next section.[^2]
 
 NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30, control = NB_control(refine = FALSE))
 #> Fitting a collection of diagonal normal-block-var models over q 
-#>   number of clusters = 1              number of clusters = 2              number of clusters = 3              number of clusters = 4              number of clusters = 5              number of clusters = 6              number of clusters = 7              number of clusters = 8              number of clusters = 9              number of clusters = 10             number of clusters = 11             number of clusters = 12             number of clusters = 13             number of clusters = 14             number of clusters = 15             number of clusters = 16             number of clusters = 17             number of clusters = 18             number of clusters = 19             number of clusters = 20             number of clusters = 21             number of clusters = 22             number of clusters = 23             number of clusters = 24             number of clusters = 25             number of clusters = 26             number of clusters = 27             number of clusters = 28             number of clusters = 29             number of clusters = 30           
+#> 
 #> DONE
 ```
 
@@ -297,47 +297,16 @@ starting points.
 
 The association network $`\Omega`$ of the ICL-selected model above is
 dense (no penalty was applied), which makes it hard to read directly.
-Treating that clustering as fixed, we can refit the model once more with
-the graphical-lasso penalty on $`\Omega`$ explored over a path of values
-(`sparsity = TRUE`), and pick the sparsity level with the best BIC.
+Treating that clustering as fixed, we refit the model with the
+graphical-lasso penalty on $`\Omega`$ explored over a path of values
+(`sparsity = TRUE`). Along such a path, some fits may stop at the
+iteration cap with a warning; they are not shown here.
 
 ``` r
 
 group_selected <- model.matrix(~ 0 + factor(selected_NB_refined$clustering))
-NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE, control = NB_control(min_ratio=0.001))
-#> Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed clusters 
-#>   penalty = 0.4842032             penalty = 0.3815745             penalty = 0.3006984             penalty = 0.2369643             penalty = 0.1867388             penalty = 0.1471588           
-#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
-#> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000773, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many clusters -- see plot_loglik() to check.
-#>   penalty = 0.115968           
-#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
-#> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000721, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many clusters -- see plot_loglik() to check.
-#>   penalty = 0.09138812           
-#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
-#> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000365, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many clusters -- see plot_loglik() to check.
-#>   penalty = 0.07201807                penalty = 0.05675357                penalty = 0.04472444                penalty = 0.03524493                penalty = 0.02777464           
-#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
-#> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000157, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many clusters -- see plot_loglik() to check.
-#>   penalty = 0.0218877           
-#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
-#> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.000496, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many clusters -- see plot_loglik() to check.
-#>   penalty = 0.01724852           
-#> Warning: diagonal normal-block-var model with fixed clusters: (V)EM stopped at
-#> the niter cap (500) without reaching the convergence threshold (last increment
-#> = 0.00093, threshold = 1.0e-04). Consider raising `niter` in NB_control(),
-#> especially with many clusters -- see plot_loglik() to check.
-#>   penalty = 0.01359263                penalty = 0.01071162                penalty = 0.008441254               penalty = 0.006652099               penalty = 0.005242162               penalty = 0.004131066               penalty = 0.003255471               penalty = 0.002565462               penalty = 0.002021703               penalty = 0.001593195               penalty = 0.001255512               penalty = 0.0009894014              penalty = 0.0007796941              penalty = 0.000614435               penalty = 0.0004842032           
-#> DONE
+NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE,
+                               control = NB_control(min_ratio = 0.001, verbose = FALSE))
 ```
 
 ``` r
@@ -347,19 +316,41 @@ plot(NB_prot_sparse, c("EBIC", "deviance"))
 
 ![](breast-cancer-proteomics_files/figure-html/plotting-criteria-sparse-1.png)
 
+The criteria favour weak penalties, hence dense networks: the EBIC keeps
+many of the possible edges.
+
 ``` r
 
-sparse_best <- NB_prot_sparse$get_best_model("EBIC")
-paste0("BIC selects a penalty of ", round(sparse_best$sparsity, 4), ".")
-#> [1] "BIC selects a penalty of 0.0172."
+sparse_ebic <- NB_prot_sparse$get_best_model("EBIC")
+paste0("EBIC keeps ", sparse_ebic$n_edges, " edges out of ", choose(sparse_ebic$q, 2), ".")
+#> [1] "EBIC keeps 180 edges out of 378."
+```
+
+Stability selection (StARS) is better suited to reading the network. It
+refits the path on subsamples of the observations, the clustering being
+held fixed, and keeps the smallest penalty whose network is stable
+enough:
+
+``` r
+
+set.seed(1)
+sparse_stars <- NB_prot_sparse$get_best_model("StARS")
+paste0("StARS keeps ", sparse_stars$n_edges, " edges.")
+#> [1] "StARS keeps 51 edges."
 ```
 
 ``` r
 
-sparse_best$plot_network(output = "corrplot")
+sparse_stars$plot_network(node.labels = seq_len(sparse_stars$q), remove.isolated = TRUE,
+                          layout = igraph::layout_with_fr)
 ```
 
 ![](breast-cancer-proteomics_files/figure-html/plot-network-sparse-1.png)
+
+The width of an edge is proportional to the absolute partial correlation
+between the two clusters, positive in red and negative in turquoise, and
+the size of a node to that of its cluster; isolated clusters are not
+drawn.
 
 ## References
 

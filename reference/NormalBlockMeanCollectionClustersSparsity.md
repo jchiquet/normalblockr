@@ -52,22 +52,7 @@ data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 2:4, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 4))
 #> Fitting a collection of full normal-block-mean models over q and sparsity penalties 
-#>   number of clusters = 2           
-     penalty = 3.916143           
-     penalty = 0.8437074           
-     penalty = 0.1817713           
-     penalty = 0.03916143           
-     number of clusters = 3           
-     penalty = 3.916143           
-     penalty = 0.8437074           
-     penalty = 0.1817713           
-     penalty = 0.03916143           
-     number of clusters = 4           
-     penalty = 3.916143           
-     penalty = 0.8437074           
-     penalty = 0.1817713           
-     penalty = 0.03916143           
-
+#> 
 #> DONE
 models$plot("BIC")
 

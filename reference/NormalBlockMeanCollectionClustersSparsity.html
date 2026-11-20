@@ -24,7 +24,7 @@ both a range of cluster counts (q) and a sparsity path, i.e. one
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/breast-cancer-proteomics.html">Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data</a></li>
     <li><a class="dropdown-item" href="../articles/mean-block-breast-cancer.html">Mean-Block models: clustering variables by their response to covariates</a></li>
     <li><a class="dropdown-item" href="../articles/normal-block.html">Analyzing multivariate Gaussian data with the Normal-Block model (variance clustering) - First steps</a></li>
     <li><a class="dropdown-item" href="../articles/zero-inflated-normal-block.html">Zero-inflated Normal-Block models (variance clustering): a worked example with fish biomass data</a></li>
@@ -98,22 +98,7 @@ both a range of cluster counts (q) and a sparsity path, i.e. one
 <span class="r-in"><span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">4</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, model <span class="op">=</span> <span class="st">"mean"</span>,</span></span>
 <span class="r-in"><span>                       control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>n_sparsity_penalties <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fitting a collection of full normal-block-mean models over q and sparsity penalties </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	 number of clusters = 2           
-	 penalty = 3.916143           
-	 penalty = 0.8437074           
-	 penalty = 0.1817713           
-	 penalty = 0.03916143           
-	 number of clusters = 3           
-	 penalty = 3.916143           
-	 penalty = 0.8437074           
-	 penalty = 0.1817713           
-	 penalty = 0.03916143           
-	 number of clusters = 4           
-	 penalty = 3.916143           
-	 penalty = 0.8437074           
-	 penalty = 0.1817713           
-	 penalty = 0.03916143           
-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DONE</span>
 <span class="r-in"><span><span class="va">models</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="st">"BIC"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="NormalBlockMeanCollectionClustersSparsity-1.png" alt="" width="700" height="433"></span>

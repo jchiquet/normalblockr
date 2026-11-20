@@ -136,6 +136,10 @@ Users of 0.3.0 will see different results on the same calls:
 - StARS subsamples keep an explicit `zeros` mask and the formula.
 - A collection over an unsorted range of q is ordered by q.
 - Known clusterings are checked to have one row per variable.
+- StARS on a variance-block sparsity path with an unknown clustering
+  failed when the least penalized model had a nearly empty cluster: an
+  initial clustering given as probabilities now only needs some mass in
+  every cluster.
 - Zero-inflated models with a spherical noise start from the spherical
   estimate of the noise variance, pooled over the non-zero cells (the
   variance-block ones started from per-variable variances).
@@ -148,6 +152,11 @@ Users of 0.3.0 will see different results on the same calls:
   [`print()`](https://rdrr.io/r/base/print.html) of a sequential fit
   wrap their long lines at the console width; the descriptions of the
   collections are the same for both families.
+- The progress line of a collection, rewritten in place, is only printed
+  in an interactive session (it made one long line in documents and
+  logs). [`print()`](https://rdrr.io/r/base/print.html) of a collection
+  no longer suggests `refine()` for a deviance increase that `refine()`
+  has already failed to repair.
 - Printed outputs speak of clusters of variables rather than blocks.
 - Vignettes and README build a known clustering with
   `model.matrix(~ 0 + factor(labels))`.
