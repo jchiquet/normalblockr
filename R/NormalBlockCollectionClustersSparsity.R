@@ -41,7 +41,7 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
         path_class$new(mydata, q, zero_inflation, control)
       })
       private$progress_field <- "q"
-      private$progress_label <- "number of blocks"
+      private$progress_label <- "number of clusters"
     },
 
     #' @description returns a collection of models corresponding to given q
