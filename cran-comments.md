@@ -19,8 +19,8 @@ Main changes since 0.3.0 (see NEWS.md):
 
 * local: Ubuntu 24.04, R-release, GCC (`R CMD check --as-cran`)
 * win-builder: R-release (4.6.2), R-oldrelease (4.5.3), R-devel (2026-11-17 r90926): Status OK
-* GitHub Actions: Ubuntu 24.04 (R-release, R-devel, R-oldrel-1), macOS
-  (R-release), Windows (R-release)
+* GitHub Actions: Ubuntu 26.04 (R-release, R-devel, R-oldrel-1), macOS 26
+  arm64 (R-release), Windows Server 2025 (R-release)
 
 ## R CMD check results
 
