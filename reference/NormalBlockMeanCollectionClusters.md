@@ -56,7 +56,7 @@ models <- normal_block(data, blocks = 2:5, model = "mean")
      number of blocks = 3           
      number of blocks = 4           
      number of blocks = 5           
-     refine(): improved 3 of 4 models
+     refine(): improved 4 of 4 models
 #> 
 #> DONE
 models$plot(c("BIC", "ICL"))
@@ -65,7 +65,7 @@ models$get_best_model()
 #> A diagonal normal-block-mean model with 3 unknown blocks.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
-#>        25 3       0        0 -1984.862 3969.724 4074.679 4077.595 4074.679
+#>        25 3       0        0 -1987.188 3974.377 4079.332 4081.981 4079.332
 #>  niter
 #>      1
 #> ===========================================================================
