@@ -28,7 +28,7 @@ subfolders `mean_block/` and `initialization/`), with their results.
   mean-block Sigma, `nb_param` counts the non-zero off-diagonal terms of Omega
   (lasso df), which makes the BIC non-monotone in q and over-select; counting
   the dense parameters would be monotone but over-charge
-  (`nestor_protocol_qsel_unpenalised.R`). The diagonal default is unaffected.
+  (`nestor_protocol.R`, unpenalised arm). The diagonal default is unaffected.
 
 ## Rescaling of Y per family (1.0.0, #60)
 
@@ -46,7 +46,7 @@ resolved per family.
 - Mean-block: kmeans is the best of the four heuristics on `brca_rppa`,
   `onema`, a simulation, and Nestor's M2 grid (mean ARI 0.90 at SNR 0.3,
   0.97 at SNR 1.5; sbm close, ward2/spectral behind) (`nestor_protocol.R`,
-  `diagnostic_mean_block_*.R`).
+  `diagnostic_mean_block_real_data.R`).
 - Variance-block (`var_init_study.R`): heuristics equivalent on simulations;
   on real data kmeans + refine() best on brca (deviance gap to the best fit
   summed over q: 2,383 vs 8,599 for ward2), close on university, but ward2
