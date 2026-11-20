@@ -93,5 +93,32 @@ test_that("normal_block_cv() stratifies its folds on a categorical design", {
   expect_equal(sort(attr(cv, "folds")[g == "c"]), 1:5)
   expect_true(is.finite(cv$loglik))
   ## a test fold without some category still gets a held-out log-likelihood
-  expect_no_error(NormalBlockData$new(ex$Y[1:5, ], X[1:5, , drop = FALSE]))
+  set.seed(1)
+  m <- normal_block(d, blocks = 2, control = NB_control(verbose = FALSE))
+  test <- d$subset(which(g == "a")[1:5], check_constant = FALSE)
+  expect_true(all(is.finite(m$heldout_loglik(test, per_observation = TRUE))))
+})
+
+test_that("normal_block_cv() names the fold and the columns when a training set has a constant column", {
+  Y <- ex$Y; colnames(Y) <- paste0("v", seq_len(ncol(Y)))
+  Y[1:20, 4] <- 0; Y[21:60, 4] <- 1 + (1:40) / 10
+  d <- NormalBlockData$new(Y, ex$X)
+  folds <- rep(1:2, c(20, 40))
+  expect_error(normal_block_cv(d, 2, folds = folds), "fold 2 \\(training set\\).*v4")
+})
+
+test_that("with an unknown clustering, the held-out log-likelihood is that of the MAP partition", {
+  set.seed(2)
+  exm <- generate_normal_block_mean_data(n = 60, p = 12, d = 1, q = 3)
+  for (family in c("var", "mean")) {
+    d <- if (family == "var") NormalBlockData$new(ex$Y, ex$X) else NormalBlockData$new(exm$Y, exm$X)
+    set.seed(1)
+    unknown <- normal_block(d, blocks = 3, model = family, control = ctrl)
+    C_map <- as_indicator(unknown$clustering)
+    known <- get_model(d, blocks = C_map, model = family, control = ctrl)
+    ## the parameters of the unknown model, the MAP partition as known clustering
+    known$update(B = unknown$model_par$B, Omega = unknown$model_par$Omega)
+    if (family == "var") known$update(dm1 = unknown$model_par$dm1)
+    expect_equal(known$heldout_loglik(d), unknown$heldout_loglik(d))
+  }
 })

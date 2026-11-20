@@ -21,13 +21,12 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
   public = list(
     #' @description Create a new [`ZINormalBlockVarKnownClusters`] object.
     #' @param data object of NormalBlockData class, with responses and design matrix
-    #' @param C clustering matrix C_jk = 1 if species j belongs to cluster k
+    #' @param C p x q clustering matrix, C_jk = 1 if variable j belongs to cluster k
     #' @param sparsity to apply on variance matrix when calling GLASSO
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`ZINormalBlockVarKnownClusters`] object
     initialize = function(data, C, sparsity = 0, control = NB_control()) {
-      stopifnot("C must be a matrix" = is.matrix(C))
-      stopifnot("There cannot be empty clusters" = min(colSums(C)) > 0)
+      check_known_clustering(C, data$p)
       super$initialize(data, ncol(C), sparsity, control = control, zero_inflation = TRUE)
       private$C  <- C
     }
@@ -37,24 +36,20 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
   ## PRIVATE MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
-
-    ## zero-inflation coefficients: d0 per variable, informed by its n observations
-    penalty_groups = function() {
-      rbind(super$penalty_groups(), penalty_group("kappa", self$p * self$d0, self$n))
-    },
+    known_clusters = TRUE,
     ## split(rule = "kmeans"): residuals of the non-zero-inflated cells only
     split_target = function() (self$data$Y - self$data$X %*% private$B) * self$data$zeros_bar,
 
     get_heuristic_parameters = function(){
-      zi_diag <- private$zi_diag_normal_inference()
+      zi_diag <- self$data$zi_ols_fit()
       Sigmaq  <- private$heuristic_Sigmaq_from_Sigma(cov(zi_diag$R))
       Omega  <- private$get_Omega(Sigmaq)
-      list(B = zi_diag$B, dm1 = zi_diag$dm1, Omega = Omega, kappa = zi_diag$kappa)
+      list(B = zi_diag$B, dm1 = zi_diag$dm1, Omega = Omega)
     },
 
     optim_initialize = function() {
       if (private$warm_started) {
-        list(B = private$B, dm1 = private$dm1, Omega = private$Omega, kappa = private$kappa,
+        list(B = private$B, dm1 = private$dm1, Omega = private$Omega,
              gamma = private$gamma, mu = private$mu)
       } else c(private$get_heuristic_parameters(),  list(
         gamma = rep(list(diag(1, self$q, self$q)), self$n),
@@ -88,24 +83,11 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
   active = list(
     #' @field posterior_par a list with the parameters of posterior distribution W | Y
     posterior_par = function() list(gamma = private$gamma, mu = private$mu),
-    #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix), kappa (zero-inflation probabilities)
+    #' @field model_par the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities)
     model_par  = function() {
       par       <- super$model_par
       par$kappa <- private$kappa
       par
-    },
-    #' @field fitted Y values predicted by the model, in Y's original units
-    fitted = function(){
-      if (private$approx) {
-        res <- self$data$X %*% private$B
-      } else {
-        res <- self$data$X %*% private$B + tcrossprod(private$mu, private$C)
-      }
-      res <- res * self$data$zeros_bar
-      private$rescale_to_original(res)
-    },
-    #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function()
-    {paste("zero-inflated", private$res_covariance, "normal-block-var model with fixed blocks")}
+    }
   )
 )

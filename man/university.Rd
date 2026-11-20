@@ -52,7 +52,8 @@ transformation used by Tan et al. (2015).
 Y <- log(1 + university$frequencies[, university$terms])
 nb_data <- NormalBlockData$new(Y, X = matrix(1, nrow(Y), 1))
 \donttest{
-out <- normal_block(nb_data, 2:15)
+out <- normal_block(nb_data, 2:6, control = NB_control(verbose = FALSE))
+out$get_best_model("ICL")
 }
 }
 \keyword{datasets}

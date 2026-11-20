@@ -22,15 +22,11 @@ model$clustering
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
-
     \item{\code{var_par}}{a list with the variational parameter: tau (posterior group probabilities)}
 
-    \item{\code{model_par}}{a list with model parameters: B, Omega and kappa (zero-inflation probabilities)}
-
-    \item{\code{entropy}}{Entropy of the conditional distribution}
-
-    \item{\code{who_am_I}}{a method to print what model is being fitted}
+    \item{\code{model_par}}{the parameters of [NormalBlockMeanBase] (B, Omega),
+plus B0 (zero-inflation coefficients), kappa (zero-inflation
+probabilities) and alpha (cluster proportions)}
   }
   \if{html}{\out{</div>}}
 }
@@ -54,10 +50,10 @@ model$clustering
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>NormalBlockBase$plot_network()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-warm_start_from'><code>NormalBlockBase$warm_start_from()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="merge"><a href='../../normalblockr/html/NormalBlockMeanBase.html#method-NormalBlockMeanBase-merge'><code>NormalBlockMeanBase$merge()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockMeanBase.html#method-NormalBlockMeanBase-predict'><code>NormalBlockMeanBase$predict()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="split"><a href='../../normalblockr/html/NormalBlockMeanBase.html#method-NormalBlockMeanBase-split'><code>NormalBlockMeanBase$split()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockMeanBase.html#method-NormalBlockMeanBase-warm_start_from'><code>NormalBlockMeanBase$warm_start_from()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}

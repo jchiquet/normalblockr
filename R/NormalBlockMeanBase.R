@@ -22,7 +22,7 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @param data object of NormalBlockData class, with responses and design matrix
     #' @param q number of block/cluster
     #' @param sparsity sparsity penalty on the network density
-    #' @param control structured list of more specific parameters, to generate with NB_Mean_control
+    #' @param control structured list of more specific parameters, to generate with NB_control
     #' @param zero_inflation whether the concrete subclass models zero-inflation;
     #' set by the ZI subclasses themselves, not meant to be set by the end user.
     #' @return A new [`NormalBlockMeanBase`] object
@@ -69,34 +69,13 @@ NormalBlockMeanBase <- R6::R6Class(
       private$weights <- weights
     },
 
-    #' @description Predicts observations Y for new covariates X, in Y's
-    #' original units. The mean-block mean is mu_i = C B' X_i, so the
-    #' cluster-level predictor has to be mapped back to the variables
-    #' through C.
+    #' @description Predicts the mean of Y for new covariates X, in Y's
+    #' original units: mu_i = C B' X_i, with the posterior cluster
+    #' probabilities as C when the clustering is unknown (as in `$fitted`).
     #' @param new_X new set of covariates.
     #' @return A n*p prediction matrix for new observations
     predict = function(new_X) {
       private$rescale_to_original(tcrossprod(new_X %*% private$B, private$C))
-    },
-
-    #' @description Seed this model's starting parameters from another,
-    #' already-optimized model with the same q, instead of the heuristic
-    #' clustering-derived values set at construction time. Used by
-    #' [split()]/[merge()].
-    #' @param other a [NormalBlockMeanBase] object, already optimized
-    #' @return Update the current object in place with `other`'s parameters
-    warm_start_from = function(other) {
-      stopifnot("warm_start_from() requires both models to have the same q" = self$q == other$q)
-      args <- other$model_par
-      ## var_par only exists on the unknown-clusters side; a known clustering
-      ## is fixed and must not be carried over
-      if (!is.null(other$var_par)) {
-        args$C     <- other$var_par$tau
-        args$alpha <- colMeans(other$var_par$tau)
-      }
-      do.call(self$update, args)
-      private$warm_started <- TRUE
-      invisible(self)
     },
 
     #' @description Create a clone of the current [`NormalBlockMeanBase`]
@@ -118,23 +97,10 @@ NormalBlockMeanBase <- R6::R6Class(
       split2 <- private$split_members(index, rule)
       split1 <- cl & !split2
 
-      new_C <- cbind(private$C, .Machine$double.eps)
-      new_C[split1, index] <- new_C[split1, index] - .Machine$double.eps
-      new_C[split2, self$q + 1] <- new_C[split2, index]
-      new_C[split2, index] <- .Machine$double.eps
-      new_C <- new_C / rowSums(new_C)
-
+      new_C <- private$split_memberships(index, split1, split2)
       ## the next M-step differentiates the duplicated column via C/tau
       new_B <- cbind(private$B, private$B[, index])
-
-      if (in_place) {
-        self$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
-        return(invisible(self))
-      } else {
-        new_NB <- self$clone()
-        new_NB$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
-        return(invisible(new_NB))
-      }
+      private$reseeded(in_place, new_C, B = new_B)
     },
 
     #' @description Create a clone of the current [`NormalBlockMeanBase`]
@@ -146,20 +112,10 @@ NormalBlockMeanBase <- R6::R6Class(
     merge = function(indices, in_place = FALSE) {
       indices <- sort(indices)
 
-      new_C <- private$C[, -indices[2], drop = FALSE]
-      new_C[, indices[1]] <- private$C[, indices[1]] + private$C[, indices[2]]
-
+      new_C <- private$merge_memberships(indices)
       new_B <- private$B[, -indices[2], drop = FALSE]
       new_B[, indices[1]] <- .5 * (private$B[, indices[1]] + private$B[, indices[2]])
-
-      if (in_place) {
-        self$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
-        return(self)
-      } else {
-        new_NB <- self$clone()
-        new_NB$update(C = new_C, B = new_B, alpha = colMeans(new_C), warm_started = TRUE)
-        return(new_NB)
-      }
+      private$reseeded(in_place, new_C, B = new_B)
     }
   ),
 
@@ -192,14 +148,14 @@ NormalBlockMeanBase <- R6::R6Class(
     default_inits     = c("kmeans", "ward2", "spectral"),
     ## split() rule used by refine() unless told otherwise (see split())
     default_split_rule = "noise",
-    res_covariance    = NA, # shape of Sigma: "full", "diagonal" or "spherical"
+    family_name       = "normal-block-mean",
 
     ## Each cluster profile beta_k is shared by every cell of its block, hence
     ## charged log(n * p) like the block parameters of a latent block model;
     ## so is a spherical variance. Per-variable variances and a full
     ## precision matrix (diagonal plus non-zero off-diagonal terms) are
     ## informed by the n observations.
-    penalty_groups = function() {
+    family_penalty_groups = function() {
       cov <- switch(private$res_covariance,
                     "full"      = penalty_group("Omega", self$p + self$n_edges, self$n),
                     "diagonal"  = penalty_group("noise", self$p, self$n),
@@ -213,9 +169,6 @@ NormalBlockMeanBase <- R6::R6Class(
     split_target = function() self$data$X %*% self$data$ols_fit()$B,
     ## split(rule = "noise") cuts at the median of the noise variances
     noise_variance = function() 1 / diag(private$Omega),
-    Psi               = NA,
-    Phi               = NA,
-    Lambda            = NA,
 
     ## Precision matrix for the requested shape of Sigma. Mirrors
     ## omega_from_residuals() in src/normal_block_mean_base.h
@@ -235,11 +188,8 @@ NormalBlockMeanBase <- R6::R6Class(
     omega_from_sigma_warm = function(Sigma, warm = NULL) {
       if (private$res_covariance != "full" || !isTRUE(private$sparsity_ > 0))
         return(list(Omega = private$omega_from_sigma(Sigma), warm = NULL))
-      out <- graphical_lasso_fit(Sigma, private$sparsity_ * self$sparsity_weights,
-                                 thr = NB_GLASSO_THRESHOLD,
-                                 w_init = warm$w, wi_init = warm$wi)
-      if (anyNA(out$wi)) return(list(Omega = chol2inv(chol(Sigma)), warm = NULL))
-      list(Omega = Matrix::symmpart(out$wi), warm = list(w = out$w, wi = out$wi))
+      glasso_omega(Sigma, private$sparsity_ * self$sparsity_weights, thr = NB_GLASSO_THRESHOLD,
+                   warm = if (is.null(warm)) list() else warm)
     },
 
     ## Omega is p x p here, so it carries no cluster-pair information: the
@@ -248,15 +198,55 @@ NormalBlockMeanBase <- R6::R6Class(
       -map_dbl(pairs, function(ij) sum((private$B[, ij[1]] - private$B[, ij[2]])^2))
     },
 
-    ## Masked counterpart of multivariate_normal_inference(), used by the ZI
-    ## subclasses to initialize.
-    zi_mean_inference = function() {
-      fit <- self$data$zi_ols_fit()
-      list(B = fit$B, Omega = private$omega_from_sigma(diag(1 / fit$dm1, self$p)), R = fit$R)
+    ## Variable-level least-squares fit the initialization starts from: one
+    ## mean profile per variable (B) and the precision matrix of its
+    ## residuals, masked for zero-inflated models
+    variable_fit = function() {
+      if (private$zi) {
+        fit <- self$data$zi_ols_fit()
+        list(B = fit$B, Omega = private$omega_from_sigma(diag(1 / fit$dm1, self$p)))
+      } else {
+        fit <- private$multivariate_normal_inference()
+        list(B = fit$B, Omega = private$omega_from_sigma(fit$Sigma))
+      }
     },
 
-    heuristic_cluster_B_from_variable_B = function(B_variable, C){
-      B <- B_variable %*% C / rep(colSums(C), each = nrow(B_variable))
+    ## Cluster profiles: the average of the variable profiles weighted by C
+    heuristic_cluster_B_from_variable_B = function(B_variable, C) {
+      B_variable %*% C / rep(colSums(C), each = nrow(B_variable))
+    },
+
+    ## Moment-based initialization. An unknown clustering is obtained from
+    ## the fitted mean trajectories X B_j (n x p) rather than the
+    ## coefficients B_j (d x 1), which leave too few rows to the
+    ## correlation-based heuristics when d is small; tau is then softened away
+    ## from 0/1 since the ELBO's entropy term is evaluated on it.
+    get_heuristic_parameters = function() {
+      fit <- private$variable_fit()
+      if (private$known_clusters)
+        return(list(B = private$heuristic_cluster_B_from_variable_B(fit$B, private$C), Omega = fit$Omega))
+      if (anyNA(private$C))
+        private$C <- private$heuristic_clustering(self$data$X %*% fit$B)
+      tau <- clip_probabilities(private$C)
+      tau <- tau / rowSums(tau)
+      list(B = private$heuristic_cluster_B_from_variable_B(fit$B, tau), Omega = fit$Omega, tau = tau)
+    },
+
+    optim_initialize = function() {
+      if (!private$warm_started) return(private$get_heuristic_parameters())
+      init <- list(B = private$B, Omega = private$Omega)
+      if (!private$known_clusters) init$tau <- private$C
+      init
+    },
+
+    ## Moment-based fit (NB_control(heuristic = TRUE)): the heuristic
+    ## initialization is the moment estimate, so there is nothing to iterate.
+    ## No likelihood is computed, hence no ll_list (`loglik` is NA).
+    heuristic_optimize = function(control) {
+      private$niter <- 0
+      init <- private$get_heuristic_parameters()
+      if (private$known_clusters) return(init)
+      list(B = init$B, Omega = init$Omega, C = init$tau, alpha = colMeans(init$tau))
     }
   ),
 
@@ -264,8 +254,19 @@ NormalBlockMeanBase <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`): use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
+    #' @field model_par a list with the model parameters: B (d x q, one
+    #' profile per cluster) and Omega (p x p precision matrix of the
+    #' residuals), on the scale of the fit (see [coef()] and [sigma()]).
     model_par = function() list(B = private$B, Omega = private$Omega),
+    #' @field fitted Y values predicted by the model, in Y's original units:
+    #' `X B C'` (with the posterior cluster probabilities as C when the
+    #' clustering is unknown), with the observed zeros of zero-inflated models
+    #' set to 0
+    fitted = function() {
+      res <- tcrossprod(self$data$X %*% private$B, private$C)
+      if (private$zi) res <- res * self$data$zeros_bar
+      private$rescale_to_original(res)
+    },
     #' @field sparsity_weights (weights associated to each pair of groups)
     sparsity_weights = function(value) {
       if (missing(value)) {

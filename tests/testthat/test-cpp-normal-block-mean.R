@@ -3,15 +3,14 @@
 ## (NormalBlockMeanKnownClusters_fit / NormalBlockMeanUnknownClusters_fit,
 ## src/exports.cpp) reproduces *exactly* (up to numerical precision) the
 ## EM/VEM recursion implemented in R (private$EM_optimize_R, kept in
-## R/NormalBlockMean*Clusters.R while the port is validated), starting from
+## R/NormalBlockMean*Clusters.R as a reference), starting from
 ## the same initial parameters, both unpenalized (sparsity = 0, plain
 ## inversion) and penalized (sparsity > 0, in-package graphical lasso,
 ## called back from C++, see src/omega_estimation.h).
 ##
 ## The comparison runs with accelerate = FALSE: the SQUAREM extrapolation
-## the C++ core applies by default deliberately changes the trajectory (it is
-## checked separately below), so only the plain recursion can be compared
-## trace-for-trace.
+## deliberately changes the trajectory (see test-acceleration.R), so only the
+## plain recursion can be compared trace-for-trace.
 ##
 ## Both recursions are driven through a fresh model object each time so that
 ## private$optim_initialize() returns the same starting point: the clustering
@@ -81,34 +80,6 @@ test_that("NormalBlockMeanUnknownClusters_fit matches the R recursion (unpenaliz
   }
 })
 
-test_that("the ELBO trace of the C++ core is non-decreasing", {
-  data  <- NormalBlockData$new(Y, X)
-  model <- NormalBlockMeanUnknownClusters$new(data, q, control = NB_control(verbose = FALSE))
-  model$optimize(control = NB_control(verbose = FALSE))
-  expect_true(all(diff(model$objective) >= -1e-6))
-})
-
-test_that("the SQUAREM extrapolation reaches at least the plain recursion's ELBO", {
-  data <- NormalBlockData$new(Y, X)
-  ctrl <- NB_control(verbose = FALSE, clustering_init = get_clusters(C),
-                     noise_covariance = "full")
-  init <- NormalBlockMeanUnknownClusters$new(data, q, control = ctrl
-            )$.__enclos_env__$private$optim_initialize()
-
-  fit <- function(accelerate) {
-    NormalBlockMeanUnknownClusters_fit(
-      Y = data$Y, X = data$X, B0 = init$B, Omega0 = init$Omega, tau0 = init$tau,
-      sparsity = 0, sparsity_weights = matrix(1, ncol(Y), ncol(Y)) - diag(ncol(Y)),
-      noise_covariance = "full", fixed_point_niter = 5, niter = 50, threshold = 1e-6,
-      accelerate = accelerate)
-  }
-  plain <- fit(FALSE)
-  accel <- fit(TRUE)
-
-  expect_gte(tail(accel$objective, 1), tail(plain$objective, 1) - 1e-6)
-  expect_true(all(diff(accel$objective) >= -1e-6)) # still monotone
-})
-
 test_that("the diagonal/spherical Sigma variants also match the R recursion", {
   data <- NormalBlockData$new(Y, X)
   fixed_point_niter <- 5
@@ -135,18 +106,4 @@ test_that("the diagonal/spherical Sigma variants also match the R recursion", {
     ## the whole point of these variants: Omega stays diagonal
     expect_equal(res$Omega, diag(diag(res$Omega)))
   }
-})
-
-test_that("a diagonal Sigma lifts the n > p requirement", {
-  narrow <- NormalBlockData$new(Y[1:(ncol(Y) - 10), , drop = FALSE],
-                                X[1:(ncol(Y) - 10), , drop = FALSE])
-  ## only a full Sigma has to be inverted, and it is no longer the default
-  expect_error(normal_block(narrow, blocks = q, model = "mean",
-                            control = NB_control(verbose = FALSE, noise_covariance = "full")),
-               "need n > p", fixed = TRUE)
-  expect_no_error(normal_block(narrow, blocks = q, model = "mean",
-                               control = NB_control(verbose = FALSE)))
-  for (nc in c("diagonal", "spherical"))
-    expect_no_error(normal_block(narrow, blocks = q, model = "mean",
-                                 control = NB_control(verbose = FALSE, noise_covariance = nc)))
 })

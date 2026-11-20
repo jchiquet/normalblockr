@@ -1,214 +1,138 @@
-# normalblockr (development version)
+# normalblockr 1.0.0
 
-## Printing
+## Changes of default behavior since 0.3.0
 
-* `summary()` of a model and `print()` of a sequential fit wrap their long
-  lines (cluster sizes, description of each stage) at the console width.
+Users of 0.3.0 will see different results on the same calls:
 
-## Examples and linear algebra
-
-* Examples for `coef()`, `sigma()`, `fitted()`, `predict()`, `isNB()`,
-  `NB_control()`, `get_model()`, the two data generators, and the print,
-  plot and summary methods that lacked them.
-* The update of the cluster profiles of the mean-block models solves a
-  linear system with a symmetric positive definite matrix instead of
-  inverting it, and products with a transposed matrix use `crossprod()` and
-  `tcrossprod()`. Results are unchanged.
-* Help page titles in title case, and named after the two families of the
-  article (Normal-Block-Var, Normal-Block-Mean).
-
-## Named extractors
-
-* `coef()`, `sigma()`, `fitted()` and `predict()` keep the names of the
-  covariates and of the variables, and name the clusters `Cluster_1`, ...
-  (as in the network plots), so that results can be indexed by name, e.g.
-  `coef(model)[, "ERBB2"]`.
-* `coef()` of a variance-block model returns B on the original scale of Y.
-  It returned it on the rescaled scale of the fit (the default for this
-  family), unlike `fitted()` and `predict()`. The cluster profiles of a
-  mean-block model stay on the scale of the fit, the original one by default.
-* The help page of `predict()` covers both families.
-* `print()` and `summary()` no longer leave a space before the final period.
-
-## Network plots with force-directed layouts
-
-* `plot_network()` computes the layout without the edge weights, so that
-  force-directed layouts such as `igraph::layout_with_fr` work with signed
-  partial correlations (they used to fail). `layout` may also be a matrix of
-  coordinates. The default style is more legible: grey nodes whose area
-  grows with the size of the cluster, labels of constant size, thinner
-  edges.
-
-## Sequential fits from an already fitted mean-block model
-
-* `normal_block_sequential()` accepts, as `blocks_mean`, a mean-block model or
-  collection already fitted on the same data: the first stage is then not
-  refitted (a collection is reduced to its best model by `crit`), which
-  avoids fitting the mean-block collection twice when it is also analysed on
-  its own. A fit on other data, or with another zero-inflation setting, is
-  refused.
-
-## SQUAREM off by default for a diagonal or spherical mean-block Sigma
-
-* `NB_control(acceleration = NULL)` is the new default, resolved at fit time:
-  SQUAREM runs for variance-block models and for mean-block models with a
-  full Sigma, not for mean-block models with a diagonal or spherical Sigma.
+* **Model-selection criteria.** The BIC charges each group of parameters the
+  log of the number of independent observations informing it (Daudin, Picard
+  & Robin, 2008; Keribin et al., 2015), instead of `log(n)` for all: the
+  cluster proportions `log(p)`, the mean-block cluster profiles and a
+  spherical noise variance `log(n * p)`, the rest `log(n)`. The ICL completes
+  the partition only (Biernacki, Celeux & Govaert, 2000), `ICL = BIC + 2 *
+  entropy` with `entropy = -sum(tau * log(tau))`, so that it equals the BIC
+  for a known clustering in both families. The EBIC of mean-block models
+  counts its edges among the p variables (it used q). The selected number of
+  clusters can change.
+* **Rescaling of Y depends on the model family.** `NormalBlockData$new()`
+  gains `scale = NULL` as its default: variance-block models keep rescaling
+  each column of Y by its standard deviation, mean-block models no longer
+  do (rescaling breaks the mean profile shared within a block). `TRUE` or
+  `FALSE` forces either for both families.
+* **One initialization for both families, followed by `refine()`.** The
+  default `clustering_init` is `"kmeans"` for both families (it was
+  `"ward2"` for variance-block models), and collections over a range of q
+  are polished by the split and merge search of `refine()` after their
+  cold-started fit (`NB_control(refine = TRUE)`; `FALSE` restores the former
+  behavior). `"ward2"` remains a good choice for zero-inflated abundances.
+* **SQUAREM off for mean-block models with a diagonal or spherical Sigma.**
   Their EM is exact and converges in a few dozen iterations, so the
-  extrapolations, almost always rejected, only cost time (1.1 to 2.2 times, for the same
-  iterations, on simulated data). `TRUE` or `FALSE` still forces it.
+  extrapolations only cost time. `NB_control(acceleration = NULL)`, the new
+  default, keeps SQUAREM for variance-block models and full-Sigma mean-block
+  models; `TRUE` or `FALSE` forces it.
+* **Extractors on the original scale of Y, with names.** `coef()` of
+  variance-block models returns B on the original scale of Y (it returned it
+  on the rescaled scale of the fit, unlike `fitted()` and `predict()`), and
+  so does `sigma()` for the p x p covariance of mean-block models. Quantities
+  defined per cluster (variance-block `sigma()`, mean-block `coef()`) stay on
+  the scale of the fit. `coef()`, `sigma()`, `fitted()`, `predict()` and
+  `latent_network()` keep the names of the variables and covariates, and
+  name the clusters `Cluster_1`, ... (also in the network plots and the
+  StARS stability path).
 
-## Held-out log-likelihood and cross-validation
+## New features
 
-* New method `heldout_loglik(newdata)` on every fitted model: the exact
-  log-likelihood of new observations at the fitted parameters and the MAP
-  partition, on Y's original scale. For variance-block models it is the
-  marginal over the latent W, computed with the Woodbury identity and the
-  determinant lemma (only q x q matrices are factorized); zero-inflated
-  models add the zero-inflation probabilities and use the marginal of the
-  non-zero cells. On the training data with a known clustering it equals
-  the model's log-likelihood, which the tests check for every variant.
-* New function `normal_block_cv()`: K-fold cross-validated log-likelihood of
-  a collection over q, with `print()` and `plot()` methods. A criterion that
-  rests on no penalty and compares families, shapes of Sigma and scalings on
-  the same footing. It plateaus beyond the true q, so the selected q
-  (attribute `best`) follows the one-standard-error rule.
+* **Held-out log-likelihood and cross-validation.** `heldout_loglik(newdata)`
+  on every fitted model gives the exact log-likelihood of new observations at
+  the fitted parameters and the MAP partition, on Y's original scale (for
+  variance-block models, the marginal over the latent W, with q x q matrices
+  only). `normal_block_cv()` computes the K-fold cross-validated
+  log-likelihood of a collection over q, a penalty-free criterion that
+  compares families, shapes of Sigma and scalings on the same footing, and
+  selects q by the one-standard-error rule; it has `print()` and `plot()`
+  methods.
+* **StARS for mean-block sparsity paths.** `get_best_model("StARS")` and
+  `stability_selection()` apply to both families, the clustering being held
+  fixed on the subsamples.
+* **Sequential fits from a fitted mean-block model.**
+  `normal_block_sequential()` accepts, as `blocks_mean`, a mean-block model or
+  collection already fitted on the same data, which is then not refitted.
+* **Diagnostics.** `within_block_correlations()` compares, for each block of a
+  variance-block model, the empirical correlations of the residuals with the
+  positive correlation the model implies: a block holding anticorrelated
+  variables, typically from a known clustering taken from an annotation, is
+  misspecified. Collections over q gain a `deviance_violations` field (values
+  of q whose deviance exceeds the previous one, a sign of a poor local
+  optimum), reported by `print()`.
+* **Split rules in `refine()`.** `split()` gains a `rule` argument and
+  `refine()` / `candidates_split()` a `split_rule` one: `"kmeans"` (a 2-means
+  on the members' residuals or least-squares trajectories, the default for
+  the variance-block family) or `"noise"` (a cut at the median of the noise
+  variances, the default for the mean-block family). Variance-block merge
+  candidates are ranked by the signed correlation between the latent block
+  signals, since a block can only gather positively co-varying variables.
+* New fields `penalty_terms` and `penalty` (the BIC penalty, group by
+  group), `NormalBlockData$for_family()` (the data a family is fitted on),
+  `NormalBlockData$subset()` and `$Y_original`, and `sparsity_details` on
+  mean-block sparsity paths.
+* The graphical lasso (`src/graphical_lasso.h`) is shared verbatim with
+  PLNmodels. It solves the problem scaled to a unit diagonal, which makes it
+  converge on covariances whose variances span orders of magnitude, shifts an
+  indefinite precision matrix on its diagonal (keeping its support), detects
+  limit cycles and can be interrupted. `graphical_lasso_fit()` also returns
+  `status`, `delta` and `shift`.
 
-## StARS for mean-block sparsity paths
+## Bug fixes
 
-* `get_best_model("StARS")` and `stability_selection()` now apply to
-  mean-block sparsity paths too: the StARS machinery moved to the shared
-  base class `NormalBlockCollectionSparsity`. The subsample paths hold the
-  clustering fixed (the known one, or the MAP partition of the least
-  penalized model); the network relates the p variables.
-* Fix: the subsample paths now reuse the collection's penalties. They used
-  to derive their own grid from each subsample's covariance, so the
-  selection probabilities were filed under penalties that had not produced
-  them.
-* The subsamples keep the zero-inflation design `X0` and the data's `scale`
-  request.
+* StARS: the subsample paths reuse the collection's penalties (they derived
+  their own grid from each subsample, so the selection probabilities were
+  filed under penalties that had not produced them), and keep the
+  zero-inflation design `X0` and the `scale` request.
+* `plot_network()` computes the layout without the signed edge weights, so
+  that force-directed layouts such as `igraph::layout_with_fr` work; `layout`
+  may also be a matrix of coordinates. Mean-block networks are labeled with
+  the variable names.
+* `model_par` exposes the cluster proportions `alpha` of mean-block models
+  with an unknown clustering, and `B0` of zero-inflated mean-block models, as
+  in the variance-block family.
+* `NB_control(clustering_init = "best_of_inits")` with a known clustering
+  crashed: the known clustering is now simply fitted.
+* A sparsity path of variance-block models failed when `sparsity_weights`
+  left some pairs unpenalized; such pairs are now ignored by the default
+  penalty grid.
+* A constant column of Y made the variance-block fit diverge, and `refine()`
+  then failed: `NormalBlockData$new()` now refuses such columns, naming them
+  (`normal_block_cv()` names the fold where it happens). A split or merge
+  candidate whose fit fails is discarded by `refine()` instead of aborting
+  it.
+* `generate_normal_block_var_data()` and `generate_normal_block_mean_data()`
+  honor `alpha`, and could put a variable in two clusters when the first
+  draw left a cluster empty. Data simulated for a given seed are unchanged
+  otherwise.
+* StARS subsamples keep an explicit `zeros` mask and the formula.
+* A collection over an unsorted range of q is ordered by q.
+* Known clusterings are checked to have one row per variable.
 
-## One initialization for both families, and refine() by default
+## Other changes
 
-Fits over a range of cluster counts change: they are refined, and the
-variance-block ones start from another heuristic.
-
-* `NB_control(refine = TRUE)` is now the default, for collections of both
-  families: every collection over a range of `q` is polished by `refine()`
-  after its cold-started fit (typically 3 to 6 times the cost). A one-line
-  report says how many models it improved. `refine = FALSE` restores the
-  previous behaviour; heuristic fits (`heuristic = TRUE`) are never refined,
-  and `refine()` called on one now says why it cannot run.
-* The default `clustering_init` of variance-block models is now `"kmeans"`,
-  as for mean-block ones. On simulated data the heuristics are equivalent;
-  on real data `kmeans` followed by `refine()` gives the best fits on
-  `brca_rppa` and close to the best on the university data, while `"ward2"`
-  remains better on zero-inflated abundances such as `onema` (see
-  `inst/clustering_initialization_benchmark/var_init_study.R`).
-
-## Rescaling of Y now depends on the model family
-
-The fits of mean-block models on default data change.
-
-* `NormalBlockData$new()` gains `scale = NULL` as its default: the model
-  family decides when a model is fitted. Variance-block models keep
-  rescaling each column of Y by its standard deviation; mean-block models no
-  longer do. `scale = TRUE` or `FALSE` forces either for both families.
-* Rescaling breaks the mean-block model, whose variables share a mean profile
-  within a block: on `brca_rppa` and `onema` the unscaled mean-block fit has
-  the better exact ICL on the original scale, while the rescaled one wins for
-  the variance-block model. On data simulated from either model, rescaling
-  makes every criterion over-select the number of clusters.
-* `normal_block_sequential()` hands the residuals of its mean-block stage to
-  the variance-block stage with the same `scale` request, so each stage
-  applies its own default.
-* New method `NormalBlockData$for_family()` returns the data a model of a
-  given family is fitted on.
-
-## Diagnostics
-
-* `within_block_correlations()` on variance-block models: for each block, the
-  empirical correlations of the residuals `Y - XB` (mean, minimum, proportion
-  of negative ones) against the correlation the fitted model implies. Within a
-  block two variables covary positively by construction (their covariance is
-  `Sigma_kk > 0`), so a block holding anticorrelated variables, typically from
-  a known clustering taken from an annotation, is misspecified.
-* Collections over a range of q gain a `deviance_violations` field, the
-  values of q whose deviance exceeds the one at the previous q, and `print()`
-  warns about them. The models are nested, so every violation signals a poor
-  local optimum, which `refine()` is designed to repair.
+* Every help page has a running example; help titles follow the two families
+  of the article (Normal-Block-Var, Normal-Block-Mean).
+* `summary()` of a model and `print()` of a sequential fit wrap their long
+  lines at the console width; the descriptions of the collections are the
+  same for both families.
 * Vignettes and README build a known clustering with
-  `model.matrix(~ 0 + factor(labels))` rather than the internal
-  `normalblockr:::as_indicator()`.
-
-## SQUAREM can be turned off
-
-* `NB_control(acceleration = FALSE)` runs plain (V)EM instead of its
-  SQUAREM-accelerated version, in both families and for every variant (the
-  acceleration is on by default, and never attempted when `sparsity > 0`).
-  Useful to measure what the acceleration buys: on a variance-block model with
-  8 unknown clusters, plain VEM needs about ten times as many iterations.
-
-## Model-selection criteria aligned with Biernacki and Daudin
-
-The criteria change, so the number of clusters they select can change too.
-
-* **BIC: one penalty per group of parameters.** Each group of parameters is
-  charged the log of the number of independent observations informing it,
-  following the ICL of Daudin, Picard & Robin (2008) for SBMs and Keribin et
-  al. (2015) for latent block models, instead of `log(n)` for all of them:
-  the cluster proportions `log(p)` (the variables are the units being
-  clustered), the mean-block cluster profiles and a spherical noise variance
-  `log(n * p)` (shared by every cell of a block), the rest `log(n)`. The new
-  fields `penalty_terms` (one row per group: `nu`, `N`) and `penalty` expose
-  the computation; `nb_param` is unchanged.
-* **ICL completes the partition only**, as in Biernacki, Celeux & Govaert
-  (2000): `ICL = BIC + 2 * entropy` with `entropy = -sum(tau * log(tau))`.
-  The variance-block models used to add the Gaussian entropy of the latent
-  vectors W, which made the ICL differ from the BIC even for a known
-  clustering and depend on the scale of the data. It now equals the BIC for a
-  known clustering, in both families.
-* **EBIC on the right network.** The EBIC term is `2 * n_edges * log(dim)`,
-  with `dim = q` for the variance-block family as before, but `dim = p` for
-  the mean-block family, whose network relates the p variables (it used `q`).
-* On `brca_rppa`, the mean-block ICL now selects 50 clusters instead of 70
-  over `seq(5, 120, 5)`; the variance-block BIC selection is unchanged.
-
-## Better split and merge candidates in `refine()`
-
-* Variance-block merge candidates are ranked by the **signed** correlation
-  between the two blocks' latent signals instead of `|Omega_kl|`. Within a
-  block, two variables necessarily covary positively (their covariance is
-  `Sigma_kk > 0`), so merging two anticorrelated blocks is never a sensible
-  candidate; the former ranking tried those first.
-* `split()` gains a `rule` argument, and `refine()` / `candidates_split()` a
-  `split_rule` one: `"kmeans"` divides a cluster by a 2-means on its members'
-  columns of residuals (variance-block) or least-squares trajectories
-  (mean-block), `"noise"` at the median of their noise variances (the former
-  rule). The default is family-specific: `"kmeans"` for the variance-block
-  family, `"noise"` for the mean-block one, where the two rules are close
-  and `"noise"` is slightly ahead on real data
-  (`inst/mean_block_analyses/split_rule_comparison.R`).
-* On `brca_rppa`, `refine()` now lowers the variance-block deviance summed
-  over `q = 1:30` by 22,166 instead of 15,758, and runs faster; the selected
-  `q` moves from 27 to 22.
-
-## Graphical lasso shared with PLNmodels
-
-* `src/graphical_lasso.h` is now the very same file as in PLNmodels, which
-  ported the same glassoFast Fortran: the two copies had drifted apart. It is
-  shared verbatim (namespace `graphical_lasso`), and brings to normalblockr:
-  * **the problem is solved scaled to a unit diagonal**, an exact change of
-    variables. On a covariance whose variances span orders of magnitude, the
-    unscaled descent could stall in a limit cycle, fail in its inner loop, or
-    return an indefinite precision matrix; scaled, it converges in a few sweeps
-    (median number of sweeps from 646 to 4 on PLN residual covariances). On
-    ordinary input the result is unchanged up to the tolerance;
-  * **an indefinite precision matrix is shifted on its diagonal** to positive
-    definite, which keeps its support, where `ensure_pd()` clamped its
-    eigenvalues and made it dense;
-  * the detection of limit cycles, as a safeguard, and interrupt checks, so
-    that a long solve can be stopped from R (by the user or by a time limit).
-* `graphical_lasso_fit()` also returns `status`, `delta` and `shift`.
+  `model.matrix(~ 0 + factor(labels))`.
+* The update of the mean-block cluster profiles solves a linear system
+  instead of inverting a matrix. Results are unchanged.
+* `NB_control(threshold = )` negative runs exactly `niter` iterations,
+  without the warning about the iteration cap.
+* `fixed_tau` is read from the control list by both families (the public
+  `$fixed_tau` field of variance-block models is removed); `update()` loses
+  the arguments `Psi`, `Phi`, `Lambda` and `kappa`, which it stored but never
+  used.
+* The packages dplyr, tidyr, tibble and scales are no longer imported, and
+  Metrics is no longer suggested. The code shared by the two families and by
+  their variants lives in their base classes; results are unchanged.
 
 # normalblockr 0.3.0
 

@@ -6,9 +6,9 @@
 #'
 #' Shared scaffolding for [NormalBlockVarCollectionClustersSparsity] and
 #' [NormalBlockMeanCollectionClustersSparsity]: a collection of sparsity
-#' sub-collections, one per q. Everything family-agnostic (two-key model
-#' lookup, model selection over both axes, the criteria heatmap) lives here;
-#' subclasses only build `self$models` and name themselves.
+#' sub-collections, one per q in increasing order. Everything lives here
+#' (two-key model lookup, model selection over both axes, the criteria
+#' heatmap); subclasses only name the model family.
 #' @examples
 #' # An internal abstract base class, never instantiated directly -- see
 #' # normal_block() for how collections are created and fitted.
@@ -21,6 +21,29 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
+    #' @description Create a collection over a range of q, sorted
+    #' increasingly, with a sparsity path for each q.
+    #' @param mydata object of NormalBlockData class, with responses and design matrix
+    #' @param q_list values of q (number of clusters) in the collection
+    #' @param zero_inflation whether the models of the collection are zero-inflated
+    #' @param control structured list of parameters to handle sparsity control
+    #' @return A new collection object
+    initialize = function(mydata, q_list, zero_inflation = FALSE, control = NB_control()) {
+      check_q_list(q_list, mydata$p)
+      self$control <- control
+      self$control$zero_inflation <- zero_inflation
+      ord <- order(q_list)
+      inits <- clustering_inits(mydata, q_list, private$family, zero_inflation, control)[ord]
+      path_class <- get(paste0("NormalBlock", if (private$family == "var") "Var" else "Mean",
+                               "CollectionSparsity"))
+      self$models <- map2(q_list[ord], inits, function(q, init) {
+        control$clustering_init <- init
+        path_class$new(mydata, q, zero_inflation, control)
+      })
+      private$progress_field <- "q"
+      private$progress_label <- "number of blocks"
+    },
+
     #' @description returns a collection of models corresponding to given q
     #' or one single model if penalty is also given
     #' @param q number of blocks asked by user.
@@ -63,9 +86,11 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
       ## otherwise round down to zero and make it fail
       if (is.null(n_intervals))
         n_intervals <- max(2, round(0.1 * length(unique(self$criteria$sparsity))))
-      df <- self$criteria %>% dplyr::mutate(pen_binned = cut(sparsity, breaks = n_intervals)) %>%
-        dplyr::group_by(pen_binned, q) %>% dplyr::summarize(avg_crit = mean(.data[[criterion]]), .groups = "drop")
-      p  <- ggplot2::ggplot(df, ggplot2::aes(x = pen_binned, y = q, fill = avg_crit)) +
+      crit <- self$criteria
+      crit$pen_binned <- cut(crit$sparsity, breaks = n_intervals)
+      df <- stats::aggregate(crit[criterion], by = crit[c("pen_binned", "q")], FUN = mean)
+      names(df)[3] <- "avg_crit"
+      p  <- ggplot2::ggplot(df, ggplot2::aes(x = .data$pen_binned, y = .data$q, fill = .data$avg_crit)) +
         ggplot2::geom_tile() +
         ggplot2::scale_fill_viridis_c() +
         ggplot2::theme_minimal() +
@@ -81,14 +106,18 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  private = list(
+    family = NA_character_, # "var" or "mean", set by the subclasses
+    scope = function() "over q and sparsity penalties"
+  ),
   active = list(
     #' @field q_list number of blocks
     q_list = function() map_dbl(self$models, "q"),
     #' @field sparsity list of penalties used for each q
     sparsity = function(){
-      self$criteria %>%
-        dplyr::group_by(q) %>%
-        dplyr::summarize(sparsity = paste(round(sparsity, 2), collapse = ", "))
+      crit <- self$criteria
+      stats::aggregate(list(sparsity = crit$sparsity), by = list(q = crit$q),
+                       FUN = function(s) paste(round(s, 2), collapse = ", "))
     }
   )
 )

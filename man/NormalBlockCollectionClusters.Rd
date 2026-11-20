@@ -5,10 +5,10 @@
 \title{Base Class for a Collection of Models over a Range of Cluster Counts}
 \description{
 Shared scaffolding for [NormalBlockVarCollectionClusters] and
-[NormalBlockMeanCollectionClusters]: everything that does not depend on the
-model family (model lookup, model selection, the criteria plot and the
-split/merge `refine()` search). Concrete subclasses only build `self$models`
-in their `initialize()` and name themselves through `who_am_I`.
+[NormalBlockMeanCollectionClusters]: the models of the collection, one per
+q in increasing order, model lookup and selection, the criteria plot and
+the split/merge `refine()` search. Concrete subclasses only name the model
+family.
 }
 \examples{
 # An internal abstract base class, never instantiated directly -- see
@@ -32,6 +32,7 @@ one signals a poor local optimum, which `refine()` can repair.}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
+    \item \href{#method-NormalBlockCollectionClusters-initialize}{\code{NormalBlockCollectionClusters$new()}}
     \item \href{#method-NormalBlockCollectionClusters-get_model}{\code{NormalBlockCollectionClusters$get_model()}}
     \item \href{#method-NormalBlockCollectionClusters-get_best_model}{\code{NormalBlockCollectionClusters$get_best_model()}}
     \item \href{#method-NormalBlockCollectionClusters-plot}{\code{NormalBlockCollectionClusters$plot()}}
@@ -46,6 +47,38 @@ one signals a poor local optimum, which `refine()` can repair.}
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
 </ul>
 </details>}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockCollectionClusters-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-initialize}{}}}
+\subsection{\code{NormalBlockCollectionClusters$new()}}{
+  Create a collection over a range of q, sorted increasingly.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockCollectionClusters$new(
+  mydata,
+  q_list,
+  zero_inflation = FALSE,
+  sparsity = 0,
+  control = NB_control()
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
+      \item{\code{q_list}}{values of q (number of clusters) in the collection}
+      \item{\code{zero_inflation}}{whether the models of the collection are zero-inflated}
+      \item{\code{sparsity}}{sparsity penalty on the network density}
+      \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A new collection object
+  }
+}
+
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockCollectionClusters-get_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-get_model}{}}}

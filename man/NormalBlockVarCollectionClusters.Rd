@@ -5,7 +5,8 @@
 \title{Collection of Normal-Block-Var Models over a Range of Cluster Counts}
 \description{
 R6 class for a collection of normal-block models with different number of
-clusters (q) and a fixed sparsity level.
+clusters (q) and a fixed sparsity level. The q-independent part of the
+initial clustering heuristic is computed once for the whole collection.
 }
 \examples{
 ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
@@ -16,17 +17,9 @@ models$get_best_model("ICL")$q
 \section{Super classes}{
 \code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{\link[normalblockr:NormalBlockCollectionClusters]{NormalBlockCollectionClusters}} -> \code{NormalBlockVarCollectionClusters}
 }
-\section{Active bindings}{
-  \if{html}{\out{<div class="r6-active-bindings">}}
-  \describe{
-    \item{\code{who_am_I}}{a method to print what model is being fitted}
-  }
-  \if{html}{\out{</div>}}
-}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
-    \item \href{#method-NormalBlockVarCollectionClusters-initialize}{\code{NormalBlockVarCollectionClusters$new()}}
     \item \href{#method-NormalBlockVarCollectionClusters-clone}{\code{NormalBlockVarCollectionClusters$clone()}}
   }
 }
@@ -35,44 +28,13 @@ models$get_best_model("ICL")$q
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_best_model"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-get_best_model'><code>NormalBlockCollectionClusters$get_best_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_model"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-get_model'><code>NormalBlockCollectionClusters$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="initialize"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-initialize'><code>NormalBlockCollectionClusters$initialize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-optimize'><code>NormalBlockCollectionClusters$optimize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="plot"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-plot'><code>NormalBlockCollectionClusters$plot()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="print"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-print'><code>NormalBlockCollectionClusters$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="refine"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-refine'><code>NormalBlockCollectionClusters$refine()</code></a></span></li>
 </ul>
 </details>}}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-initialize"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-initialize}{}}}
-\subsection{\code{NormalBlockVarCollectionClusters$new()}}{
-  Create a new [`NormalBlockVarCollectionClusters`] object.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionClusters$new(
-  mydata,
-  q_list,
-  zero_inflation = FALSE,
-  sparsity = 0,
-  control = NB_control()
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
-      \item{\code{q_list}}{list of q values (number of groups) in the collection}
-      \item{\code{zero_inflation}}{whether the models in the collection should be zero-inflated or not}
-      \item{\code{sparsity}}{sparsity penalty on the network density}
-      \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A new [`NormalBlockVarCollectionClusters`] object
-  }
-}
-
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionClusters-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionClusters-clone}{}}}

@@ -16,27 +16,12 @@ model$clustering
 \section{Super classes}{
 \code{\link[normalblockr:NormalBlockBase]{NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockVarBase]{NormalBlockVarBase}} -> \code{NormalBlockVarUnknownClusters}
 }
-\section{Public fields}{
-  \if{html}{\out{<div class="r6-fields">}}
-  \describe{
-    \item{\code{fixed_tau}}{whether tau should be fixed at clustering_init during optimization, useful for stability selection}
-  }
-  \if{html}{\out{</div>}}
-}
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix))}
+    \item{\code{model_par}}{the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus alpha (cluster proportions)}
 
     \item{\code{var_par}}{a list with the matrices of the variational parameters: M (means), S (variances), tau (posterior group probabilities)}
-
-    \item{\code{entropy}}{entropy of the variational distribution of the
-clustering, `-sum(tau * log(tau))` (W is integrated out, not completed:
-see [NormalBlockBase]'s `ICL`)}
-
-    \item{\code{fitted}}{Y values predicted by the model, in Y's original units}
-
-    \item{\code{who_am_I}}{a method to print what model is being fitted}
   }
   \if{html}{\out{</div>}}
 }
@@ -61,9 +46,9 @@ see [NormalBlockBase]'s `ICL`)}
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-predict'><code>NormalBlockBase$predict()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-warm_start_from'><code>NormalBlockBase$warm_start_from()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="merge"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-merge'><code>NormalBlockVarBase$merge()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="split"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-split'><code>NormalBlockVarBase$split()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-warm_start_from'><code>NormalBlockVarBase$warm_start_from()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockVarBase" data-id="within_block_correlations"><a href='../../normalblockr/html/NormalBlockVarBase.html#method-NormalBlockVarBase-within_block_correlations'><code>NormalBlockVarBase$within_block_correlations()</code></a></span></li>
 </ul>
 </details>}}

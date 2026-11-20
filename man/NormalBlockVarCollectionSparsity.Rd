@@ -5,7 +5,8 @@
 \title{Collection of Normal-Block-Var Models over a Sparsity Path}
 \description{
 R6 class for a collection of normal-block models with a fixed clustering
-(blocks) and different sparsity levels.
+(blocks) and different sparsity levels. The default penalty grid is read
+off the latent block covariance of a short unpenalized fit.
 }
 \examples{
 ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
@@ -17,19 +18,9 @@ models$get_best_model("BIC")$sparsity
 \section{Super classes}{
 \code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{\link[normalblockr:NormalBlockCollectionSparsity]{NormalBlockCollectionSparsity}} -> \code{NormalBlockVarCollectionSparsity}
 }
-\section{Active bindings}{
-  \if{html}{\out{<div class="r6-active-bindings">}}
-  \describe{
-    \item{\code{sparsity_details}}{list of information about model's penalties}
-
-    \item{\code{who_am_I}}{a method to print what model is being fitted}
-  }
-  \if{html}{\out{</div>}}
-}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
-    \item \href{#method-NormalBlockVarCollectionSparsity-initialize}{\code{NormalBlockVarCollectionSparsity$new()}}
     \item \href{#method-NormalBlockVarCollectionSparsity-clone}{\code{NormalBlockVarCollectionSparsity$clone()}}
   }
 }
@@ -39,41 +30,12 @@ models$get_best_model("BIC")$sparsity
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="get_best_model"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-get_best_model'><code>NormalBlockCollectionSparsity$get_best_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="get_model"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-get_model'><code>NormalBlockCollectionSparsity$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="initialize"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-initialize'><code>NormalBlockCollectionSparsity$initialize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-optimize'><code>NormalBlockCollectionSparsity$optimize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="plot"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-plot'><code>NormalBlockCollectionSparsity$plot()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionSparsity" data-id="stability_selection"><a href='../../normalblockr/html/NormalBlockCollectionSparsity.html#method-NormalBlockCollectionSparsity-stability_selection'><code>NormalBlockCollectionSparsity$stability_selection()</code></a></span></li>
 </ul>
 </details>}}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockVarCollectionSparsity-initialize"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionSparsity-initialize}{}}}
-\subsection{\code{NormalBlockVarCollectionSparsity$new()}}{
-  Create a new [`NormalBlockVarCollectionSparsity`] object.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockVarCollectionSparsity$new(
-  mydata,
-  blocks,
-  zero_inflation = FALSE,
-  control = NB_control()
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
-      \item{\code{blocks}}{either a clustering matrix (known, fixed clustering) or a single integer (number of blocks to infer)}
-      \item{\code{zero_inflation}}{boolean to specify whether data is zero-inflated}
-      \item{\code{control}}{structured list of parameters to handle sparsity control}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A new [`NormalBlockVarCollectionSparsity`] object
-  }
-}
-
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockVarCollectionSparsity-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarCollectionSparsity-clone}{}}}

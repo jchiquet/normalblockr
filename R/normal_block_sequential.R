@@ -56,7 +56,7 @@ normal_block_sequential <- function(data, blocks_mean, blocks_var,
     pick(normal_block(data, blocks_mean, model = "mean",
                       zero_inflation = zero_inflation, control = control_mean))
   }
-  residuals <- data$Y * matrix(data$Y_scale, data$n, data$p, byrow = TRUE) - fitted(fit_mean)
+  residuals <- data$Y_original - fitted(fit_mean)
 
   intercept <- matrix(1, data$n, 1, dimnames = list(NULL, "(Intercept)"))
   ## same scale request as the original data: NULL lets each family apply its own default
@@ -79,11 +79,10 @@ is_mean_fit <- function(x) {
 ## `zero_inflation`, and reduces a collection to its best model
 fitted_mean_stage <- function(fit, data, zero_inflation, pick) {
   model <- if (isNBcollection(fit)) fit$models[[1]] else fit
-  raw <- function(d) d$Y * matrix(d$Y_scale, d$n, d$p, byrow = TRUE)
   stopifnot(
     "the mean-block fit must have been obtained on `data` (same observations and variables)" =
       model$data$n == data$n && model$data$p == data$p &&
-      isTRUE(all.equal(raw(model$data), raw(data), check.attributes = FALSE)),
+      isTRUE(all.equal(model$data$Y_original, data$Y_original, check.attributes = FALSE)),
     "`zero_inflation` must match the mean-block fit" =
       zero_inflation == grepl("^ZI", class(model)[1])
   )

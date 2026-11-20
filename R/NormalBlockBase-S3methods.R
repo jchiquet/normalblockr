@@ -46,9 +46,12 @@ coef.NormalBlockBase <- function(object, ...){
 }
 
 #' @title Extract the Covariance Matrix
-#' @description Extract the covariance matrix `Omega^-1`: between latent
-#' blocks (q x q) for the variance-block models, between variables (p x p)
-#' for the mean-block models.
+#' @description Extract the covariance matrix `Omega^-1`. For the
+#' variance-block models, the q x q covariance of the latent block signals,
+#' on the scale of the fit (it has no original-scale counterpart when the
+#' variables of a block were rescaled by different factors). For the
+#' mean-block models, the p x p residual covariance between variables, on
+#' the original scale of Y.
 #' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return The covariance matrix, of size q x q or p x p depending on the model.
@@ -62,12 +65,17 @@ coef.NormalBlockBase <- function(object, ...){
 sigma.NormalBlockBase <- function(object, ...){
   stopifnot(isNB(object))
   S <- chol2inv(chol(object$model_par$Omega))
-  nodes <- if (inherits(object, "NormalBlockVarBase")) cluster_names(ncol(S)) else colnames(object$data$Y)
-  with_dimnames(S, nodes, nodes)
+  if (inherits(object, "NormalBlockMeanBase")) S <- S * tcrossprod(object$data$Y_scale)
+  with_dimnames(S, network_nodes_names(object), network_nodes_names(object))
 }
 
 #' @title Extract Fitted Values
-#' @description Extract fitted values from a normal-block model.
+#' @description Extract the fitted values of a normal-block model, on the
+#' original scale of Y. For the variance-block models, they include the
+#' posterior mean of the latent block signals, `X B + E[W] C'`; for the
+#' mean-block models, they are `X B C'` (with the posterior cluster
+#' probabilities when the clustering is unknown). Zero-inflated models set
+#' the observed zeros to 0.
 #' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return A matrix of fitted values extracted from the object.
@@ -84,8 +92,12 @@ fitted.NormalBlockBase <- function(object, ...){
 
 
 #' @title Predict Method for Normal-Block Models
-#' @description Predicts the mean of the observations Y for new covariates X:
-#' B' X for the variance-block models, C B' X for the mean-block models.
+#' @description Predicts the mean of the observations Y for new covariates X,
+#' on the original scale of Y: `B' X` for the variance-block models (the
+#' latent block signals, centered, average out; unlike [fitted()], which adds
+#' their posterior mean for the training observations), `C B' X` for the
+#' mean-block models. For zero-inflated models, the mean of the Gaussian
+#' component.
 #' @param object An object of class NormalBlockBase.
 #' @param new_X New set of covariates.
 #' @param ... not used, only here for S3 compatibility
@@ -108,8 +120,10 @@ predict.NormalBlockBase <- function(object, new_X, ...){
 #' @param object An object of class NormalBlockBase.
 #' @param ... not used, only here for S3 compatibility
 #' @return An object of class `"logLik"`. The numeric value is the
-#' log-likelihood or its variational lower bound (ELBO). Attributes `df` and
-#' `nobs` hold the number of parameters and observations.
+#' log-likelihood or its variational lower bound (ELBO), on the scale of the
+#' data the model was fitted on (rescaled or not, see [NormalBlockData]); use
+#' the `heldout_loglik()` method for a log-likelihood on Y's original scale.
+#' Attributes `df` and `nobs` hold the number of parameters and observations.
 #' @importFrom stats logLik
 #' @export
 #' @examples
@@ -238,6 +252,12 @@ plot.NormalBlockBase <- function(x, ...) {
 
 ## names of the clusters, as in the network plots
 cluster_names <- function(q) paste0("Cluster_", seq_len(q))
+
+## names of the nodes of a model's network: the clusters (variance-block) or
+## the variables (mean-block)
+network_nodes_names <- function(model) {
+  if (inherits(model, "NormalBlockVarBase")) cluster_names(model$q) else colnames(model$data$Y)
+}
 
 ## names the dimensions of a matrix when they match its size
 with_dimnames <- function(M, rows = NULL, cols = NULL) {

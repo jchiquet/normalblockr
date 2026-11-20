@@ -90,7 +90,7 @@ kappa_zi <- rnorm(p, mean = 0.7, sd = 0.05)
 kappa_zi <- unlist(lapply(kappa_zi, f <- function(x) return(max(0, min(x, 0.9)))))
 my_nb_data_zi <- generate_normal_block_var_data(n = n, p = p, d = d, q = 5, kappa = kappa_zi,
                                                 omega_structure = omega_structure, u_v = u_v,
-                                                SNR = SNR, alpha = alpha,
+                                                SNR = SNR, alpha = rep(1/5, 5),
                                                 range_X = range_X, range_D = range_D)
 ```
 For a better visualization of the zero-inflated data, we set-up the 0 to be shown in white.

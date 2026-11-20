@@ -13,8 +13,10 @@
 }
 \value{
 An object of class `"logLik"`. The numeric value is the
-log-likelihood or its variational lower bound (ELBO). Attributes `df` and
-`nobs` hold the number of parameters and observations.
+log-likelihood or its variational lower bound (ELBO), on the scale of the
+data the model was fitted on (rescaled or not, see [NormalBlockData]); use
+the `heldout_loglik()` method for a log-likelihood on Y's original scale.
+Attributes `df` and `nobs` hold the number of parameters and observations.
 }
 \description{
 Returns the (variational) log-likelihood of a fitted

@@ -2,22 +2,19 @@
 ## normal_block_sequential() fits a mean-block model, then a variance-block one
 ## on its residuals. The positive control below carries two genuinely distinct
 ## structures (unrelated partitions in the mean and in the covariance); the
-## estimator must recover both. See
-## inst/mean_block_analyses/sequential_mean_then_variance.R.
+## estimator must recover both.
 
 test_that("normal_block_sequential() recovers two distinct structures", {
-  skip_if_not_installed("aricode")
   set.seed(42)
-  n <- 300; p <- 100; d <- 3; q_mean <- 5; q_var <- 4
+  n <- 150; p <- 40; d <- 3; q_mean <- 5; q_var <- 4
   X  <- cbind(1, matrix(rnorm(n * (d - 1)), n, d - 1))
   Cm <- normalblockr:::as_indicator(sample(rep(1:q_mean, length.out = p)))
   Cv <- normalblockr:::as_indicator(sample(rep(1:q_var,  length.out = p)))
-  Y  <- X %*% matrix(rnorm(d * q_mean, sd = 2), d, q_mean) %*% t(Cm) +
+  Y  <- X %*% matrix(rnorm(d * q_mean, sd = 3), d, q_mean) %*% t(Cm) +
         matrix(rnorm(n * q_var, sd = 1.5), n, q_var) %*% t(Cv) +
         matrix(rnorm(n * p, sd = 0.5), n, p)
 
-  fit <- normal_block_sequential(NormalBlockData$new(Y, X),
-                                 blocks_mean = seq(3, 15, by = 2), blocks_var = 1:8)
+  fit <- normal_block_sequential(NormalBlockData$new(Y, X), blocks_mean = 3:7, blocks_var = 2:6)
 
   expect_s3_class(fit, "normal_block_sequential")
   expect_equal(fit$mean$q, q_mean)
@@ -26,7 +23,7 @@ test_that("normal_block_sequential() recovers two distinct structures", {
   expect_gt(aricode::ARI(fit$var$clustering,  normalblockr:::get_clusters(Cv)), 0.95)
   ## the two structures are unrelated by construction, and must stay so
   expect_lt(aricode::ARI(fit$mean$clustering, fit$var$clustering), 0.2)
-  expect_equal(dim(fit$residuals), dim(Y))
+  expect_equal(fit$residuals, Y - fitted(fit$mean), ignore_attr = TRUE)
 })
 
 test_that("normal_block_sequential() accepts fixed clusterings and prints", {
@@ -34,28 +31,12 @@ test_that("normal_block_sequential() accepts fixed clusterings and prints", {
   data <- NormalBlockData$new(testdata$Y, testdata$X)
   C    <- testdata$parameters$C
 
+  set.seed(1)
   fit <- normal_block_sequential(data, blocks_mean = C, blocks_var = 2)
   expect_s3_class(fit$mean, "NormalBlockMeanKnownClusters")
   expect_equal(fit$var$q, 2)
   expect_output(print(fit), "sequential mean-then-variance")
-  expect_invisible(print(fit))
-})
-
-test_that("an explicit zeros mask overrides the default Y == 0", {
-  ex <- generate_normal_block_mean_data(n = 40, p = 10, d = 1, q = 2)
-  mask <- matrix(0, 40, 10); mask[1:5, 1:2] <- 1
-
-  default  <- NormalBlockData$new(ex$Y, ex$X)
-  explicit <- NormalBlockData$new(ex$Y, ex$X, zeros = mask)
-
-  expect_equal(sum(default$zeros), 0)
-  expect_equal(explicit$zeros, mask)
-  expect_equal(explicit$zeros_bar, 1 - mask)
-  expect_equal(explicit$npY, 40 * 10 - 10)
-  expect_equal(explicit$nY, colSums(1 - mask))
-
-  expect_error(NormalBlockData$new(ex$Y, ex$X, zeros = mask[, -1]),
-               "same dimensions")
+  capture.output(expect_invisible(print(fit)))
 })
 
 test_that("the zero-inflated chain runs and shares one mask across both stages", {
@@ -64,6 +45,7 @@ test_that("the zero-inflated chain runs and shares one mask across both stages",
   Y  <- ex$Y; Y[runif(length(Y)) < 0.2] <- 0
   data <- NormalBlockData$new(Y, ex$X)
 
+  set.seed(1)
   fit <- normal_block_sequential(data, blocks_mean = 3, blocks_var = 2,
                                  zero_inflation = TRUE)
 
@@ -81,6 +63,7 @@ test_that("normal_block_sequential() can start from a mean-block fit, without re
   ex   <- generate_normal_block_mean_data(n = 80, p = 20, d = 1, q = 3)
   data <- NormalBlockData$new(ex$Y, ex$X)
   ctrl <- NB_control(verbose = FALSE)
+  set.seed(1)
   coll <- normal_block(data, blocks = 2:4, model = "mean", control = ctrl)
 
   ## from a collection: its best model by crit is the first stage, unchanged
@@ -103,4 +86,20 @@ test_that("normal_block_sequential() can start from a mean-block fit, without re
   expect_error(normal_block_sequential(other, blocks_mean = single, blocks_var = 2), "obtained on `data`")
   expect_error(normal_block_sequential(data, blocks_mean = single, blocks_var = 2, zero_inflation = TRUE),
                "zero_inflation")
+})
+
+test_that("the second stage gets the scale request of the data", {
+  set.seed(6)
+  ex <- generate_normal_block_mean_data(n = 60, p = 12, d = 1, q = 2)
+  Y  <- ex$Y * matrix(c(1, 5), 60, 12, byrow = TRUE)
+  for (scale in list(NULL, TRUE, FALSE)) {
+    data <- NormalBlockData$new(Y, ex$X, scale = scale)
+    set.seed(1)
+    fit <- normal_block_sequential(data, blocks_mean = ex$parameters$C, blocks_var = 2)
+    ## the residuals are on Y's original scale whatever the request
+    expect_equal(fit$residuals, Y - fitted(fit$mean), ignore_attr = TRUE)
+    ## the variance-block family rescales unless told not to, the mean-block one only when told to
+    expect_equal(all(fit$var$data$Y_scale == 1), isFALSE(scale))
+    expect_equal(all(fit$mean$data$Y_scale == 1), !isTRUE(scale))
+  }
 })

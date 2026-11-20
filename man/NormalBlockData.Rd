@@ -76,11 +76,19 @@ for the family default (see `for_family()`)}
   }
   \if{html}{\out{</div>}}
 }
+\section{Active bindings}{
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{Y_original}}{the matrix of responses as given, before any rescaling}
+  }
+  \if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-NormalBlockData-initialize}{\code{NormalBlockData$new()}}
     \item \href{#method-NormalBlockData-for_family}{\code{NormalBlockData$for_family()}}
+    \item \href{#method-NormalBlockData-subset}{\code{NormalBlockData$subset()}}
     \item \href{#method-NormalBlockData-ols_fit}{\code{NormalBlockData$ols_fit()}}
     \item \href{#method-NormalBlockData-zi_ols_fit}{\code{NormalBlockData$zi_ols_fit()}}
     \item \href{#method-NormalBlockData-zi_fit}{\code{NormalBlockData$zi_fit()}}
@@ -100,7 +108,8 @@ for the family default (see `for_family()`)}
   X0 = NULL,
   formula = NULL,
   scale = NULL,
-  zeros = NULL
+  zeros = NULL,
+  check_constant = TRUE
 )}
     \if{html}{\out{</div>}}
   }
@@ -116,6 +125,9 @@ deviation (no centering): `NULL` (default) for the model family's
 default, see the section "Rescaling Y" below and `for_family()`.}
       \item{\code{zeros}}{an optional 0/1 matrix of structural zeros, overriding the
 default `Y == 0`.}
+      \item{\code{check_constant}}{whether to refuse constant columns of Y, which
+carry no information to cluster on. `FALSE` for data only used to
+evaluate a fitted model (see `heldout_loglik()`).}
     }
     \if{html}{\out{</div>}}
   }
@@ -139,6 +151,31 @@ built once and shared by every model fitted on it.
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{model}}{the model family, `"var"` or `"mean"`}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    a [`NormalBlockData`] object
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-NormalBlockData-subset"></a>}}
+\if{latex}{\out{\hypertarget{method-NormalBlockData-subset}{}}}
+\subsection{\code{NormalBlockData$subset()}}{
+  The data restricted to some observations, with the same
+covariates, formula, zeros and scale request (a rescaled Y is rescaled
+again on these rows).
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{NormalBlockData$subset(rows, check_constant = TRUE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{rows}}{the observations to keep (indices or a logical vector)}
+      \item{\code{check_constant}}{as in `new()`}
     }
     \if{html}{\out{</div>}}
   }

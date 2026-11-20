@@ -38,14 +38,14 @@ NormalBlockBase <- R6::R6Class(
       stopifnot("this model family does not implement NB_control(heuristic = TRUE)" =
                   is.function(private$optimizer))
       private$approx <- control$heuristic
-
+      private$zi <- zero_inflation
 
       ## control$clustering_init is either the name of a clustering heuristic
       ## or an actual clustering to use directly
       cl0 <- control$clustering_init
       if (is.character(cl0) && length(cl0) == 1) {
         private$clustering_approx <- cl0
-        private$C <- matrix(NA, self$data$n, q)
+        private$C <- matrix(NA, self$p, q)
       } else if (!is.null(cl0)) {
         if (!is.vector(cl0) & !is.matrix(cl0)) stop("Labels must be encoded in vector of labels or indicator matrix")
         if (is.vector(cl0)) {
@@ -66,7 +66,7 @@ NormalBlockBase <- R6::R6Class(
         }
         private$C <- cl0
       } else {
-        private$C <- matrix(NA, self$data$n, q)
+        private$C <- matrix(NA, self$p, q)
       }
 
       if (zero_inflation) private$fit_zi_component()
@@ -85,33 +85,25 @@ NormalBlockBase <- R6::R6Class(
     #' models, variable-level for Normal Mean Block models) [all]
     #' @param gamma  variance of posterior distribution of W [NBVar - known]
     #' @param mu mean for posterior distribution of W [NBVar - known]
-    #' @param kappa vector of zero-inflation probabilities [ZINBVar, ZINBMean]
     #' @param alpha vector of groups probabilities [NBVar]
     #' @param M variational mean for posterior distribution of W [NBVar - unknown]
     #' @param S variational diagonal of variances for posterior distribution of W [NBVar - unknown]
-    #' @param Psi variational expectation of C'Omega C, intermediary term in calculations [NBMean - unknown]
-    #' @param Phi variational correction term used in the Psi/ELBO computations [NBMean - unknown]
-    #' @param Lambda variational correction term used in the Sigma-hat update [NBMean - unknown]
     #' @param ll_list  list of log-lik (elbo) values
     #' @param warm_started whether `optim_initialize()` should treat the model as
     #' already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
     #' rather than recomputing a fresh heuristic initialization. Set by
     #' [warm_start_from()] and by [split()]/[merge()].
     #' @param clustering_init initial clustering
-    #' @return Update the current [`normal`] object
+    #' @return Update the current object in place
     update = function(B = NA,
                       dm1 = NA,
                       C = NA,
                       Omega = NA,
                       gamma = NA,
                       mu = NA,
-                      kappa = NA,
                       alpha = NA,
                       M = NA,
                       S = NA,
-                      Psi = NA,
-                      Phi = NA,
-                      Lambda = NA,
                       ll_list = NA,
                       warm_started = NA,
                       clustering_init = NA) {
@@ -120,14 +112,10 @@ NormalBlockBase <- R6::R6Class(
       if (!anyNA(C))       private$C       <- C
       if (!anyNA(Omega))   private$Omega   <- Omega
       if (!anyNA(gamma))   private$gamma   <- gamma
-      if (!anyNA(kappa))   private$kappa   <- kappa
       if (!anyNA(mu))      private$mu      <- mu
       if (!anyNA(alpha))   private$alpha   <- alpha
       if (!anyNA(M))       private$M       <- M
       if (!anyNA(S))       private$S       <- S
-      if (!anyNA(Psi))     private$Psi     <- Psi
-      if (!anyNA(Phi))     private$Phi     <- Phi
-      if (!anyNA(Lambda))  private$Lambda     <- Lambda
       if (!anyNA(ll_list)) private$ll_list <- ll_list
       if (!anyNA(warm_started)) private$warm_started <- warm_started
       if (!anyNA(clustering_init)) {
@@ -178,6 +166,8 @@ NormalBlockBase <- R6::R6Class(
                              trial_niter = 10, max_training = 2,
                              control = list(niter = 500, threshold = 1e-4, fixed_point_niter = 5)) {
       stopifnot(
+        "best_of_inits() only applies to an unknown clustering: a known one has no initialization to choose" =
+          !private$known_clusters,
         "best_of_inits() requires (V)EM inference (not the heuristic-only mode, see NB_control(heuristic = ))" =
           !private$approx,
         "best_of_inits() only applies when the initial clustering is inferred by a heuristic (see NB_control(clustering_init = ))" =
@@ -195,6 +185,31 @@ NormalBlockBase <- R6::R6Class(
       best_candidates[[which.max(map_dbl(best_candidates, "loglik"))]]
     },
 
+    #' @description Seed this model's starting parameters from another,
+    #' already-optimized model of the same family and q, instead of a fresh
+    #' heuristic clustering. Used by the sparsity paths to warm-start each
+    #' penalty from the previous one's solution.
+    #' @param other a model of the same class, already optimized
+    #' @return Update the current object in place with `other`'s parameters
+    warm_start_from = function(other) {
+      stopifnot("warm_start_from() requires both models to have the same q" = self$q == other$q)
+      args <- other$model_par
+      if (!is.null(other$var_par)) {
+        args$C     <- other$var_par$tau
+        args$M     <- other$var_par$M
+        args$S     <- other$var_par$S
+        args$alpha <- colMeans(other$var_par$tau)
+      } else if (!is.null(other$posterior_par)) {
+        args$gamma <- other$posterior_par$gamma
+        args$mu    <- other$posterior_par$mu
+      }
+      ## the zero-inflation component (B0, kappa) depends on the data only
+      args <- Filter(Negate(is.null), args[intersect(names(args), names(formals(self$update)))])
+      do.call(self$update, args)
+      private$warm_started <- TRUE
+      invisible(self)
+    },
+
     #' @description generate and select a set of candidate models
     #' by splitting the clusters of the current model
     #' @param trial_niter number of (V)EM iterations used to cheaply score each
@@ -205,21 +220,19 @@ NormalBlockBase <- R6::R6Class(
     candidates_split = function(trial_niter = 5, split_rule = NULL) {
       # do not split groups with less than 2 guys
       candidates <- map((1:self$q)[self$cluster_sizes > 1],
-                        function(k) self$split(k, rule = split_rule))
+                        function(k) tryCatch(self$split(k, rule = split_rule), error = function(e) NULL))
+      candidates <- Filter(Negate(is.null), candidates)
       # keep candidates with at least 2 guys per cluster and non empty split.
       # Compared against the number of currently *live* (non-empty) clusters
       # rather than self$q: the (V)EM can converge to an empty cluster,
       # in which case self$q overcounts and every split would otherwise look
       # invalid, silently stalling explore_forward() before n_clusters_range[2].
-      clustering_sizes <- map(candidates, "clustering") %>% map(table)
-      min_sizes  <- clustering_sizes %>% map_dbl(min)
-      n_clusters <- clustering_sizes %>% map_dbl(length)
+      clustering_sizes <- map(map(candidates, "clustering"), table)
+      min_sizes  <- map_dbl(clustering_sizes, min)
+      n_clusters <- map_dbl(clustering_sizes, length)
       n_live <- length(unique(self$clustering))
       candidates <- candidates[min_sizes > 1 & n_clusters == n_live + 1]
-
-      for (i in seq_along(candidates))
-        candidates[[i]]$optimize(private$trial_control(trial_niter), warn = FALSE)
-      candidates
+      private$trial_fits(candidates, trial_niter)
     },
 
     #' @description generate and select a set of candidate models
@@ -235,10 +248,8 @@ NormalBlockBase <- R6::R6Class(
       pairs <- combn(self$q, 2, simplify = FALSE)
       if (length(pairs) > max_candidates)
         pairs <- pairs[order(private$merge_score(pairs), decreasing = TRUE)[1:max_candidates]]
-      candidates <- map(pairs, self$merge)
-      for (i in seq_along(candidates))
-        candidates[[i]]$optimize(private$trial_control(trial_niter), warn = FALSE)
-      candidates
+      candidates <- map(pairs, function(ij) tryCatch(self$merge(ij), error = function(e) NULL))
+      private$trial_fits(Filter(Negate(is.null), candidates), trial_niter)
     },
 
     #' @description Log-likelihood of new observations at the fitted
@@ -258,7 +269,7 @@ NormalBlockBase <- R6::R6Class(
                 "a heuristic fit (NB_control(heuristic = TRUE)) has no likelihood" = !isTRUE(private$approx))
       s <- self$data$Y_scale
       ## newdata's raw Y, put on the scale the model was fitted on
-      Y <- newdata$Y * matrix(newdata$Y_scale / s, newdata$n, self$p, byrow = TRUE)
+      Y <- newdata$Y_original / matrix(s, newdata$n, self$p, byrow = TRUE)
       C <- matrix(0, self$p, self$q)
       C[cbind(seq_len(self$p), self$clustering)] <- 1
       R <- Y - private$heldout_mean(newdata$X, C)
@@ -276,9 +287,11 @@ NormalBlockBase <- R6::R6Class(
       if (per_observation) ll else sum(ll)
     },
 
-    #' @description Predicts observations Y for new covariates X, in Y's
-    #' original units (like `$fitted`, so that predicting on the training X
-    #' reproduces it).
+    #' @description Predicts the mean of Y for new covariates X, in Y's
+    #' original units. For the variance-block family, `X B`: the latent block
+    #' signals average out, so that on the training X it differs from
+    #' `$fitted`, which adds their posterior mean. The mean-block family
+    #' overrides it.
     #' @param new_X new set of covariates.
     #' @return A n*p prediction matrix for new observations
     predict = function(new_X){
@@ -287,10 +300,14 @@ NormalBlockBase <- R6::R6Class(
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Extractors ------------------------
-    #' @description Extract interaction network in the latent space, as a
-    #' matrix rather than a plot -- see `$plot_network()` to plot it instead.
-    #' @param type edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)
-    #' @return a square matrix of size `self$q`
+    #' @description Extract the network encoded by Omega, as a matrix rather
+    #' than a plot (see `$plot_network()`): between clusters for the
+    #' variance-block family, between variables for the mean-block family.
+    #' @param type edge value in the network: "support" (binary edges),
+    #' "precision" (entries of the precision matrix, on the scale of the fit)
+    #' or "partial_cor" (partial correlations)
+    #' @return a sparse square matrix, q x q (variance-block) or p x p
+    #' (mean-block), with named rows and columns
     latent_network = function(type = c("partial_cor", "support", "precision")) {
       net <- switch(
         match.arg(type),
@@ -301,6 +318,8 @@ NormalBlockBase <- R6::R6Class(
           tmp
         }
       )
+      nodes <- network_nodes_names(self)
+      if (length(nodes) == ncol(net)) dimnames(net) <- list(nodes, nodes)
       ## Sparse encoding: igraph::graph_from_adjacency_matrix() fails on dsyMatrix
       Matrix::Matrix(net, sparse = TRUE)
     },
@@ -327,7 +346,7 @@ NormalBlockBase <- R6::R6Class(
       obj_facet  <- if (obj_is_neg) "log10(-objective)" else "objective"
       obj_value  <- if (obj_is_neg) log10(-obj) else obj
 
-      dplot <- tibble::tibble(iteration = seq_along(obj), value = obj_value, facet = obj_facet)
+      dplot <- data.frame(iteration = seq_along(obj), value = obj_value, facet = obj_facet)
       last_increment <- abs(diff(ll))[length(obj)]
       converged <- !is.na(private$threshold) && last_increment < private$threshold
       subtitle  <- if (is.na(private$niter_max)) {
@@ -340,14 +359,14 @@ NormalBlockBase <- R6::R6Class(
       }
 
       if (show_increment) {
-        dplot <- dplyr::bind_rows(
+        dplot <- rbind(
           dplot,
-          tibble::tibble(iteration = seq_along(obj), value = log10(abs(diff(ll))), facet = "log10(|increment|)")
+          data.frame(iteration = seq_along(obj), value = log10(abs(diff(ll))), facet = "log10(|increment|)")
         )
       }
       dplot$facet <- factor(dplot$facet, levels = c(obj_facet, "log10(|increment|)"))
 
-      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = iteration, y = value)) +
+      p <- ggplot2::ggplot(dplot, ggplot2::aes(x = .data$iteration, y = .data$value)) +
         ggplot2::geom_line() + ggplot2::geom_point(size = .8) +
         ggplot2::ggtitle(label = "(V)EM optimization", subtitle = subtitle) +
         ggplot2::xlab("iteration") + ggplot2::ylab(NULL) +
@@ -359,19 +378,22 @@ NormalBlockBase <- R6::R6Class(
           p <- p + ggplot2::geom_hline(
             data = data.frame(facet = factor("log10(|increment|)", levels = levels(dplot$facet)),
                               yintercept = log10(private$threshold)),
-            ggplot2::aes(yintercept = yintercept),
+            ggplot2::aes(yintercept = .data$yintercept),
             linetype = "dashed", colour = "red", alpha = .6
           )
       }
       p
     },
 
-    #' @description plot the latent network. To extract the network as a
-    #' matrix instead of plotting it, use `$latent_network()`.
-    #' @param type edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).
+    #' @description Plot the network encoded by Omega (see
+    #' `$latent_network()` to extract it as a matrix).
+    #' @param type edge value in the network: "partial_cor" (partial
+    #' correlations) or "support" (binary edges).
     #' @param output Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)
     #' @param edge.color Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.
-    #' @param node.labels vector of character. The labels of the nodes. The default will use the column names ot the response matrix.
+    #' @param node.labels vector of character. The labels of the nodes. By
+    #' default, the cluster names (variance-block) or the variable names
+    #' (mean-block), as in `$latent_network()`.
     #' @param remove.isolated if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.
     #' @param layout an igraph layout function, applied to the graph without its edge weights, or a matrix of node coordinates. Only relevant for igraph output.
     #' @param plot logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.
@@ -391,11 +413,7 @@ NormalBlockBase <- R6::R6Class(
       if (output == "igraph") {
         G <-  igraph::graph_from_adjacency_matrix(net, mode = "undirected", weighted = TRUE, diag = FALSE)
 
-        if (!is.null(node.labels)) {
-          igraph::V(G)$label <- node.labels
-        } else {
-          igraph::V(G)$label <- cluster_names(ncol(net))
-        }
+        igraph::V(G)$label <- if (!is.null(node.labels)) node.labels else rownames(net)
         ## Nice nodes: a cluster's area grows with its number of variables
         sizes <- if (inherits(self, "NormalBlockVarBase")) tabulate(self$clustering, nbins = ncol(net))
                  else rep(1, ncol(net))
@@ -422,14 +440,12 @@ NormalBlockBase <- R6::R6Class(
         }
       }
       if (output == "corrplot") {
+        G <- net
         if (plot) {
           if (ncol(net) > 100)
             colnames(net) <- rownames(net) <- rep(" ", ncol(net))
-          G <- net
           diag(net) <- 0
           corrplot::corrplot(as.matrix(net), method = "color", is.corr = FALSE, tl.pos = "td", cl.pos = "n", tl.cex = 0.5, type = "upper")
-        } else  {
-          G <- net
         }
       }
       invisible(G)
@@ -465,12 +481,23 @@ NormalBlockBase <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
     ## Groups of free parameters and the number of independent observations
-    ## informing each one (see the penalty_terms field). Each family declares
-    ## its own groups; subclasses append theirs (alpha, kappa) to super's.
-    penalty_groups = function() penalty_group(character(0), integer(0), numeric(0)),
+    ## informing each one (see the penalty_terms field): the family's own
+    ## groups, then the zero-inflation coefficients (d0 per variable, informed
+    ## by its n observations) and the cluster proportions (informed by the p
+    ## variables) when the model has them.
+    penalty_groups = function() {
+      rbind(private$family_penalty_groups(),
+            if (private$zi) penalty_group("kappa", self$p * self$d0, self$n),
+            if (!private$known_clusters) penalty_group("alpha", self$q - 1, self$p))
+    },
+    family_penalty_groups = function() penalty_group(character(0), integer(0), numeric(0)),
     ## Dimension of the network the EBIC is computed on. Overridden by the
     ## mean-block family, whose network relates the p variables.
     network_dim = function() self$q,
+    family_name       = NA, # "normal-block-var" or "normal-block-mean", for who_am_I
+    known_clusters    = FALSE, # TRUE for the classes with a known clustering
+    zi                = FALSE, # whether the model is zero-inflated
+    res_covariance    = NA, # shape of the residual covariance
     kappa             = NA, # matrix of zero-inflation probabilities
     B0                = NA, # zero-inflation regression matrix
     ZI_cond_mean      = NA, # fixed contribution of the ZI component to the log-likelihood
@@ -496,13 +523,51 @@ NormalBlockBase <- R6::R6Class(
     # which would also be true for split()/merge() clones (those
     # keep their own, different, already-tested initialization path).
 
-    ## Warns when the (V)EM hit the niter cap without reaching threshold
-    ## (heuristic fits have no ll_list/niter to check, so stay silent).
     ## Control list for the deliberately-truncated trial fits of
     ## best_of_inits()/candidates_split()/candidates_merge(). fixed_point_niter
     ## is only read by the mean-block family; the variance-block one ignores it.
     trial_control = function(trial_niter) {
       list(niter = trial_niter, threshold = 1e-4, fixed_point_niter = 5)
+    },
+
+    ## Short (V)EM runs of the split()/merge() candidates; a candidate whose
+    ## run fails (e.g. a degenerate block) is discarded rather than aborting
+    ## the search.
+    trial_fits = function(candidates, trial_niter) {
+      ok <- vapply(candidates, function(cand) {
+        tryCatch({
+          cand$optimize(private$trial_control(trial_niter), warn = FALSE)
+          TRUE
+        }, error = function(e) FALSE)
+      }, logical(1))
+      candidates[ok]
+    },
+
+    ## Shared tail of split() and merge(): applies the new clustering and its
+    ## reseeded parameters to the model itself or to a clone, marked as warm
+    ## started so that optim_initialize() reuses them.
+    reseeded = function(in_place, C, ..., weights = NULL) {
+      target <- if (in_place) self else self$clone()
+      target$update(C = C, ..., alpha = colMeans(C), warm_started = TRUE)
+      if (!is.null(weights)) target$sparsity_weights <- weights
+      invisible(target)
+    },
+
+    ## Memberships after splitting cluster `index`: `split2` moves to a new
+    ## cluster q + 1, `split1` stays, both kept slightly away from 0.
+    split_memberships = function(index, split1, split2) {
+      new_C <- cbind(private$C, .Machine$double.eps)
+      new_C[split1, index] <- new_C[split1, index] - .Machine$double.eps
+      new_C[split2, self$q + 1] <- new_C[split2, index]
+      new_C[split2, index] <- .Machine$double.eps
+      new_C / rowSums(new_C)
+    },
+
+    ## Memberships after merging the clusters `indices` (sorted) into the first
+    merge_memberships = function(indices) {
+      new_C <- private$C[, -indices[2], drop = FALSE]
+      new_C[, indices[1]] <- private$C[, indices[1]] + private$C[, indices[2]]
+      new_C
     },
 
     ## Ranks candidate cluster pairs for candidates_merge(), highest first.
@@ -535,8 +600,12 @@ NormalBlockBase <- R6::R6Class(
       (var <= median(var[cl])) & cl
     },
 
+    ## Warns when the (V)EM hit the niter cap without reaching threshold
+    ## (heuristic fits have no ll_list/niter to check, so stay silent; a
+    ## negative threshold asks for exactly niter iterations).
     warn_if_not_converged = function() {
-      if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())
+      if (is.na(private$niter) || private$niter < private$niter_max || private$threshold < 0)
+        return(invisible())
       last_increment <- abs(diff(private$ll_list))[private$niter]
       if (last_increment >= private$threshold)
         warning(sprintf(
@@ -574,11 +643,13 @@ NormalBlockBase <- R6::R6Class(
       if (is.matrix(M)) M * matrix(factor, nrow(M), ncol(M), byrow = TRUE) else M * factor
     },
 
-    get_Omega = function(Sigma) {
+    ## Precision matrix from a covariance estimate: plain inversion, or
+    ## graphical lasso when penalized
+    get_Omega = function(Sigma, weights = self$sparsity_weights) {
       if (private$sparsity_ == 0) {
         chol2inv(chol(Sigma))
       } else {
-        glasso_omega(Sigma, private$sparsity_ * self$sparsity_weights)
+        glasso_omega(Sigma, private$sparsity_ * weights)
       }
     },
 
@@ -588,30 +659,12 @@ NormalBlockBase <- R6::R6Class(
     ## by NB_control(clustering_init = ...); kmeans is the default.
     ## spectral clusters the eigenvectors of cov(R) (top q, each row rescaled
     ## to unit L2 norm, the classic Ng-Jordan-Weiss normalization).
+    ## Each one is the collection-level path (R/utils.R) for a single q.
     clustering_methods = list(
-      ## compress_columns() is exact here: kmeans sees only the distances
-      ## between R's columns, which it preserves (R/utils.R)
-      kmeans   = function(R, q) kmeans_columns(compress_columns(R), q),
-      ## ward2_tree() (R/utils.R) also backs sbm_clustering_path()'s own
-      ## fallback -- same computation, shared rather than duplicated.
-      ward2    = function(R, q) cutree(ward2_tree(R), q),
-      sbm      = function(R, q) {
-        options <- list(verbosity = 0, exploreMin = q, exploreMax = q, plot = FALSE, nbCores = 1)
-        mySBM <- sbm::estimateSimpleSBM(cov(R), "gaussian", estimOptions = options)
-        mySBM$setModel(q)
-        mySBM$memberships
-      },
-      ## spectral_eig_rank() (R/utils.R) caps the eigenvectors used at
-      ## cov(R)'s numerical rank -- see its comment for why: R = X %*% B for
-      ## the mean-block family is routinely rank << q, and eigenvectors past
-      ## the rank are arbitrary, not data-derived. Shared with
-      ## spectral_clustering_path(), the collection-level analogue.
-      spectral = function(R, q) {
-        eig <- spectral_eig_rank(R)
-        U <- eig$vectors[, seq_len(min(q, eig$rank)), drop = FALSE]
-        U <- U / pmax(sqrt(rowSums(U^2)), 1e-10)
-        kmeans(U, q, nstart = 30, iter.max = 50)$cluster
-      }
+      kmeans   = function(R, q) kmeans_clustering_path(R, q)[[1]],
+      ward2    = function(R, q) ward2_clustering_path(R, q)[[1]],
+      sbm      = function(R, q) sbm_clustering_path(R, q)[[1]],
+      spectral = function(R, q) spectral_clustering_path(R, q)[[1]]
     ),
 
     heuristic_clustering = function(R) {
@@ -641,6 +694,14 @@ NormalBlockBase <- R6::R6Class(
     p = function() self$data$p,
     #' @field d number of variables (dimensions in X)
     d = function() self$data$d,
+    #' @field d0 number of zero-inflation covariates (dimensions in X0)
+    d0 = function() self$data$d0,
+    #' @field who_am_I a description of the model
+    who_am_I = function() {
+      paste(c(if (private$zi) "zero-inflated", private$res_covariance, private$family_name, "model with",
+              if (private$known_clusters) "fixed blocks" else paste(self$q, "unknown blocks")),
+            collapse = " ")
+    },
     #' @field q number of blocks
     q = function() as.integer(ncol(private$C)),
     #' @field n_edges number of edges of the network (non null coefficient of the sparse precision matrix Omega)
@@ -656,7 +717,9 @@ NormalBlockBase <- R6::R6Class(
     #' known. Only the discrete partition is completed, as in the ICL of
     #' Biernacki, Celeux and Govaert (2000); the latent vectors W of the
     #' variance-block family are integrated out, not completed.
-    entropy    = function() 0,
+    entropy    = function() {
+      if (private$known_clusters) 0 else if (private$approx) NA else -sum(xlogx(private$C))
+    },
     #' @field penalty_terms data frame with one row per group of parameters:
     #' its name (`group`), its number of free parameters (`nu`) and the
     #' number of independent observations informing it (`N`), so that the
@@ -702,9 +765,11 @@ NormalBlockBase <- R6::R6Class(
     },
     #' @field sparsity_term (sparsity_term term in log-likelihood due to sparsity)
     sparsity_term = function() self$sparsity * sum(abs(self$sparsity_weights * private$Omega)),
-    #' @field memberships cluster memberships
+    #' @field memberships the p x q matrix of cluster memberships: indicators
+    #' for a known clustering, posterior probabilities (tau) otherwise
     memberships = function() private$C,
-    #' @field clustering given as the list of elements contained in each cluster
+    #' @field clustering the cluster label of each variable (MAP for an
+    #' unknown clustering), named after the columns of Y
     clustering = function() {
       cl <- get_clusters(private$C)
       names(cl) <- colnames(self$data$Y)

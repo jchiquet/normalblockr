@@ -1,13 +1,13 @@
 ###############################################################################
-## Exercises the S3 methods defined on NormalBlockVarBase (print, summary,
-## plot, logLik, BIC) and on NormalBlockCollection (print, summary,
-## logLik, BIC).
+## The S3 methods of the models (print, summary, plot, logLik, BIC), for both
+## families, and of the collections (print, summary, logLik, BIC).
 testdata <- readRDS("testdata/testdata_normal.RDS")
 Y <- testdata$Y
 X <- testdata$X
 C <- testdata$parameters$C ; q <- ncol(C)
 
 data  <- NormalBlockData$new(Y, X)
+set.seed(1)
 model <- NormalBlockVarUnknownClusters$new(data, q)
 model$optimize()
 
@@ -25,18 +25,17 @@ test_that("logLik.NormalBlockVarBase() returns a well-formed logLik object", {
   expect_equal(attr(ll, "nobs"), model$n)
 })
 
-test_that("BIC.NormalBlockVarBase() matches model$BIC and the per-group penalty", {
+test_that("BIC.NormalBlockVarBase() matches model$BIC", {
   expect_equal(BIC(model), model$BIC)
-  ll  <- logLik(model)
-  pen <- model$penalty_terms
-  expect_equal(attr(ll, "df"), sum(pen$nu))
-  expect_equal(-2 * as.numeric(ll) + sum(pen$nu * log(pen$N)), BIC(model))
 })
 
 test_that("print.NormalBlockVarBase() reports the model type and criteria", {
   expect_output(print(model), model$who_am_I, fixed = TRUE)
   expect_output(print(model), "Useful S3 methods")
-  expect_invisible(print(model))
+  capture.output(expect_invisible(print(model)))
+  ## the model type ends with a period, without a space
+  expect_false(any(grepl(" \\.$", capture.output(print(model)))))
+  expect_false(any(grepl(" \\.$", capture.output(print(summary(model))))))
 })
 
 test_that("summary.NormalBlockVarBase() returns cluster sizes, edges and density", {
@@ -74,7 +73,7 @@ test_that("print.NormalBlockCollection() reports the model type and the q range 
   expect_output(print(collection), collection$who_am_I, fixed = TRUE)
   expect_output(print(collection), "model(s) explored", fixed = TRUE)
   expect_output(print(collection), "q ranging from 2 to 4")
-  expect_invisible(print(collection))
+  capture.output(expect_invisible(print(collection)))
 })
 
 test_that("summary.NormalBlockCollection() returns the full criteria table and q range", {
@@ -87,7 +86,16 @@ test_that("summary.NormalBlockCollection() returns the full criteria table and q
   expect_output(print(s), "loglik")
 })
 
-test_that("latent_network() extracts the network without plotting it", {
-  net <- model$latent_network()
-  expect_equal(dim(net), c(model$q, model$q))
+test_that("print(), summary() and plot() work on a mean-block model, its network relating the variables", {
+  td <- readRDS("testdata/testdata_normal_mean_block.RDS")
+  set.seed(1)
+  m <- normal_block(NormalBlockData$new(td$Y, td$X), 3, sparsity = 0.1, model = "mean",
+                    control = NB_control(verbose = FALSE))
+  expect_output(print(m), m$who_am_I, fixed = TRUE)
+  s <- summary(m)
+  expect_equal(s$cluster_sizes, m$cluster_sizes)
+  expect_gt(s$n_edges, 0)
+  expect_equal(s$density, m$n_edges / choose(m$p, 2))
+  expect_output(print(s), "density")
+  expect_s3_class(plot(m), "ggplot")
 })

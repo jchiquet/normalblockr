@@ -19,7 +19,7 @@
 // A full Sigma would tie the variables together inside each row, and the mask
 // makes each row's set of observed variables different: every row would then
 // need its own submatrix inverse, i.e. a missing-data EM rather than a
-// reweighting (see R/ZINormalBlockMeanBase.R for the user-facing error).
+// reweighting (see R/NormalBlockMeanBase.R for the user-facing error).
 //
 // Everything the recursion needs is carried by two p x q statistics, both
 // linear in the mask:

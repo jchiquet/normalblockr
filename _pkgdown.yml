@@ -1,4 +1,4 @@
-url: ~
+url: https://jchiquet.github.io/normalblockr/
 template:
   bootstrap: 5
 
@@ -26,10 +26,10 @@ reference:
 - title: 'Model and data classes'
   desc: >
     R6 classes returned by normal_block(). NormalBlockData wraps the
-    responses and design matrix; NormalBlockVar*Clusters (optionally
-    ZI-prefixed) are single fitted models, known- or unknown-clustering;
-    NormalBlockCollection* are collections of models explored over a
-    range of q and/or sparsity penalties.
+    responses and design matrix; NormalBlock{Var,Mean}*Clusters (optionally
+    ZI-prefixed) are single fitted models, with a known or unknown
+    clustering; NormalBlock{Var,Mean}Collection* are collections of models
+    explored over a range of q and/or sparsity penalties.
   contents:
     - '`NormalBlockData`'
     - '`NormalBlockVarKnownClusters`'
@@ -80,8 +80,8 @@ reference:
 
 - title: 'Internal'
   desc: >
-    Abstract base classes, low-level helpers and exploratory code kept for
-    reference; not part of the user-facing API
+    Abstract base classes and low-level helpers, documented for developers
+    and for the methods their subclasses inherit
   contents:
     - '`NormalBlockBase`'
     - '`NormalBlockVarBase`'

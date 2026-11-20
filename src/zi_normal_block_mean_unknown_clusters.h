@@ -30,7 +30,7 @@ class ZINormalBlockMeanUnknownClusters : public ZINormalBlockMeanBase {
     eta.each_col() %= w;
     eta.each_row() += arma::log(arma::clamp(alpha_, 1e-300, arma::datum::inf)).t();
     tau_ = nb_utils::softmax_rows(eta);
-    tau_ = nb_utils::check_one_boundary(nb_utils::check_zero_boundary(tau_));
+    tau_ = nb_utils::clip_probabilities(tau_);
     tau_.each_col() /= arma::sum(tau_, 1);
   }
 

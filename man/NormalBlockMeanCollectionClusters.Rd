@@ -5,13 +5,9 @@
 \title{Collection of Normal-Block-Mean Models over a Range of Cluster Counts}
 \description{
 R6 class for a collection of mean-block models ([NormalBlockMeanBase])
-with different numbers of clusters (q). Inherits its scaffolding
-(`print()`/`summary()`/`plot()`/`optimize()`, the `criteria` table) from
-[NormalBlockCollection]. Unlike [NormalBlockVarCollectionClusters], there
-is no SBM-path shortcut here: the shared clustering-heuristic registry's
-cov()/correlation-based methods are ill-suited to the mean-block family
-(see [NormalBlockMeanBase]'s own default), so each q is fit
-independently.
+with different numbers of clusters (q). As for
+[NormalBlockVarCollectionClusters], the q-independent part of the initial
+clustering heuristic is computed once for the whole collection.
 }
 \examples{
 ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
@@ -23,17 +19,9 @@ models$get_best_model()
 \section{Super classes}{
 \code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{\link[normalblockr:NormalBlockCollectionClusters]{NormalBlockCollectionClusters}} -> \code{NormalBlockMeanCollectionClusters}
 }
-\section{Active bindings}{
-  \if{html}{\out{<div class="r6-active-bindings">}}
-  \describe{
-    \item{\code{who_am_I}}{a method to print what model is being fitted}
-  }
-  \if{html}{\out{</div>}}
-}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
-    \item \href{#method-NormalBlockMeanCollectionClusters-initialize}{\code{NormalBlockMeanCollectionClusters$new()}}
     \item \href{#method-NormalBlockMeanCollectionClusters-clone}{\code{NormalBlockMeanCollectionClusters$clone()}}
   }
 }
@@ -42,46 +30,13 @@ models$get_best_model()
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollection" data-id="summary"><a href='../../normalblockr/html/NormalBlockCollection.html#method-NormalBlockCollection-summary'><code>NormalBlockCollection$summary()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_best_model"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-get_best_model'><code>NormalBlockCollectionClusters$get_best_model()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="get_model"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-get_model'><code>NormalBlockCollectionClusters$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="initialize"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-initialize'><code>NormalBlockCollectionClusters$initialize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="optimize"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-optimize'><code>NormalBlockCollectionClusters$optimize()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="plot"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-plot'><code>NormalBlockCollectionClusters$plot()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="print"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-print'><code>NormalBlockCollectionClusters$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockCollectionClusters" data-id="refine"><a href='../../normalblockr/html/NormalBlockCollectionClusters.html#method-NormalBlockCollectionClusters-refine'><code>NormalBlockCollectionClusters$refine()</code></a></span></li>
 </ul>
 </details>}}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanCollectionClusters-initialize"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionClusters-initialize}{}}}
-\subsection{\code{NormalBlockMeanCollectionClusters$new()}}{
-  Create a new [`NormalBlockMeanCollectionClusters`] object.
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanCollectionClusters$new(
-  mydata,
-  q_list,
-  zero_inflation = FALSE,
-  sparsity = 0,
-  control = NB_control()
-)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
-      \item{\code{q_list}}{list of q values (number of groups) in the collection}
-      \item{\code{zero_inflation}}{whether Y carries structural zeros; every model in
-the collection is then zero-inflated (Sigma diagonal or spherical only,
-see [NormalBlockMeanBase])}
-      \item{\code{sparsity}}{sparsity penalty on the network density}
-      \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    A new [`NormalBlockMeanCollectionClusters`] object
-  }
-}
-
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-NormalBlockMeanCollectionClusters-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionClusters-clone}{}}}

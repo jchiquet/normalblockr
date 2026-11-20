@@ -60,24 +60,23 @@ normal_block_cv <- function(data, blocks, model = c("var", "mean"), zero_inflati
   stopifnot("folds must give one label per observation" = length(folds) == n,
             "at least two folds are needed" = length(unique(folds)) >= 2)
 
-  ## the raw data, rebuilt row-wise with the same scale request
-  Y <- data$Y * matrix(data$Y_scale, n, data$p, byrow = TRUE)
-  rows_data <- function(rows)
-    NormalBlockData$new(Y[rows, , drop = FALSE], data$X[rows, , drop = FALSE],
-                        X0 = data$X0[rows, , drop = FALSE], scale = data$scale,
-                        zeros = data$zeros[rows, , drop = FALSE])
+  ## the data of a fold, with the same scale request
+  rows_data <- function(rows, k, what) {
+    tryCatch(data$subset(rows, check_constant = what == "training"), error = function(e)
+      stop("fold ", k, " (", what, " set): ", conditionMessage(e), call. = FALSE))
+  }
 
   per_obs <- NULL
   for (k in unique(folds)) {
     test <- folds == k
-    fit <- normal_block(rows_data(!test), blocks, sparsity = sparsity,
+    fit <- normal_block(rows_data(!test, k, "training"), blocks, sparsity = sparsity,
                         zero_inflation = zero_inflation, control = control, model = model)
     models <- if (isNBcollection(fit)) fit$models else list(fit)
     if (is.null(per_obs)) {
       per_obs <- matrix(NA_real_, n, length(models),
                         dimnames = list(NULL, paste0("q", vapply(models, function(m) m$q, numeric(1)))))
     }
-    test_data <- rows_data(test)
+    test_data <- rows_data(test, k, "test")
     per_obs[test, ] <- vapply(models, function(m) m$heldout_loglik(test_data, per_observation = TRUE),
                               numeric(sum(test)))
   }

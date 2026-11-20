@@ -5,10 +5,10 @@
 #' Base Class for a Collection of Models over a Range of Cluster Counts
 #'
 #' Shared scaffolding for [NormalBlockVarCollectionClusters] and
-#' [NormalBlockMeanCollectionClusters]: everything that does not depend on the
-#' model family (model lookup, model selection, the criteria plot and the
-#' split/merge `refine()` search). Concrete subclasses only build `self$models`
-#' in their `initialize()` and name themselves through `who_am_I`.
+#' [NormalBlockMeanCollectionClusters]: the models of the collection, one per
+#' q in increasing order, model lookup and selection, the criteria plot and
+#' the split/merge `refine()` search. Concrete subclasses only name the model
+#' family.
 #' @examples
 #' # An internal abstract base class, never instantiated directly -- see
 #' # normal_block() for how collections are created and fitted.
@@ -21,6 +21,29 @@ NormalBlockCollectionClusters <- R6::R6Class(
   ## PUBLIC MEMBERS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   public = list(
+    #' @description Create a collection over a range of q, sorted increasingly.
+    #' @param mydata object of NormalBlockData class, with responses and design matrix
+    #' @param q_list values of q (number of clusters) in the collection
+    #' @param zero_inflation whether the models of the collection are zero-inflated
+    #' @param sparsity sparsity penalty on the network density
+    #' @param control structured list of more specific parameters, to generate with NB_control
+    #' @return A new collection object
+    initialize = function(mydata, q_list, zero_inflation = FALSE,
+                          sparsity = 0, control = NB_control()) {
+      check_q_list(q_list, mydata$p)
+      self$control <- control
+      self$control$zero_inflation <- zero_inflation
+      ord <- order(q_list)
+      inits <- clustering_inits(mydata, q_list, private$family, zero_inflation, control)[ord]
+      self$models <- map2(q_list[ord], inits, function(q, init) {
+        control$clustering_init <- init
+        get_model(mydata, q, sparsity = sparsity, zero_inflation = zero_inflation,
+                  model = private$family, control = control)
+      })
+      private$progress_field <- "q"
+      private$progress_label <- "number of blocks"
+    },
+
     #' @description returns the unknown-clusters model corresponding to given q
     #' @param q number of blocks asked by user
     #' @return A unknown-clusters object with given value q
@@ -107,7 +130,7 @@ NormalBlockCollectionClusters <- R6::R6Class(
       try_candidate <- function(idx_target, candidates, label) {
         if (length(candidates) == 0) return(invisible())
         best_candidate <- candidates[[which.min(map_dbl(candidates, "ICL"))]]
-        best_candidate$optimize()
+        if (inherits(try(best_candidate$optimize(), silent = TRUE), "try-error")) return(invisible())
         deviance_before <- self$models[[idx_target]]$deviance
         if (best_candidate$deviance < deviance_before) {
           if (verbose) cat("\t refine: q =", self$models[[idx_target]]$q, "-- deviance", round(deviance_before, 2),
@@ -151,6 +174,10 @@ NormalBlockCollectionClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  private = list(
+    family = NA_character_, # "var" or "mean", set by the subclasses
+    scope = function() "over q"
+  ),
   active = list(
     #' @field q_list number of blocks
     q_list = function() map_dbl(self$models, "q"),

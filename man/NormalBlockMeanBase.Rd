@@ -18,7 +18,14 @@ structures the mean (mu_i = C B' X_i).
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{model_par}}{a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`): use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.}
+    \item{\code{model_par}}{a list with the model parameters: B (d x q, one
+profile per cluster) and Omega (p x p precision matrix of the
+residuals), on the scale of the fit (see [coef()] and [sigma()]).}
+
+    \item{\code{fitted}}{Y values predicted by the model, in Y's original units:
+`X B C'` (with the posterior cluster probabilities as C when the
+clustering is unknown), with the observed zeros of zero-inflated models
+set to 0}
 
     \item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
   }
@@ -29,7 +36,6 @@ structures the mean (mu_i = C B' X_i).
   \itemize{
     \item \href{#method-NormalBlockMeanBase-initialize}{\code{NormalBlockMeanBase$new()}}
     \item \href{#method-NormalBlockMeanBase-predict}{\code{NormalBlockMeanBase$predict()}}
-    \item \href{#method-NormalBlockMeanBase-warm_start_from}{\code{NormalBlockMeanBase$warm_start_from()}}
     \item \href{#method-NormalBlockMeanBase-split}{\code{NormalBlockMeanBase$split()}}
     \item \href{#method-NormalBlockMeanBase-merge}{\code{NormalBlockMeanBase$merge()}}
     \item \href{#method-NormalBlockMeanBase-clone}{\code{NormalBlockMeanBase$clone()}}
@@ -48,6 +54,7 @@ structures the mean (mu_i = C B' X_i).
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-plot_network'><code>NormalBlockBase$plot_network()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-print'><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-update'><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="warm_start_from"><a href='../../normalblockr/html/NormalBlockBase.html#method-NormalBlockBase-warm_start_from'><code>NormalBlockBase$warm_start_from()</code></a></span></li>
 </ul>
 </details>}}
 \if{html}{\out{<hr>}}
@@ -72,7 +79,7 @@ structures the mean (mu_i = C B' X_i).
       \item{\code{data}}{object of NormalBlockData class, with responses and design matrix}
       \item{\code{q}}{number of block/cluster}
       \item{\code{sparsity}}{sparsity penalty on the network density}
-      \item{\code{control}}{structured list of more specific parameters, to generate with NB_Mean_control}
+      \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
       \item{\code{zero_inflation}}{whether the concrete subclass models zero-inflation;
 set by the ZI subclasses themselves, not meant to be set by the end user.}
     }
@@ -87,10 +94,9 @@ set by the ZI subclasses themselves, not meant to be set by the end user.}
 \if{html}{\out{<a id="method-NormalBlockMeanBase-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-predict}{}}}
 \subsection{\code{NormalBlockMeanBase$predict()}}{
-  Predicts observations Y for new covariates X, in Y's
-original units. The mean-block mean is mu_i = C B' X_i, so the
-cluster-level predictor has to be mapped back to the variables
-through C.
+  Predicts the mean of Y for new covariates X, in Y's
+original units: mu_i = C B' X_i, with the posterior cluster
+probabilities as C when the clustering is unknown (as in `$fitted`).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanBase$predict(new_X)}
@@ -105,31 +111,6 @@ through C.
   }
   \subsection{Returns}{
     A n*p prediction matrix for new observations
-  }
-}
-
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-NormalBlockMeanBase-warm_start_from"></a>}}
-\if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-warm_start_from}{}}}
-\subsection{\code{NormalBlockMeanBase$warm_start_from()}}{
-  Seed this model's starting parameters from another,
-already-optimized model with the same q, instead of the heuristic
-clustering-derived values set at construction time. Used by
-[split()]/[merge()].
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{NormalBlockMeanBase$warm_start_from(other)}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Arguments}{
-    \if{html}{\out{<div class="arguments">}}
-    \describe{
-      \item{\code{other}}{a [NormalBlockMeanBase] object, already optimized}
-    }
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    Update the current object in place with `other`'s parameters
   }
 }
 

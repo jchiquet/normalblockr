@@ -46,32 +46,8 @@ NormalBlockVarBase <- R6::R6Class(
         weights <- control$sparsity_weights
       }
       private$weights <- weights
-      ## variant (either diagonal or spherical residuals covariance)
+      ## either diagonal or spherical residuals covariance
       private$res_covariance <- control$noise_covariance
-    },
-
-    #' @description Seed this model's starting parameters from another,
-    #' already-optimized model with the same q, instead of a fresh heuristic
-    #' clustering. Used by [NormalBlockVarCollectionSparsity] to warm-start
-    #' each penalty in a sparsity path from the previous one's solution.
-    #' @param other a [NormalBlockVarBase] object, already optimized
-    #' @return Update the current object in place with `other`'s parameters
-    warm_start_from = function(other) {
-      stopifnot("warm_start_from() requires both models to have the same q" = self$q == other$q)
-      args <- other$model_par
-      args$B0 <- NULL
-      if (!is.null(other$var_par)) {
-        args$C     <- other$var_par$tau
-        args$M     <- other$var_par$M
-        args$S     <- other$var_par$S
-        args$alpha <- colMeans(other$var_par$tau)
-      } else if (!is.null(other$posterior_par)) {
-        args$gamma <- other$posterior_par$gamma
-        args$mu    <- other$posterior_par$mu
-      }
-      do.call(self$update, args)
-      private$warm_started <- TRUE
-      invisible(self)
     },
 
     #' @description Checks that the blocks gather positively co-varying
@@ -123,12 +99,7 @@ NormalBlockVarBase <- R6::R6Class(
       split2 <- private$split_members(index, rule)
       split1 <- cl & !split2
 
-      ## Cluster split
-      new_C <- cbind(private$C, .Machine$double.eps)
-      new_C[split1, index] <- new_C[split1, index] - .Machine$double.eps
-      new_C[split2, self$q + 1] <- new_C[split2, index]
-      new_C[split2, index] <- .Machine$double.eps
-      new_C <- new_C / rowSums(new_C)
+      new_C <- private$split_memberships(index, split1, split2)
 
       ## New block starts as a copy of its parent's M/S column; split1/split2
       ## index variables (length p) and must not be reused on M/S, which
@@ -155,20 +126,7 @@ NormalBlockVarBase <- R6::R6Class(
       ## Precision matrix re-derived from new_M/new_S.
       new_Omega <- private$omega_from_M_S(new_M, new_S, new_weights)
 
-      ## Mark as already initialized so optim_initialize() reuses this state
-      ## instead of a fresh heuristic clustering.
-      if (in_place) {
-        self$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
-                    alpha = colMeans(new_C), warm_started = TRUE)
-        self$sparsity_weights <- new_weights
-        return(invisible(self))
-      } else {
-        new_NB <- self$clone()
-        new_NB$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
-                      alpha = colMeans(new_C), warm_started = TRUE)
-        new_NB$sparsity_weights <- new_weights
-        return(invisible(new_NB))
-      }
+      private$reseeded(in_place, new_C, Omega = new_Omega, M = new_M, S = new_S, weights = new_weights)
     },
 
     #' @description Create a clone of the current [`NormalBlockVarBase`] object after merging clusters `cl1` and `cl2`
@@ -181,8 +139,7 @@ NormalBlockVarBase <- R6::R6Class(
       ## sorting by increasing group label
       indices <- sort(indices)
 
-      new_C <- private$C[, -indices[2], drop = FALSE]
-      new_C[, indices[1]] <- private$C[, indices[1]] + private$C[, indices[2]]
+      new_C <- private$merge_memberships(indices)
 
       ## Variational means
       new_M <- private$M[, -indices[2], drop = FALSE]
@@ -203,20 +160,7 @@ NormalBlockVarBase <- R6::R6Class(
       ## Precision matrix re-derived from new_M/new_S.
       new_Omega <- private$omega_from_M_S(new_M, new_S, new_weights)
 
-      ## See split()'s comment: mark as warm-started so optim_initialize()
-      ## reuses this state instead of a fresh heuristic Sigmaq/Omega.
-      if (in_place) {
-        self$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
-                    alpha = colMeans(new_C), warm_started = TRUE)
-        self$sparsity_weights <- new_weights
-        return(self)
-      } else {
-        new_NB <- self$clone()
-        new_NB$update(C = new_C, Omega = new_Omega, M = new_M, S = new_S,
-                      alpha = colMeans(new_C), warm_started = TRUE)
-        new_NB$sparsity_weights <- new_weights
-        return(new_NB)
-      }
+      private$reseeded(in_place, new_C, Omega = new_Omega, M = new_M, S = new_S, weights = new_weights)
     }
   ),
 
@@ -261,13 +205,13 @@ NormalBlockVarBase <- R6::R6Class(
     mu                = NA, # mean for posterior distribution of W
     M                 = NA, # variational mean for posterior distribution of W
     S                 = NA, # variational diagonal of variances for posterior distribution of W
-    res_covariance    = NA, # shape of the residuals covariance (diagonal or spherical)
+    family_name       = "normal-block-var",
 
     ## Variable-specific B and d are informed by the n observations, and so is
     ## the q x q precision matrix of the n latent vectors W_i (diagonal plus
     ## the non-zero off-diagonal terms). A spherical noise variance is shared
     ## by all n * p cells.
-    penalty_groups = function() {
+    family_penalty_groups = function() {
       noise <- if (private$res_covariance == "diagonal") {
         penalty_group("noise", self$p, self$n)
       } else {
@@ -278,21 +222,10 @@ NormalBlockVarBase <- R6::R6Class(
             noise)
     },
 
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## Methods for integrated (V)EM inference --------------
-
-    ## Closed-form M-step estimate of Omega from M/S (Sigma_hat = M'M/n +
-    ## diag(S)); used by split()/merge() to reseed Omega from the new
-    ## clustering's own M/S/C rather than the parent's stale Omega.
-    ## Cluster pairs are ranked by how strongly related they are in the
-    ## current fit: merging two nearly independent blocks is rarely
-    ## competitive.
-    ## Ranked by the signed correlation between the two blocks' latent
-    ## signals, Sigma_kl / sqrt(Sigma_kk Sigma_ll), highest first: within a
-    ## block, the covariance of two variables is Sigma_kk > 0, so a merged
-    ## block can only describe positively co-varying variables. Merging two
-    ## negatively correlated blocks is never a sensible candidate (ranking by
-    ## |Omega_kl|, as before 0.4.0, tried those too).
+    ## Cluster pairs for merge() are ranked by the signed correlation between
+    ## the two blocks' latent signals, highest first: a merged block can only
+    ## describe positively co-varying variables, so merging two nearly
+    ## independent or negatively correlated blocks is rarely competitive.
     merge_score = function(pairs) {
       block_cor <- cov2cor(chol2inv(chol(private$Omega)))
       map_dbl(pairs, function(ij) block_cor[ij[1], ij[2]])
@@ -303,22 +236,17 @@ NormalBlockVarBase <- R6::R6Class(
     ## split(rule = "noise") cuts at the median of the noise variances
     noise_variance = function() 1 / private$dm1,
 
+    ## Closed-form M-step estimate of Omega from M/S (Sigma_hat = M'M/n +
+    ## diag(S)); used by split()/merge() to reseed Omega from the new
+    ## clustering's own M/S rather than the parent's stale Omega.
     omega_from_M_S = function(M, S, weights) {
       s_vec <- if (is.matrix(S)) colMeans(S) else S
       Sigma_hat <- crossprod(M) / self$n + diag(s_vec, ncol(M))
-      Omega <- if (private$sparsity_ == 0) {
-        chol2inv(chol(Sigma_hat))
-      } else {
-        glasso_omega(Sigma_hat, private$sparsity_ * weights)
-      }
-      ensure_pd(Omega)
+      ensure_pd(private$get_Omega(Sigma_hat, weights))
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for heuristic inference----------------------
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     ## Per-variable inverse variance from a residual matrix ("diagonal": one
     ## dm1 per variable; "spherical": one shared value). ddiag is floored
@@ -331,13 +259,6 @@ NormalBlockVarBase <- R6::R6Class(
     },
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## MLE of ZI Diagonal Normal distribution
-    ## (the weighted-least-squares fit itself lives in zi_weighted_fit(),
-    ## R/utils.R, shared with the collection-level zi_residuals())
-    zi_diag_normal_inference = function(){
-      fit <- self$data$zi_ols_fit()
-      list(B = fit$B, dm1 = fit$dm1, kappa = private$kappa, R = fit$R)
-    },
 
     heuristic_optimize = function(control){
       parameters <- private$get_heuristic_parameters()
@@ -365,9 +286,21 @@ NormalBlockVarBase <- R6::R6Class(
     #' column-wise rescaling, if any). Use `model_par$B` instead for the
     #' coefficients on the internal fitting scale.
     B_original = function() private$rescale_to_original(private$B, power = 1),
-    #' @field d0 number of zi variables (dimensions in X0)
-    d0 = function() self$data$d0,
-    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
+    #' @field fitted Y values predicted by the model, in Y's original units:
+    #' `X B`, plus the posterior mean of the latent block signals for (V)EM
+    #' fits, with the observed zeros of zero-inflated models set to 0
+    fitted = function() {
+      res <- self$data$X %*% private$B
+      if (!private$approx)
+        res <- res + tcrossprod(if (private$known_clusters) private$mu else private$M, private$C)
+      if (private$zi) res <- res * self$data$zeros_bar
+      private$rescale_to_original(res)
+    },
+    #' @field model_par a list with the model parameters: B (d x p regression
+    #' coefficients), B0 (zero-inflation coefficients, if any), dm1 (inverse
+    #' noise variances of the variables) and Omega (q x q precision matrix of
+    #' the latent block signals), on the scale of the fit. Use
+    #' `$B_original`/`$dm1_original` for B and dm1 on Y's original scale.
     model_par = function() list(B = private$B, B0 = private$B0,
                                 dm1 = private$dm1, Omega = private$Omega),
     #' @field sparsity_weights (weights associated to each pair of groups)
