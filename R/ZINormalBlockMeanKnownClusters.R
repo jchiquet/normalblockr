@@ -24,7 +24,7 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
   public = list(
     #' @description Create a new [`ZINormalBlockMeanKnownClusters`] object.
     #' @param data object of NormalBlockData class, with responses and design matrix
-    #' @param C clustering matrix C_jk = 1 if species j belongs to cluster k
+    #' @param C p x q clustering matrix, C_jk = 1 if variable j belongs to cluster k
     #' @param sparsity unused here, kept for signature symmetry (must be 0)
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`ZINormalBlockMeanKnownClusters`] object
@@ -88,8 +88,10 @@ ZINormalBlockMeanKnownClusters <- R6::R6Class(
       private$rescale_to_original(
         tcrossprod(self$data$X %*% private$B, private$C) * self$data$zeros_bar)
     },
-    #' @field model_par a list with model parameters: B, Omega and kappa (zero-inflation probabilities)
-    model_par = function() c(super$model_par, list(kappa = private$kappa)),
+    #' @field model_par the parameters of [NormalBlockMeanBase] (B, Omega),
+    #' plus B0 (zero-inflation coefficients) and kappa (zero-inflation
+    #' probabilities)
+    model_par = function() c(super$model_par, list(B0 = private$B0, kappa = private$kappa)),
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
     {paste("zero-inflated", private$res_covariance, "normal-block-mean model with fixed blocks")}

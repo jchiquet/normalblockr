@@ -278,21 +278,10 @@ NormalBlockVarBase <- R6::R6Class(
             noise)
     },
 
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    ## Methods for integrated (V)EM inference --------------
-
-    ## Closed-form M-step estimate of Omega from M/S (Sigma_hat = M'M/n +
-    ## diag(S)); used by split()/merge() to reseed Omega from the new
-    ## clustering's own M/S/C rather than the parent's stale Omega.
-    ## Cluster pairs are ranked by how strongly related they are in the
-    ## current fit: merging two nearly independent blocks is rarely
-    ## competitive.
-    ## Ranked by the signed correlation between the two blocks' latent
-    ## signals, Sigma_kl / sqrt(Sigma_kk Sigma_ll), highest first: within a
-    ## block, the covariance of two variables is Sigma_kk > 0, so a merged
-    ## block can only describe positively co-varying variables. Merging two
-    ## negatively correlated blocks is never a sensible candidate (ranking by
-    ## |Omega_kl|, as before 0.4.0, tried those too).
+    ## Cluster pairs for merge() are ranked by the signed correlation between
+    ## the two blocks' latent signals, highest first: a merged block can only
+    ## describe positively co-varying variables, so merging two nearly
+    ## independent or negatively correlated blocks is rarely competitive.
     merge_score = function(pairs) {
       block_cor <- cov2cor(chol2inv(chol(private$Omega)))
       map_dbl(pairs, function(ij) block_cor[ij[1], ij[2]])
@@ -303,6 +292,9 @@ NormalBlockVarBase <- R6::R6Class(
     ## split(rule = "noise") cuts at the median of the noise variances
     noise_variance = function() 1 / private$dm1,
 
+    ## Closed-form M-step estimate of Omega from M/S (Sigma_hat = M'M/n +
+    ## diag(S)); used by split()/merge() to reseed Omega from the new
+    ## clustering's own M/S rather than the parent's stale Omega.
     omega_from_M_S = function(M, S, weights) {
       s_vec <- if (is.matrix(S)) colMeans(S) else S
       Sigma_hat <- crossprod(M) / self$n + diag(s_vec, ncol(M))
@@ -316,9 +308,6 @@ NormalBlockVarBase <- R6::R6Class(
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Methods for heuristic inference----------------------
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     ## Per-variable inverse variance from a residual matrix ("diagonal": one
     ## dm1 per variable; "spherical": one shared value). ddiag is floored
@@ -367,7 +356,11 @@ NormalBlockVarBase <- R6::R6Class(
     B_original = function() private$rescale_to_original(private$B, power = 1),
     #' @field d0 number of zi variables (dimensions in X0)
     d0 = function() self$data$d0,
-    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) -- use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
+    #' @field model_par a list with the model parameters: B (d x p regression
+    #' coefficients), B0 (zero-inflation coefficients, if any), dm1 (inverse
+    #' noise variances of the variables) and Omega (q x q precision matrix of
+    #' the latent block signals), on the scale of the fit. Use
+    #' `$B_original`/`$dm1_original` for B and dm1 on Y's original scale.
     model_par = function() list(B = private$B, B0 = private$B0,
                                 dm1 = private$dm1, Omega = private$Omega),
     #' @field sparsity_weights (weights associated to each pair of groups)

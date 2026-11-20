@@ -99,12 +99,15 @@ ZINormalBlockMeanUnknownClusters <- R6::R6Class(
     },
     #' @field var_par a list with the variational parameter: tau (posterior group probabilities)
     var_par = function() list(tau = private$C),
-    #' @field model_par a list with model parameters: B, Omega and kappa (zero-inflation probabilities)
-    model_par = function() c(super$model_par, list(kappa = private$kappa)),
-    #' @field entropy Entropy of the conditional distribution
-    entropy = function() -sum(xlogx(private$C)),
+    #' @field model_par the parameters of [NormalBlockMeanBase] (B, Omega),
+    #' plus B0 (zero-inflation coefficients), kappa (zero-inflation
+    #' probabilities) and alpha (cluster proportions)
+    model_par = function() c(super$model_par, list(B0 = private$B0, kappa = private$kappa, alpha = private$alpha)),
+    #' @field entropy entropy of the variational distribution of the
+    #' clustering, `-sum(tau * log(tau))`
+    entropy = function() if (private$approx) NA else -sum(xlogx(private$C)),
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
-    {paste("zero-inflated", private$res_covariance, "normal-block-mean model with unknown blocks")}
+    {paste("zero-inflated", private$res_covariance, "normal-block-mean model with", self$q, "unknown blocks")}
   )
 )

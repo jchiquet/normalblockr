@@ -20,7 +20,7 @@ NormalBlockVarKnownClusters <- R6::R6Class(
   public = list(
     #' @description Create a new [`NormalBlockVarKnownClusters`] object.
     #' @param data object of NormalBlockVarData class, with responses and design matrix
-    #' @param C clustering matrix C_jk = 1 if species j belongs to cluster k
+    #' @param C p x q clustering matrix, C_jk = 1 if variable j belongs to cluster k
     #' @param sparsity to apply on variance matrix when calling GLASSO
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`NormalBlockVarKnownClusters`] object

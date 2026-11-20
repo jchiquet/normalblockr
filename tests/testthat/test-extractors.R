@@ -13,6 +13,7 @@ test_that("the extractors keep the names of the variables, covariates and cluste
   m <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
   expect_equal(dimnames(coef(m)), list(paste0("cov", 1:2), paste0("var", 1:12)))
   expect_equal(dimnames(sigma(m)), list(paste0("Cluster_", 1:3), paste0("Cluster_", 1:3)))
+  expect_equal(dimnames(m$latent_network()), dimnames(sigma(m)))
   expect_equal(dimnames(fitted(m)), list(paste0("obs", 1:60), paste0("var", 1:12)))
   new_X <- data$X[1:2, , drop = FALSE]
   rownames(new_X) <- c("a", "b")
@@ -22,6 +23,7 @@ test_that("the extractors keep the names of the variables, covariates and cluste
   m <- normal_block(data, blocks = 3, model = "mean", control = NB_control(verbose = FALSE))
   expect_equal(dimnames(coef(m)), list(paste0("cov", 1:2), paste0("Cluster_", 1:3)))
   expect_equal(dimnames(sigma(m)), list(paste0("var", 1:12), paste0("var", 1:12)))
+  expect_equal(dimnames(m$latent_network()), dimnames(sigma(m)))
   expect_equal(dim(predict(m, data$X[1:2, , drop = FALSE])), c(2, 12))
 })
 
@@ -40,9 +42,20 @@ test_that("print() and summary() end the model type with a period, without a spa
   expect_false(any(grepl(" \\.$", capture.output(print(summary(m))))))
 })
 
-test_that("coef() of a variance-block model is on the original scale of Y", {
+test_that("per-variable extractors are on the original scale of Y", {
   Y <- ex_var$Y * matrix(c(1, 10), nrow(ex_var$Y), ncol(ex_var$Y), byrow = TRUE)
   data <- NormalBlockData$new(Y, ex_var$X, scale = TRUE)
   m <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
   expect_equal(predict(m, ex_var$X), ex_var$X %*% coef(m), ignore_attr = TRUE)
+})
+
+test_that("predict() reproduces fitted() on the training X for mean-block models", {
+  Y <- ex_mean$Y * matrix(c(1, 10), nrow(ex_mean$Y), ncol(ex_mean$Y), byrow = TRUE)
+  data <- NormalBlockData$new(Y, ex_mean$X, scale = TRUE)
+  m <- normal_block(data, blocks = 3, model = "mean",
+                    control = NB_control(verbose = FALSE, noise_covariance = "full"))
+  expect_equal(predict(m, ex_mean$X), fitted(m), ignore_attr = TRUE)
+  ## the p x p residual covariance is mapped back to Y's units
+  s <- data$Y_scale
+  expect_equal(sigma(m), chol2inv(chol(m$model_par$Omega)) * tcrossprod(s), ignore_attr = TRUE)
 })

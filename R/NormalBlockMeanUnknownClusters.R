@@ -249,12 +249,14 @@ NormalBlockMeanUnknownClusters <- R6::R6Class(
       ## mean-block model: mu_i = C B' X_i, i.e. X B C' in matrix form
       private$rescale_to_original(tcrossprod(self$data$X %*% private$B, private$C))
     },
+    #' @field model_par the parameters of [NormalBlockMeanBase] (B, Omega),
+    #' plus alpha (cluster proportions)
+    model_par  = function() c(super$model_par, list(alpha = private$alpha)),
     #' @field var_par a list with the variational parameter: tau (posterior group probabilities)
     var_par    = function() list(tau = private$C),
-    #' @field entropy Entropy of the conditional distribution
-    #' The only latent variable is the clustering, so the entropy of the
-    #' variational distribution reduces to -sum(tau * log(tau)).
-    entropy    = function() -sum(xlogx(private$C)),
+    #' @field entropy entropy of the variational distribution of the
+    #' clustering, `-sum(tau * log(tau))`
+    entropy    = function() if (private$approx) NA else -sum(xlogx(private$C)),
     #' @field who_am_I a method to print what model is being fitted
     who_am_I = function()
     {paste(private$res_covariance, "normal-block-mean model with", self$q, "unknown blocks")}

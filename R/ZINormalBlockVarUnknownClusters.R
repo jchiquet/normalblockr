@@ -106,7 +106,7 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
   active = list(
     #' @field var_par a list with variational parameters
     var_par  = function() {list(M = private$M, S = private$S, tau = private$C)},
-    #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omega (blocks precision matrix), kappa (zero-inflation probabilities)
+    #' @field model_par the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities) and alpha (cluster proportions)
     model_par  = function() {
       par       <- super$model_par
       par$kappa <- private$kappa

@@ -97,7 +97,7 @@ NormalBlockVarUnknownClusters <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix))
+    #' @field model_par the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus alpha (cluster proportions)
     model_par  = function() {
       parameters       <- super$model_par
       parameters$alpha <- private$alpha

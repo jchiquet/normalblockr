@@ -45,7 +45,7 @@ NormalBlockBase <- R6::R6Class(
       cl0 <- control$clustering_init
       if (is.character(cl0) && length(cl0) == 1) {
         private$clustering_approx <- cl0
-        private$C <- matrix(NA, self$data$n, q)
+        private$C <- matrix(NA, self$p, q)
       } else if (!is.null(cl0)) {
         if (!is.vector(cl0) & !is.matrix(cl0)) stop("Labels must be encoded in vector of labels or indicator matrix")
         if (is.vector(cl0)) {
@@ -66,7 +66,7 @@ NormalBlockBase <- R6::R6Class(
         }
         private$C <- cl0
       } else {
-        private$C <- matrix(NA, self$data$n, q)
+        private$C <- matrix(NA, self$p, q)
       }
 
       if (zero_inflation) private$fit_zi_component()
@@ -98,7 +98,7 @@ NormalBlockBase <- R6::R6Class(
     #' rather than recomputing a fresh heuristic initialization. Set by
     #' [warm_start_from()] and by [split()]/[merge()].
     #' @param clustering_init initial clustering
-    #' @return Update the current [`normal`] object
+    #' @return Update the current object in place
     update = function(B = NA,
                       dm1 = NA,
                       C = NA,
@@ -276,9 +276,11 @@ NormalBlockBase <- R6::R6Class(
       if (per_observation) ll else sum(ll)
     },
 
-    #' @description Predicts observations Y for new covariates X, in Y's
-    #' original units (like `$fitted`, so that predicting on the training X
-    #' reproduces it).
+    #' @description Predicts the mean of Y for new covariates X, in Y's
+    #' original units. For the variance-block family, `X B`: the latent block
+    #' signals average out, so that on the training X it differs from
+    #' `$fitted`, which adds their posterior mean. The mean-block family
+    #' overrides it.
     #' @param new_X new set of covariates.
     #' @return A n*p prediction matrix for new observations
     predict = function(new_X){
@@ -287,10 +289,14 @@ NormalBlockBase <- R6::R6Class(
 
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Extractors ------------------------
-    #' @description Extract interaction network in the latent space, as a
-    #' matrix rather than a plot -- see `$plot_network()` to plot it instead.
-    #' @param type edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)
-    #' @return a square matrix of size `self$q`
+    #' @description Extract the network encoded by Omega, as a matrix rather
+    #' than a plot (see `$plot_network()`): between clusters for the
+    #' variance-block family, between variables for the mean-block family.
+    #' @param type edge value in the network: "support" (binary edges),
+    #' "precision" (entries of the precision matrix, on the scale of the fit)
+    #' or "partial_cor" (partial correlations)
+    #' @return a sparse square matrix, q x q (variance-block) or p x p
+    #' (mean-block), with named rows and columns
     latent_network = function(type = c("partial_cor", "support", "precision")) {
       net <- switch(
         match.arg(type),
@@ -301,6 +307,8 @@ NormalBlockBase <- R6::R6Class(
           tmp
         }
       )
+      nodes <- network_nodes_names(self)
+      if (length(nodes) == ncol(net)) dimnames(net) <- list(nodes, nodes)
       ## Sparse encoding: igraph::graph_from_adjacency_matrix() fails on dsyMatrix
       Matrix::Matrix(net, sparse = TRUE)
     },
@@ -366,12 +374,15 @@ NormalBlockBase <- R6::R6Class(
       p
     },
 
-    #' @description plot the latent network. To extract the network as a
-    #' matrix instead of plotting it, use `$latent_network()`.
-    #' @param type edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).
+    #' @description Plot the network encoded by Omega (see
+    #' `$latent_network()` to extract it as a matrix).
+    #' @param type edge value in the network: "partial_cor" (partial
+    #' correlations) or "support" (binary edges).
     #' @param output Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)
     #' @param edge.color Length 2 color vector. Color for positive/negative edges. Default is `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.
-    #' @param node.labels vector of character. The labels of the nodes. The default will use the column names ot the response matrix.
+    #' @param node.labels vector of character. The labels of the nodes. By
+    #' default, the cluster names (variance-block) or the variable names
+    #' (mean-block), as in `$latent_network()`.
     #' @param remove.isolated if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.
     #' @param layout an igraph layout function, applied to the graph without its edge weights, or a matrix of node coordinates. Only relevant for igraph output.
     #' @param plot logical. Should the final network be displayed or only sent back to the user. Default is `TRUE`.
@@ -391,11 +402,7 @@ NormalBlockBase <- R6::R6Class(
       if (output == "igraph") {
         G <-  igraph::graph_from_adjacency_matrix(net, mode = "undirected", weighted = TRUE, diag = FALSE)
 
-        if (!is.null(node.labels)) {
-          igraph::V(G)$label <- node.labels
-        } else {
-          igraph::V(G)$label <- cluster_names(ncol(net))
-        }
+        igraph::V(G)$label <- if (!is.null(node.labels)) node.labels else rownames(net)
         ## Nice nodes: a cluster's area grows with its number of variables
         sizes <- if (inherits(self, "NormalBlockVarBase")) tabulate(self$clustering, nbins = ncol(net))
                  else rep(1, ncol(net))
@@ -496,8 +503,6 @@ NormalBlockBase <- R6::R6Class(
     # which would also be true for split()/merge() clones (those
     # keep their own, different, already-tested initialization path).
 
-    ## Warns when the (V)EM hit the niter cap without reaching threshold
-    ## (heuristic fits have no ll_list/niter to check, so stay silent).
     ## Control list for the deliberately-truncated trial fits of
     ## best_of_inits()/candidates_split()/candidates_merge(). fixed_point_niter
     ## is only read by the mean-block family; the variance-block one ignores it.
@@ -535,6 +540,8 @@ NormalBlockBase <- R6::R6Class(
       (var <= median(var[cl])) & cl
     },
 
+    ## Warns when the (V)EM hit the niter cap without reaching threshold
+    ## (heuristic fits have no ll_list/niter to check, so stay silent).
     warn_if_not_converged = function() {
       if (is.na(private$niter) || private$niter < private$niter_max) return(invisible())
       last_increment <- abs(diff(private$ll_list))[private$niter]
@@ -702,9 +709,11 @@ NormalBlockBase <- R6::R6Class(
     },
     #' @field sparsity_term (sparsity_term term in log-likelihood due to sparsity)
     sparsity_term = function() self$sparsity * sum(abs(self$sparsity_weights * private$Omega)),
-    #' @field memberships cluster memberships
+    #' @field memberships the p x q matrix of cluster memberships: indicators
+    #' for a known clustering, posterior probabilities (tau) otherwise
     memberships = function() private$C,
-    #' @field clustering given as the list of elements contained in each cluster
+    #' @field clustering the cluster label of each variable (MAP for an
+    #' unknown clustering), named after the columns of Y
     clustering = function() {
       cl <- get_clusters(private$C)
       names(cl) <- colnames(self$data$Y)

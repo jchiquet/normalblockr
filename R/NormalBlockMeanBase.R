@@ -22,7 +22,7 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @param data object of NormalBlockData class, with responses and design matrix
     #' @param q number of block/cluster
     #' @param sparsity sparsity penalty on the network density
-    #' @param control structured list of more specific parameters, to generate with NB_Mean_control
+    #' @param control structured list of more specific parameters, to generate with NB_control
     #' @param zero_inflation whether the concrete subclass models zero-inflation;
     #' set by the ZI subclasses themselves, not meant to be set by the end user.
     #' @return A new [`NormalBlockMeanBase`] object
@@ -69,10 +69,9 @@ NormalBlockMeanBase <- R6::R6Class(
       private$weights <- weights
     },
 
-    #' @description Predicts observations Y for new covariates X, in Y's
-    #' original units. The mean-block mean is mu_i = C B' X_i, so the
-    #' cluster-level predictor has to be mapped back to the variables
-    #' through C.
+    #' @description Predicts the mean of Y for new covariates X, in Y's
+    #' original units: mu_i = C B' X_i, with the posterior cluster
+    #' probabilities as C when the clustering is unknown (as in `$fitted`).
     #' @param new_X new set of covariates.
     #' @return A n*p prediction matrix for new observations
     predict = function(new_X) {
@@ -82,12 +81,14 @@ NormalBlockMeanBase <- R6::R6Class(
     #' @description Seed this model's starting parameters from another,
     #' already-optimized model with the same q, instead of the heuristic
     #' clustering-derived values set at construction time. Used by
-    #' [split()]/[merge()].
+    #' [NormalBlockMeanCollectionSparsity] to warm-start each penalty of a
+    #' sparsity path from the previous one's solution.
     #' @param other a [NormalBlockMeanBase] object, already optimized
     #' @return Update the current object in place with `other`'s parameters
     warm_start_from = function(other) {
       stopifnot("warm_start_from() requires both models to have the same q" = self$q == other$q)
       args <- other$model_par
+      args$B0 <- NULL
       ## var_par only exists on the unknown-clusters side; a known clustering
       ## is fixed and must not be carried over
       if (!is.null(other$var_par)) {
@@ -264,7 +265,9 @@ NormalBlockMeanBase <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
-    #' @field model_par a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`): use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.
+    #' @field model_par a list with the model parameters: B (d x q, one
+    #' profile per cluster) and Omega (p x p precision matrix of the
+    #' residuals), on the scale of the fit (see [coef()] and [sigma()]).
     model_par = function() list(B = private$B, Omega = private$Omega),
     #' @field sparsity_weights (weights associated to each pair of groups)
     sparsity_weights = function(value) {

@@ -21,7 +21,7 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
   public = list(
     #' @description Create a new [`ZINormalBlockVarKnownClusters`] object.
     #' @param data object of NormalBlockData class, with responses and design matrix
-    #' @param C clustering matrix C_jk = 1 if species j belongs to cluster k
+    #' @param C p x q clustering matrix, C_jk = 1 if variable j belongs to cluster k
     #' @param sparsity to apply on variance matrix when calling GLASSO
     #' @param control structured list of more specific parameters, to generate with NB_control
     #' @return A new [`ZINormalBlockVarKnownClusters`] object
@@ -88,7 +88,7 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
   active = list(
     #' @field posterior_par a list with the parameters of posterior distribution W | Y
     posterior_par = function() list(gamma = private$gamma, mu = private$mu),
-    #' @field model_par a list with model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix), kappa (zero-inflation probabilities)
+    #' @field model_par the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities)
     model_par  = function() {
       par       <- super$model_par
       par$kappa <- private$kappa
