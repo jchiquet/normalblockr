@@ -171,20 +171,25 @@ sort(round(kappa_hat, 2))[1:5]                    # almost always present in som
 
 # Sparsifying the association network
 
-Once a number of clusters is chosen, the same sparsity options as in the non-zero-inflated case apply: fitting at the selected `q` with `sparsity = TRUE` explores a path of $\ell_1$ penalties on the inter-cluster association network [see @tous2026].
+Once a model is chosen, its network between clusters can be sparsified as in the non-zero-inflated case [see @tous2026]. Treating the selected clustering as known, `sparsity = TRUE` explores a path of $\ell_1$ penalties on the network:
 
-```{r, sparsify-zi}
-out_sp <- normal_block(data, blocks = myModel$q, sparsity = TRUE, zero_inflation = TRUE)
-out_sp$plot(c("BIC", "EBIC"))
-out_sp$plot(c("ICL", "deviance"))
+```{r, sparsify-zi, warning = FALSE}
+C_selected <- model.matrix(~ 0 + factor(myModel$clustering))
+out_sp <- normal_block(data, blocks = C_selected, sparsity = TRUE, zero_inflation = TRUE,
+                       control = NB_control(verbose = FALSE))
+out_sp$plot(c("BIC", "EBIC", "deviance"))
 ```
 
-Unlike `deviance`, which decreases monotonically as the penalty relaxes (a less penalized network is always at least as expressive), `BIC`/`EBIC` can bump up locally along the path: each extra edge costs a fixed `log(n)` in the parameter-count penalty, and whenever its actual gain in deviance is smaller than that, the criterion increases even though both the deviance and the parameter count keep moving in the expected direction. This is the intended behavior of a penalized criterion, not a bug in the parameter count.
+With only `r choose(myModel$q, 2)` possible edges, each edge costs little in BIC and EBIC, which pick one of the weakest penalties, at the end of the path. Stability selection (StARS) is more informative here: it refits the path on subsamples of the stations, the clustering being held fixed, and keeps the smallest penalty whose network is stable enough.
 
-The association network at the best ICL penalty can then be visualized directly:
+```{r, stars-zi, warning = FALSE}
+set.seed(1)
+sparse_zi <- out_sp$get_best_model("StARS")
+paste0("StARS keeps ", sparse_zi$n_edges, " edges out of ", choose(myModel$q, 2), ".")
+```
 
-```{r, network-zi}
-out_sp$get_best_model("ICL")$plot_network()
+```{r, network-zi, fig.width=5, fig.height=5}
+sparse_zi$plot_network(node.labels = seq_len(sparse_zi$q), layout = igraph::layout_with_fr)
 ```
 
 # References

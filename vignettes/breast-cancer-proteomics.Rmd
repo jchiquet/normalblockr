@@ -1,5 +1,5 @@
 ---
-title: "Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data"
+title: "Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data"
 author: "Julien Chiquet & Jeanne Tous"
 date: "`r Sys.Date()`"
 output:
@@ -9,7 +9,7 @@ output:
 bibliography: references.bib
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Normal-Block models: clustering variables by their covariance -- a worked example with breast cancer proteomics data}
+  %\VignetteIndexEntry{Normal-Block models: clustering variables by their covariance — a worked example with breast cancer proteomics data}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -129,24 +129,38 @@ On this dataset, `refine()` moves the ICL-selected number of clusters, a reminde
 
 # Sparsifying the network of the selected clustering
 
-The association network $\Omega$ of the ICL-selected model above is dense (no penalty was applied), which makes it hard to read directly. Treating that clustering as fixed, we can refit the model once more with the graphical-lasso penalty on $\Omega$ explored over a path of values (`sparsity = TRUE`), and pick the sparsity level with the best BIC.
+The association network $\Omega$ of the ICL-selected model above is dense (no penalty was applied), which makes it hard to read directly. Treating that clustering as fixed, we refit the model with the graphical-lasso penalty on $\Omega$ explored over a path of values (`sparsity = TRUE`). Along such a path, some fits may stop at the iteration cap with a warning; they are not shown here.
 
-```{r, sparsify}
+```{r, sparsify, warning = FALSE}
 group_selected <- model.matrix(~ 0 + factor(selected_NB_refined$clustering))
-NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE, control = NB_control(min_ratio=0.001))
+NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE,
+                               control = NB_control(min_ratio = 0.001, verbose = FALSE))
 ```
 
 ```{r, plotting-criteria-sparse, fig.width=7, fig.height=5}
 plot(NB_prot_sparse, c("EBIC", "deviance"))
 ```
 
+The criteria favour weak penalties, hence dense networks: the EBIC keeps many of the possible edges.
+
 ```{r, sparse-model-selection}
-sparse_best <- NB_prot_sparse$get_best_model("EBIC")
-paste0("BIC selects a penalty of ", round(sparse_best$sparsity, 4), ".")
+sparse_ebic <- NB_prot_sparse$get_best_model("EBIC")
+paste0("EBIC keeps ", sparse_ebic$n_edges, " edges out of ", choose(sparse_ebic$q, 2), ".")
 ```
 
-```{r, plot-network-sparse, fig.width=6, fig.height=6}
-sparse_best$plot_network(output = "corrplot")
+Stability selection (StARS) is better suited to reading the network. It refits the path on subsamples of the observations, the clustering being held fixed, and keeps the smallest penalty whose network is stable enough:
+
+```{r, sparse-stars, warning = FALSE}
+set.seed(1)
+sparse_stars <- NB_prot_sparse$get_best_model("StARS")
+paste0("StARS keeps ", sparse_stars$n_edges, " edges.")
 ```
+
+```{r, plot-network-sparse, fig.width=6, fig.height=5}
+sparse_stars$plot_network(node.labels = seq_len(sparse_stars$q), remove.isolated = TRUE,
+                          layout = igraph::layout_with_fr)
+```
+
+The width of an edge is proportional to the absolute partial correlation between the two clusters, positive in red and negative in turquoise, and the size of a node to that of its cluster; isolated clusters are not drawn.
 
 # References

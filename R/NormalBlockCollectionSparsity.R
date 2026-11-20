@@ -79,9 +79,11 @@ NormalBlockCollectionSparsity <- R6::R6Class(
     optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {
       previous <- NULL
       self$models <- lapply(self$models, function(model) {
-        if (control$verbose)
+        ## a line rewritten in place only makes sense in a console
+        if (control$verbose && interactive()) {
           cat("\t", private$progress_label, "=", model[[private$progress_field]], "          \r")
-        flush.console()
+          flush.console()
+        }
         if (!is.null(previous)) model$warm_start_from(previous)
         model$optimize(control)
         previous <<- model

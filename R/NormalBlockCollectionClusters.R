@@ -122,6 +122,7 @@ NormalBlockCollectionClusters <- R6::R6Class(
       stopifnot(all(directions %in% c("split", "merge")))
       stopifnot("refine() compares deviances, which heuristic fits (NB_control(heuristic = TRUE)) do not have" =
                   !isTRUE(self$control$heuristic))
+      private$refined <- TRUE
       if (!is.null(split_rule)) split_rule <- match.arg(split_rule, c("kmeans", "noise"))
       ord <- order(self$q_list)
       q_sorted <- self$q_list[ord]
@@ -166,7 +167,8 @@ NormalBlockCollectionClusters <- R6::R6Class(
       viol <- self$deviance_violations
       if (length(viol) > 0)
         cat("* Warning: the deviance increases with q at q =", paste(viol, collapse = ", "),
-            "\n    (nested models: a sign of poor local optima). Try $refine().\n")
+            "\n    (nested models: a sign of poor local optima",
+            if (private$refined) "that refine() did not repair).\n" else "). Try $refine().\n")
       invisible(self)
     }
   ),
@@ -176,6 +178,7 @@ NormalBlockCollectionClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   private = list(
     family = NA_character_, # "var" or "mean", set by the subclasses
+    refined = FALSE,        # whether refine() has run, for print()
     scope = function() "over q"
   ),
   active = list(
