@@ -151,6 +151,9 @@ NormalBlockCollectionClusters <- R6::R6Class(
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  private = list(
+    scope = function() "over q"
+  ),
   active = list(
     #' @field q_list number of blocks
     q_list = function() map_dbl(self$models, "q"),

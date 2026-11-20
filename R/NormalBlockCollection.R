@@ -92,6 +92,7 @@ NormalBlockCollection <- R6::R6Class(
   private = list(
     progress_field = NA_character_, # name of the field reported by optimize()'s progress message
     progress_label = NA_character_, # human-readable label for that field
+    scope = function() "", # what varies across the collection (see who_am_I)
 
     ## Row of crit_df minimizing `crit`. `crit_df` can be passed in to reuse
     ## one already computed by the caller instead of rebuilding self$criteria.
@@ -136,6 +137,13 @@ NormalBlockCollection <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
+    #' @field who_am_I a description of the collection: the kind of models it
+    #' holds and what varies across them
+    who_am_I = function() {
+      m <- self$models[[1]]
+      while (inherits(m, "NormalBlockCollection")) m <- m$models[[1]]
+      paste("collection of", sub(" model with .*$", "", m$who_am_I), "models", private$scope())
+    },
     #' @field criteria a data frame with the values of some criteria for the collection of models
     criteria = function() purrr::map_df(self$models, "criteria"),
     #' @field loglik not defined for a collection: accessing it raises an informative error. Use `logLik()` for every model's log-likelihood, or `$get_best_model()$loglik` for a single one.

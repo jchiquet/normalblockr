@@ -44,14 +44,5 @@ NormalBlockMeanCollectionClustersSparsity <- R6::R6Class(
       private$progress_field <- "q"
       private$progress_label <- "number of blocks"
     }
-  ),
-
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  ##  ACTIVE BINDINGS ----
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  active = list(
-    #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function()
-      "collection of normal-block-mean models with different values of q and different penalties"
   )
 )

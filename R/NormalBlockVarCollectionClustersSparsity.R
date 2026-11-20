@@ -51,19 +51,5 @@ NormalBlockVarCollectionClustersSparsity <- R6::R6Class(
       private$progress_field <- "q"
       private$progress_label <- "number of blocks"
     }
-  ),
-
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  ##  ACTIVE BINDINGS ----
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  active = list(
-    #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(){
-      nc <- if (is.null(self$control$noise_covariance)) "diagonal" else self$control$noise_covariance
-      zi <- if (isTRUE(self$control$zero_inflation)) "zero-inflated " else ""
-      paste0("Collection of ", zi, nc,
-             " normal-block-var models with different values of q and different penalties.")
-    }
-
   )
 )

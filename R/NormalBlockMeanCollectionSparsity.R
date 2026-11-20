@@ -85,12 +85,5 @@ NormalBlockMeanCollectionSparsity <- R6::R6Class(
       nm <- colnames(self$data$Y)
       if (is.null(nm)) paste0("Y", seq_len(self$data$p)) else nm
     }
-  ),
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  ##  ACTIVE BINDINGS ----
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  active = list(
-    #' @field who_am_I a method to print what model is being fitted
-    who_am_I = function() "normal-block-mean model with sparsity path"
   )
 )

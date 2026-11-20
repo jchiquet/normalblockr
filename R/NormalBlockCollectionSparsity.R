@@ -141,6 +141,8 @@ NormalBlockCollectionSparsity <- R6::R6Class(
   private = list(
     sparsity_ = NA,   # penalty values in the collection (lambda)
     blocks_   = NA,   # blocks (either a scalar or an indicator matrix)
+    scope = function() paste("over sparsity penalties, with",
+                             if (is.matrix(private$blocks_)) "fixed blocks" else "fixed q"),
     stab_path = NULL, # stability path, filled in by stability_selection()
     ## family hooks for stability_selection(): the same penalty path refitted
     ## on a subsample with the clustering held fixed, and the network's nodes
@@ -152,6 +154,10 @@ NormalBlockCollectionSparsity <- R6::R6Class(
   ##  ACTIVE BINDINGS ----
   ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   active = list(
+    #' @field sparsity_details number, range and ratio of the penalties of the path
+    sparsity_details = function()
+      list("n_penalties" = length(self$sparsity), "min_ratio" = min(self$sparsity)/max(self$sparsity),
+           "min_sparsity" = min(self$sparsity), "max_sparsity" = max(self$sparsity)),
     #' @field q number of blocks
     q = function() ifelse(is.matrix(private$blocks_), ncol(private$blocks_), private$blocks_),
     #' @field blocks group matrix or number of blocks

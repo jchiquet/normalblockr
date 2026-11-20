@@ -83,22 +83,6 @@ NormalBlockVarCollectionSparsity <- R6::R6Class(
       }
       NormalBlockVarCollectionSparsity$new(data, private$blocks_, isTRUE(self$control$zero_inflation), control)
     },
-    network_nodes = function() paste0("group_", seq_len(self$q))
-  ),
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  ##  ACTIVE BINDINGS ----
-  ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  active = list(
-    #' @field sparsity_details list of information about model's penalties
-    sparsity_details = function()
-      list("n_penalties" = length(self$sparsity), "min_ratio" = min(self$sparsity)/max(self$sparsity),
-           "min_sparsity" = min(self$sparsity), "max_sparsity" = max(self$sparsity)),
-    #' @field who_am_I a method to print what model is being fitted
-    who_am_I  = function(){
-      nc <- if (is.null(self$control$noise_covariance)) "diagonal" else self$control$noise_covariance
-      zi <- if (isTRUE(self$control$zero_inflation)) "zero-inflated " else ""
-      paste0("Collection of ", zi, nc, " normal-block-var models with ",
-             ifelse(is.matrix(private$blocks_), "fixed blocks", "fixed q"),
-        ", with different sparsity penalties.")}
+    network_nodes = function() cluster_names(self$q)
   )
 )
