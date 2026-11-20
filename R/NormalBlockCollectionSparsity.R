@@ -181,7 +181,7 @@ NormalBlockCollectionSparsity <- R6::R6Class(
     sparsity_ = NA,   # penalty values in the collection (lambda)
     blocks_   = NA,   # blocks (either a scalar or an indicator matrix)
     scope = function() paste("over sparsity penalties, with",
-                             if (is.matrix(private$blocks_)) "fixed blocks" else "fixed q"),
+                             if (is.matrix(private$blocks_)) "fixed clusters" else "fixed q"),
     stab_path = NULL, # stability path, filled in by stability_selection()
     family    = NA_character_, # "var" or "mean", set by the subclasses
     ## family hook for the default penalty grid: the absolute entries of a

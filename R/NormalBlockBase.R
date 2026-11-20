@@ -609,7 +609,7 @@ NormalBlockBase <- R6::R6Class(
       last_increment <- abs(diff(private$ll_list))[private$niter]
       if (last_increment >= private$threshold)
         warning(sprintf(
-          "%s: (V)EM stopped at the niter cap (%d) without reaching the convergence threshold (last increment = %.3g, threshold = %.1e). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.",
+          "%s: (V)EM stopped at the niter cap (%d) without reaching the convergence threshold (last increment = %.3g, threshold = %.1e). Consider raising `niter` in NB_control(), especially with many clusters -- see plot_loglik() to check.",
           self$who_am_I, private$niter_max, last_increment, private$threshold), call. = FALSE)
       invisible()
     },
@@ -699,7 +699,7 @@ NormalBlockBase <- R6::R6Class(
     #' @field who_am_I a description of the model
     who_am_I = function() {
       paste(c(if (private$zi) "zero-inflated", private$res_covariance, private$family_name, "model with",
-              if (private$known_clusters) "fixed blocks" else paste(self$q, "unknown blocks")),
+              if (private$known_clusters) "fixed clusters" else paste(self$q, "unknown clusters")),
             collapse = " ")
     },
     #' @field q number of blocks

@@ -41,7 +41,7 @@ NormalBlockCollectionClusters <- R6::R6Class(
                   model = private$family, control = control)
       })
       private$progress_field <- "q"
-      private$progress_label <- "number of blocks"
+      private$progress_label <- "number of clusters"
     },
 
     #' @description returns the unknown-clusters model corresponding to given q
