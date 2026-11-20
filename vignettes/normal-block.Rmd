@@ -48,7 +48,7 @@ Fix the seed to make the results reproducible.
 set.seed(1)
 ```
 
-Simulate data with `generate_normal_block_data()`.
+Data are simulated with `generate_normal_block_var_data()`.
 
 ## Fix simulation parameters
 
@@ -58,7 +58,7 @@ Several parameters need to be defined to simulate the data:
 n = 100 # Number of samples (number of rows in the matrix of observations)
 p = 40  # Number of entities observed (number of columns in the matrix of observations)
 d = 2   # Number of covariates
-q = 3   # Number of clusters
+q = 6   # Number of clusters
 kappa = 0 # Mean zero-inflation probability (can also be a vector to define one ZI-probability for each variable). kappa = 0 means that there is no zero-inflation.
 omega_structure = "erdos-renyi" # Network structure.
 u_v = c(0.3, 0.1) # Parameters to generate an association matrix from a graph, details given in the bibliography.
@@ -176,7 +176,7 @@ When the variables' clustering is unknown, the number of clusters can simply be 
 
 ```{r, simulation1-NB2}
 my_NB <- normal_block(data = my_data,
-                      blocks = 3)
+                      blocks = q)
 print(my_NB)
 plot(my_NB)
 ```
@@ -192,13 +192,15 @@ When the number of clusters is unknown, `normal_block()` can be given a range of
 
 ```{r, simulation1-NB3}
 my_NB_unknown <- normal_block(data = my_data,
-                              blocks = 2:5)
+                              blocks = 2:8)
 ```
 Each model of the collection is first fitted from its own initial clustering (a $k$-means on the residuals, see `NB_control()`), then the whole collection is polished by `refine()`: for every $q$, it tries to split a cluster of the model with $q-1$ clusters and to merge two clusters of the model with $q+1$, and keeps a candidate when it lowers the deviance. Since the models are nested, a deviance that increases with $q$ signals a poor local optimum: `print()` reports such cases (`deviance_violations`).
 
 ```{r, simulation1-NB3-print}
 my_NB_unknown
 ```
+
+`r v <- my_NB_unknown$deviance_violations; if (length(v)) paste0("Here, a violation remains at q = ", paste(v, collapse = ", "), ", at the edge of the explored range, where refine() can only seed the model from its smaller neighbour; it does not affect the selected model.") else ""`
 
 A specific model can be selected either by its number of clusters or as the best model for a given criterion (BIC, ICL or EBIC). The value of each criterion, for every model in the collection, can be visualized with `plot()`.
 
@@ -209,93 +211,78 @@ plot(my_NB_unknown)
 Model selection is done with `get_model()` when a specific number of clusters is required, and with `get_best_model()` to select the best model for a given criterion.
 
 ```{r, simulation1-NB3-model-selection}
-myNB_3   <- my_NB_unknown$get_model(3)
+myNB_6   <- my_NB_unknown$get_model(6)
 myNB_BIC <- my_NB_unknown$get_best_model("BIC")
+myNB_BIC$q
 ```
 
 The criteria above rest on penalties. Cross-validation offers a penalty-free alternative: `normal_block_cv()` fits the collection on all folds but one and computes the exact log-likelihood of the left-out observations (for the variance-block model, the marginal over the latent factors, computed at the selected partition). It typically plateaus beyond the true number of clusters, so the one-standard-error rule picks the smallest $q$ within one standard error of the best.
 
 ```{r, simulation1-NB3-cv, fig.width=6, fig.height=4}
 set.seed(1)
-my_NB_cv <- normal_block_cv(my_data, blocks = 2:5, folds = 5)
+my_NB_cv <- normal_block_cv(my_data, blocks = 2:8, folds = 5)
 my_NB_cv
 plot(my_NB_cv)
 ```
 
-Here every criterion selects more than the 3 simulated clusters, cross-validation least of all. This is the default column rescaling of $Y$ at work: on data simulated from the model itself, whose variables carry their block's signal with the same weight, rescaling makes the model misspecified. Fitting `NormalBlockData$new(my_nb_data$Y, my_nb_data$X, scale = FALSE)` instead, BIC, ICL and cross-validation all select $q = 3$. On real data the rescaling usually helps the variance-block model (see `?NormalBlockData`).
+Here BIC, ICL and cross-validation all recover the `r q` simulated clusters. By default the columns of $Y$ are rescaled for the variance-block model, which usually helps on real data (see `?NormalBlockData`).
 
 
 ### Playing with sparsity
-By default, no penalty is applied to the association network. A penalty can be added via the `sparsity` argument of `normal_block()`, with any of the parametrizations seen above (fixed clustering, fixed number of clusters, or unknown number of clusters). The example below uses a fixed clustering.
+By default, no penalty is applied to the association network. A penalty can be added via the `sparsity` argument of `normal_block()`, with any of the parametrizations seen above (fixed clustering, fixed number of clusters, or unknown number of clusters). The examples below use the known clustering, so that the inferred network can be compared with the simulated one, which has `r sum(my_nb_data$parameters$Omega[upper.tri(my_nb_data$parameters$Omega)] != 0)` edges out of `r choose(q, 2)` possible ones.
 
-To use a fixed $\ell_1$ penalty [@tous2026] on the network, pass that value to the `sparsity` argument:
+To use a fixed $\ell_1$ penalty [@tous2026] on the network, pass that value to the `sparsity` argument. The larger the penalty, the sparser the network:
 ```{r, simulation1-NB-fixed-sparsity}
 my_NB_sparse_low <- normal_block(data = my_data,
                                  blocks = my_nb_data$parameters$C,
-                                 sparsity = 0.1)
+                                 sparsity = 0.05,
+                                 control = NB_control(verbose = FALSE))
 my_NB_sparse_high <- normal_block(data = my_data,
                                   blocks = my_nb_data$parameters$C,
-                                  sparsity = 10)
+                                  sparsity = 0.2,
+                                  control = NB_control(verbose = FALSE))
+c(low = my_NB_sparse_low$n_edges, high = my_NB_sparse_high$n_edges)
 ```
-The larger the penalty, the sparser the network.
-```{r, simulation1-NB-low-sparsity-plot}
-my_NB_sparse_low$plot_network()
-```
-```{r, simulation1-NB-high-sparsity-plot}
-my_NB_sparse_high$plot_network()
-```
-It is usually hard to know a priori which sparsity penalty is best. `normal_block()` can instead explore a range of sparsity levels by simply setting `sparsity = TRUE`, which returns a collection of Normal-Block models, one per sparsity penalty.
 
-```{r, simulation1-NB-changing-sparsity}
+It is usually hard to know a priori which penalty is best. `normal_block()` can instead explore a range of penalties by setting `sparsity = TRUE`, which returns a collection of Normal-Block models, one per penalty. The criteria can then be plotted as a function of the penalty, using `plot()`.
+
+```{r, simulation1-NB-changing-sparsity, warning = FALSE}
 my_NB_sparse <- normal_block(data = my_data,
                              blocks = my_nb_data$parameters$C,
                              sparsity = TRUE,
                              control = NB_control(verbose = FALSE))
-```
-
-The different criteria can then be plotted as a function of the penalty, using `plot()`.
-```{r, simulation1-NB-changing-sparsity-plot}
 plot(my_NB_sparse)
 ```
-Penalty selection can be done similarly to the selection of the number of clusters.
-```{r, simulation1-NB-changing-sparsity-model-selection}
-myNB_sparse_0.1   <- my_NB_sparse$get_model(0.1)
+
+A penalty is selected as a number of clusters is, with `get_model()` and `get_best_model()`. The penalized criteria tend to favour weak penalties, hence dense networks. Stability selection (StARS) refits the path on subsamples of the observations, the clustering being held fixed, and keeps the smallest penalty whose network is stable enough; it is usually better suited to reading the network.
+
+```{r, simulation1-NB-changing-sparsity-model-selection, warning = FALSE}
 myNB_sparse_BIC   <- my_NB_sparse$get_best_model("BIC")
-```
-
-The penalty can also be chosen by stability selection (StARS, @liu2010stars): the whole path is refitted on subsamples of the observations, with the clustering held fixed, and the selected penalty is the smallest one whose network is stable enough (0.9 by default).
-
-```{r, simulation1-NB-changing-sparsity-stars}
 set.seed(1)
 myNB_sparse_StARS <- my_NB_sparse$get_best_model("StARS")
-myNB_sparse_StARS$n_edges
+c(BIC = myNB_sparse_BIC$n_edges, StARS = myNB_sparse_StARS$n_edges)
 ```
 
-Both the sparsity penalty and the number of clusters can also be left to vary jointly.
+The edges selected by StARS can be compared with those of the simulated network:
 
-```{r, simulation1-NB-sparse_unknown}
-my_NB_sparse_unknown <-  normal_block(data = my_data,
-                                      blocks = 2:6,
-                                      sparsity = TRUE,
-                                      control = NB_control(verbose = FALSE))
+```{r, simulation1-NB-stars-vs-truth}
+true_net  <- my_nb_data$parameters$Omega != 0
+stars_net <- as.matrix(myNB_sparse_StARS$latent_network("support")) != 0
+table(simulated = true_net[upper.tri(true_net)], StARS = stars_net[upper.tri(stars_net)])
 ```
 
-The result is a collection of Normal-Block models with different numbers of clusters and different penalties.
-```{r, simulation1-NB-sparse_unknown-who-am-I}
-my_NB_sparse_unknown$who_am_I
+```{r, simulation1-NB-stars-network}
+myNB_sparse_StARS$plot_network(layout = igraph::layout_with_fr)
 ```
 
+The penalty and the number of clusters can also vary jointly, by passing a range of values to `blocks` together with `sparsity = TRUE`. `get_model(q)` then returns the path of penalties for $q$ clusters, from which a penalty is selected as above.
 
-`plot()` allows each criterion to be analysed as a function of both the number of clusters and the penalty. By default, the penalties tested are computed by `normal_block()` separately for each number of clusters, and can differ from one to another -- which is what the blanks in the plot come from.
-```{r, simulation1-NB-sparse_unknown-plot}
-plot(my_NB_sparse_unknown, "BIC")
-```
-
-Model selection is also done using `get_model()` and `get_best_model()`. With `get_model()`, one can fix only the number of clusters, getting back a collection of models with different sparsity levels, or fix both the number of clusters and the sparsity level.
-
-```{r, simulation1-NB-sparse_unknown-selection}
-my_NB_sparse_3     <- my_NB_sparse_unknown$get_model(3)
-my_NB_sparse_3_0.1 <- my_NB_sparse_unknown$get_model(3, 0.1)
+```{r, simulation1-NB-sparse_unknown, warning = FALSE}
+my_NB_sparse_unknown <- normal_block(data = my_data,
+                                     blocks = 5:7,
+                                     sparsity = TRUE,
+                                     control = NB_control(verbose = FALSE))
+my_NB_sparse_unknown$get_model(6)
 ```
 
 ## With zero-inflated data
