@@ -7,7 +7,7 @@
 [![Coverage
 status](https://codecov.io/gh/jchiquet/normalblockr/branch/master/graph/badge.svg)](https://app.codecov.io/github/jchiquet/normalblockr?branch=master)
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![License: GPL
 v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![](https://img.shields.io/github/last-commit/jchiquet/normalblockr.svg)](https://github.com/jchiquet/normalblockr/commits/master)
@@ -15,48 +15,44 @@ v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/li
 
 ## Description
 
-> The Normal-Block model[^1] is a Gaussian graphical model with a latent
-> clustering structure, designed for the multivariate analysis of
-> continuous data: it clusters variables and, building on the graphical
-> lasso, infers a network of statistical dependencies *between clusters*
-> rather than between individual variables. This package implements an
-> efficient (variational) EM algorithm to fit it, accompanied by a set
-> of functions for model selection, visualization and diagnostic. See
-> [all the dedicated
+> **normalblockr** fits Gaussian models with a latent clustering of the
+> variables. The Normal-Block model[^1] is a Gaussian graphical model
+> that clusters variables by how they *covary* and, building on the
+> graphical lasso[^2], infers a network of statistical dependencies
+> *between clusters* rather than between individual variables. A
+> complementary family clusters variables by how they *respond* to
+> covariates. The package fits both by (variational) EM, with tools for
+> model selection, visualization and diagnostics. See [the
 > vignettes](https://jchiquet.github.io/normalblockr/articles/) for a
 > comprehensive introduction.
 
-**normalblockr** covers the following model variants, all built around
-the same `normal_block()`/`NormalBlockData` interface:
+Two model families are reached through the same
+`normal_block()`/`NormalBlockData` interface:
 
-- **Known clusters**: the grouping of variables is given (e.g. from
-  prior knowledge); only the association network between clusters is
-  estimated, by EM.
-- **Unknown clusters**: the grouping is inferred jointly with everything
-  else by a variational EM, either for a single number of clusters or
-  over a range explored as a collection, with model selection via
-  BIC/EBIC/ICL.
-- **Sparse (graphical-lasso) network**: an $\ell_1$ penalty[^2] on the
-  inter-cluster precision matrix, for a single penalty value or a path
-  explored as a collection.
-- **Zero-inflated extension**: an excess-of-zeros layer for data
-  (e.g. abundance/biomass tables) with more exact zeros than a plain
-  Normal model can represent.
+- **Normal-Block-Var** (`model = "var"`, the default): variables are
+  clustered by their covariance,
+  $Y_i = B^\top X_i + C W_i + \varepsilon_i$ with a latent
+  $W_i \sim \mathcal N(0, \Omega^{-1})$ shared within a cluster;
+  $\Omega$ is the network between clusters.
+- **Normal-Block-Mean** (`model = "mean"`): variables are clustered by
+  their response to the covariates. All variables of a cluster share one
+  regression profile, $\mu_i = C B^\top X_i$ with $B$ of size
+  $d \times q$ instead of $d \times p$; the residual covariance is
+  diagonal (the default), spherical, or full.
 
-Any combination of these is reached through the same `normal_block()`
-function: known or unknown clustering, sparse or not, zero-inflated or
-not are independent choices, not separate model classes to learn.
+For both families, the following are independent choices of the same
+call:
 
-Since version 0.3.0 the package also fits a second, complementary
-family, reached with `normal_block(..., model = "mean")`:
-
-- **Mean-block models**: variables are clustered by how they *respond*
-  to the covariates rather than by how they *covary*. All variables in a
-  cluster share one regression profile, so the mean is
-  $\mu_i = C B^\top X_i$ with $B$ of size $d \times q$ instead of
-  $d \times p$. Known or unknown clustering, zero-inflated or not, with
-  the residual covariance taken diagonal (the default), spherical, or
-  full.
+- **Known or unknown clusters**: the grouping of variables is given
+  (e.g. from prior knowledge), or inferred by a variational EM, for a
+  single number of clusters or over a range explored as a collection,
+  with model selection by BIC, ICL, EBIC or cross-validation.
+- **Sparse network**: an $\ell_1$ penalty on the precision matrix, for a
+  single penalty or a path, selected by a criterion or by stability
+  (StARS).
+- **Zero-inflation**: an excess-of-zeros layer for data (e.g. abundance
+  or biomass tables) with more exact zeros than a Gaussian model can
+  represent.
 
 The two families answer different questions and generally return
 different groupings; `normal_block_sequential()` runs one after the
@@ -115,7 +111,7 @@ m_known <- normal_block(data, blocks = group)
 m_known
 ```
 
-    A diagonal normal-block-var model with fixed blocks .
+    A diagonal normal-block-var model with fixed blocks.
     ===========================================================================
      nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
           999 6      15        0 -70387.84 140775.7 146616.3 146616.3 146670    14
@@ -137,7 +133,7 @@ by ICL.
 m_unknown <- normal_block(data, blocks = 2:20)
 ```
 
-    Fitting a diagonal normal-block-var model with unknown q 
+    Fitting a collection of diagonal normal-block-var models over q 
          number of blocks = 2           
          number of blocks = 3           
          number of blocks = 4           
@@ -171,10 +167,12 @@ m_unknown$plot(c("deviance", "BIC", "ICL", "EBIC"))
 m_unknown$get_best_model("EBIC")
 ```
 
-    A diagonal normal-block-var model with 16 unknown blocks .
+    A diagonal normal-block-var model with 19 unknown blocks.
     ===========================================================================
-     nb_param  q n_edges sparsity loglik deviance      BIC      ICL     EBIC niter
-         1129 16     120        0 -66764   133528 140117.3 140117.5 140782.8    18
+     nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+         1186 19     171        0 -66245.44 132490.9 139411.2 139411.2 140418.2
+     niter
+        11
     ===========================================================================
     * Useful fields
         $model_par, $posterior_par / $var_par, $clustering 
@@ -193,7 +191,7 @@ actually worth visualizing.
 m_sparse <- normal_block(data, blocks = group, sparsity = TRUE)
 ```
 
-    Fitting a Collection of diagonal normal-block-var models with fixed blocks, with different sparsity penalties. 
+    Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed blocks 
          penalty = 0.2565018           
          penalty = 0.2188391           
          penalty = 0.1867065           
@@ -249,7 +247,7 @@ data_zi <- NormalBlockData$new(Y_zi, X_zi)
 m_zi    <- normal_block(data_zi, blocks = 2:8, zero_inflation = TRUE)
 ```
 
-    Fitting a diagonal normal-block-var model with unknown q 
+    Fitting a collection of zero-inflated diagonal normal-block-var models over q 
          number of blocks = 2           
          number of blocks = 3           
          number of blocks = 4           
@@ -265,7 +263,7 @@ m_zi    <- normal_block(data_zi, blocks = 2:8, zero_inflation = TRUE)
 m_zi$get_best_model("ICL")
 ```
 
-    A zero-inflated diagonal normal-block-var model with 4 unknown blocks .
+    A zero-inflated diagonal normal-block-var model with 4 unknown blocks.
     ===========================================================================
      nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
           197 4       6        0 -13523.7  27047.4 28220.75 28241.19 28237.38     8
@@ -292,10 +290,11 @@ m_zi$get_best_model("ICL")
   (`vignette("mean-block-breast-cancer")`): the mean-block family on
   `brca_rppa` – clustering proteins by their subtype signature, choosing
   the shape of the residual covariance, sparsifying it.
-- [`inst/normal_block_models.qmd`](https://jchiquet.github.io/normalblockr/normal_block_models.pdf)
-  in the package sources: a reference card in two parts, the models
-  (both families, with their criteria and E/M or VE/M updates) and the
-  implementation notes.
+- The [technical
+  report](https://jchiquet.github.io/normalblockr/normal_block_models.pdf)
+  (`inst/normal_block_models.qmd` in the package sources): a reference
+  card in two parts, the models (both families, with their criteria and
+  E/M or VE/M updates) and the implementation notes.
 
 ## Note on the use of generative AI
 
