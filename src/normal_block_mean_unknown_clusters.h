@@ -83,7 +83,7 @@ class NormalBlockMeanUnknownClusters : public NormalBlockMeanBase {
         tau_.row(j) = t;
         G.row(j) = ZtXB.row(j) - t * M;
       }
-      tau_ = nb_utils::check_one_boundary(nb_utils::check_zero_boundary(tau_));
+      tau_ = nb_utils::clip_probabilities(tau_);
       tau_.each_col() /= arma::sum(tau_, 1);
     }
   }

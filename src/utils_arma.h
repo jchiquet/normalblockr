@@ -34,22 +34,14 @@ inline double sum_xlogx(const arma::mat& x) {
   return out;
 }
 
-// adds machine's 0 to elements equal to 0 in x (equivalent of `check_zero_boundary`)
-inline arma::mat check_zero_boundary(arma::mat x, double zero = kEps) {
-  x.transform([zero](double v) { return (std::isnan(v) || v < zero) ? zero : v; });
+// keeps variational probabilities (tau) away from the {0, 1} boundaries,
+// NaN set to `zero` (equivalent of `clip_probabilities` in R/utils.R)
+inline arma::mat clip_probabilities(arma::mat x, double zero = kEps) {
+  x.transform([zero](double v) {
+    if (std::isnan(v)) return zero;
+    return std::max(std::min(v, 1.0 - zero), zero);
+  });
   return x;
-}
-
-// removes machine's 0 to elements equal to 1 in x (equivalent of `check_one_boundary`)
-inline arma::mat check_one_boundary(arma::mat x, double zero = kEps) {
-  x.transform([zero](double v) { return std::isnan(v) ? zero : std::min(v, 1.0 - zero); });
-  return x;
-}
-
-// equivalent of `check_zero_boundary(check_one_boundary(x))`, used to keep
-// variational probabilities (tau) away from the {0, 1} boundaries.
-inline arma::mat clip_probabilities(const arma::mat& x, double zero = kEps) {
-  return check_zero_boundary(check_one_boundary(x, zero), zero);
 }
 
 // Inverse and log-determinant of a symmetric positive-definite matrix,
