@@ -19,7 +19,6 @@ Main changes since 0.3.0 (see NEWS.md):
 
 * local: Ubuntu 24.04, R-release, GCC (`R CMD check --as-cran`)
 * win-builder: R-release, R-devel
-* mac-builder: R-release
 * GitHub Actions: Ubuntu 24.04 (R-release, R-devel, R-oldrel-1), macOS
   (R-release), Windows (R-release)
 

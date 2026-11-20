@@ -8,18 +8,25 @@ Authors@R: c(
   person("Julien", "Chiquet", role = c("aut", "cre"), email = "julien.chiquet@inrae.fr",
       comment = c(ORCID = "0000-0002-3629-3429"))
       )
-Description: Implements the Normal-Block model, a Gaussian graphical model
-             with a latent clustering structure for the multivariate analysis
-             of continuous data. The model clusters variables and, building
-             on the graphical lasso, infers a network of statistical
-             dependencies between clusters rather than between individual
-             variables, for known or unknown clusterings, with an optional
-             zero-inflation extension for data with an excess of exact
-             zeros. A complementary family clusters variables by their
-             regression response to covariates rather than by their
-             covariance, sharing one profile per cluster. See Tous & Chiquet (2026)
-             <doi:10.1016/j.csda.2026.108347> for the model itself and its
-             variational expectation-maximization estimation procedure.
+Description: Implements two families of Gaussian models with a latent
+    clustering of the variables, for multivariate data whose variables
+    co-vary, or respond to covariates, in groups. In the Normal-Block-Var
+    model, the clusters structure the covariance through latent variables,
+    and a network is inferred between the clusters rather than between the
+    variables, which reduces its dimension and eases its interpretation
+    (Tous and Chiquet (2026) <doi:10.1016/j.csda.2026.108347>). In the
+    Normal-Block-Mean model, the variables of a cluster share the same
+    regression profile, and a network between the variables can be inferred
+    from their residual covariance. In both families, the clustering is
+    either known or inferred, the network can be sparse (graphical lasso),
+    and zero-inflated variants handle data with an excess of zeros. The
+    parameters are estimated by expectation-maximization or variational
+    expectation-maximization algorithms, accelerated by the SQUAREM method
+    (Varadhan and Roland (2008) <doi:10.1111/j.1467-9469.2007.00585.x>),
+    and a split and merge procedure improves the fits of a collection of
+    models. The number of clusters, the sparsity of the network and the
+    shape of the covariance are chosen with penalized criteria,
+    cross-validation or stability selection.
 License: GPL (>= 3)
 URL: https://github.com/jchiquet/normalblockr,
     https://jchiquet.github.io/normalblockr/
