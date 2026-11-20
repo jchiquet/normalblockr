@@ -2,10 +2,8 @@ generate_D <- function(p, min_D = 0.5, max_D = 1.5){
   runif(p, min_D, max_D)
 }
 
-generate_X <- function(n, d, min_X = 0, max_X = 10){
-  matrix(runif(n*d, min=min_X, max = max_X), n, d)
-}
-
+# Uniform regression coefficients (d x p). With an SNR, rescaled so that the
+# variance of the entries of X B is SNR times that of the entries of Sigma.
 generate_B <- function(p, X, Sigma = NULL, SNR = NULL){
   d <- ncol(X)
   B <- matrix(runif(p*d), d, p)
@@ -16,12 +14,18 @@ generate_B <- function(p, X, Sigma = NULL, SNR = NULL){
   B
 }
 
+# p x q indicator matrix of clusters drawn with proportions alpha, redrawn
+# until no cluster is empty. A uniform alpha keeps the plain uniform draw.
 generate_blocks <- function(p, q, alpha = rep(1/q, q)){
-  C <- matrix(rep(0, p * q), nrow = p)
-  while(0 %in% colSums(C)){
-    groups = sample(1 : q, size = p, replace = TRUE)
-    C[cbind(1:p, groups)] <- 1
+  stopifnot("alpha must have one proportion per cluster" = length(alpha) == q,
+            "there cannot be more clusters than variables" = q <= p)
+  prob <- if (all(alpha == alpha[1])) NULL else alpha
+  repeat {
+    groups <- sample(1:q, size = p, replace = TRUE, prob = prob)
+    if (all(tabulate(groups, q) > 0)) break
   }
+  C <- matrix(0, p, q)
+  C[cbind(1:p, groups)] <- 1
   C
 }
 
@@ -120,7 +124,9 @@ generate_normal_block_var_param <- function(X = matrix(rnorm(100*p), 100, p),
 #' @param range_D A 2-size vector defining the range of the uniform distribution used to draw values in D, the diagonal matrix of variances of variables. Default is c(0.5, 1.5)
 #' @param u_v two-size vector of positive numbers v and u controlling the generation of the precision matrix Omega: v scales the off-diagonal elements of the precision matrix (magnitude of partial correlations), and u is a positive number added to the diagonal elements to ensure positive-definiteness. The default value is c(0.3, 0.1).
 #' @param alpha the q-size vector of group proportion. Default to rep(1/q, q)
-#' @param SNR Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desired SNR.
+#' @param SNR signal-to-noise ratio: the regression coefficients B are
+#' rescaled so that the variance of the entries of X B is `SNR` times the
+#' variance of the entries of the latent block covariance Sigma.
 #'
 #' @returns A named list with the following element
 #' - Y a matrix of responses
@@ -221,7 +227,9 @@ generate_normal_block_mean_param <- function(X = matrix(rnorm(100*p), 100, p),
 #' @param range_X A 2-size vector defining the range of the uniform distribution used to draw values in X, the regressor matrix. Default is c(0, 10)
 #' @param u_v two-size vector of positive numbers v and u controlling the generation of the precision matrix Omega: v scales the off-diagonal elements of the precision matrix (magnitude of partial correlations), and u is a positive number added to the diagonal elements to ensure positive-definiteness. The default value is c(0.3, 0.1).
 #' @param alpha the q-size vector of group proportion. Default to rep(1/q, q)
-#' @param SNR Signal to noise ratio: magnitude of the regression parameters B will be adjusted so that tr(var(XB)) and tr(Sigma) match the desired SNR.
+#' @param SNR signal-to-noise ratio: the residual covariance Sigma is
+#' rescaled so that the squared norm of the signal X B C' is `SNR` times the
+#' expected squared norm of the noise, n tr(Sigma).
 #'
 #' @returns A named list with the following element
 #' - Y a matrix of responses
