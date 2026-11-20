@@ -21,12 +21,11 @@ Description: Implements two families of Gaussian models with a latent
     either known or inferred, the network can be sparse (graphical lasso),
     and zero-inflated variants handle data with an excess of zeros. The
     parameters are estimated by expectation-maximization or variational
-    expectation-maximization algorithms, accelerated by the SQUAREM method
-    (Varadhan and Roland (2008) <doi:10.1111/j.1467-9469.2007.00585.x>),
-    and a split and merge procedure improves the fits of a collection of
-    models. The number of clusters, the sparsity of the network and the
-    shape of the covariance are chosen with penalized criteria,
-    cross-validation or stability selection.
+    expectation-maximization algorithms, accelerated by squared
+    extrapolation, and a split and merge procedure improves the fits of a
+    collection of models. The number of clusters, the sparsity of the
+    network and the shape of the covariance are chosen with penalized
+    criteria, cross-validation or stability selection.
 License: GPL (>= 3)
 URL: https://github.com/jchiquet/normalblockr,
     https://jchiquet.github.io/normalblockr/
