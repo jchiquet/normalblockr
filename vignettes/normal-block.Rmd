@@ -150,7 +150,21 @@ A summary of the results is accessible via `print()`.
 ```{r, simulation1-NB1-print}
 print(my_NB)
 ```
-The inter-cluster association network can be visualized with the `plot_network()` function.
+`summary()` adds the cluster sizes and the density of the network, and the usual extractors give the estimated parameters: `coef()` the regression coefficients B (one column per variable, on the original scale of $Y$), `sigma()` the covariance of the latent cluster signals ($\Omega^{-1}$, one row and column per cluster), `fitted()` and `predict()` the fitted and predicted means.
+
+```{r, simulation1-NB1-extractors}
+summary(my_NB)
+coef(my_NB)[, 1:6]
+sigma(my_NB)
+```
+
+Within a cluster, the model makes every pair of variables co-vary positively. `within_block_correlations()` compares the empirical correlations of the residuals with those the model implies, block by block, to check this on a given clustering:
+
+```{r, simulation1-NB1-within}
+my_NB$within_block_correlations()
+```
+
+The inter-cluster association network can be visualized with the `plot_network()` function, or extracted as a matrix with `latent_network()`.
 
 ```{r, simulation1-NB1-plot_network}
  my_NB$plot_network()
@@ -180,7 +194,13 @@ When the number of clusters is unknown, `normal_block()` can be given a range of
 my_NB_unknown <- normal_block(data = my_data,
                               blocks = 2:5)
 ```
-`my_NB_unknown` is a collection of Normal-Block models. A specific one can be selected either by its number of clusters or as the best model for a given criterion (BIC, deviance, EBIC or ICL). The value of each criterion, for every model in the collection, can be visualized with `plot()`.
+Each model of the collection is first fitted from its own initial clustering (a $k$-means on the residuals, see `NB_control()`), then the whole collection is polished by `refine()`: for every $q$, it tries to split a cluster of the model with $q-1$ clusters and to merge two clusters of the model with $q+1$, and keeps a candidate when it lowers the deviance. Since the models are nested, a deviance that increases with $q$ signals a poor local optimum: `print()` reports such cases (`deviance_violations`).
+
+```{r, simulation1-NB3-print}
+my_NB_unknown
+```
+
+A specific model can be selected either by its number of clusters or as the best model for a given criterion (BIC, ICL or EBIC). The value of each criterion, for every model in the collection, can be visualized with `plot()`.
 
 ```{r, simulation1-NB3-plot}
 plot(my_NB_unknown)
@@ -229,7 +249,8 @@ It is usually hard to know a priori which sparsity penalty is best. `normal_bloc
 ```{r, simulation1-NB-changing-sparsity}
 my_NB_sparse <- normal_block(data = my_data,
                              blocks = my_nb_data$parameters$C,
-                             sparsity = TRUE)
+                             sparsity = TRUE,
+                             control = NB_control(verbose = FALSE))
 ```
 
 The different criteria can then be plotted as a function of the penalty, using `plot()`.
@@ -242,12 +263,21 @@ myNB_sparse_0.1   <- my_NB_sparse$get_model(0.1)
 myNB_sparse_BIC   <- my_NB_sparse$get_best_model("BIC")
 ```
 
+The penalty can also be chosen by stability selection (StARS, @liu2010stars): the whole path is refitted on subsamples of the observations, with the clustering held fixed, and the selected penalty is the smallest one whose network is stable enough (0.9 by default).
+
+```{r, simulation1-NB-changing-sparsity-stars}
+set.seed(1)
+myNB_sparse_StARS <- my_NB_sparse$get_best_model("StARS")
+myNB_sparse_StARS$n_edges
+```
+
 Both the sparsity penalty and the number of clusters can also be left to vary jointly.
 
 ```{r, simulation1-NB-sparse_unknown}
 my_NB_sparse_unknown <-  normal_block(data = my_data,
                                       blocks = 2:6,
-                                      sparsity = TRUE)
+                                      sparsity = TRUE,
+                                      control = NB_control(verbose = FALSE))
 ```
 
 The result is a collection of Normal-Block models with different numbers of clusters and different penalties.
@@ -269,11 +299,11 @@ my_NB_sparse_3_0.1 <- my_NB_sparse_unknown$get_model(3, 0.1)
 ```
 
 ## With zero-inflated data
-The process is similar with zero-inflated data, but `zero_inflation = TRUE` must be passed to `normal_block()`. The example below uses a fixed number of blocks and no penalty on the network.
+The process is similar with zero-inflated data, but `zero_inflation = TRUE` must be passed to `normal_block()`. The example below uses the simulated number of blocks and no penalty on the network. See `vignette("zero-inflated-normal-block")` for the model and a real-data example.
 
 ```{r, simulation2-NB}
 my_NB_zi <- normal_block(data = my_data_zi,
-                         blocks = 4,
+                         blocks = 5,
                          zero_inflation = TRUE)
 ```
 When the data is zero-inflated, the inference process may take longer.
