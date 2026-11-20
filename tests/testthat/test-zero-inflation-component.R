@@ -124,3 +124,26 @@ test_that("the masked fit tolerates a design group without any non-zero observat
   expect_no_error(model$optimize(control = list(niter = 2, threshold = -1)))
   expect_false(anyNA(model$model_par$B))
 })
+
+test_that("spherical zero-inflated models start from the pooled masked precision", {
+  set.seed(5)
+  exz <- generate_normal_block_var_data(n = 40, p = 10, d = 1, q = 2, kappa = rep(0.3, 10))
+  dz  <- NormalBlockData$new(exz$Y, exz$X)
+  ctrl <- function(nc) NB_control(verbose = FALSE, noise_covariance = nc)
+  ## on the data each model is fitted on (rescaled for the variance-block family)
+  pooled <- function(m) {
+    fit <- m$data$zi_ols_fit()
+    sum(m$data$nY) / sum(m$data$nY / fit$dm1)
+  }
+  init <- function(m) m$.__enclos_env__$private$optim_initialize()
+
+  for (m in list(ZINormalBlockVarKnownClusters$new(dz, exz$parameters$C, control = ctrl("spherical")),
+                 ZINormalBlockVarUnknownClusters$new(dz, 2, control = ctrl("spherical"))))
+    expect_equal(init(m)$dm1, rep(pooled(m), 10))
+  m <- ZINormalBlockVarKnownClusters$new(dz, exz$parameters$C, control = ctrl("diagonal"))
+  expect_equal(init(m)$dm1, m$data$zi_ols_fit()$dm1)
+
+  for (m in list(ZINormalBlockMeanKnownClusters$new(dz, exz$parameters$C, control = ctrl("spherical")),
+                 ZINormalBlockMeanUnknownClusters$new(dz, 2, control = ctrl("spherical"))))
+    expect_equal(diag(init(m)$Omega), rep(pooled(m), 10))
+})

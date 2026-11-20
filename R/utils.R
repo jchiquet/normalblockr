@@ -281,3 +281,8 @@ cat_wrapped <- function(text, label = "", indent = 4) {
   cat(strwrap(text, width = getOption("width"),
               initial = label, prefix = strrep(" ", indent)), sep = "\n")
 }
+
+# Spherical precision pooled over the non-zero cells, from the per-variable
+# inverse variances dm1 of a masked fit and the numbers nY of non-zero cells
+# per variable: npY / sum_j ssq_j, with ssq_j = nY_j / dm1_j
+zi_pooled_precision <- function(dm1, nY) sum(nY) / sum(nY / dm1)

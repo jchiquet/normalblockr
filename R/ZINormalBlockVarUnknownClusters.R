@@ -48,7 +48,7 @@ ZINormalBlockVarUnknownClusters <- R6::R6Class(
       private$C <- clip_probabilities(private$C)
       Sigmaq <- private$heuristic_Sigmaq_from_Sigma(cov(zi_diag$R))
       Omega <- private$get_Omega(Sigmaq)
-      list(B = zi_diag$B, dm1 = zi_diag$dm1, Omega = Omega,
+      list(B = zi_diag$B, dm1 = private$zi_dm1(), Omega = Omega,
            alpha = colMeans(private$C), C = private$C)
     },
 

@@ -45,9 +45,10 @@ stable).
 
 Minor, same family of issues: SQUAREM leaves a decrease of about 4e-6 on an
 unknown-cluster spherical variance-block fit (an accepted extrapolation
-slightly below the previous objective); the initial `dm1` of zero-inflated
-spherical variance-block models is per variable (from `zi_ols_fit()`), not
-spherical.
+slightly below the previous objective).
+
+(Fixed before the release: zero-inflated spherical models started from
+per-variable variances; they now start from the pooled masked estimate.)
 
 ## Model-selection criteria (1.0.0, #55, checked in #59)
 

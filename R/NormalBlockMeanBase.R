@@ -204,7 +204,10 @@ NormalBlockMeanBase <- R6::R6Class(
     variable_fit = function() {
       if (private$zi) {
         fit <- self$data$zi_ols_fit()
-        list(B = fit$B, Omega = private$omega_from_sigma(diag(1 / fit$dm1, self$p)))
+        Omega <- if (private$res_covariance == "spherical")
+                   diag(zi_pooled_precision(fit$dm1, self$data$nY), self$p)
+                 else private$omega_from_sigma(diag(1 / fit$dm1, self$p))
+        list(B = fit$B, Omega = Omega)
       } else {
         fit <- private$multivariate_normal_inference()
         list(B = fit$B, Omega = private$omega_from_sigma(fit$Sigma))
