@@ -9,10 +9,10 @@ the *latent covariance*, this one puts it in the *mean*: variables are
 grouped by how their expected value responds to the covariates.
 
 We use the same dataset as the `breast-cancer-proteomics` vignette
-([`?brca_rppa`](../reference/brca_rppa.md)) on purpose, so that the two
-families can be read side by side on the same data: 163 proteins
-measured on 346 breast-cancer tumor samples, with each sample’s PAM50
-molecular subtype as the covariate.
+([`?brca_rppa`](https://jchiquet.github.io/normalblockr/reference/brca_rppa.md))
+on purpose, so that the two families can be read side by side on the
+same data: 163 proteins measured on 346 breast-cancer tumor samples,
+with each sample’s PAM50 molecular subtype as the covariate.
 
 ``` r
 
@@ -87,8 +87,8 @@ amounts to grouping them by *subtype signature*.
 The dataset ships a Gene Ontology annotation (one biological-process
 term per protein), which gives a clustering built with no reference to
 the model at all. Handing it to
-[`normal_block()`](../reference/normal_block.md) as a matrix fixes
-$`C`$: only $`(B, \Sigma)`$ are estimated.
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
+as a matrix fixes $`C`$: only $`(B, \Sigma)`$ are estimated.
 
 ``` r
 
@@ -131,11 +131,12 @@ abline(0, 1, col = "red")
 ### A collection over the number of clusters
 
 With `blocks` a range of values,
-[`normal_block()`](../reference/normal_block.md) returns one fitted
-model per $`q`$. The initial clustering of each is derived from every
-protein’s own fitted profile – the ordinary least-squares fit of that
-protein on $`X`$ alone, unconstrained by any clustering (see
-`NB_control(clustering_init = )`; `kmeans` is this family’s default).
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
+returns one fitted model per $`q`$. The initial clustering of each is
+derived from every protein’s own fitted profile – the ordinary
+least-squares fit of that protein on $`X`$ alone, unconstrained by any
+clustering (see `NB_control(clustering_init = )`; `kmeans` is this
+family’s default).
 
 ``` r
 
@@ -170,10 +171,10 @@ finding about this dataset, not a failure of the fit. The criteria do
 turn: they reach an interior minimum and rise again afterwards, which is
 what makes the selection meaningful.
 
-[`normal_block()`](../reference/normal_block.md) polishes every
-collection with `refine()`, which tries for each $`q`$ a short
-split-and-reoptimize seeded from its $`q-1`$ neighbour and a merge from
-its $`q+1`$ one, keeping a candidate only if it strictly lowers the
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
+polishes every collection with `refine()`, which tries for each $`q`$ a
+short split-and-reoptimize seeded from its $`q-1`$ neighbour and a merge
+from its $`q+1`$ one, keeping a candidate only if it strictly lowers the
 deviance. It needs a contiguous range; on the coarse grid above there
 are no adjacent $`q`$ to seed from, so it leaves this collection
 unchanged.

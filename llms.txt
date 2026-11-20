@@ -2,55 +2,50 @@
 
 ## Description
 
-> The Normal-Block model[^1] is a Gaussian graphical model with a latent
-> clustering structure, designed for the multivariate analysis of
-> continuous data: it clusters variables and, building on the graphical
-> lasso, infers a network of statistical dependencies *between clusters*
-> rather than between individual variables. This package implements an
-> efficient (variational) EM algorithm to fit it, accompanied by a set
-> of functions for model selection, visualization and diagnostic. See
-> [all the dedicated
+> **normalblockr** fits Gaussian models with a latent clustering of the
+> variables. The Normal-Block model[^1] is a Gaussian graphical model
+> that clusters variables by how they *covary* and, building on the
+> graphical lasso[^2], infers a network of statistical dependencies
+> *between clusters* rather than between individual variables. A
+> complementary family clusters variables by how they *respond* to
+> covariates. The package fits both by (variational) EM, with tools for
+> model selection, visualization and diagnostics. See [the
 > vignettes](https://jchiquet.github.io/normalblockr/articles/) for a
 > comprehensive introduction.
 
-**normalblockr** covers the following model variants, all built around
-the same [`normal_block()`](reference/normal_block.md)/`NormalBlockData`
+Two model families are reached through the same
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)/`NormalBlockData`
 interface:
 
-- **Known clusters**: the grouping of variables is given (e.g. from
-  prior knowledge); only the association network between clusters is
-  estimated, by EM.
-- **Unknown clusters**: the grouping is inferred jointly with everything
-  else by a variational EM, either for a single number of clusters or
-  over a range explored as a collection, with model selection via
-  BIC/EBIC/ICL.
-- **Sparse (graphical-lasso) network**: an $`\ell_1`$ penalty[^2] on the
-  inter-cluster precision matrix, for a single penalty value or a path
-  explored as a collection.
-- **Zero-inflated extension**: an excess-of-zeros layer for data
-  (e.g. abundance/biomass tables) with more exact zeros than a plain
-  Normal model can represent.
+- **Normal-Block-Var** (`model = "var"`, the default): variables are
+  clustered by their covariance,
+  $`Y_i = B^\top X_i + C W_i + \varepsilon_i`$ with a latent
+  $`W_i \sim \mathcal N(0, \Omega^{-1})`$ shared within a cluster;
+  $`\Omega`$ is the network between clusters.
+- **Normal-Block-Mean** (`model = "mean"`): variables are clustered by
+  their response to the covariates. All variables of a cluster share one
+  regression profile, $`\mu_i = C B^\top X_i`$ with $`B`$ of size
+  $`d \times q`$ instead of $`d \times p`$; the residual covariance is
+  diagonal (the default), spherical, or full.
 
-Any combination of these is reached through the same
-[`normal_block()`](reference/normal_block.md) function: known or unknown
-clustering, sparse or not, zero-inflated or not are independent choices,
-not separate model classes to learn.
+For both families, the following are independent choices of the same
+call:
 
-Since version 0.3.0 the package also fits a second, complementary
-family, reached with `normal_block(..., model = "mean")`:
-
-- **Mean-block models**: variables are clustered by how they *respond*
-  to the covariates rather than by how they *covary*. All variables in a
-  cluster share one regression profile, so the mean is
-  $`\mu_i = C B^\top X_i`$ with $`B`$ of size $`d \times q`$ instead of
-  $`d \times p`$. Known or unknown clustering, zero-inflated or not,
-  with the residual covariance taken diagonal (the default), spherical,
-  or full.
+- **Known or unknown clusters**: the grouping of variables is given
+  (e.g. from prior knowledge), or inferred by a variational EM, for a
+  single number of clusters or over a range explored as a collection,
+  with model selection by BIC, ICL, EBIC or cross-validation.
+- **Sparse network**: an $`\ell_1`$ penalty on the precision matrix, for
+  a single penalty or a path, selected by a criterion or by stability
+  (StARS).
+- **Zero-inflation**: an excess-of-zeros layer for data (e.g. abundance
+  or biomass tables) with more exact zeros than a Gaussian model can
+  represent.
 
 The two families answer different questions and generally return
 different groupings;
-[`normal_block_sequential()`](reference/normal_block_sequential.md) runs
-one after the other when both are of interest. See the [mean-block
+[`normal_block_sequential()`](https://jchiquet.github.io/normalblockr/reference/normal_block_sequential.md)
+runs one after the other when both are of interest. See the [mean-block
 vignette](https://jchiquet.github.io/normalblockr/articles/mean-block-breast-cancer.html).
 
 ## Installation
@@ -91,8 +86,9 @@ data <- NormalBlockData$new(Y, X)
 
 A simple, fully data-driven grouping (hierarchical clustering on the raw
 expression profiles, with no reference to the Normal-Block model) handed
-to [`normal_block()`](reference/normal_block.md) as fixed – only the
-network between the 6 blocks is estimated.
+to
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
+as fixed – only the network between the 6 blocks is estimated.
 
 ``` r
 
@@ -113,7 +109,7 @@ m_known
 ```
 
 ``` R
-A diagonal normal-block-var model with fixed blocks .
+A diagonal normal-block-var model with fixed blocks.
 ===========================================================================
  nb_param q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
       999 6      15        0 -70387.84 140775.7 146616.3 146616.3 146670    14
@@ -138,7 +134,7 @@ m_unknown <- normal_block(data, blocks = 2:20)
 ```
 
 ``` R
-Fitting a diagonal normal-block-var model with unknown q 
+Fitting a collection of diagonal normal-block-var models over q 
      number of blocks = 2           
      number of blocks = 3           
      number of blocks = 4           
@@ -176,10 +172,12 @@ m_unknown$get_best_model("EBIC")
 ```
 
 ``` R
-A diagonal normal-block-var model with 16 unknown blocks .
+A diagonal normal-block-var model with 19 unknown blocks.
 ===========================================================================
- nb_param  q n_edges sparsity loglik deviance      BIC      ICL     EBIC niter
-     1129 16     120        0 -66764   133528 140117.3 140117.5 140782.8    18
+ nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+     1186 19     171        0 -66245.44 132490.9 139411.2 139411.2 140418.2
+ niter
+    11
 ===========================================================================
 * Useful fields
     $model_par, $posterior_par / $var_par, $clustering 
@@ -201,7 +199,7 @@ m_sparse <- normal_block(data, blocks = group, sparsity = TRUE)
 ```
 
 ``` R
-Fitting a Collection of diagonal normal-block-var models with fixed blocks, with different sparsity penalties. 
+Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed blocks 
      penalty = 0.2565018           
      penalty = 0.2188391           
      penalty = 0.1867065           
@@ -261,7 +259,7 @@ m_zi    <- normal_block(data_zi, blocks = 2:8, zero_inflation = TRUE)
 ```
 
 ``` R
-Fitting a diagonal normal-block-var model with unknown q 
+Fitting a collection of zero-inflated diagonal normal-block-var models over q 
      number of blocks = 2           
      number of blocks = 3           
      number of blocks = 4           
@@ -280,7 +278,7 @@ m_zi$get_best_model("ICL")
 ```
 
 ``` R
-A zero-inflated diagonal normal-block-var model with 4 unknown blocks .
+A zero-inflated diagonal normal-block-var model with 4 unknown blocks.
 ===========================================================================
  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
       197 4       6        0 -13523.7  27047.4 28220.75 28241.19 28237.38     8
@@ -295,27 +293,28 @@ A zero-inflated diagonal normal-block-var model with 4 unknown blocks .
 ## Learning more
 
 - [`normal-block`](https://jchiquet.github.io/normalblockr/articles/normal-block.html)
-  ([`vignette("normal-block")`](articles/normal-block.md)): a general
-  introduction on simulated data – known/unknown clusters, sparsity,
-  zero-inflation.
+  ([`vignette("normal-block")`](https://jchiquet.github.io/normalblockr/articles/normal-block.md)):
+  a general introduction on simulated data – known/unknown clusters,
+  sparsity, zero-inflation.
 - [`zero-inflated-normal-block`](https://jchiquet.github.io/normalblockr/articles/zero-inflated-normal-block.html)
-  ([`vignette("zero-inflated-normal-block")`](articles/zero-inflated-normal-block.md)):
+  ([`vignette("zero-inflated-normal-block")`](https://jchiquet.github.io/normalblockr/articles/zero-inflated-normal-block.md)):
   a full worked example on `onema`, with the math behind the
   zero-inflation extension.
 - [`breast-cancer-proteomics`](https://jchiquet.github.io/normalblockr/articles/breast-cancer-proteomics.html)
-  ([`vignette("breast-cancer-proteomics")`](articles/breast-cancer-proteomics.md)):
+  ([`vignette("breast-cancer-proteomics")`](https://jchiquet.github.io/normalblockr/articles/breast-cancer-proteomics.md)):
   a full worked example on `brca_rppa` – known vs. inferred clustering,
   model selection, the post-hoc `refine()` step, sparsifying the
   selected network.
 - [`mean-block-breast-cancer`](https://jchiquet.github.io/normalblockr/articles/mean-block-breast-cancer.html)
-  ([`vignette("mean-block-breast-cancer")`](articles/mean-block-breast-cancer.md)):
+  ([`vignette("mean-block-breast-cancer")`](https://jchiquet.github.io/normalblockr/articles/mean-block-breast-cancer.md)):
   the mean-block family on `brca_rppa` – clustering proteins by their
   subtype signature, choosing the shape of the residual covariance,
   sparsifying it.
-- [`inst/normal_block_models.qmd`](https://jchiquet.github.io/normalblockr/normal_block_models.pdf)
-  in the package sources: a reference card in two parts, the models
-  (both families, with their criteria and E/M or VE/M updates) and the
-  implementation notes.
+- The [technical
+  report](https://jchiquet.github.io/normalblockr/normal_block_models.pdf)
+  (`inst/normal_block_models.qmd` in the package sources): a reference
+  card in two parts, the models (both families, with their criteria and
+  E/M or VE/M updates) and the implementation notes.
 
 ## Note on the use of generative AI
 
@@ -360,68 +359,70 @@ for details.
 
 Main entry points for fitting a Normal-Block model and simulating data
 
-- [`normal_block()`](normal_block.md) : Fit Normal-Block Models
-- [`normal_block_sequential()`](normal_block_sequential.md) : Cluster
-  Variables in the Mean, then in the Residual Covariance
-- [`normal_block_cv()`](normal_block_cv.md) : Cross-Validated
-  Log-Likelihood of Normal-Block Models
-- [`NB_control()`](NB_control.md) : Control Parameters for Normal-Block
-  Models
-- [`generate_normal_block_var_data()`](generate_normal_block_var_data.md)
+- [`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
+  : Fit Normal-Block Models
+- [`normal_block_sequential()`](https://jchiquet.github.io/normalblockr/reference/normal_block_sequential.md)
+  : Cluster Variables in the Mean, then in the Residual Covariance
+- [`normal_block_cv()`](https://jchiquet.github.io/normalblockr/reference/normal_block_cv.md)
+  : Cross-Validated Log-Likelihood of Normal-Block Models
+- [`NB_control()`](https://jchiquet.github.io/normalblockr/reference/NB_control.md)
+  : Control Parameters for Normal-Block Models
+- [`generate_normal_block_var_data()`](https://jchiquet.github.io/normalblockr/reference/generate_normal_block_var_data.md)
   : Simulate Data from a Normal-Block-Var Model
-- [`generate_normal_block_mean_data()`](generate_normal_block_mean_data.md)
+- [`generate_normal_block_mean_data()`](https://jchiquet.github.io/normalblockr/reference/generate_normal_block_mean_data.md)
   : Simulate Data from a Normal-Block-Mean Model
 
 ## Model and data classes
 
 R6 classes returned by normal_block(). NormalBlockData wraps the
-responses and design matrix; NormalBlockVar*Clusters (optionally
-ZI-prefixed) are single fitted models, known- or unknown-clustering;
-NormalBlockCollection* are collections of models explored over a range
-of q and/or sparsity penalties.
+responses and design matrix; NormalBlock{Var,Mean}*Clusters (optionally
+ZI-prefixed) are single fitted models, with a known or unknown
+clustering; NormalBlock{Var,Mean}Collection* are collections of models
+explored over a range of q and/or sparsity penalties.
 
-- [`NormalBlockData`](NormalBlockData.md) : Data Container for
-  Normal-Block Models
-- [`NormalBlockVarKnownClusters`](NormalBlockVarKnownClusters.md) :
-  Normal-Block-Var Model with Known Clustering
-- [`NormalBlockVarUnknownClusters`](NormalBlockVarUnknownClusters.md) :
-  Normal-Block-Var Model with Unknown Clustering
-- [`NormalBlockMeanKnownClusters`](NormalBlockMeanKnownClusters.md) :
-  Normal-Block-Mean Model with Known Clustering
-- [`NormalBlockMeanUnknownClusters`](NormalBlockMeanUnknownClusters.md)
+- [`NormalBlockData`](https://jchiquet.github.io/normalblockr/reference/NormalBlockData.md)
+  : Data Container for Normal-Block Models
+- [`NormalBlockVarKnownClusters`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarKnownClusters.md)
+  : Normal-Block-Var Model with Known Clustering
+- [`NormalBlockVarUnknownClusters`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarUnknownClusters.md)
+  : Normal-Block-Var Model with Unknown Clustering
+- [`NormalBlockMeanKnownClusters`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanKnownClusters.md)
+  : Normal-Block-Mean Model with Known Clustering
+- [`NormalBlockMeanUnknownClusters`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanUnknownClusters.md)
   : Normal-Block-Mean Model with Unknown Clustering
-- [`ZINormalBlockVarKnownClusters`](ZINormalBlockVarKnownClusters.md) :
-  Zero-Inflated Normal-Block-Var Model with Known Clustering
-- [`ZINormalBlockVarUnknownClusters`](ZINormalBlockVarUnknownClusters.md)
+- [`ZINormalBlockVarKnownClusters`](https://jchiquet.github.io/normalblockr/reference/ZINormalBlockVarKnownClusters.md)
+  : Zero-Inflated Normal-Block-Var Model with Known Clustering
+- [`ZINormalBlockVarUnknownClusters`](https://jchiquet.github.io/normalblockr/reference/ZINormalBlockVarUnknownClusters.md)
   : Zero-Inflated Normal-Block-Var Model with Unknown Clustering
-- [`ZINormalBlockMeanKnownClusters`](ZINormalBlockMeanKnownClusters.md)
+- [`ZINormalBlockMeanKnownClusters`](https://jchiquet.github.io/normalblockr/reference/ZINormalBlockMeanKnownClusters.md)
   : Zero-Inflated Normal-Block-Mean Model with Known Clustering
-- [`ZINormalBlockMeanUnknownClusters`](ZINormalBlockMeanUnknownClusters.md)
+- [`ZINormalBlockMeanUnknownClusters`](https://jchiquet.github.io/normalblockr/reference/ZINormalBlockMeanUnknownClusters.md)
   : Zero-Inflated Normal-Block-Mean Model with Unknown Clustering
-- [`NormalBlockVarCollectionClusters`](NormalBlockVarCollectionClusters.md)
+- [`NormalBlockVarCollectionClusters`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionClusters.md)
   : Collection of Normal-Block-Var Models over a Range of Cluster Counts
-- [`NormalBlockVarCollectionSparsity`](NormalBlockVarCollectionSparsity.md)
+- [`NormalBlockVarCollectionSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionSparsity.md)
   : Collection of Normal-Block-Var Models over a Sparsity Path
-- [`NormalBlockVarCollectionClustersSparsity`](NormalBlockVarCollectionClustersSparsity.md)
+- [`NormalBlockVarCollectionClustersSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionClustersSparsity.md)
   : Collection of Normal-Block-Var Models over Cluster Counts and
   Sparsity Levels
-- [`NormalBlockMeanCollectionClusters`](NormalBlockMeanCollectionClusters.md)
+- [`NormalBlockMeanCollectionClusters`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanCollectionClusters.md)
   : Collection of Normal-Block-Mean Models over a Range of Cluster
   Counts
-- [`NormalBlockMeanCollectionSparsity`](NormalBlockMeanCollectionSparsity.md)
+- [`NormalBlockMeanCollectionSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanCollectionSparsity.md)
   : Collection of Normal-Block-Mean Models over a Sparsity Path
-- [`NormalBlockMeanCollectionClustersSparsity`](NormalBlockMeanCollectionClustersSparsity.md)
+- [`NormalBlockMeanCollectionClustersSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanCollectionClustersSparsity.md)
   : Collection of Normal-Block-Mean Models over Cluster Counts and
   Sparsity Levels
 
 ## Data sets
 
-- [`brca_rppa`](brca_rppa.md) : Breast Cancer Proteomics Data (TCGA,
-  RPPA)
-- [`onema`](onema.md) : French Stream Fish Community Data (ONEMA / OFB
-  Electrofishing Surveys)
-- [`university`](university.md) : University Webpages Text Data (CMU "4
-  Universities" / WebKB)
+- [`brca_rppa`](https://jchiquet.github.io/normalblockr/reference/brca_rppa.md)
+  : Breast Cancer Proteomics Data (TCGA, RPPA)
+- [`onema`](https://jchiquet.github.io/normalblockr/reference/onema.md)
+  : French Stream Fish Community Data (ONEMA / OFB Electrofishing
+  Surveys)
+- [`university`](https://jchiquet.github.io/normalblockr/reference/university.md)
+  : University Webpages Text Data (CMU "4 Universities" / WebKB)
 
 ## S3 methods
 
@@ -429,64 +430,67 @@ Standard extractors and methods for a fitted model (any NormalBlockBase
 subclass) and for a collection of models (any NormalBlockCollection
 subclass)
 
-- [`coef(`*`<NormalBlockBase>`*`)`](coef.NormalBlockBase.md) : Extract
-  Model Coefficients
-- [`fitted(`*`<NormalBlockBase>`*`)`](fitted.NormalBlockBase.md) :
-  Extract Fitted Values
-- [`predict(`*`<NormalBlockBase>`*`)`](predict.NormalBlockBase.md) :
-  Predict Method for Normal-Block Models
-- [`sigma(`*`<NormalBlockBase>`*`)`](sigma.NormalBlockBase.md) : Extract
-  the Covariance Matrix
-- [`print(`*`<NormalBlockBase>`*`)`](print.NormalBlockBase.md) : Print a
-  Normal-Block Model
-- [`summary(`*`<NormalBlockBase>`*`)`](summary.NormalBlockBase.md) :
-  Summarize a Normal-Block Model
-- [`print(`*`<summary.NormalBlockBase>`*`)`](print.summary.NormalBlockBase.md)
+- [`coef(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/coef.NormalBlockBase.md)
+  : Extract Model Coefficients
+- [`fitted(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/fitted.NormalBlockBase.md)
+  : Extract Fitted Values
+- [`predict(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/predict.NormalBlockBase.md)
+  : Predict Method for Normal-Block Models
+- [`sigma(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/sigma.NormalBlockBase.md)
+  : Extract the Covariance Matrix
+- [`print(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/print.NormalBlockBase.md)
+  : Print a Normal-Block Model
+- [`summary(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/summary.NormalBlockBase.md)
+  : Summarize a Normal-Block Model
+- [`print(`*`<summary.NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/print.summary.NormalBlockBase.md)
   : Print a Normal-Block Model Summary
-- [`plot(`*`<NormalBlockBase>`*`)`](plot.NormalBlockBase.md) : Plot a
-  Normal-Block Model
-- [`logLik(`*`<NormalBlockBase>`*`)`](logLik.NormalBlockBase.md) :
-  Extract Log-Likelihood of a Normal-Block Model
-- [`BIC(`*`<NormalBlockBase>`*`)`](BIC.NormalBlockBase.md) : Bayesian
-  Information Criterion for a Normal-Block Model
-- [`print(`*`<NormalBlockCollection>`*`)`](print.NormalBlockCollection.md)
+- [`plot(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/plot.NormalBlockBase.md)
+  : Plot a Normal-Block Model
+- [`logLik(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/logLik.NormalBlockBase.md)
+  : Extract Log-Likelihood of a Normal-Block Model
+- [`BIC(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/BIC.NormalBlockBase.md)
+  : Bayesian Information Criterion for a Normal-Block Model
+- [`print(`*`<NormalBlockCollection>`*`)`](https://jchiquet.github.io/normalblockr/reference/print.NormalBlockCollection.md)
   : Print a Collection of Normal-Block Models
-- [`summary(`*`<NormalBlockCollection>`*`)`](summary.NormalBlockCollection.md)
+- [`summary(`*`<NormalBlockCollection>`*`)`](https://jchiquet.github.io/normalblockr/reference/summary.NormalBlockCollection.md)
   : Summarize a Collection of Normal-Block Models
-- [`print(`*`<summary.NormalBlockCollection>`*`)`](print.summary.NormalBlockCollection.md)
+- [`print(`*`<summary.NormalBlockCollection>`*`)`](https://jchiquet.github.io/normalblockr/reference/print.summary.NormalBlockCollection.md)
   : Print a Collection Summary
-- [`logLik(`*`<NormalBlockCollection>`*`)`](logLik.NormalBlockCollection.md)
+- [`logLik(`*`<NormalBlockCollection>`*`)`](https://jchiquet.github.io/normalblockr/reference/logLik.NormalBlockCollection.md)
   : Extract Log-Likelihood of a Collection of Normal-Block Models
-- [`BIC(`*`<NormalBlockCollection>`*`)`](BIC.NormalBlockCollection.md) :
-  Bayesian Information Criterion for a Collection of Normal-Block Models
-- [`print(`*`<normal_block_sequential>`*`)`](print.normal_block_sequential.md)
+- [`BIC(`*`<NormalBlockCollection>`*`)`](https://jchiquet.github.io/normalblockr/reference/BIC.NormalBlockCollection.md)
+  : Bayesian Information Criterion for a Collection of Normal-Block
+  Models
+- [`print(`*`<normal_block_sequential>`*`)`](https://jchiquet.github.io/normalblockr/reference/print.normal_block_sequential.md)
   : Print a Sequential Mean-then-Variance Fit
-- [`print(`*`<normal_block_cv>`*`)`](print.normal_block_cv.md) : Print a
-  Cross-Validated Log-Likelihood
-- [`plot(`*`<normal_block_cv>`*`)`](plot.normal_block_cv.md) : Plot a
-  Cross-Validated Log-Likelihood
+- [`print(`*`<normal_block_cv>`*`)`](https://jchiquet.github.io/normalblockr/reference/print.normal_block_cv.md)
+  : Print a Cross-Validated Log-Likelihood
+- [`plot(`*`<normal_block_cv>`*`)`](https://jchiquet.github.io/normalblockr/reference/plot.normal_block_cv.md)
+  : Plot a Cross-Validated Log-Likelihood
 
 ## Internal
 
-Abstract base classes, low-level helpers and exploratory code kept for
-reference; not part of the user-facing API
+Abstract base classes and low-level helpers, documented for developers
+and for the methods their subclasses inherit
 
-- [`NormalBlockBase`](NormalBlockBase.md) : Root Base Class for
-  Normal-Block Models
-- [`NormalBlockVarBase`](NormalBlockVarBase.md) : Base Class for
-  Normal-Block-Var Models
-- [`NormalBlockMeanBase`](NormalBlockMeanBase.md) : Base Class for
-  Normal-Block-Mean Models
-- [`NormalBlockCollection`](NormalBlockCollection.md) : Base Class for a
-  Collection of Normal-Block Models
-- [`NormalBlockCollectionClusters`](NormalBlockCollectionClusters.md) :
-  Base Class for a Collection of Models over a Range of Cluster Counts
-- [`NormalBlockCollectionSparsity`](NormalBlockCollectionSparsity.md) :
-  Base Class for a Collection of Models over a Sparsity Path
-- [`NormalBlockCollectionClustersSparsity`](NormalBlockCollectionClustersSparsity.md)
+- [`NormalBlockBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.md)
+  : Root Base Class for Normal-Block Models
+- [`NormalBlockVarBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.md)
+  : Base Class for Normal-Block-Var Models
+- [`NormalBlockMeanBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md)
+  : Base Class for Normal-Block-Mean Models
+- [`NormalBlockCollection`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.md)
+  : Base Class for a Collection of Normal-Block Models
+- [`NormalBlockCollectionClusters`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionClusters.md)
+  : Base Class for a Collection of Models over a Range of Cluster Counts
+- [`NormalBlockCollectionSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.md)
+  : Base Class for a Collection of Models over a Sparsity Path
+- [`NormalBlockCollectionClustersSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionClustersSparsity.md)
   : Base Class for a Collection over Cluster Counts and Sparsity Levels
-- [`get_model()`](get_model.md) : Create a Normal-Block Model Object
-- [`isNB()`](isNB.md) : Check if an Object is a Normal-Block Model
+- [`get_model()`](https://jchiquet.github.io/normalblockr/reference/get_model.md)
+  : Create a Normal-Block Model Object
+- [`isNB()`](https://jchiquet.github.io/normalblockr/reference/isNB.md)
+  : Check if an Object is a Normal-Block Model
 
 # Articles
 
@@ -494,10 +498,12 @@ reference; not part of the user-facing API
 
 - [Normal-Block models: clustering variables by their covariance -- a
   worked example with breast cancer proteomics
-  data](breast-cancer-proteomics.md):
+  data](https://jchiquet.github.io/normalblockr/articles/breast-cancer-proteomics.md):
 - [Mean-Block models: clustering variables by their response to
-  covariates](mean-block-breast-cancer.md):
+  covariates](https://jchiquet.github.io/normalblockr/articles/mean-block-breast-cancer.md):
 - [Analyzing multivariate Gaussian data with the Normal-Block model
-  (variance clustering) - First steps](normal-block.md):
+  (variance clustering) - First
+  steps](https://jchiquet.github.io/normalblockr/articles/normal-block.md):
 - [Zero-inflated Normal-Block models (variance clustering): a worked
-  example with fish biomass data](zero-inflated-normal-block.md):
+  example with fish biomass
+  data](https://jchiquet.github.io/normalblockr/articles/zero-inflated-normal-block.md):

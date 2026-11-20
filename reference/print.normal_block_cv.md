@@ -33,8 +33,8 @@ cv <- normal_block_cv(data, blocks = 2:4, folds = 3)
 print(cv)
 #> Cross-validated log-likelihood, 3 folds (larger is better)
 #>  q    loglik       se
-#>  2 -1639.534 29.47171
-#>  3 -1558.875 19.22820
-#>  4 -1532.419 17.51005
+#>  2 -1682.441 27.55630
+#>  3 -1614.087 24.04311
+#>  4 -1588.535 23.02608
 #> Best: q = 4 (one-standard-error rule; maximum at q = 4)
 ```

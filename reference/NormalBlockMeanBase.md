@@ -5,18 +5,22 @@ structures the mean (mu_i = C B' X_i).
 
 ## Super class
 
-[`NormalBlockBase`](NormalBlockBase.md) -\> `NormalBlockMeanBase`
+[`NormalBlockBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.md)
+-\> `NormalBlockMeanBase`
 
 ## Active bindings
 
 - `model_par`:
 
-  a list with the matrices of the model parameters: B (covariates), dm1
-  (species variance), Omega (groups precision matrix)). On the internal
-  fitting scale (\`self\$data\$Y\`, possibly column-rescaled by
-  \`NormalBlockData(scale = TRUE)\`): use
-  \`\$B_original\`/\`\$dm1_original\` for the same quantities converted
-  back to Y's original units.
+  a list with the model parameters: B (d x q, one profile per cluster)
+  and Omega (p x p precision matrix of the residuals), on the scale of
+  the fit (see \[coef()\] and \[sigma()\]).
+
+- `fitted`:
+
+  Y values predicted by the model, in Y's original units: \`X B C'\`
+  (with the posterior cluster probabilities as C when the clustering is
+  unknown), with the observed zeros of zero-inflated models set to 0
 
 - `sparsity_weights`:
 
@@ -30,8 +34,6 @@ structures the mean (mu_i = C B' X_i).
 
 - [`NormalBlockMeanBase$predict()`](#method-NormalBlockMeanBase-predict)
 
-- [`NormalBlockMeanBase$warm_start_from()`](#method-NormalBlockMeanBase-warm_start_from)
-
 - [`NormalBlockMeanBase$split()`](#method-NormalBlockMeanBase-split)
 
 - [`NormalBlockMeanBase$merge()`](#method-NormalBlockMeanBase-merge)
@@ -40,17 +42,18 @@ structures the mean (mu_i = C B' X_i).
 
 Inherited methods
 
-- [`NormalBlockBase$best_of_inits()`](NormalBlockBase.html#method-best_of_inits)
-- [`NormalBlockBase$candidates_merge()`](NormalBlockBase.html#method-candidates_merge)
-- [`NormalBlockBase$candidates_split()`](NormalBlockBase.html#method-candidates_split)
-- [`NormalBlockBase$heldout_loglik()`](NormalBlockBase.html#method-heldout_loglik)
-- [`NormalBlockBase$latent_network()`](NormalBlockBase.html#method-latent_network)
-- [`NormalBlockBase$optimize()`](NormalBlockBase.html#method-optimize)
-- [`NormalBlockBase$plot()`](NormalBlockBase.html#method-plot)
-- [`NormalBlockBase$plot_loglik()`](NormalBlockBase.html#method-plot_loglik)
-- [`NormalBlockBase$plot_network()`](NormalBlockBase.html#method-plot_network)
-- [`NormalBlockBase$print()`](NormalBlockBase.html#method-print)
-- [`NormalBlockBase$update()`](NormalBlockBase.html#method-update)
+- [`NormalBlockBase$best_of_inits()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-best_of_inits)
+- [`NormalBlockBase$candidates_merge()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_merge)
+- [`NormalBlockBase$candidates_split()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_split)
+- [`NormalBlockBase$heldout_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-heldout_loglik)
+- [`NormalBlockBase$latent_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-latent_network)
+- [`NormalBlockBase$optimize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-optimize)
+- [`NormalBlockBase$plot()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot)
+- [`NormalBlockBase$plot_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_loglik)
+- [`NormalBlockBase$plot_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_network)
+- [`NormalBlockBase$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-print)
+- [`NormalBlockBase$update()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-update)
+- [`NormalBlockBase$warm_start_from()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-warm_start_from)
 
 ------------------------------------------------------------------------
 
@@ -85,7 +88,7 @@ Create a new \[\`NormalBlockMeanBase\`\] object.
 - `control`:
 
   structured list of more specific parameters, to generate with
-  NB_Mean_control
+  NB_control
 
 - `zero_inflation`:
 
@@ -100,9 +103,9 @@ A new \[\`NormalBlockMeanBase\`\] object
 
 ### `NormalBlockMeanBase$predict()`
 
-Predicts observations Y for new covariates X, in Y's original units. The
-mean-block mean is mu_i = C B' X_i, so the cluster-level predictor has
-to be mapped back to the variables through C.
+Predicts the mean of Y for new covariates X, in Y's original units: mu_i
+= C B' X_i, with the posterior cluster probabilities as C when the
+clustering is unknown (as in \`\$fitted\`).
 
 #### Usage
 
@@ -117,28 +120,6 @@ to be mapped back to the variables through C.
 #### Returns
 
 A n\*p prediction matrix for new observations
-
-------------------------------------------------------------------------
-
-### `NormalBlockMeanBase$warm_start_from()`
-
-Seed this model's starting parameters from another, already-optimized
-model with the same q, instead of the heuristic clustering-derived
-values set at construction time. Used by \[split()\]/\[merge()\].
-
-#### Usage
-
-    NormalBlockMeanBase$warm_start_from(other)
-
-#### Arguments
-
-- `other`:
-
-  a \[NormalBlockMeanBase\] object, already optimized
-
-#### Returns
-
-Update the current object in place with \`other\`'s parameters
 
 ------------------------------------------------------------------------
 

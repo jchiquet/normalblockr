@@ -4,15 +4,15 @@
 
 This vignette walks through a real-data analysis with the Normal-Block
 model, using the `brca_rppa` dataset shipped with the package (see
-[`?brca_rppa`](../reference/brca_rppa.md)): reverse-phase protein array
-measurements of 163 proteins across 346 breast cancer tumor samples from
-The Cancer Genome Atlas, together with each sample’s PAM50 molecular
-subtype. See the `normal-block` vignette
-([`vignette("normal-block")`](../articles/normal-block.md)) for a
-general introduction to the package on simulated data; this one focuses
-on a single real dataset, illustrated first with a known clustering of
-the proteins, then with the clustering left for the model to infer, and
-finally with the post-hoc `refine()` step.[^1]
+[`?brca_rppa`](https://jchiquet.github.io/normalblockr/reference/brca_rppa.md)):
+reverse-phase protein array measurements of 163 proteins across 346
+breast cancer tumor samples from The Cancer Genome Atlas, together with
+each sample’s PAM50 molecular subtype. See the `normal-block` vignette
+([`vignette("normal-block")`](https://jchiquet.github.io/normalblockr/articles/normal-block.md))
+for a general introduction to the package on simulated data; this one
+focuses on a single real dataset, illustrated first with a known
+clustering of the proteins, then with the clustering left for the model
+to infer, and finally with the post-hoc `refine()` step.[^1]
 
 #### Requirements
 
@@ -108,9 +108,9 @@ group <- model.matrix(~ 0 + factor(cutree(hc_expr, 6)))
 ```
 
 This fixed grouping is then handed to
-[`normal_block()`](../reference/normal_block.md) as a known clustering:
-the model only estimates the association network between the 6 blocks,
-not the grouping itself.
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
+as a known clustering: the model only estimates the association network
+between the 6 blocks, not the grouping itself.
 
 ``` r
 
@@ -163,17 +163,17 @@ NB_prot_group$within_block_correlations()
 ### Fitting a collection over a range of cluster counts
 
 When the clustering is left unknown,
-[`normal_block()`](../reference/normal_block.md) accepts a range of
-candidate cluster counts and returns a collection of models, one per
-$`q`$, fitted independently, each cold-started from a clustering
-heuristic on the residuals (`kmeans` by default), then polished by
-`refine()` (see below). We turn `refine()` off here, to show what it
-changes in the next section.[^2]
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
+accepts a range of candidate cluster counts and returns a collection of
+models, one per $`q`$, fitted independently, each cold-started from a
+clustering heuristic on the residuals (`kmeans` by default), then
+polished by `refine()` (see below). We turn `refine()` off here, to show
+what it changes in the next section.[^2]
 
 ``` r
 
 NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30, control = NB_control(refine = FALSE))
-#> Fitting a diagonal normal-block-var model with unknown q 
+#> Fitting a collection of diagonal normal-block-var models over q 
 #>   number of blocks = 1                number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8                number of blocks = 9                number of blocks = 10               number of blocks = 11               number of blocks = 12               number of blocks = 13               number of blocks = 14               number of blocks = 15               number of blocks = 16               number of blocks = 17               number of blocks = 18               number of blocks = 19               number of blocks = 20               number of blocks = 21               number of blocks = 22               number of blocks = 23               number of blocks = 24               number of blocks = 25               number of blocks = 26               number of blocks = 27               number of blocks = 28               number of blocks = 29               number of blocks = 30           
 #> DONE
 ```
@@ -206,9 +206,9 @@ trial seeded from its $`q+1`$ neighbor, keeping a candidate only if it
 strictly improves the deviance. It runs unconditionally over the whole
 range and discards whatever doesn’t help, so it can only improve (or
 leave unchanged) each model it touches.
-[`normal_block()`](../reference/normal_block.md) runs it by default
-(`NB_control(refine = TRUE)`); since we turned it off above, we call it
-explicitly:
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
+runs it by default (`NB_control(refine = TRUE)`); since we turned it off
+above, we call it explicitly:
 
 ``` r
 
@@ -305,7 +305,7 @@ the graphical-lasso penalty on $`\Omega`$ explored over a path of values
 
 group_selected <- model.matrix(~ 0 + factor(selected_NB_refined$clustering))
 NB_prot_sparse <- normal_block(data_subtype, blocks = group_selected, sparsity = TRUE, control = NB_control(min_ratio=0.001))
-#> Fitting a Collection of diagonal normal-block-var models with fixed blocks, with different sparsity penalties. 
+#> Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed blocks 
 #>   penalty = 0.4842032             penalty = 0.3815745             penalty = 0.3006984             penalty = 0.2369643             penalty = 0.1867388             penalty = 0.1471588           
 #> Warning: diagonal normal-block-var model with fixed blocks: (V)EM stopped at
 #> the niter cap (500) without reaching the convergence threshold (last increment

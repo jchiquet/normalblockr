@@ -63,8 +63,9 @@ generate_normal_block_var_data(
 
 - SNR:
 
-  Signal to noise ratio: magnitude of the regression parameters B will
-  be adjusted so that tr(var(XB)) and tr(Sigma) match the desired SNR.
+  signal-to-noise ratio: the regression coefficients B are rescaled so
+  that the variance of the entries of X B is \`SNR\` times the variance
+  of the entries of the latent block covariance Sigma.
 
 - alpha:
 

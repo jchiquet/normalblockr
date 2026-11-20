@@ -15,7 +15,7 @@ Chiquet (2026)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,29 +109,21 @@ transformation used by Tan et al. (2015).</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">university</span><span class="op">$</span><span class="va">frequencies</span><span class="op">[</span>, <span class="va">university</span><span class="op">$</span><span class="va">terms</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">nb_data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">Y</span>, X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">nb_data</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fitting a diagonal normal-block-var model with unknown q </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	 number of blocks = 2           
-	 number of blocks = 3           
-	 number of blocks = 4           
-	 number of blocks = 5           
-	 number of blocks = 6           
-	 number of blocks = 7           
-	 number of blocks = 8           
-	 number of blocks = 9           
-	 number of blocks = 10           
-	 number of blocks = 11           
-	 number of blocks = 12           
-	 number of blocks = 13           
-	 number of blocks = 14           
-	 number of blocks = 15           
-</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>diagonal normal-block-var model with 14 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000378, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>diagonal normal-block-var model with 11 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000515, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>diagonal normal-block-var model with 10 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000304, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	 refine(): improved 14 of 14 models</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> DONE</span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">nb_data</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">6</span>, control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>diagonal normal-block-var model with 6 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000144, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.</span>
+<span class="r-in"><span><span class="va">out</span><span class="op">$</span><span class="fu">get_best_model</span><span class="op">(</span><span class="st">"ICL"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A diagonal normal-block-var model with 6 unknown blocks.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       226 6      15        0 -71159.77 142319.5 143717.8 143717.8 143771.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  niter</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    250</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> * Useful fields</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     $model_par, $posterior_par / $var_par, $clustering </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     $loglik, $BIC, $ICL, $objective, $nb_param, $criteria</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> * Useful S3 methods</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     print(), summary(), plot(), coef(), sigma(), fitted(), predict() </span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
@@ -140,7 +132,7 @@ transformation used by Tan et al. (2015).</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

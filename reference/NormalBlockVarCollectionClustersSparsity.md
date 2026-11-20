@@ -1,73 +1,31 @@
 # Collection of Normal-Block-Var Models over Cluster Counts and Sparsity Levels
 
 R6 class for a collection of normal-block models with different number
-of clusters (q) and different sparsity levels.
+of clusters (q) and different sparsity levels, i.e. one
+\[NormalBlockVarCollectionSparsity\] per q.
 
 ## Super classes
 
-[`NormalBlockCollection`](NormalBlockCollection.md) -\>
-[`NormalBlockCollectionClustersSparsity`](NormalBlockCollectionClustersSparsity.md)
+[`NormalBlockCollection`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.md)
+-\>
+[`NormalBlockCollectionClustersSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionClustersSparsity.md)
 -\> `NormalBlockVarCollectionClustersSparsity`
-
-## Active bindings
-
-- `who_am_I`:
-
-  a method to print what model is being fitted
 
 ## Methods
 
 ### Public methods
 
-- [`NormalBlockVarCollectionClustersSparsity$new()`](#method-NormalBlockVarCollectionClustersSparsity-initialize)
-
 - [`NormalBlockVarCollectionClustersSparsity$clone()`](#method-NormalBlockVarCollectionClustersSparsity-clone)
 
 Inherited methods
 
-- [`NormalBlockCollection$optimize()`](NormalBlockCollection.html#method-optimize)
-- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
-- [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
-- [`NormalBlockCollectionClustersSparsity$get_best_model()`](NormalBlockCollectionClustersSparsity.html#method-get_best_model)
-- [`NormalBlockCollectionClustersSparsity$get_model()`](NormalBlockCollectionClustersSparsity.html#method-get_model)
-- [`NormalBlockCollectionClustersSparsity$plot()`](NormalBlockCollectionClustersSparsity.html#method-plot)
-
-------------------------------------------------------------------------
-
-### `NormalBlockVarCollectionClustersSparsity$new()`
-
-Create a new \[\`NormalBlockVarCollectionClustersSparsity\`\] object.
-
-#### Usage
-
-    NormalBlockVarCollectionClustersSparsity$new(
-      mydata,
-      q_list,
-      zero_inflation = FALSE,
-      control = NB_control()
-    )
-
-#### Arguments
-
-- `mydata`:
-
-  object of NormalBlockData class, with responses and design matrix
-
-- `q_list`:
-
-  list of q values (number of groups) in the collection
-
-- `zero_inflation`:
-
-  boolean to specify whether data is zero-inflated
-
-- `control`:
-
-  structured list of parameters to handle sparsity control
-
-#### Returns
-
-A new \[\`NormalBlockVarCollectionClustersSparsity\`\] object
+- [`NormalBlockCollection$optimize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-optimize)
+- [`NormalBlockCollection$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-print)
+- [`NormalBlockCollection$summary()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-summary)
+- [`NormalBlockCollectionClustersSparsity$get_best_model()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionClustersSparsity.html#method-get_best_model)
+- [`NormalBlockCollectionClustersSparsity$get_model()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionClustersSparsity.html#method-get_model)
+- [`NormalBlockCollectionClustersSparsity$initialize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionClustersSparsity.html#method-initialize)
+- [`NormalBlockCollectionClustersSparsity$plot()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionClustersSparsity.html#method-plot)
 
 ------------------------------------------------------------------------
 

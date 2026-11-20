@@ -35,7 +35,7 @@ print(model)
 #> A diagonal normal-block-var model with 3 unknown blocks.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>        48 3       3        0 -438.705   877.41 1063.354 1063.354 1069.946    24
+#>        48 3       3        0 -572.736 1145.473 1331.417 1331.417 1338.009    13
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

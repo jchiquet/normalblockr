@@ -1,18 +1,19 @@
 # Base Class for a Collection of Models over a Sparsity Path
 
 Shared scaffolding for \[NormalBlockVarCollectionSparsity\] and
-\[NormalBlockMeanCollectionSparsity\]: the warm-started path traversal,
-the penalty lookup and the criteria plot. Concrete subclasses derive the
-penalty grid in their \`initialize()\`. Model selection, StARS included
-(stability selection, Liu et al. 2010), is shared: a family only says
-how to refit its path on a subsample with the clustering held fixed
+\[NormalBlockMeanCollectionSparsity\]: the penalty grid, the
+warm-started path traversal, the penalty lookup and the criteria plot.
+Model selection, StARS included (stability selection, Liu et al. 2010),
+is shared: a family only says on which covariance estimate the default
+penalty grid is read (\`private\$penalty_scale()\`), how to refit its
+path on a subsample with the clustering held fixed
 (\`private\$subsample_path()\`) and how to name the nodes of its network
 (\`private\$network_nodes()\`).
 
 ## Super class
 
-[`NormalBlockCollection`](NormalBlockCollection.md) -\>
-`NormalBlockCollectionSparsity`
+[`NormalBlockCollection`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.md)
+-\> `NormalBlockCollectionSparsity`
 
 ## Public fields
 
@@ -21,6 +22,10 @@ how to refit its path on a subsample with the clustering held fixed
   object of NormalBlockData class, with responses and design matrix
 
 ## Active bindings
+
+- `sparsity_details`:
+
+  number, range and ratio of the penalties of the path
 
 - `q`:
 
@@ -53,6 +58,8 @@ how to refit its path on a subsample with the clustering held fixed
 
 ### Public methods
 
+- [`NormalBlockCollectionSparsity$new()`](#method-NormalBlockCollectionSparsity-initialize)
+
 - [`NormalBlockCollectionSparsity$optimize()`](#method-NormalBlockCollectionSparsity-optimize)
 
 - [`NormalBlockCollectionSparsity$get_model()`](#method-NormalBlockCollectionSparsity-get_model)
@@ -67,8 +74,49 @@ how to refit its path on a subsample with the clustering held fixed
 
 Inherited methods
 
-- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
-- [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
+- [`NormalBlockCollection$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-print)
+- [`NormalBlockCollection$summary()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-summary)
+
+------------------------------------------------------------------------
+
+### `NormalBlockCollectionSparsity$new()`
+
+Create a collection over a path of sparsity penalties. By default,
+\`control\$n_sparsity_penalties\` values on a log scale, from the
+largest absolute (weighted) entry of a covariance estimate, which
+removes every edge, down to \`control\$min_ratio\` times it.
+
+#### Usage
+
+    NormalBlockCollectionSparsity$new(
+      mydata,
+      blocks,
+      zero_inflation = FALSE,
+      control = NB_control()
+    )
+
+#### Arguments
+
+- `mydata`:
+
+  object of NormalBlockData class, with responses and design matrix
+
+- `blocks`:
+
+  either a clustering matrix (known, fixed clustering) or a single
+  integer (number of blocks to infer)
+
+- `zero_inflation`:
+
+  whether the models of the path are zero-inflated
+
+- `control`:
+
+  structured list of parameters to handle sparsity control
+
+#### Returns
+
+A new collection object
 
 ------------------------------------------------------------------------
 

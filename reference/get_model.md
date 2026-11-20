@@ -1,7 +1,7 @@
 # Create a Normal-Block Model Object
 
-Creates the appropriate normal-block model (or collection of models)
-depending on the parametrization.
+Creates, without fitting it, the model (or collection of models) that
+\[normal_block()\] would fit for the same arguments.
 
 ## Usage
 
@@ -20,33 +20,44 @@ get_model(
 
 - data:
 
-  contains the matrix of responses (Y) and the design matrix (X).
+  a \[NormalBlockData\] object, holding the responses (Y, n x p) and the
+  covariates (X, n x d).
 
 - blocks:
 
-  either an integer (number of blocks), a vector of integer (list of
-  possible number of block) or a p \* q matrix (for indicating block
-  membership when its known)
+  the clustering of the variables: a p x q indicator matrix for a known
+  clustering (e.g. \`model.matrix(~ 0 + factor(labels))\`), a single
+  integer q for an unknown clustering into q clusters, or a vector of
+  distinct integers for a collection over these values of q.
 
 - sparsity:
 
-  boolean to say whether the model should have a changing penalty OR
-  float to run model with a single penalty value
+  the graphical-lasso penalty on Omega: \`0\` (the default) for none, a
+  positive number for a single penalty, or \`TRUE\` for a collection
+  along a path of penalties (see \[NB_control()\]).
 
 - zero_inflation:
 
-  boolean to indicate if Y is zero-inflated and adjust fitted model as a
-  consequence
+  whether to model an excess of exact zeros in Y.
 
 - control:
 
-  a list-like structure for detailed control on parameters should be
-  generated with NB_control() for collections of sparse models
+  a list of settings, built with \[NB_control()\].
 
 - model:
 
-  which model family to fit, "var" (the default) or "mean" – see
-  \[normal_block()\]
+  the model family: \`"var"\` (the default) clusters the variables by
+  how they covary, and infers a network between clusters (see
+  \[NormalBlockVarBase\]); \`"mean"\` clusters them by how they respond
+  to the covariates, \`mu_i = C B' X_i\` (see \[NormalBlockMeanBase\]).
+  Every combination of the other arguments is available for both
+  families, except a penalty together with zero-inflation for the
+  mean-block family, whose zero-inflated models have a diagonal or
+  spherical Sigma.
+
+## Value
+
+an R6 object: a model or a collection of models, not optimized yet.
 
 ## Examples
 

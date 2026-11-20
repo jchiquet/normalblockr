@@ -9,7 +9,7 @@ normal-block model."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -146,12 +146,21 @@ for the family default (see `for_family()`)</p></dd>
 </dl><p></p></div>
     </div>
     <div class="section level2">
+    <h2 id="active-bindings">Active bindings<a class="anchor" aria-label="anchor" href="#active-bindings"></a></h2>
+    <p></p><div class="r6-active-bindings"><dl><dt><code>Y_original</code></dt>
+<dd><p>the matrix of responses as given, before any rescaling</p></dd>
+
+
+</dl><p></p></div>
+    </div>
+    <div class="section level2">
     <h2 id="methods">Methods<a class="anchor" aria-label="anchor" href="#methods"></a></h2>
 
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockData-initialize"><code>NormalBlockData$new()</code></a></p></li>
 <li><p><a href="#method-NormalBlockData-for_family"><code>NormalBlockData$for_family()</code></a></p></li>
+<li><p><a href="#method-NormalBlockData-subset"><code>NormalBlockData$subset()</code></a></p></li>
 <li><p><a href="#method-NormalBlockData-ols_fit"><code>NormalBlockData$ols_fit()</code></a></p></li>
 <li><p><a href="#method-NormalBlockData-zi_ols_fit"><code>NormalBlockData$zi_ols_fit()</code></a></p></li>
 <li><p><a href="#method-NormalBlockData-zi_fit"><code>NormalBlockData$zi_fit()</code></a></p></li>
@@ -166,7 +175,8 @@ for the family default (see `for_family()`)</p></dd>
 <span>  X0 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  zeros <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  zeros <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  check_constant <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
@@ -190,6 +200,11 @@ default, see the section "Rescaling Y" below and `for_family()`.</p></dd>
       <dt><code>zeros</code></dt>
 <dd><p>an optional 0/1 matrix of structural zeros, overriding the
 default `Y == 0`.</p></dd>
+
+      <dt><code>check_constant</code></dt>
+<dd><p>whether to refuse constant columns of Y, which
+carry no information to cluster on. `FALSE` for data only used to
+evaluate a fitted model (see `heldout_loglik()`).</p></dd>
 
 
 </dl><p></p></div>
@@ -220,14 +235,38 @@ built once and shared by every model fitted on it.</p><div class="section">
 
 </div>
 
+<p></p><hr><a id="method-NormalBlockData-subset"></a><div class="section">
+<h3 id="normalblockdata-subset-"><code>NormalBlockData$subset()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-subset-"></a></h3>
+<p>The data restricted to some observations, with the same
+covariates, formula, zeros and scale request (a rescaled Y is rescaled
+again on these rows).</p><div class="section">
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">subset</span><span class="op">(</span><span class="va">rows</span>, check_constant <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>rows</code></dt>
+<dd><p>the observations to keep (indices or a logical vector)</p></dd>
+
+      <dt><code>check_constant</code></dt>
+<dd><p>as in `new()`</p></dd>
+
+
+</dl><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<p>a [`NormalBlockData`] object</p>
+</div>
+
+</div>
+
 <p></p><hr><a id="method-NormalBlockData-ols_fit"></a><div class="section">
 <h3 id="normalblockdata-ols-fit-"><code>NormalBlockData$ols_fit()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-ols-fit-"></a></h3>
 <p>Ordinary-least-squares fit of Y on X, with its residuals
 and their covariance. Computed once and memoized.</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">ols_fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>a list with `B` (d x p), `R` (n x p residuals) and `Sigma`
 (p x p residual covariance)</p>
 </div>
@@ -240,10 +279,10 @@ and their covariance. Computed once and memoized.</p><div class="section">
 least-squares fit of B under the zero-inflation mask, with its inverse
 residual variances and residuals (see `zi_weighted_fit()`).
 Computed once and memoized.</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">zi_ols_fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>a list with `B` (d x p), `dm1` (p) and `R` (n x p masked residuals)</p>
 </div>
 
@@ -255,10 +294,10 @@ Computed once and memoized.</p><div class="section">
 regressions of each variable's zero pattern on `X0`, and the fixed
 contribution they make to the log-likelihood. The (V)EM never revisits
 these, so they are a property of the data rather than of a model.</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">zi_fit</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
 <p>a list with `B0` (d0 x p), `kappa` (n x p zero-inflation
 probabilities) and `ZI_cond_mean` (a scalar)</p>
 </div>
@@ -268,10 +307,10 @@ probabilities) and `ZI_cond_mean` (a scalar)</p>
 <p></p><hr><a id="method-NormalBlockData-clone"></a><div class="section">
 <h3 id="normalblockdata-clone-"><code>NormalBlockData$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockdata-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockData</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -298,7 +337,7 @@ probabilities) and `ZI_cond_mean` (a scalar)</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

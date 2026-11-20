@@ -11,7 +11,7 @@ and [stats::BIC()]."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,8 +72,10 @@ and [stats::BIC()].</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class `"logLik"`. The numeric value is the
-log-likelihood or its variational lower bound (ELBO). Attributes `df` and
-`nobs` hold the number of parameters and observations.</p>
+log-likelihood or its variational lower bound (ELBO), on the scale of the
+data the model was fitted on (rescaled or not, see [NormalBlockData]); use
+the `heldout_loglik()` method for a log-likelihood on Y's original scale.
+Attributes `df` and `nobs` hold the number of parameters and observations.</p>
     </div>
 
     <div class="section level2">
@@ -90,7 +92,7 @@ log-likelihood or its variational lower bound (ELBO). Attributes `df` and
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

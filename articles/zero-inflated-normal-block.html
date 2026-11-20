@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Julien Chiquet
 &amp; Jeanne Tous</h4>
             
-            <h4 data-toc-skip class="date">2026-11-19</h4>
+            <h4 data-toc-skip class="date">2026-11-20</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jchiquet/normalblockr/blob/master/vignettes/zero-inflated-normal-block.Rmd" class="external-link"><code>vignettes/zero-inflated-normal-block.Rmd</code></a></small>
       <div class="d-none name"><code>zero-inflated-normal-block.Rmd</code></div>
@@ -292,7 +292,7 @@ to show what it changes in the next section:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">8</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                    control <span class="op">=</span> <span class="fu"><a href="../reference/NB_control.html">NB_control</a></span><span class="op">(</span>clustering_init <span class="op">=</span> <span class="st">"ward2"</span>, refine <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fitting a diagonal normal-block-var model with unknown q </span></span>
+<span><span class="co">#&gt; Fitting a collection of zero-inflated diagonal normal-block-var models over q </span></span>
 <span><span class="co">#&gt;   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8           </span></span>
 <span><span class="co">#&gt; DONE</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -399,7 +399,7 @@ with <code>sparsity = TRUE</code> explores a path of
 penalties on the inter-cluster association network <span class="citation">(see Tous and Chiquet 2026)</span>.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="va">myModel</span><span class="op">$</span><span class="va">q</span>, sparsity <span class="op">=</span> <span class="cn">TRUE</span>, zero_inflation <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Fitting a Collection of zero-inflated diagonal normal-block-var models with fixed q, with different sparsity penalties. </span></span>
+<span><span class="co">#&gt; Fitting a collection of zero-inflated diagonal normal-block-var models over sparsity penalties, with fixed q </span></span>
 <span><span class="co">#&gt;   penalty = 0.02839098           </span></span>
 <span><span class="co">#&gt; Warning: zero-inflated diagonal normal-block-var model with 4 unknown blocks:</span></span>
 <span><span class="co">#&gt; (V)EM stopped at the niter cap (500) without reaching the convergence threshold</span></span>
@@ -450,7 +450,7 @@ Statistics &amp; Data Analysis</em> 219: 108347. <a href="https://doi.org/10.101
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

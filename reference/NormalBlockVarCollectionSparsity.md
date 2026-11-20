@@ -1,79 +1,32 @@
 # Collection of Normal-Block-Var Models over a Sparsity Path
 
 R6 class for a collection of normal-block models with a fixed clustering
-(blocks) and different sparsity levels.
+(blocks) and different sparsity levels. The default penalty grid is read
+off the latent block covariance of a short unpenalized fit.
 
 ## Super classes
 
-[`NormalBlockCollection`](NormalBlockCollection.md) -\>
-[`NormalBlockCollectionSparsity`](NormalBlockCollectionSparsity.md) -\>
-`NormalBlockVarCollectionSparsity`
-
-## Active bindings
-
-- `sparsity_details`:
-
-  list of information about model's penalties
-
-- `who_am_I`:
-
-  a method to print what model is being fitted
+[`NormalBlockCollection`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.md)
+-\>
+[`NormalBlockCollectionSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.md)
+-\> `NormalBlockVarCollectionSparsity`
 
 ## Methods
 
 ### Public methods
 
-- [`NormalBlockVarCollectionSparsity$new()`](#method-NormalBlockVarCollectionSparsity-initialize)
-
 - [`NormalBlockVarCollectionSparsity$clone()`](#method-NormalBlockVarCollectionSparsity-clone)
 
 Inherited methods
 
-- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
-- [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
-- [`NormalBlockCollectionSparsity$get_best_model()`](NormalBlockCollectionSparsity.html#method-get_best_model)
-- [`NormalBlockCollectionSparsity$get_model()`](NormalBlockCollectionSparsity.html#method-get_model)
-- [`NormalBlockCollectionSparsity$optimize()`](NormalBlockCollectionSparsity.html#method-optimize)
-- [`NormalBlockCollectionSparsity$plot()`](NormalBlockCollectionSparsity.html#method-plot)
-- [`NormalBlockCollectionSparsity$stability_selection()`](NormalBlockCollectionSparsity.html#method-stability_selection)
-
-------------------------------------------------------------------------
-
-### `NormalBlockVarCollectionSparsity$new()`
-
-Create a new \[\`NormalBlockVarCollectionSparsity\`\] object.
-
-#### Usage
-
-    NormalBlockVarCollectionSparsity$new(
-      mydata,
-      blocks,
-      zero_inflation = FALSE,
-      control = NB_control()
-    )
-
-#### Arguments
-
-- `mydata`:
-
-  object of NormalBlockData class, with responses and design matrix
-
-- `blocks`:
-
-  either a clustering matrix (known, fixed clustering) or a single
-  integer (number of blocks to infer)
-
-- `zero_inflation`:
-
-  boolean to specify whether data is zero-inflated
-
-- `control`:
-
-  structured list of parameters to handle sparsity control
-
-#### Returns
-
-A new \[\`NormalBlockVarCollectionSparsity\`\] object
+- [`NormalBlockCollection$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-print)
+- [`NormalBlockCollection$summary()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-summary)
+- [`NormalBlockCollectionSparsity$get_best_model()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-get_best_model)
+- [`NormalBlockCollectionSparsity$get_model()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-get_model)
+- [`NormalBlockCollectionSparsity$initialize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-initialize)
+- [`NormalBlockCollectionSparsity$optimize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-optimize)
+- [`NormalBlockCollectionSparsity$plot()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-plot)
+- [`NormalBlockCollectionSparsity$stability_selection()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-stability_selection)
 
 ------------------------------------------------------------------------
 

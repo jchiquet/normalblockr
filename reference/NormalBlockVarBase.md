@@ -5,7 +5,8 @@ clustering structures the latent covariance.
 
 ## Super class
 
-[`NormalBlockBase`](NormalBlockBase.md) -\> `NormalBlockVarBase`
+[`NormalBlockBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.md)
+-\> `NormalBlockVarBase`
 
 ## Active bindings
 
@@ -16,18 +17,20 @@ clustering structures the latent covariance.
   any). Use \`model_par\$B\` instead for the coefficients on the
   internal fitting scale.
 
-- `d0`:
+- `fitted`:
 
-  number of zi variables (dimensions in X0)
+  Y values predicted by the model, in Y's original units: \`X B\`, plus
+  the posterior mean of the latent block signals for (V)EM fits, with
+  the observed zeros of zero-inflated models set to 0
 
 - `model_par`:
 
-  a list with the matrices of the model parameters: B (covariates), dm1
-  (species variance), Omega (groups precision matrix)). On the internal
-  fitting scale (\`self\$data\$Y\`, possibly column-rescaled by
-  \`NormalBlockData(scale = TRUE)\`) – use
-  \`\$B_original\`/\`\$dm1_original\` for the same quantities converted
-  back to Y's original units.
+  a list with the model parameters: B (d x p regression coefficients),
+  B0 (zero-inflation coefficients, if any), dm1 (inverse noise variances
+  of the variables) and Omega (q x q precision matrix of the latent
+  block signals), on the scale of the fit. Use
+  \`\$B_original\`/\`\$dm1_original\` for B and dm1 on Y's original
+  scale.
 
 - `sparsity_weights`:
 
@@ -48,8 +51,6 @@ clustering structures the latent covariance.
 
 - [`NormalBlockVarBase$new()`](#method-NormalBlockVarBase-initialize)
 
-- [`NormalBlockVarBase$warm_start_from()`](#method-NormalBlockVarBase-warm_start_from)
-
 - [`NormalBlockVarBase$within_block_correlations()`](#method-NormalBlockVarBase-within_block_correlations)
 
 - [`NormalBlockVarBase$split()`](#method-NormalBlockVarBase-split)
@@ -60,18 +61,19 @@ clustering structures the latent covariance.
 
 Inherited methods
 
-- [`NormalBlockBase$best_of_inits()`](NormalBlockBase.html#method-best_of_inits)
-- [`NormalBlockBase$candidates_merge()`](NormalBlockBase.html#method-candidates_merge)
-- [`NormalBlockBase$candidates_split()`](NormalBlockBase.html#method-candidates_split)
-- [`NormalBlockBase$heldout_loglik()`](NormalBlockBase.html#method-heldout_loglik)
-- [`NormalBlockBase$latent_network()`](NormalBlockBase.html#method-latent_network)
-- [`NormalBlockBase$optimize()`](NormalBlockBase.html#method-optimize)
-- [`NormalBlockBase$plot()`](NormalBlockBase.html#method-plot)
-- [`NormalBlockBase$plot_loglik()`](NormalBlockBase.html#method-plot_loglik)
-- [`NormalBlockBase$plot_network()`](NormalBlockBase.html#method-plot_network)
-- [`NormalBlockBase$predict()`](NormalBlockBase.html#method-predict)
-- [`NormalBlockBase$print()`](NormalBlockBase.html#method-print)
-- [`NormalBlockBase$update()`](NormalBlockBase.html#method-update)
+- [`NormalBlockBase$best_of_inits()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-best_of_inits)
+- [`NormalBlockBase$candidates_merge()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_merge)
+- [`NormalBlockBase$candidates_split()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_split)
+- [`NormalBlockBase$heldout_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-heldout_loglik)
+- [`NormalBlockBase$latent_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-latent_network)
+- [`NormalBlockBase$optimize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-optimize)
+- [`NormalBlockBase$plot()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot)
+- [`NormalBlockBase$plot_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_loglik)
+- [`NormalBlockBase$plot_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_network)
+- [`NormalBlockBase$predict()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-predict)
+- [`NormalBlockBase$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-print)
+- [`NormalBlockBase$update()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-update)
+- [`NormalBlockBase$warm_start_from()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-warm_start_from)
 
 ------------------------------------------------------------------------
 
@@ -119,29 +121,6 @@ Create a new \[\`NormalBlockVarBase\`\] object.
 #### Returns
 
 A new \[\`NormalBlockVarBase\`\] object
-
-------------------------------------------------------------------------
-
-### `NormalBlockVarBase$warm_start_from()`
-
-Seed this model's starting parameters from another, already-optimized
-model with the same q, instead of a fresh heuristic clustering. Used by
-\[NormalBlockVarCollectionSparsity\] to warm-start each penalty in a
-sparsity path from the previous one's solution.
-
-#### Usage
-
-    NormalBlockVarBase$warm_start_from(other)
-
-#### Arguments
-
-- `other`:
-
-  a \[NormalBlockVarBase\] object, already optimized
-
-#### Returns
-
-Update the current object in place with \`other\`'s parameters
 
 ------------------------------------------------------------------------
 

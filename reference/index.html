@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,7 @@
       </dl></div><div class="section level2">
       <h2 id="model-and-data-classes">Model and data classes<a class="anchor" aria-label="anchor" href="#model-and-data-classes"></a></h2>
 
-      <div class="section-desc"><p>R6 classes returned by normal_block(). NormalBlockData wraps the responses and design matrix; NormalBlockVar<em>Clusters (optionally ZI-prefixed) are single fitted models, known- or unknown-clustering; NormalBlockCollection</em> are collections of models explored over a range of q and/or sparsity penalties.</p></div>
+      <div class="section-desc"><p>R6 classes returned by normal_block(). NormalBlockData wraps the responses and design matrix; NormalBlock{Var,Mean}<em>Clusters (optionally ZI-prefixed) are single fitted models, with a known or unknown clustering; NormalBlock{Var,Mean}Collection</em> are collections of models explored over a range of q and/or sparsity penalties.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -372,7 +372,7 @@
       </dl></div><div class="section level2">
       <h2 id="internal">Internal<a class="anchor" aria-label="anchor" href="#internal"></a></h2>
 
-      <div class="section-desc"><p>Abstract base classes, low-level helpers and exploratory code kept for reference; not part of the user-facing API</p></div>
+      <div class="section-desc"><p>Abstract base classes and low-level helpers, documented for developers and for the methods their subclasses inherit</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -447,7 +447,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

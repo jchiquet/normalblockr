@@ -3,19 +3,16 @@
 R6 class for a collection of mean-block models (\[NormalBlockMeanBase\])
 with a fixed clustering (or a fixed number of blocks) and different
 sparsity levels applied to the p x p precision matrix of the variables.
-Mirrors \[NormalBlockVarCollectionSparsity\], StARS included.
+Mirrors \[NormalBlockVarCollectionSparsity\], StARS included; the
+default penalty grid is read off the covariance of the least-squares
+residuals.
 
 ## Super classes
 
-[`NormalBlockCollection`](NormalBlockCollection.md) -\>
-[`NormalBlockCollectionSparsity`](NormalBlockCollectionSparsity.md) -\>
-`NormalBlockMeanCollectionSparsity`
-
-## Active bindings
-
-- `who_am_I`:
-
-  a method to print what model is being fitted
+[`NormalBlockCollection`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.md)
+-\>
+[`NormalBlockCollectionSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.md)
+-\> `NormalBlockMeanCollectionSparsity`
 
 ## Methods
 
@@ -27,13 +24,13 @@ Mirrors \[NormalBlockVarCollectionSparsity\], StARS included.
 
 Inherited methods
 
-- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
-- [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
-- [`NormalBlockCollectionSparsity$get_best_model()`](NormalBlockCollectionSparsity.html#method-get_best_model)
-- [`NormalBlockCollectionSparsity$get_model()`](NormalBlockCollectionSparsity.html#method-get_model)
-- [`NormalBlockCollectionSparsity$optimize()`](NormalBlockCollectionSparsity.html#method-optimize)
-- [`NormalBlockCollectionSparsity$plot()`](NormalBlockCollectionSparsity.html#method-plot)
-- [`NormalBlockCollectionSparsity$stability_selection()`](NormalBlockCollectionSparsity.html#method-stability_selection)
+- [`NormalBlockCollection$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-print)
+- [`NormalBlockCollection$summary()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-summary)
+- [`NormalBlockCollectionSparsity$get_best_model()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-get_best_model)
+- [`NormalBlockCollectionSparsity$get_model()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-get_model)
+- [`NormalBlockCollectionSparsity$optimize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-optimize)
+- [`NormalBlockCollectionSparsity$plot()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-plot)
+- [`NormalBlockCollectionSparsity$stability_selection()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.html#method-stability_selection)
 
 ------------------------------------------------------------------------
 
@@ -43,7 +40,12 @@ Create a new \[\`NormalBlockMeanCollectionSparsity\`\] object.
 
 #### Usage
 
-    NormalBlockMeanCollectionSparsity$new(mydata, blocks, control = NB_control())
+    NormalBlockMeanCollectionSparsity$new(
+      mydata,
+      blocks,
+      zero_inflation = FALSE,
+      control = NB_control()
+    )
 
 #### Arguments
 
@@ -55,6 +57,11 @@ Create a new \[\`NormalBlockMeanCollectionSparsity\`\] object.
 
   either a clustering matrix (known, fixed clustering) or a single
   integer (number of blocks to infer)
+
+- `zero_inflation`:
+
+  must be \`FALSE\`: the path penalizes a full Sigma, which
+  zero-inflated mean-block models do not carry
 
 - `control`:
 
@@ -87,7 +94,7 @@ ex <- generate_normal_block_mean_data(n = 60, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 3, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 5))
-#> Fitting a normal-block-mean model with sparsity path 
+#> Fitting a collection of full normal-block-mean models over sparsity penalties, with fixed q 
 #>   penalty = 4.95276           
      penalty = 1.5662           
      penalty = 0.495276           

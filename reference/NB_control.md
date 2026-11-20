@@ -27,42 +27,46 @@ NB_control(
 
 - niter:
 
-  number of iterations in model optimization
+  maximal number of (V)EM iterations.
 
 - threshold:
 
-  loglikelihood / elbo threshold under which optimization stops
+  the (V)EM stops when the objective (log-likelihood or ELBO) increases
+  by less than this. A negative value runs exactly \`niter\` iterations,
+  without the warning issued when \`niter\` is reached.
 
 - fixed_point_niter:
 
-  number of sweeps of the tau update for Normal-Block-Mean with unknown
-  clusters. Each sweep visits the rows of tau sequentially and maximizes
-  the ELBO exactly in each, so it can never decrease the ELBO.
+  number of sweeps of the tau update for Normal-Block-Mean models with
+  unknown clusters. Each sweep visits the rows of tau sequentially and
+  maximizes the ELBO exactly in each, so it can never decrease the ELBO.
 
 - sparsity_weights:
 
-  weights with which the penalty should be applied in case sparsity is
-  required, non-0 values on the diagonal mean diagonal shall be
-  penalized too (default is non-penalized diagonal and 1s off-diagonal)
+  a symmetric matrix of weights applied to the penalty, entry by entry:
+  q x q (variance-block) or p x p (mean-block). By default, 1 off the
+  diagonal and 0 on it (the diagonal is not penalized).
 
 - sparsity_penalties:
 
-  list of penalties the user wants to test, other parameters are only
-  used if penalties is not specified
+  the penalties of a sparsity path (\`sparsity = TRUE\`). By default,
+  \`n_sparsity_penalties\` values from the smallest penalty that removes
+  every edge down to \`min_ratio\` times it, on a log scale.
 
 - n_sparsity_penalties:
 
-  number of penalties to test.
+  number of penalties of the default path.
 
 - min_ratio:
 
-  ratio for sparsity between max penalty (0 edge penalty) and min
-  penalty to test
+  ratio between the smallest and the largest penalty of the default
+  path.
 
 - fixed_tau:
 
-  whether tau should be fixed at clustering_init during optimization
-  useful for calls to fixed_q models in stability_selection
+  whether the posterior cluster probabilities stay at their initial
+  value (\`clustering_init\`) during the optimization; used to refit a
+  sparsity path with its clustering held fixed (stability selection).
 
 - clustering_init:
 
@@ -71,13 +75,13 @@ NB_control(
   clustering (a vector of labels or a p x q indicator matrix, or a list
   of either per q for a collection), or "best_of_inits" to try several
   heuristics per model and keep the best-ELBO fit (see
-  \[NormalBlockVarBase\]'s \`best_of_inits()\`; not supported with
+  \[NormalBlockBase\]'s \`best_of_inits()\`; not supported with
   \`sparsity = TRUE\`). Default \`NULL\`, i.e. "kmeans" for both model
   families; "ward2" can work better on zero-inflated abundance data.
 
 - verbose:
 
-  telling if information should be printed during optimization
+  whether to print the progress of the optimization.
 
 - heuristic:
 

@@ -11,7 +11,7 @@ models: model type and the range of q/sparsity explored. See
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,7 @@ models: model type and the range of q/sparsity explored. See
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">ex_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">ex_data</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">5</span>, control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">models</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> A diagonal normal-block-var model with unknown q </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A collection of diagonal normal-block-var models over q </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   4 model(s) explored</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     q ranging from 2 to 5 </span>
@@ -96,7 +96,7 @@ models: model type and the range of q/sparsity explored. See
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

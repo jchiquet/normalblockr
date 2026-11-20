@@ -61,28 +61,20 @@ vocabulary – the transformation used by Tan et al. (2015).
 Y <- log(1 + university$frequencies[, university$terms])
 nb_data <- NormalBlockData$new(Y, X = matrix(1, nrow(Y), 1))
 # \donttest{
-out <- normal_block(nb_data, 2:15)
-#> Fitting a diagonal normal-block-var model with unknown q 
-#>   number of blocks = 2           
-     number of blocks = 3           
-     number of blocks = 4           
-     number of blocks = 5           
-     number of blocks = 6           
-     number of blocks = 7           
-     number of blocks = 8           
-     number of blocks = 9           
-     number of blocks = 10           
-     number of blocks = 11           
-     number of blocks = 12           
-     number of blocks = 13           
-     number of blocks = 14           
-     number of blocks = 15           
-
-#> Warning: diagonal normal-block-var model with 14 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000378, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
-#> Warning: diagonal normal-block-var model with 11 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000515, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
-#> Warning: diagonal normal-block-var model with 10 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000304, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
-#>   refine(): improved 14 of 14 models
-#> 
-#> DONE
+out <- normal_block(nb_data, 2:6, control = NB_control(verbose = FALSE))
+#> Warning: diagonal normal-block-var model with 6 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.000144, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
+out$get_best_model("ICL")
+#> A diagonal normal-block-var model with 6 unknown blocks.
+#> ===========================================================================
+#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+#>       226 6      15        0 -71159.77 142319.5 143717.8 143717.8 143771.5
+#>  niter
+#>    250
+#> ===========================================================================
+#> * Useful fields
+#>     $model_par, $posterior_par / $var_par, $clustering 
+#>     $loglik, $BIC, $ICL, $objective, $nb_param, $criteria
+#> * Useful S3 methods
+#>     print(), summary(), plot(), coef(), sigma(), fitted(), predict() 
 # }
 ```

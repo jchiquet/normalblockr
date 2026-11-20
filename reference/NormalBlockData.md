@@ -100,6 +100,12 @@ since the scaling factors differ within a block).
 
   where are the non-zeros in Y
 
+## Active bindings
+
+- `Y_original`:
+
+  the matrix of responses as given, before any rescaling
+
 ## Methods
 
 ### Public methods
@@ -107,6 +113,8 @@ since the scaling factors differ within a block).
 - [`NormalBlockData$new()`](#method-NormalBlockData-initialize)
 
 - [`NormalBlockData$for_family()`](#method-NormalBlockData-for_family)
+
+- [`NormalBlockData$subset()`](#method-NormalBlockData-subset)
 
 - [`NormalBlockData$ols_fit()`](#method-NormalBlockData-ols_fit)
 
@@ -130,7 +138,8 @@ Create a new \[\`NormalBlockData\`\] object.
       X0 = NULL,
       formula = NULL,
       scale = NULL,
-      zeros = NULL
+      zeros = NULL,
+      check_constant = TRUE
     )
 
 #### Arguments
@@ -163,6 +172,12 @@ Create a new \[\`NormalBlockData\`\] object.
   an optional 0/1 matrix of structural zeros, overriding the default \`Y
   == 0\`.
 
+- `check_constant`:
+
+  whether to refuse constant columns of Y, which carry no information to
+  cluster on. \`FALSE\` for data only used to evaluate a fitted model
+  (see \`heldout_loglik()\`).
+
 ------------------------------------------------------------------------
 
 ### `NormalBlockData$for_family()`
@@ -182,6 +197,32 @@ every model fitted on it.
 - `model`:
 
   the model family, \`"var"\` or \`"mean"\`
+
+#### Returns
+
+a \[\`NormalBlockData\`\] object
+
+------------------------------------------------------------------------
+
+### `NormalBlockData$subset()`
+
+The data restricted to some observations, with the same covariates,
+formula, zeros and scale request (a rescaled Y is rescaled again on
+these rows).
+
+#### Usage
+
+    NormalBlockData$subset(rows, check_constant = TRUE)
+
+#### Arguments
+
+- `rows`:
+
+  the observations to keep (indices or a logical vector)
+
+- `check_constant`:
+
+  as in \`new()\`
 
 #### Returns
 

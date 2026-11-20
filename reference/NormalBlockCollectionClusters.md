@@ -1,16 +1,15 @@
 # Base Class for a Collection of Models over a Range of Cluster Counts
 
 Shared scaffolding for \[NormalBlockVarCollectionClusters\] and
-\[NormalBlockMeanCollectionClusters\]: everything that does not depend
-on the model family (model lookup, model selection, the criteria plot
-and the split/merge \`refine()\` search). Concrete subclasses only build
-\`self\$models\` in their \`initialize()\` and name themselves through
-\`who_am_I\`.
+\[NormalBlockMeanCollectionClusters\]: the models of the collection, one
+per q in increasing order, model lookup and selection, the criteria plot
+and the split/merge \`refine()\` search. Concrete subclasses only name
+the model family.
 
 ## Super class
 
-[`NormalBlockCollection`](NormalBlockCollection.md) -\>
-`NormalBlockCollectionClusters`
+[`NormalBlockCollection`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.md)
+-\> `NormalBlockCollectionClusters`
 
 ## Active bindings
 
@@ -28,6 +27,8 @@ and the split/merge \`refine()\` search). Concrete subclasses only build
 
 ### Public methods
 
+- [`NormalBlockCollectionClusters$new()`](#method-NormalBlockCollectionClusters-initialize)
+
 - [`NormalBlockCollectionClusters$get_model()`](#method-NormalBlockCollectionClusters-get_model)
 
 - [`NormalBlockCollectionClusters$get_best_model()`](#method-NormalBlockCollectionClusters-get_best_model)
@@ -44,7 +45,50 @@ and the split/merge \`refine()\` search). Concrete subclasses only build
 
 Inherited methods
 
-- [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
+- [`NormalBlockCollection$summary()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-summary)
+
+------------------------------------------------------------------------
+
+### `NormalBlockCollectionClusters$new()`
+
+Create a collection over a range of q, sorted increasingly.
+
+#### Usage
+
+    NormalBlockCollectionClusters$new(
+      mydata,
+      q_list,
+      zero_inflation = FALSE,
+      sparsity = 0,
+      control = NB_control()
+    )
+
+#### Arguments
+
+- `mydata`:
+
+  object of NormalBlockData class, with responses and design matrix
+
+- `q_list`:
+
+  values of q (number of clusters) in the collection
+
+- `zero_inflation`:
+
+  whether the models of the collection are zero-inflated
+
+- `sparsity`:
+
+  sparsity penalty on the network density
+
+- `control`:
+
+  structured list of more specific parameters, to generate with
+  NB_control
+
+#### Returns
+
+A new collection object
 
 ------------------------------------------------------------------------
 

@@ -4,10 +4,10 @@
 
 - **Jeanne Tous**. Author.
 
-- **Nestor Ngalala Manguitini**. Author.
-
 - **Julien Chiquet**. Author, maintainer.
   [](https://orcid.org/0000-0002-3629-3429)
+
+- **Nestor Ngalala Manguitini**. Author.
 
 ## Citation
 
@@ -28,14 +28,14 @@ association network inference. Computational Statistics & Data Analysis,
       doi = {10.1016/j.csda.2026.108347},
     }
 
-Chiquet, J., Ngalala Manguitini, N., & Tous, J. (2026). normalblockr:
+Tous, J., Chiquet, J., & Ngalala Manguitini, N. (2026). normalblockr:
 Gaussian Models with Latent Clustering of Variables. R package version
-0.3.0.9000. https://github.com/jchiquet/normalblockr
+1.0.0. https://github.com/jchiquet/normalblockr
 
     @Manual{,
       title = {{normalblockr}: Gaussian Models with Latent Clustering of Variables},
-      author = {Julien Chiquet and Nestor {Ngalala Manguitini} and Jeanne Tous},
+      author = {Jeanne Tous and Julien Chiquet and Nestor {Ngalala Manguitini}},
       year = {2026},
-      note = {R package version 0.3.0.9000},
+      note = {R package version 1.0.0},
       url = {https://github.com/jchiquet/normalblockr},
     }

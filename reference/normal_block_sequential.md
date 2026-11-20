@@ -85,7 +85,7 @@ fit
 #>                         unknown blocks
 #>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2
 #>                         unknown blocks
-#>   ARI between the two partitions: -0.018 
+#>   ARI between the two partitions: 0.003 
 #>   (near 0 means the two structures are unrelated, as is usual)
 #> ===========================================================================
 #> * Useful fields

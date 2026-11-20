@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,115 +41,65 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="normalblockr-development-version">normalblockr (development version)<a class="anchor" aria-label="anchor" href="#normalblockr-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.0.0" id="normalblockr-100">normalblockr 1.0.0<a class="anchor" aria-label="anchor" href="#normalblockr-100"></a></h2>
 <div class="section level3">
-<h3 id="printing-development-version">Printing<a class="anchor" aria-label="anchor" href="#printing-development-version"></a></h3>
+<h3 id="changes-of-default-behavior-since-1-0-0">Changes of default behavior since 0.3.0<a class="anchor" aria-label="anchor" href="#changes-of-default-behavior-since-1-0-0"></a></h3>
+<p>Users of 0.3.0 will see different results on the same calls:</p>
 <ul><li>
-<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of a model and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of a sequential fit wrap their long lines (cluster sizes, description of each stage) at the console width.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="examples-and-linear-algebra-development-version">Examples and linear algebra<a class="anchor" aria-label="anchor" href="#examples-and-linear-algebra-development-version"></a></h3>
-<ul><li>Examples for <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="https://rdrr.io/r/stats/sigma.html" class="external-link">sigma()</a></code>, <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, <code><a href="../reference/isNB.html">isNB()</a></code>, <code><a href="../reference/NB_control.html">NB_control()</a></code>, <code><a href="../reference/get_model.html">get_model()</a></code>, the two data generators, and the print, plot and summary methods that lacked them.</li>
-<li>The update of the cluster profiles of the mean-block models solves a linear system with a symmetric positive definite matrix instead of inverting it, and products with a transposed matrix use <code><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">crossprod()</a></code> and <code><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">tcrossprod()</a></code>. Results are unchanged.</li>
-<li>Help page titles in title case, and named after the two families of the article (Normal-Block-Var, Normal-Block-Mean).</li>
-</ul></div>
-<div class="section level3">
-<h3 id="named-extractors-development-version">Named extractors<a class="anchor" aria-label="anchor" href="#named-extractors-development-version"></a></h3>
-<ul><li>
-<code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="https://rdrr.io/r/stats/sigma.html" class="external-link">sigma()</a></code>, <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> keep the names of the covariates and of the variables, and name the clusters <code>Cluster_1</code>, … (as in the network plots), so that results can be indexed by name, e.g. <code>coef(model)[, "ERBB2"]</code>.</li>
+<strong>Model-selection criteria.</strong> The BIC charges each group of parameters the log of the number of independent observations informing it (Daudin, Picard &amp; Robin, 2008; Keribin et al., 2015), instead of <code>log(n)</code> for all: the cluster proportions <code>log(p)</code>, the mean-block cluster profiles and a spherical noise variance <code>log(n * p)</code>, the rest <code>log(n)</code>. The ICL completes the partition only (Biernacki, Celeux &amp; Govaert, 2000), <code>ICL = BIC + 2 * entropy</code> with <code>entropy = -sum(tau * log(tau))</code>, so that it equals the BIC for a known clustering in both families. The EBIC of mean-block models counts its edges among the p variables (it used q). The selected number of clusters can change.</li>
 <li>
-<code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> of a variance-block model returns B on the original scale of Y. It returned it on the rescaled scale of the fit (the default for this family), unlike <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>. The cluster profiles of a mean-block model stay on the scale of the fit, the original one by default.</li>
-<li>The help page of <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> covers both families.</li>
+<strong>Rescaling of Y depends on the model family.</strong> <code>NormalBlockData$new()</code> gains <code>scale = NULL</code> as its default: variance-block models keep rescaling each column of Y by its standard deviation, mean-block models no longer do (rescaling breaks the mean profile shared within a block). <code>TRUE</code> or <code>FALSE</code> forces either for both families.</li>
 <li>
-<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> no longer leave a space before the final period.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="network-plots-with-force-directed-layouts-development-version">Network plots with force-directed layouts<a class="anchor" aria-label="anchor" href="#network-plots-with-force-directed-layouts-development-version"></a></h3>
-<ul><li>
-<code>plot_network()</code> computes the layout without the edge weights, so that force-directed layouts such as <code><a href="https://r.igraph.org/reference/layout_with_fr.html" class="external-link">igraph::layout_with_fr</a></code> work with signed partial correlations (they used to fail). <code>layout</code> may also be a matrix of coordinates. The default style is more legible: grey nodes whose area grows with the size of the cluster, labels of constant size, thinner edges.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="sequential-fits-from-an-already-fitted-mean-block-model-development-version">Sequential fits from an already fitted mean-block model<a class="anchor" aria-label="anchor" href="#sequential-fits-from-an-already-fitted-mean-block-model-development-version"></a></h3>
-<ul><li>
-<code><a href="../reference/normal_block_sequential.html">normal_block_sequential()</a></code> accepts, as <code>blocks_mean</code>, a mean-block model or collection already fitted on the same data: the first stage is then not refitted (a collection is reduced to its best model by <code>crit</code>), which avoids fitting the mean-block collection twice when it is also analysed on its own. A fit on other data, or with another zero-inflation setting, is refused.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="squarem-off-by-default-for-a-diagonal-or-spherical-mean-block-sigma-development-version">SQUAREM off by default for a diagonal or spherical mean-block Sigma<a class="anchor" aria-label="anchor" href="#squarem-off-by-default-for-a-diagonal-or-spherical-mean-block-sigma-development-version"></a></h3>
-<ul><li>
-<code>NB_control(acceleration = NULL)</code> is the new default, resolved at fit time: SQUAREM runs for variance-block models and for mean-block models with a full Sigma, not for mean-block models with a diagonal or spherical Sigma. Their EM is exact and converges in a few dozen iterations, so the extrapolations, almost always rejected, only cost time (1.1 to 2.2 times, for the same iterations, on simulated data). <code>TRUE</code> or <code>FALSE</code> still forces it.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="held-out-log-likelihood-and-cross-validation-development-version">Held-out log-likelihood and cross-validation<a class="anchor" aria-label="anchor" href="#held-out-log-likelihood-and-cross-validation-development-version"></a></h3>
-<ul><li>New method <code>heldout_loglik(newdata)</code> on every fitted model: the exact log-likelihood of new observations at the fitted parameters and the MAP partition, on Y’s original scale. For variance-block models it is the marginal over the latent W, computed with the Woodbury identity and the determinant lemma (only q x q matrices are factorized); zero-inflated models add the zero-inflation probabilities and use the marginal of the non-zero cells. On the training data with a known clustering it equals the model’s log-likelihood, which the tests check for every variant.</li>
-<li>New function <code><a href="../reference/normal_block_cv.html">normal_block_cv()</a></code>: K-fold cross-validated log-likelihood of a collection over q, with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods. A criterion that rests on no penalty and compares families, shapes of Sigma and scalings on the same footing. It plateaus beyond the true q, so the selected q (attribute <code>best</code>) follows the one-standard-error rule.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="stars-for-mean-block-sparsity-paths-development-version">StARS for mean-block sparsity paths<a class="anchor" aria-label="anchor" href="#stars-for-mean-block-sparsity-paths-development-version"></a></h3>
-<ul><li>
-<code>get_best_model("StARS")</code> and <code>stability_selection()</code> now apply to mean-block sparsity paths too: the StARS machinery moved to the shared base class <code>NormalBlockCollectionSparsity</code>. The subsample paths hold the clustering fixed (the known one, or the MAP partition of the least penalized model); the network relates the p variables.</li>
-<li>Fix: the subsample paths now reuse the collection’s penalties. They used to derive their own grid from each subsample’s covariance, so the selection probabilities were filed under penalties that had not produced them.</li>
-<li>The subsamples keep the zero-inflation design <code>X0</code> and the data’s <code>scale</code> request.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="one-initialization-for-both-families-and-refine-by-default-development-version">One initialization for both families, and refine() by default<a class="anchor" aria-label="anchor" href="#one-initialization-for-both-families-and-refine-by-default-development-version"></a></h3>
-<p>Fits over a range of cluster counts change: they are refined, and the variance-block ones start from another heuristic.</p>
-<ul><li>
-<code>NB_control(refine = TRUE)</code> is now the default, for collections of both families: every collection over a range of <code>q</code> is polished by <code>refine()</code> after its cold-started fit (typically 3 to 6 times the cost). A one-line report says how many models it improved. <code>refine = FALSE</code> restores the previous behaviour; heuristic fits (<code>heuristic = TRUE</code>) are never refined, and <code>refine()</code> called on one now says why it cannot run.</li>
-<li>The default <code>clustering_init</code> of variance-block models is now <code>"kmeans"</code>, as for mean-block ones. On simulated data the heuristics are equivalent; on real data <code>kmeans</code> followed by <code>refine()</code> gives the best fits on <code>brca_rppa</code> and close to the best on the university data, while <code>"ward2"</code> remains better on zero-inflated abundances such as <code>onema</code> (see <code>inst/clustering_initialization_benchmark/var_init_study.R</code>).</li>
-</ul></div>
-<div class="section level3">
-<h3 id="rescaling-of-y-now-depends-on-the-model-family-development-version">Rescaling of Y now depends on the model family<a class="anchor" aria-label="anchor" href="#rescaling-of-y-now-depends-on-the-model-family-development-version"></a></h3>
-<p>The fits of mean-block models on default data change.</p>
-<ul><li>
-<code>NormalBlockData$new()</code> gains <code>scale = NULL</code> as its default: the model family decides when a model is fitted. Variance-block models keep rescaling each column of Y by its standard deviation; mean-block models no longer do. <code>scale = TRUE</code> or <code>FALSE</code> forces either for both families.</li>
-<li>Rescaling breaks the mean-block model, whose variables share a mean profile within a block: on <code>brca_rppa</code> and <code>onema</code> the unscaled mean-block fit has the better exact ICL on the original scale, while the rescaled one wins for the variance-block model. On data simulated from either model, rescaling makes every criterion over-select the number of clusters.</li>
+<strong>One initialization for both families, followed by <code>refine()</code>.</strong> The default <code>clustering_init</code> is <code>"kmeans"</code> for both families (it was <code>"ward2"</code> for variance-block models), and collections over a range of q are polished by the split and merge search of <code>refine()</code> after their cold-started fit (<code>NB_control(refine = TRUE)</code>; <code>FALSE</code> restores the former behavior). <code>"ward2"</code> remains a good choice for zero-inflated abundances.</li>
 <li>
-<code><a href="../reference/normal_block_sequential.html">normal_block_sequential()</a></code> hands the residuals of its mean-block stage to the variance-block stage with the same <code>scale</code> request, so each stage applies its own default.</li>
-<li>New method <code>NormalBlockData$for_family()</code> returns the data a model of a given family is fitted on.</li>
+<strong>SQUAREM off for mean-block models with a diagonal or spherical Sigma.</strong> Their EM is exact and converges in a few dozen iterations, so the extrapolations only cost time. <code>NB_control(acceleration = NULL)</code>, the new default, keeps SQUAREM for variance-block models and full-Sigma mean-block models; <code>TRUE</code> or <code>FALSE</code> forces it.</li>
+<li>
+<strong>Extractors on the original scale of Y, with names.</strong> <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> of variance-block models returns B on the original scale of Y (it returned it on the rescaled scale of the fit, unlike <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>), and so does <code><a href="https://rdrr.io/r/stats/sigma.html" class="external-link">sigma()</a></code> for the p x p covariance of mean-block models. Quantities defined per cluster (variance-block <code><a href="https://rdrr.io/r/stats/sigma.html" class="external-link">sigma()</a></code>, mean-block <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>) stay on the scale of the fit. <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="https://rdrr.io/r/stats/sigma.html" class="external-link">sigma()</a></code>, <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> and <code>latent_network()</code> keep the names of the variables and covariates, and name the clusters <code>Cluster_1</code>, … (also in the network plots and the StARS stability path).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="diagnostics-development-version">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics-development-version"></a></h3>
+<h3 id="new-features-1-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-0"></a></h3>
 <ul><li>
-<code>within_block_correlations()</code> on variance-block models: for each block, the empirical correlations of the residuals <code>Y - XB</code> (mean, minimum, proportion of negative ones) against the correlation the fitted model implies. Within a block two variables covary positively by construction (their covariance is <code>Sigma_kk &gt; 0</code>), so a block holding anticorrelated variables, typically from a known clustering taken from an annotation, is misspecified.</li>
-<li>Collections over a range of q gain a <code>deviance_violations</code> field, the values of q whose deviance exceeds the one at the previous q, and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> warns about them. The models are nested, so every violation signals a poor local optimum, which <code>refine()</code> is designed to repair.</li>
-<li>Vignettes and README build a known clustering with <code>model.matrix(~ 0 + factor(labels))</code> rather than the internal <code>normalblockr:::as_indicator()</code>.</li>
+<strong>Held-out log-likelihood and cross-validation.</strong> <code>heldout_loglik(newdata)</code> on every fitted model gives the exact log-likelihood of new observations at the fitted parameters and the MAP partition, on Y’s original scale (for variance-block models, the marginal over the latent W, with q x q matrices only). <code><a href="../reference/normal_block_cv.html">normal_block_cv()</a></code> computes the K-fold cross-validated log-likelihood of a collection over q, a penalty-free criterion that compares families, shapes of Sigma and scalings on the same footing, and selects q by the one-standard-error rule; it has <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods.</li>
+<li>
+<strong>StARS for mean-block sparsity paths.</strong> <code>get_best_model("StARS")</code> and <code>stability_selection()</code> apply to both families, the clustering being held fixed on the subsamples.</li>
+<li>
+<strong>Sequential fits from a fitted mean-block model.</strong> <code><a href="../reference/normal_block_sequential.html">normal_block_sequential()</a></code> accepts, as <code>blocks_mean</code>, a mean-block model or collection already fitted on the same data, which is then not refitted.</li>
+<li>
+<strong>Diagnostics.</strong> <code>within_block_correlations()</code> compares, for each block of a variance-block model, the empirical correlations of the residuals with the positive correlation the model implies: a block holding anticorrelated variables, typically from a known clustering taken from an annotation, is misspecified. Collections over q gain a <code>deviance_violations</code> field (values of q whose deviance exceeds the previous one, a sign of a poor local optimum), reported by <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</li>
+<li>
+<strong>Split rules in <code>refine()</code>.</strong> <code><a href="https://rdrr.io/r/base/split.html" class="external-link">split()</a></code> gains a <code>rule</code> argument and <code>refine()</code> / <code>candidates_split()</code> a <code>split_rule</code> one: <code>"kmeans"</code> (a 2-means on the members’ residuals or least-squares trajectories, the default for the variance-block family) or <code>"noise"</code> (a cut at the median of the noise variances, the default for the mean-block family). Variance-block merge candidates are ranked by the signed correlation between the latent block signals, since a block can only gather positively co-varying variables.</li>
+<li>New fields <code>penalty_terms</code> and <code>penalty</code> (the BIC penalty, group by group), <code>NormalBlockData$for_family()</code> (the data a family is fitted on), <code>NormalBlockData$subset()</code> and <code>$Y_original</code>, and <code>sparsity_details</code> on mean-block sparsity paths.</li>
+<li>The graphical lasso (<code>src/graphical_lasso.h</code>) is shared verbatim with PLNmodels. It solves the problem scaled to a unit diagonal, which makes it converge on covariances whose variances span orders of magnitude, shifts an indefinite precision matrix on its diagonal (keeping its support), detects limit cycles and can be interrupted. <code>graphical_lasso_fit()</code> also returns <code>status</code>, <code>delta</code> and <code>shift</code>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="squarem-can-be-turned-off-development-version">SQUAREM can be turned off<a class="anchor" aria-label="anchor" href="#squarem-can-be-turned-off-development-version"></a></h3>
-<ul><li>
-<code>NB_control(acceleration = FALSE)</code> runs plain (V)EM instead of its SQUAREM-accelerated version, in both families and for every variant (the acceleration is on by default, and never attempted when <code>sparsity &gt; 0</code>). Useful to measure what the acceleration buys: on a variance-block model with 8 unknown clusters, plain VEM needs about ten times as many iterations.</li>
+<h3 id="bug-fixes-1-0-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-0"></a></h3>
+<ul><li>StARS: the subsample paths reuse the collection’s penalties (they derived their own grid from each subsample, so the selection probabilities were filed under penalties that had not produced them), and keep the zero-inflation design <code>X0</code> and the <code>scale</code> request.</li>
+<li>
+<code>plot_network()</code> computes the layout without the signed edge weights, so that force-directed layouts such as <code><a href="https://r.igraph.org/reference/layout_with_fr.html" class="external-link">igraph::layout_with_fr</a></code> work; <code>layout</code> may also be a matrix of coordinates. Mean-block networks are labeled with the variable names.</li>
+<li>
+<code>model_par</code> exposes the cluster proportions <code>alpha</code> of mean-block models with an unknown clustering, and <code>B0</code> of zero-inflated mean-block models, as in the variance-block family.</li>
+<li>
+<code>NB_control(clustering_init = "best_of_inits")</code> with a known clustering crashed: the known clustering is now simply fitted.</li>
+<li>A sparsity path of variance-block models failed when <code>sparsity_weights</code> left some pairs unpenalized; such pairs are now ignored by the default penalty grid.</li>
+<li>A constant column of Y made the variance-block fit diverge, and <code>refine()</code> then failed: <code>NormalBlockData$new()</code> now refuses such columns, naming them (<code><a href="../reference/normal_block_cv.html">normal_block_cv()</a></code> names the fold where it happens). A split or merge candidate whose fit fails is discarded by <code>refine()</code> instead of aborting it.</li>
+<li>
+<code><a href="../reference/generate_normal_block_var_data.html">generate_normal_block_var_data()</a></code> and <code><a href="../reference/generate_normal_block_mean_data.html">generate_normal_block_mean_data()</a></code> honor <code>alpha</code>, and could put a variable in two clusters when the first draw left a cluster empty. Data simulated for a given seed are unchanged otherwise.</li>
+<li>StARS subsamples keep an explicit <code>zeros</code> mask and the formula.</li>
+<li>A collection over an unsorted range of q is ordered by q.</li>
+<li>Known clusterings are checked to have one row per variable.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="model-selection-criteria-aligned-with-biernacki-and-daudin-development-version">Model-selection criteria aligned with Biernacki and Daudin<a class="anchor" aria-label="anchor" href="#model-selection-criteria-aligned-with-biernacki-and-daudin-development-version"></a></h3>
-<p>The criteria change, so the number of clusters they select can change too.</p>
-<ul><li>
-<strong>BIC: one penalty per group of parameters.</strong> Each group of parameters is charged the log of the number of independent observations informing it, following the ICL of Daudin, Picard &amp; Robin (2008) for SBMs and Keribin et al. (2015) for latent block models, instead of <code>log(n)</code> for all of them: the cluster proportions <code>log(p)</code> (the variables are the units being clustered), the mean-block cluster profiles and a spherical noise variance <code>log(n * p)</code> (shared by every cell of a block), the rest <code>log(n)</code>. The new fields <code>penalty_terms</code> (one row per group: <code>nu</code>, <code>N</code>) and <code>penalty</code> expose the computation; <code>nb_param</code> is unchanged.</li>
+<h3 id="other-changes-1-0-0">Other changes<a class="anchor" aria-label="anchor" href="#other-changes-1-0-0"></a></h3>
+<ul><li>Every help page has a running example; help titles follow the two families of the article (Normal-Block-Var, Normal-Block-Mean).</li>
 <li>
-<strong>ICL completes the partition only</strong>, as in Biernacki, Celeux &amp; Govaert (2000): <code>ICL = BIC + 2 * entropy</code> with <code>entropy = -sum(tau * log(tau))</code>. The variance-block models used to add the Gaussian entropy of the latent vectors W, which made the ICL differ from the BIC even for a known clustering and depend on the scale of the data. It now equals the BIC for a known clustering, in both families.</li>
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> of a model and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of a sequential fit wrap their long lines at the console width; the descriptions of the collections are the same for both families.</li>
+<li>Vignettes and README build a known clustering with <code>model.matrix(~ 0 + factor(labels))</code>.</li>
+<li>The update of the mean-block cluster profiles solves a linear system instead of inverting a matrix. Results are unchanged.</li>
 <li>
-<strong>EBIC on the right network.</strong> The EBIC term is <code>2 * n_edges * log(dim)</code>, with <code>dim = q</code> for the variance-block family as before, but <code>dim = p</code> for the mean-block family, whose network relates the p variables (it used <code>q</code>).</li>
-<li>On <code>brca_rppa</code>, the mean-block ICL now selects 50 clusters instead of 70 over <code>seq(5, 120, 5)</code>; the variance-block BIC selection is unchanged.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="better-split-and-merge-candidates-in-refine-development-version">Better split and merge candidates in <code>refine()</code>
-<a class="anchor" aria-label="anchor" href="#better-split-and-merge-candidates-in-refine-development-version"></a></h3>
-<ul><li>Variance-block merge candidates are ranked by the <strong>signed</strong> correlation between the two blocks’ latent signals instead of <code>|Omega_kl|</code>. Within a block, two variables necessarily covary positively (their covariance is <code>Sigma_kk &gt; 0</code>), so merging two anticorrelated blocks is never a sensible candidate; the former ranking tried those first.</li>
+<code>NB_control(threshold = )</code> negative runs exactly <code>niter</code> iterations, without the warning about the iteration cap.</li>
 <li>
-<code><a href="https://rdrr.io/r/base/split.html" class="external-link">split()</a></code> gains a <code>rule</code> argument, and <code>refine()</code> / <code>candidates_split()</code> a <code>split_rule</code> one: <code>"kmeans"</code> divides a cluster by a 2-means on its members’ columns of residuals (variance-block) or least-squares trajectories (mean-block), <code>"noise"</code> at the median of their noise variances (the former rule). The default is family-specific: <code>"kmeans"</code> for the variance-block family, <code>"noise"</code> for the mean-block one, where the two rules are close and <code>"noise"</code> is slightly ahead on real data (<code>inst/mean_block_analyses/split_rule_comparison.R</code>).</li>
-<li>On <code>brca_rppa</code>, <code>refine()</code> now lowers the variance-block deviance summed over <code>q = 1:30</code> by 22,166 instead of 15,758, and runs faster; the selected <code>q</code> moves from 27 to 22.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="graphical-lasso-shared-with-plnmodels-development-version">Graphical lasso shared with PLNmodels<a class="anchor" aria-label="anchor" href="#graphical-lasso-shared-with-plnmodels-development-version"></a></h3>
-<ul><li>
-<code>src/graphical_lasso.h</code> is now the very same file as in PLNmodels, which ported the same glassoFast Fortran: the two copies had drifted apart. It is shared verbatim (namespace <code>graphical_lasso</code>), and brings to normalblockr:
-<ul><li>
-<strong>the problem is solved scaled to a unit diagonal</strong>, an exact change of variables. On a covariance whose variances span orders of magnitude, the unscaled descent could stall in a limit cycle, fail in its inner loop, or return an indefinite precision matrix; scaled, it converges in a few sweeps (median number of sweeps from 646 to 4 on PLN residual covariances). On ordinary input the result is unchanged up to the tolerance;</li>
-<li>
-<strong>an indefinite precision matrix is shifted on its diagonal</strong> to positive definite, which keeps its support, where <code>ensure_pd()</code> clamped its eigenvalues and made it dense;</li>
-<li>the detection of limit cycles, as a safeguard, and interrupt checks, so that a long solve can be stopped from R (by the user or by a time limit).</li>
-</ul></li>
-<li>
-<code>graphical_lasso_fit()</code> also returns <code>status</code>, <code>delta</code> and <code>shift</code>.</li>
+<code>fixed_tau</code> is read from the control list by both families (the public <code>$fixed_tau</code> field of variance-block models is removed); <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code> loses the arguments <code>Psi</code>, <code>Phi</code>, <code>Lambda</code> and <code>kappa</code>, which it stored but never used.</li>
+<li>The packages dplyr, tidyr, tibble and scales are no longer imported, and Metrics is no longer suggested. The code shared by the two families and by their variants lives in their base classes; results are unchanged.</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -222,7 +172,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

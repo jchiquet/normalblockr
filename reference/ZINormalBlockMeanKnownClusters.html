@@ -11,7 +11,7 @@ clustering. Sigma is diagonal or spherical here. See
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,16 +58,10 @@ clustering. Sigma is diagonal or spherical here. See
     </div>
     <div class="section level2">
     <h2 id="active-bindings">Active bindings<a class="anchor" aria-label="anchor" href="#active-bindings"></a></h2>
-    <p></p><div class="r6-active-bindings"><dl><dt><code>fitted</code></dt>
-<dd><p>Y values predicted by the model, in Y's original units</p></dd>
-
-
-    <dt><code>model_par</code></dt>
-<dd><p>a list with model parameters: B, Omega and kappa (zero-inflation probabilities)</p></dd>
-
-
-    <dt><code>who_am_I</code></dt>
-<dd><p>a method to print what model is being fitted</p></dd>
+    <p></p><div class="r6-active-bindings"><dl><dt><code>model_par</code></dt>
+<dd><p>the parameters of [NormalBlockMeanBase] (B, Omega),
+plus B0 (zero-inflation coefficients) and kappa (zero-inflation
+probabilities)</p></dd>
 
 
 </dl><p></p></div>
@@ -90,10 +84,10 @@ clustering. Sigma is diagonal or spherical here. See
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="plot_network"><a href="NormalBlockBase.html#method-plot_network"><code>NormalBlockBase$plot_network()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href="NormalBlockBase.html#method-print"><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href="NormalBlockBase.html#method-update"><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="warm_start_from"><a href="NormalBlockBase.html#method-warm_start_from"><code>NormalBlockBase$warm_start_from()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="merge"><a href="NormalBlockMeanBase.html#method-merge"><code>NormalBlockMeanBase$merge()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="predict"><a href="NormalBlockMeanBase.html#method-predict"><code>NormalBlockMeanBase$predict()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="split"><a href="NormalBlockMeanBase.html#method-split"><code>NormalBlockMeanBase$split()</code></a></span></li>
-  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockMeanBase" data-id="warm_start_from"><a href="NormalBlockMeanBase.html#method-warm_start_from"><code>NormalBlockMeanBase$warm_start_from()</code></a></span></li>
 </ul></details></p><hr><a id="method-ZINormalBlockMeanKnownClusters-initialize"></a><div class="section">
 <h3 id="zinormalblockmeanknownclusters-new-"><code>ZINormalBlockMeanKnownClusters$new()</code><a class="anchor" aria-label="anchor" href="#zinormalblockmeanknownclusters-new-"></a></h3>
 <p>Create a new [`ZINormalBlockMeanKnownClusters`] object.</p><div class="section">
@@ -110,7 +104,7 @@ clustering. Sigma is diagonal or spherical here. See
 <dd><p>object of NormalBlockData class, with responses and design matrix</p></dd>
 
       <dt><code>C</code></dt>
-<dd><p>clustering matrix C_jk = 1 if species j belongs to cluster k</p></dd>
+<dd><p>p x q clustering matrix, C_jk = 1 if variable j belongs to cluster k</p></dd>
 
       <dt><code>sparsity</code></dt>
 <dd><p>unused here, kept for signature symmetry (must be 0)</p></dd>
@@ -165,7 +159,7 @@ clustering. Sigma is diagonal or spherical here. See
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

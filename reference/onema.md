@@ -65,26 +65,21 @@ Y <- log(1 + onema$biomass)
 X <- model.matrix(~ 1, data = onema$covariates)
 nb_data <- NormalBlockData$new(Y, X)
 # \donttest{
-out <- normal_block(nb_data, 2:15, control = NB_control(clustering_init = "ward2"))
-#> Fitting a diagonal normal-block-var model with unknown q 
-#>   number of blocks = 2           
-     number of blocks = 3           
-     number of blocks = 4           
-     number of blocks = 5           
-     number of blocks = 6           
-     number of blocks = 7           
-     number of blocks = 8           
-     number of blocks = 9           
-     number of blocks = 10           
-     number of blocks = 11           
-     number of blocks = 12           
-     number of blocks = 13           
-
-#> Warning: diagonal normal-block-var model with 13 unknown blocks: (V)EM stopped at the niter cap (500) without reaching the convergence threshold (last increment = 0.00137, threshold = 1.0e-04). Consider raising `niter` in NB_control(), especially with many blocks -- see plot_loglik() to check.
-#>   number of blocks = 14           
-     number of blocks = 15           
-     refine(): improved 11 of 14 models
-#> 
-#> DONE
+## zero-inflated fits; ward2 initializations suit abundance data
+out <- normal_block(nb_data, 2:6, zero_inflation = TRUE,
+                    control = NB_control(clustering_init = "ward2", verbose = FALSE))
+out$get_best_model("ICL")
+#> A zero-inflated diagonal normal-block-var model with 5 unknown blocks.
+#> ===========================================================================
+#>  nb_param q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+#>       157 5      10        0 -13631.76 27263.52 28195.15 28209.76 28227.33
+#>  niter
+#>    135
+#> ===========================================================================
+#> * Useful fields
+#>     $model_par, $posterior_par / $var_par, $clustering 
+#>     $loglik, $BIC, $ICL, $objective, $nb_param, $criteria
+#> * Useful S3 methods
+#>     print(), summary(), plot(), coef(), sigma(), fitted(), predict() 
 # }
 ```

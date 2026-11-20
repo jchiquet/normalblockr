@@ -4,12 +4,14 @@
 
 This vignette walks through a real-data analysis with the zero-inflated
 extension of the Normal-Block model, using the `onema` dataset shipped
-with the package (see [`?onema`](../reference/onema.md)): fish biomass
-per species, summed per sampling station, together with environmental
-covariates. See the `normal-block` vignette
-([`vignette("normal-block")`](../articles/normal-block.md)) for a
-general introduction to the Normal-Block model on simulated data; this
-one focuses on what changes when the observations are zero-inflated.
+with the package (see
+[`?onema`](https://jchiquet.github.io/normalblockr/reference/onema.md)):
+fish biomass per species, summed per sampling station, together with
+environmental covariates. See the `normal-block` vignette
+([`vignette("normal-block")`](https://jchiquet.github.io/normalblockr/articles/normal-block.md))
+for a general introduction to the Normal-Block model on simulated data;
+this one focuses on what changes when the observations are
+zero-inflated.
 
 Many entries of `onema$biomass` are exactly zero: a species simply
 absent from a given station, not a small positive biomass rounded down.
@@ -168,8 +170,8 @@ No separate zero-inflation design matrix is supplied here, so
 `NormalBlockData` defaults `X0` to an intercept-only column: each
 species gets its own zero-inflation probability $`\kappa_j`$, estimated
 independently of the covariates (see
-[`?NormalBlockData`](../reference/NormalBlockData.md) to instead let
-$`\kappa`$ depend on covariates through `X0`).
+[`?NormalBlockData`](https://jchiquet.github.io/normalblockr/reference/NormalBlockData.md)
+to instead let $`\kappa`$ depend on covariates through `X0`).
 
 ## Fitting a zero-inflated Normal-Block model
 
@@ -180,15 +182,15 @@ we let `normal_block` explore a range and return a collection of fitted
 models, one per number of clusters. Two settings depart from the
 defaults. The initial clustering uses `ward2` rather than `kmeans`: on
 zero-inflated abundance data such as these, it reaches better fits (see
-[`?NB_control`](../reference/NB_control.md)). And `refine()`, normally
-run on every collection, is turned off to show what it changes in the
-next section:
+[`?NB_control`](https://jchiquet.github.io/normalblockr/reference/NB_control.md)).
+And `refine()`, normally run on every collection, is turned off to show
+what it changes in the next section:
 
 ``` r
 
 out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE,
                     control = NB_control(clustering_init = "ward2", refine = FALSE))
-#> Fitting a diagonal normal-block-var model with unknown q 
+#> Fitting a collection of zero-inflated diagonal normal-block-var models over q 
 #>   number of blocks = 2                number of blocks = 3                number of blocks = 4                number of blocks = 5                number of blocks = 6                number of blocks = 7                number of blocks = 8           
 #> DONE
 ```
@@ -204,13 +206,14 @@ out$plot(criteria = c("BIC", "EBIC", "deviance"))
 
 Each model in the collection above is initialized independently (a
 heuristic clustering on the zero-inflation-aware residuals, see
-[`?NB_control`](../reference/NB_control.md)‘s `clustering_init`), which
-can occasionally settle into a milder local optimum than a neighboring
-number of clusters’ solution would. `refine()` tries a short split/merge
-trial from each model’s already-fitted neighbors and keeps it only if it
-strictly improves. See
-[`?NormalBlockVarCollectionClusters`](../reference/NormalBlockVarCollectionClusters.md)
-for the full rationale. [`normal_block()`](../reference/normal_block.md)
+[`?NB_control`](https://jchiquet.github.io/normalblockr/reference/NB_control.md)‘s
+`clustering_init`), which can occasionally settle into a milder local
+optimum than a neighboring number of clusters’ solution would.
+`refine()` tries a short split/merge trial from each model’s
+already-fitted neighbors and keeps it only if it strictly improves. See
+[`?NormalBlockVarCollectionClusters`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionClusters.md)
+for the full rationale.
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)
 runs it by default; since we turned it off above, we call it explicitly:
 
 ``` r
@@ -236,8 +239,9 @@ out$plot(criteria = c("BIC", "EBIC", "deviance"))
 ### Selecting a model and inspecting the clustering
 
 As with non-zero-inflated collections, a specific model is retrieved
-with [`get_model()`](../reference/get_model.md) (by number of clusters)
-or `get_best_model()` (by criterion):
+with
+[`get_model()`](https://jchiquet.github.io/normalblockr/reference/get_model.md)
+(by number of clusters) or `get_best_model()` (by criterion):
 
 ``` r
 
@@ -314,7 +318,7 @@ inter-cluster association network (see Tous and Chiquet 2026).
 ``` r
 
 out_sp <- normal_block(data, blocks = myModel$q, sparsity = TRUE, zero_inflation = TRUE)
-#> Fitting a Collection of zero-inflated diagonal normal-block-var models with fixed q, with different sparsity penalties. 
+#> Fitting a collection of zero-inflated diagonal normal-block-var models over sparsity penalties, with fixed q 
 #>   penalty = 0.02839098           
 #> Warning: zero-inflated diagonal normal-block-var model with 4 unknown blocks:
 #> (V)EM stopped at the niter cap (500) without reaching the convergence threshold

@@ -23,6 +23,11 @@ the (row of \`self\$criteria\` minimizing a criterion) lookup to
 
 ## Active bindings
 
+- `who_am_I`:
+
+  a description of the collection: the kind of models it holds and what
+  varies across them
+
 - `criteria`:
 
   a data frame with the values of some criteria for the collection of

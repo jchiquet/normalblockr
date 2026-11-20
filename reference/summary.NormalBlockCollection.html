@@ -9,7 +9,7 @@ the full criteria table, and the range of q/sparsity explored."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,15 +80,15 @@ with the collection's `who_am_I`, `criteria`, `q_range` and
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va"><a href="NormalBlockData.html">NormalBlockData</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">ex_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">ex_data</span><span class="op">$</span><span class="va">X</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="normal_block.html">normal_block</a></span><span class="op">(</span><span class="va">data</span>, blocks <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">5</span>, control <span class="op">=</span> <span class="fu"><a href="NB_control.html">NB_control</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">models</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> A diagonal normal-block-var model with unknown q </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A collection of diagonal normal-block-var models over q </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     q ranging from 2 to 5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ===========================================================================</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        44 2       1        0 -591.923 1183.847 1355.060 1355.511 1356.446     8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        48 3       3        0 -469.088  938.176 1124.121 1124.121 1130.713    11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        53 4       6        0 -445.445  890.890 1095.479 1095.515 1112.114    14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        59 5      10        0 -445.448  890.896 1118.040 1118.076 1150.229    28</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        44 2       1        0 -733.207 1466.415 1637.627 1637.627 1639.014    10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        48 3       3        0 -628.158 1256.317 1442.261 1442.261 1448.853     7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        53 4       6        0 -596.138 1192.277 1396.865 1396.865 1413.501     6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        59 5      10        0 -596.241 1192.481 1419.626 1419.626 1451.814    10</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -96,7 +96,7 @@ with the collection's `who_am_I`, `criteria`, `q_range` and
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

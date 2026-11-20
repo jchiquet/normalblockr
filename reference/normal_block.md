@@ -1,6 +1,9 @@
 # Fit Normal-Block Models
 
-Fit a normal-block model with a variational or heuristic algorithm
+Fits a Normal-Block model, or a collection of them, by (variational) EM.
+The arguments select the model: the family (\`model\`), whether the
+clustering is known (\`blocks\`), whether the network is penalized
+(\`sparsity\`) and whether Y is zero-inflated (\`zero_inflation\`).
 
 ## Usage
 
@@ -19,95 +22,83 @@ normal_block(
 
 - data:
 
-  NormalBlockData object, contains the matrix of responses (Y, n x p)
-  and the design matrix (X, n x d), must be created with
-  NormalBlockData\$new.
+  a \[NormalBlockData\] object, holding the responses (Y, n x p) and the
+  covariates (X, n x d).
 
 - blocks:
 
-  either a integer (number of blocks), a vector of integer (list of
-  possible number of block) or a p \* q matrix (for indicating block
-  membership when its known)
+  the clustering of the variables: a p x q indicator matrix for a known
+  clustering (e.g. \`model.matrix(~ 0 + factor(labels))\`), a single
+  integer q for an unknown clustering into q clusters, or a vector of
+  distinct integers for a collection over these values of q.
 
 - sparsity:
 
-  either TRUE to run the optimization for different sparsity penalty
-  values OR float to run model with a single sparsity penalty value
+  the graphical-lasso penalty on Omega: \`0\` (the default) for none, a
+  positive number for a single penalty, or \`TRUE\` for a collection
+  along a path of penalties (see \[NB_control()\]).
 
 - zero_inflation:
 
-  boolean to indicate if Y is zero-inflated and adjust fitted model as a
-  consequence
+  whether to model an excess of exact zeros in Y.
 
 - control:
 
-  a list-like structure for detailed control on parameters should be
-  generated with NB_control().
+  a list of settings, built with \[NB_control()\].
 
 - model:
 
-  which model family to fit: "var" (the default) structures the
-  clustering in the latent covariance (see \[NormalBlockVarBase\]),
-  "mean" structures it in the mean (mu_i = C B' X_i, see
-  \[NormalBlockMeanBase\]). The mean-block family covers the same
-  collections as the variance-block one
-  (\[NormalBlockMeanCollectionClusters\],
-  \[NormalBlockMeanCollectionSparsity\] and their crossing,
-  \[NormalBlockMeanCollectionClustersSparsity\]) – each q simply fit
-  independently, without the variance-block family's SBM-path shortcut.
-  Zero-inflation is supported (\[ZINormalBlockMeanKnownClusters\],
-  \[ZINormalBlockMeanUnknownClusters\], and collections of those over a
-  range of q), with a diagonal or spherical Sigma only, hence not along
-  a sparsity path – see \[NormalBlockMeanBase\].
+  the model family: \`"var"\` (the default) clusters the variables by
+  how they covary, and infers a network between clusters (see
+  \[NormalBlockVarBase\]); \`"mean"\` clusters them by how they respond
+  to the covariates, \`mu_i = C B' X_i\` (see \[NormalBlockMeanBase\]).
+  Every combination of the other arguments is available for both
+  families, except a penalty together with zero-inflation for the
+  mean-block family, whose zero-inflated models have a diagonal or
+  spherical Sigma.
 
 ## Value
 
-an R6 object with one of the model classes (or a collection of model
-objects).
+a fitted model (an R6 object, see the classes listed in the reference
+index), or a collection of fitted models.
 
 ## Examples
 
 ``` r
-## Normal Data
-ex_data <- generate_normal_block_var_data(n=100, p=30, d=1, q=3)
+## Variance-block models over a range of q
+ex_data <- generate_normal_block_var_data(n = 100, p = 30, d = 1, q = 3)
 data <- NormalBlockData$new(ex_data$Y, ex_data$X)
-my_normal_block <- normal_block(data, blocks = 1:6)
-#> Fitting a diagonal normal-block-var model with unknown q 
+my_normal_block <- normal_block(data, blocks = 1:5)
+#> Fitting a collection of diagonal normal-block-var models over q 
 #>   number of blocks = 1           
      number of blocks = 2           
      number of blocks = 3           
      number of blocks = 4           
      number of blocks = 5           
-     number of blocks = 6           
-     refine(): improved 3 of 6 models
+     refine(): improved 1 of 5 models
 #> 
 #> DONE
 my_normal_block$plot(c("deviance", "BIC", "ICL"))
 
-Y_hat <- my_normal_block$get_best_model()$fitted
-plot(data$Y, Y_hat, log = "xy"); abline(0,1)
-#> Warning: 722 x values <= 0 omitted from logarithmic plot
-#> Warning: 689 y values <= 0 omitted from logarithmic plot
+best <- my_normal_block$get_best_model("ICL")
+plot(ex_data$Y, fitted(best)); abline(0, 1)
 
-## Normal Data with Zero Inflation
-ex_data_zi <- generate_normal_block_var_data(n=50, p=50, d=1, q=3, kappa = rep(0.5,50))
+## the same with zero-inflation
+ex_data_zi <- generate_normal_block_var_data(n = 50, p = 30, d = 1, q = 3,
+                                             kappa = rep(0.5, 30))
 zidata <- NormalBlockData$new(ex_data_zi$Y, ex_data_zi$X)
-my_normal_block <- normal_block(zidata, blocks = 1:6, zero_inflation = TRUE)
-#> Fitting a diagonal normal-block-var model with unknown q 
-#>   number of blocks = 1           
-     number of blocks = 2           
-     number of blocks = 3           
-     number of blocks = 4           
-     number of blocks = 5           
-     number of blocks = 6           
-     refine(): improved 4 of 6 models
+my_zi_block <- normal_block(zidata, blocks = 3, zero_inflation = TRUE)
+#> Fitting a zero-inflated diagonal normal-block-var model with 3 unknown blocks 
 #> 
 #> DONE
-## Mean-Block model (clustering in the mean rather than the covariance)
-ex_mean <- generate_normal_block_mean_data(n=50, p=20, d=1, q=3)
+## a mean-block model (clustering in the mean rather than the covariance)
+ex_mean <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 mean_data <- NormalBlockData$new(ex_mean$Y, ex_mean$X)
 my_mean_block <- normal_block(mean_data, blocks = 3, model = "mean")
 #> Fitting a diagonal normal-block-mean model with 3 unknown blocks 
 #> 
 #> DONE
+coef(my_mean_block)
+#>      Cluster_1 Cluster_2 Cluster_3
+#> [1,]  0.960217 0.5271684 0.7654264
 ```

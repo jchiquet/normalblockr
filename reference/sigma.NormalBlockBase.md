@@ -1,8 +1,11 @@
 # Extract the Covariance Matrix
 
-Extract the covariance matrix \`Omega^-1\`: between latent blocks (q x
-q) for the variance-block models, between variables (p x p) for the
-mean-block models.
+Extract the covariance matrix \`Omega^-1\`. For the variance-block
+models, the q x q covariance of the latent block signals, on the scale
+of the fit (it has no original-scale counterpart when the variables of a
+block were rescaled by different factors). For the mean-block models,
+the p x p residual covariance between variables, on the original scale
+of Y.
 
 ## Usage
 
@@ -32,8 +35,8 @@ ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 sigma(model)
-#>               Cluster_1   Cluster_2     Cluster_3
-#> Cluster_1  6.229576e-01 -0.34215315 -9.907212e-05
-#> Cluster_2 -3.421532e-01  0.35311703 -4.111713e-02
-#> Cluster_3 -9.907212e-05 -0.04111713  2.547881e-01
+#>            Cluster_1  Cluster_2  Cluster_3
+#> Cluster_1  0.3440074 -0.2667135 -0.2148215
+#> Cluster_2 -0.2667135  0.4472436  0.1823370
+#> Cluster_3 -0.2148215  0.1823370  0.2554245
 ```

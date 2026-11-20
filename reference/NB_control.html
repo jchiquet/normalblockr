@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,42 +70,48 @@
 
 
 <dl><dt id="arg-niter">niter<a class="anchor" aria-label="anchor" href="#arg-niter"></a></dt>
-<dd><p>number of iterations in model optimization</p></dd>
+<dd><p>maximal number of (V)EM iterations.</p></dd>
 
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
-<dd><p>loglikelihood / elbo threshold under which optimization stops</p></dd>
+<dd><p>the (V)EM stops when the objective (log-likelihood or
+ELBO) increases by less than this. A negative value runs exactly `niter`
+iterations, without the warning issued when `niter` is reached.</p></dd>
 
 
 <dt id="arg-fixed-point-niter">fixed_point_niter<a class="anchor" aria-label="anchor" href="#arg-fixed-point-niter"></a></dt>
 <dd><p>number of sweeps of the tau update for
-Normal-Block-Mean with unknown clusters. Each sweep visits the rows of
-tau sequentially and maximizes the ELBO exactly in each, so it can never
-decrease the ELBO.</p></dd>
+Normal-Block-Mean models with unknown clusters. Each sweep visits the rows
+of tau sequentially and maximizes the ELBO exactly in each, so it can
+never decrease the ELBO.</p></dd>
 
 
 <dt id="arg-sparsity-weights">sparsity_weights<a class="anchor" aria-label="anchor" href="#arg-sparsity-weights"></a></dt>
-<dd><p>weights with which the penalty should be applied in case
-sparsity is required, non-0 values on the diagonal mean diagonal shall be
-penalized too (default is non-penalized diagonal and 1s off-diagonal)</p></dd>
+<dd><p>a symmetric matrix of weights applied to the
+penalty, entry by entry: q x q (variance-block) or p x p (mean-block). By
+default, 1 off the diagonal and 0 on it (the diagonal is not penalized).</p></dd>
 
 
 <dt id="arg-sparsity-penalties">sparsity_penalties<a class="anchor" aria-label="anchor" href="#arg-sparsity-penalties"></a></dt>
-<dd><p>list of penalties the user wants to test, other parameters
-are only used if penalties is not specified</p></dd>
+<dd><p>the penalties of a sparsity path (`sparsity =
+TRUE`). By default, `n_sparsity_penalties` values from the smallest
+penalty that removes every edge down to `min_ratio` times it, on a log
+scale.</p></dd>
 
 
 <dt id="arg-n-sparsity-penalties">n_sparsity_penalties<a class="anchor" aria-label="anchor" href="#arg-n-sparsity-penalties"></a></dt>
-<dd><p>number of penalties to test.</p></dd>
+<dd><p>number of penalties of the default path.</p></dd>
 
 
 <dt id="arg-min-ratio">min_ratio<a class="anchor" aria-label="anchor" href="#arg-min-ratio"></a></dt>
-<dd><p>ratio for sparsity between max penalty (0 edge penalty) and min penalty to test</p></dd>
+<dd><p>ratio between the smallest and the largest penalty of the
+default path.</p></dd>
 
 
 <dt id="arg-fixed-tau">fixed_tau<a class="anchor" aria-label="anchor" href="#arg-fixed-tau"></a></dt>
-<dd><p>whether tau should be fixed at clustering_init during optimization
-useful for calls to fixed_q models in stability_selection</p></dd>
+<dd><p>whether the posterior cluster probabilities stay at their
+initial value (`clustering_init`) during the optimization; used to refit
+a sparsity path with its clustering held fixed (stability selection).</p></dd>
 
 
 <dt id="arg-clustering-init">clustering_init<a class="anchor" aria-label="anchor" href="#arg-clustering-init"></a></dt>
@@ -114,13 +120,13 @@ unknown blocks: a heuristic name ("ward2", "kmeans", "sbm" or
 "spectral"), an actual clustering (a vector of labels or a p x q indicator
 matrix, or a list of either per q for a collection), or "best_of_inits" to
 try several heuristics per model and keep the best-ELBO fit (see
-[NormalBlockVarBase]'s `best_of_inits()`; not supported with `sparsity =
+[NormalBlockBase]'s `best_of_inits()`; not supported with `sparsity =
 TRUE`). Default `NULL`, i.e. "kmeans" for both model families; "ward2"
 can work better on zero-inflated abundance data.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>telling if information should be printed during optimization</p></dd>
+<dd><p>whether to print the progress of the optimization.</p></dd>
 
 
 <dt id="arg-heuristic">heuristic<a class="anchor" aria-label="anchor" href="#arg-heuristic"></a></dt>
@@ -188,7 +194,7 @@ argument.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

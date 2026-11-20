@@ -27,6 +27,14 @@ and mean-block (\[NormalBlockMeanBase\]) model families.
 
   number of variables (dimensions in X)
 
+- `d0`:
+
+  number of zero-inflation covariates (dimensions in X0)
+
+- `who_am_I`:
+
+  a description of the model
+
 - `q`:
 
   number of blocks
@@ -107,11 +115,13 @@ and mean-block (\[NormalBlockMeanBase\]) model families.
 
 - `memberships`:
 
-  cluster memberships
+  the p x q matrix of cluster memberships: indicators for a known
+  clustering, posterior probabilities (tau) otherwise
 
 - `clustering`:
 
-  given as the list of elements contained in each cluster
+  the cluster label of each variable (MAP for an unknown clustering),
+  named after the columns of Y
 
 - `cluster_sizes`:
 
@@ -132,6 +142,8 @@ and mean-block (\[NormalBlockMeanBase\]) model families.
 - [`NormalBlockBase$optimize()`](#method-NormalBlockBase-optimize)
 
 - [`NormalBlockBase$best_of_inits()`](#method-NormalBlockBase-best_of_inits)
+
+- [`NormalBlockBase$warm_start_from()`](#method-NormalBlockBase-warm_start_from)
 
 - [`NormalBlockBase$candidates_split()`](#method-NormalBlockBase-candidates_split)
 
@@ -211,13 +223,9 @@ All possible parameters of the child classes
       Omega = NA,
       gamma = NA,
       mu = NA,
-      kappa = NA,
       alpha = NA,
       M = NA,
       S = NA,
-      Psi = NA,
-      Phi = NA,
-      Lambda = NA,
       ll_list = NA,
       warm_started = NA,
       clustering_init = NA
@@ -250,10 +258,6 @@ All possible parameters of the child classes
 
   mean for posterior distribution of W \[NBVar - known\]
 
-- `kappa`:
-
-  vector of zero-inflation probabilities \[ZINBVar, ZINBMean\]
-
 - `alpha`:
 
   vector of groups probabilities \[NBVar\]
@@ -266,21 +270,6 @@ All possible parameters of the child classes
 
   variational diagonal of variances for posterior distribution of W
   \[NBVar - unknown\]
-
-- `Psi`:
-
-  variational expectation of C'Omega C, intermediary term in
-  calculations \[NBMean - unknown\]
-
-- `Phi`:
-
-  variational correction term used in the Psi/ELBO computations
-  \[NBMean - unknown\]
-
-- `Lambda`:
-
-  variational correction term used in the Sigma-hat update \[NBMean -
-  unknown\]
 
 - `ll_list`:
 
@@ -299,7 +288,7 @@ All possible parameters of the child classes
 
 #### Returns
 
-Update the current \[\`normal\`\] object
+Update the current object in place
 
 ------------------------------------------------------------------------
 
@@ -383,6 +372,29 @@ reassign the result (\`model \<- model\$best_of_inits()\`).
 
 ------------------------------------------------------------------------
 
+### `NormalBlockBase$warm_start_from()`
+
+Seed this model's starting parameters from another, already-optimized
+model of the same family and q, instead of a fresh heuristic clustering.
+Used by the sparsity paths to warm-start each penalty from the previous
+one's solution.
+
+#### Usage
+
+    NormalBlockBase$warm_start_from(other)
+
+#### Arguments
+
+- `other`:
+
+  a model of the same class, already optimized
+
+#### Returns
+
+Update the current object in place with \`other\`'s parameters
+
+------------------------------------------------------------------------
+
 ### `NormalBlockBase$candidates_split()`
 
 generate and select a set of candidate models by splitting the clusters
@@ -461,8 +473,10 @@ the held-out log-likelihood, or a vector of \`newdata\$n\` values
 
 ### `NormalBlockBase$predict()`
 
-Predicts observations Y for new covariates X, in Y's original units
-(like \`\$fitted\`, so that predicting on the training X reproduces it).
+Predicts the mean of Y for new covariates X, in Y's original units. For
+the variance-block family, \`X B\`: the latent block signals average
+out, so that on the training X it differs from \`\$fitted\`, which adds
+their posterior mean. The mean-block family overrides it.
 
 #### Usage
 
@@ -482,8 +496,9 @@ A n\*p prediction matrix for new observations
 
 ### `NormalBlockBase$latent_network()`
 
-Extract interaction network in the latent space, as a matrix rather than
-a plot – see \`\$plot_network()\` to plot it instead.
+Extract the network encoded by Omega, as a matrix rather than a plot
+(see \`\$plot_network()\`): between clusters for the variance-block
+family, between variables for the mean-block family.
 
 #### Usage
 
@@ -493,13 +508,14 @@ a plot – see \`\$plot_network()\` to plot it instead.
 
 - `type`:
 
-  edge value in the network. Can be "support" (binary edges),
-  "precision" (coefficient of the precision matrix) or "partial_cor"
-  (partial correlation between species)
+  edge value in the network: "support" (binary edges), "precision"
+  (entries of the precision matrix, on the scale of the fit) or
+  "partial_cor" (partial correlations)
 
 #### Returns
 
-a square matrix of size \`self\$q\`
+a sparse square matrix, q x q (variance-block) or p x p (mean-block),
+with named rows and columns
 
 ------------------------------------------------------------------------
 
@@ -528,8 +544,8 @@ a \[\`ggplot2::ggplot\`\] graph
 
 ### `NormalBlockBase$plot_network()`
 
-plot the latent network. To extract the network as a matrix instead of
-plotting it, use \`\$latent_network()\`.
+Plot the network encoded by Omega (see \`\$latent_network()\` to extract
+it as a matrix).
 
 #### Usage
 
@@ -547,9 +563,8 @@ plotting it, use \`\$latent_network()\`.
 
 - `type`:
 
-  edge value in the network. Either "precision" (coefficient of the
-  precision matrix) or "partial_cor" (partial correlation between
-  species).
+  edge value in the network: "partial_cor" (partial correlations) or
+  "support" (binary edges).
 
 - `output`:
 
@@ -568,8 +583,9 @@ plotting it, use \`\$latent_network()\`.
 
 - `node.labels`:
 
-  vector of character. The labels of the nodes. The default will use the
-  column names ot the response matrix.
+  vector of character. The labels of the nodes. By default, the cluster
+  names (variance-block) or the variable names (mean-block), as in
+  \`\$latent_network()\`.
 
 - `layout`:
 

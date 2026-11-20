@@ -2,14 +2,14 @@
 
 Shared scaffolding for \[NormalBlockVarCollectionClustersSparsity\] and
 \[NormalBlockMeanCollectionClustersSparsity\]: a collection of sparsity
-sub-collections, one per q. Everything family-agnostic (two-key model
-lookup, model selection over both axes, the criteria heatmap) lives
-here; subclasses only build \`self\$models\` and name themselves.
+sub-collections, one per q in increasing order. Everything lives here
+(two-key model lookup, model selection over both axes, the criteria
+heatmap); subclasses only name the model family.
 
 ## Super class
 
-[`NormalBlockCollection`](NormalBlockCollection.md) -\>
-`NormalBlockCollectionClustersSparsity`
+[`NormalBlockCollection`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.md)
+-\> `NormalBlockCollectionClustersSparsity`
 
 ## Active bindings
 
@@ -25,6 +25,8 @@ here; subclasses only build \`self\$models\` and name themselves.
 
 ### Public methods
 
+- [`NormalBlockCollectionClustersSparsity$new()`](#method-NormalBlockCollectionClustersSparsity-initialize)
+
 - [`NormalBlockCollectionClustersSparsity$get_model()`](#method-NormalBlockCollectionClustersSparsity-get_model)
 
 - [`NormalBlockCollectionClustersSparsity$get_best_model()`](#method-NormalBlockCollectionClustersSparsity-get_best_model)
@@ -35,9 +37,47 @@ here; subclasses only build \`self\$models\` and name themselves.
 
 Inherited methods
 
-- [`NormalBlockCollection$optimize()`](NormalBlockCollection.html#method-optimize)
-- [`NormalBlockCollection$print()`](NormalBlockCollection.html#method-print)
-- [`NormalBlockCollection$summary()`](NormalBlockCollection.html#method-summary)
+- [`NormalBlockCollection$optimize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-optimize)
+- [`NormalBlockCollection$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-print)
+- [`NormalBlockCollection$summary()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.html#method-summary)
+
+------------------------------------------------------------------------
+
+### `NormalBlockCollectionClustersSparsity$new()`
+
+Create a collection over a range of q, sorted increasingly, with a
+sparsity path for each q.
+
+#### Usage
+
+    NormalBlockCollectionClustersSparsity$new(
+      mydata,
+      q_list,
+      zero_inflation = FALSE,
+      control = NB_control()
+    )
+
+#### Arguments
+
+- `mydata`:
+
+  object of NormalBlockData class, with responses and design matrix
+
+- `q_list`:
+
+  values of q (number of clusters) in the collection
+
+- `zero_inflation`:
+
+  whether the models of the collection are zero-inflated
+
+- `control`:
+
+  structured list of parameters to handle sparsity control
+
+#### Returns
+
+A new collection object
 
 ------------------------------------------------------------------------
 

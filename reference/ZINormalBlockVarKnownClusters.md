@@ -4,9 +4,10 @@ R6 class for a zero-inflated normal-block model with a known clustering.
 
 ## Super classes
 
-[`NormalBlockBase`](NormalBlockBase.md) -\>
-[`NormalBlockVarBase`](NormalBlockVarBase.md) -\>
-`ZINormalBlockVarKnownClusters`
+[`NormalBlockBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.md)
+-\>
+[`NormalBlockVarBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.md)
+-\> `ZINormalBlockVarKnownClusters`
 
 ## Active bindings
 
@@ -16,16 +17,8 @@ R6 class for a zero-inflated normal-block model with a known clustering.
 
 - `model_par`:
 
-  a list with model parameters: B (covariates), dm1 (species variance),
-  Omega (groups precision matrix), kappa (zero-inflation probabilities)
-
-- `fitted`:
-
-  Y values predicted by the model, in Y's original units
-
-- `who_am_I`:
-
-  a method to print what model is being fitted
+  the parameters of \[NormalBlockVarBase\] (B, B0, dm1, Omega), plus
+  kappa (zero-inflation probabilities)
 
 ## Methods
 
@@ -37,22 +30,22 @@ R6 class for a zero-inflated normal-block model with a known clustering.
 
 Inherited methods
 
-- [`NormalBlockBase$best_of_inits()`](NormalBlockBase.html#method-best_of_inits)
-- [`NormalBlockBase$candidates_merge()`](NormalBlockBase.html#method-candidates_merge)
-- [`NormalBlockBase$candidates_split()`](NormalBlockBase.html#method-candidates_split)
-- [`NormalBlockBase$heldout_loglik()`](NormalBlockBase.html#method-heldout_loglik)
-- [`NormalBlockBase$latent_network()`](NormalBlockBase.html#method-latent_network)
-- [`NormalBlockBase$optimize()`](NormalBlockBase.html#method-optimize)
-- [`NormalBlockBase$plot()`](NormalBlockBase.html#method-plot)
-- [`NormalBlockBase$plot_loglik()`](NormalBlockBase.html#method-plot_loglik)
-- [`NormalBlockBase$plot_network()`](NormalBlockBase.html#method-plot_network)
-- [`NormalBlockBase$predict()`](NormalBlockBase.html#method-predict)
-- [`NormalBlockBase$print()`](NormalBlockBase.html#method-print)
-- [`NormalBlockBase$update()`](NormalBlockBase.html#method-update)
-- [`NormalBlockVarBase$merge()`](NormalBlockVarBase.html#method-merge)
-- [`NormalBlockVarBase$split()`](NormalBlockVarBase.html#method-split)
-- [`NormalBlockVarBase$warm_start_from()`](NormalBlockVarBase.html#method-warm_start_from)
-- [`NormalBlockVarBase$within_block_correlations()`](NormalBlockVarBase.html#method-within_block_correlations)
+- [`NormalBlockBase$best_of_inits()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-best_of_inits)
+- [`NormalBlockBase$candidates_merge()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_merge)
+- [`NormalBlockBase$candidates_split()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_split)
+- [`NormalBlockBase$heldout_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-heldout_loglik)
+- [`NormalBlockBase$latent_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-latent_network)
+- [`NormalBlockBase$optimize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-optimize)
+- [`NormalBlockBase$plot()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot)
+- [`NormalBlockBase$plot_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_loglik)
+- [`NormalBlockBase$plot_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_network)
+- [`NormalBlockBase$predict()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-predict)
+- [`NormalBlockBase$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-print)
+- [`NormalBlockBase$update()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-update)
+- [`NormalBlockBase$warm_start_from()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-warm_start_from)
+- [`NormalBlockVarBase$merge()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.html#method-merge)
+- [`NormalBlockVarBase$split()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.html#method-split)
+- [`NormalBlockVarBase$within_block_correlations()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.html#method-within_block_correlations)
 
 ------------------------------------------------------------------------
 
@@ -77,7 +70,7 @@ Create a new \[\`ZINormalBlockVarKnownClusters\`\] object.
 
 - `C`:
 
-  clustering matrix C_jk = 1 if species j belongs to cluster k
+  p x q clustering matrix, C_jk = 1 if variable j belongs to cluster k
 
 - `sparsity`:
 

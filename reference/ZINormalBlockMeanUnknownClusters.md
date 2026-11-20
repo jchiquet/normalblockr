@@ -7,15 +7,12 @@ full one is out of reach under a mask.
 
 ## Super classes
 
-[`NormalBlockBase`](NormalBlockBase.md) -\>
-[`NormalBlockMeanBase`](NormalBlockMeanBase.md) -\>
-`ZINormalBlockMeanUnknownClusters`
+[`NormalBlockBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.md)
+-\>
+[`NormalBlockMeanBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md)
+-\> `ZINormalBlockMeanUnknownClusters`
 
 ## Active bindings
-
-- `fitted`:
-
-  Y values predicted by the model, in Y's original units
 
 - `var_par`:
 
@@ -24,16 +21,9 @@ full one is out of reach under a mask.
 
 - `model_par`:
 
-  a list with model parameters: B, Omega and kappa (zero-inflation
-  probabilities)
-
-- `entropy`:
-
-  Entropy of the conditional distribution
-
-- `who_am_I`:
-
-  a method to print what model is being fitted
+  the parameters of \[NormalBlockMeanBase\] (B, Omega), plus B0
+  (zero-inflation coefficients), kappa (zero-inflation probabilities)
+  and alpha (cluster proportions)
 
 ## Methods
 
@@ -45,21 +35,21 @@ full one is out of reach under a mask.
 
 Inherited methods
 
-- [`NormalBlockBase$best_of_inits()`](NormalBlockBase.html#method-best_of_inits)
-- [`NormalBlockBase$candidates_merge()`](NormalBlockBase.html#method-candidates_merge)
-- [`NormalBlockBase$candidates_split()`](NormalBlockBase.html#method-candidates_split)
-- [`NormalBlockBase$heldout_loglik()`](NormalBlockBase.html#method-heldout_loglik)
-- [`NormalBlockBase$latent_network()`](NormalBlockBase.html#method-latent_network)
-- [`NormalBlockBase$optimize()`](NormalBlockBase.html#method-optimize)
-- [`NormalBlockBase$plot()`](NormalBlockBase.html#method-plot)
-- [`NormalBlockBase$plot_loglik()`](NormalBlockBase.html#method-plot_loglik)
-- [`NormalBlockBase$plot_network()`](NormalBlockBase.html#method-plot_network)
-- [`NormalBlockBase$print()`](NormalBlockBase.html#method-print)
-- [`NormalBlockBase$update()`](NormalBlockBase.html#method-update)
-- [`NormalBlockMeanBase$merge()`](NormalBlockMeanBase.html#method-merge)
-- [`NormalBlockMeanBase$predict()`](NormalBlockMeanBase.html#method-predict)
-- [`NormalBlockMeanBase$split()`](NormalBlockMeanBase.html#method-split)
-- [`NormalBlockMeanBase$warm_start_from()`](NormalBlockMeanBase.html#method-warm_start_from)
+- [`NormalBlockBase$best_of_inits()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-best_of_inits)
+- [`NormalBlockBase$candidates_merge()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_merge)
+- [`NormalBlockBase$candidates_split()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_split)
+- [`NormalBlockBase$heldout_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-heldout_loglik)
+- [`NormalBlockBase$latent_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-latent_network)
+- [`NormalBlockBase$optimize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-optimize)
+- [`NormalBlockBase$plot()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot)
+- [`NormalBlockBase$plot_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_loglik)
+- [`NormalBlockBase$plot_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_network)
+- [`NormalBlockBase$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-print)
+- [`NormalBlockBase$update()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-update)
+- [`NormalBlockBase$warm_start_from()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-warm_start_from)
+- [`NormalBlockMeanBase$merge()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.html#method-merge)
+- [`NormalBlockMeanBase$predict()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.html#method-predict)
+- [`NormalBlockMeanBase$split()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.html#method-split)
 
 ------------------------------------------------------------------------
 
@@ -122,7 +112,7 @@ ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 Y <- ex$Y; Y[runif(length(Y)) < 0.2] <- 0
 data <- NormalBlockData$new(Y, ex$X)
 model <- normal_block(data, blocks = 3, model = "mean", zero_inflation = TRUE)
-#> Fitting a zero-inflated diagonal normal-block-mean model with unknown blocks 
+#> Fitting a zero-inflated diagonal normal-block-mean model with 3 unknown blocks 
 #> 
 #> DONE
 model$clustering

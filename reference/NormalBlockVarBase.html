@@ -9,7 +9,7 @@ structures the latent covariance."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,12 +62,18 @@ column-wise rescaling, if any). Use `model_par$B` instead for the
 coefficients on the internal fitting scale.</p></dd>
 
 
-    <dt><code>d0</code></dt>
-<dd><p>number of zi variables (dimensions in X0)</p></dd>
+    <dt><code>fitted</code></dt>
+<dd><p>Y values predicted by the model, in Y's original units:
+`X B`, plus the posterior mean of the latent block signals for (V)EM
+fits, with the observed zeros of zero-inflated models set to 0</p></dd>
 
 
     <dt><code>model_par</code></dt>
-<dd><p>a list with the matrices of the model parameters: B (covariates), dm1 (species variance), Omega (groups precision matrix)). On the internal fitting scale (`self$data$Y`, possibly column-rescaled by `NormalBlockData(scale = TRUE)`) – use `$B_original`/`$dm1_original` for the same quantities converted back to Y's original units.</p></dd>
+<dd><p>a list with the model parameters: B (d x p regression
+coefficients), B0 (zero-inflation coefficients, if any), dm1 (inverse
+noise variances of the variables) and Omega (q x q precision matrix of
+the latent block signals), on the scale of the fit. Use
+`$B_original`/`$dm1_original` for B and dm1 on Y's original scale.</p></dd>
 
 
     <dt><code>sparsity_weights</code></dt>
@@ -93,7 +99,6 @@ different factors.</p></dd>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 <p></p><ul><li><p><a href="#method-NormalBlockVarBase-initialize"><code>NormalBlockVarBase$new()</code></a></p></li>
-<li><p><a href="#method-NormalBlockVarBase-warm_start_from"><code>NormalBlockVarBase$warm_start_from()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarBase-within_block_correlations"><code>NormalBlockVarBase$within_block_correlations()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarBase-split"><code>NormalBlockVarBase$split()</code></a></p></li>
 <li><p><a href="#method-NormalBlockVarBase-merge"><code>NormalBlockVarBase$merge()</code></a></p></li>
@@ -110,6 +115,7 @@ different factors.</p></dd>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="predict"><a href="NormalBlockBase.html#method-predict"><code>NormalBlockBase$predict()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="print"><a href="NormalBlockBase.html#method-print"><code>NormalBlockBase$print()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="update"><a href="NormalBlockBase.html#method-update"><code>NormalBlockBase$update()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="normalblockr" data-topic="NormalBlockBase" data-id="warm_start_from"><a href="NormalBlockBase.html#method-warm_start_from"><code>NormalBlockBase$warm_start_from()</code></a></span></li>
 </ul></details></p><hr><a id="method-NormalBlockVarBase-initialize"></a><div class="section">
 <h3 id="normalblockvarbase-new-"><code>NormalBlockVarBase$new()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-new-"></a></h3>
 <p>Create a new [`NormalBlockVarBase`] object.</p><div class="section">
@@ -150,38 +156,16 @@ is skipped entirely, since it would otherwise never be used downstream.</p></dd>
 
 </div>
 
-<p></p><hr><a id="method-NormalBlockVarBase-warm_start_from"></a><div class="section">
-<h3 id="normalblockvarbase-warm-start-from-"><code>NormalBlockVarBase$warm_start_from()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-warm-start-from-"></a></h3>
-<p>Seed this model's starting parameters from another,
-already-optimized model with the same q, instead of a fresh heuristic
-clustering. Used by [NormalBlockVarCollectionSparsity] to warm-start
-each penalty in a sparsity path from the previous one's solution.</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">warm_start_from</span><span class="op">(</span><span class="va">other</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div><p></p><div class="section">
-<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>other</code></dt>
-<dd><p>a [NormalBlockVarBase] object, already optimized</p></dd>
-
-
-</dl><p></p></div>
-</div><p></p><div class="section">
-<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
-<p>Update the current object in place with `other`'s parameters</p>
-</div>
-
-</div>
-
 <p></p><hr><a id="method-NormalBlockVarBase-within_block_correlations"></a><div class="section">
 <h3 id="normalblockvarbase-within-block-correlations-"><code>NormalBlockVarBase$within_block_correlations()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-within-block-correlations-"></a></h3>
 <p>Checks that the blocks gather positively co-varying
 variables, as the model requires (two variables of a block have a
 positive correlation). Compares, for each block, the empirical
 correlations of the residuals `Y - XB` with those implied by the model.</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">within_block_correlations</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>a data frame with one row per block: `block`, `size`, the mean
 and minimum of the empirical within-block correlations (`mean_cor`,
 `min_cor`), the proportion of negative ones (`prop_negative`), and the
@@ -194,10 +178,10 @@ with fewer than two variables.</p>
 <p></p><hr><a id="method-NormalBlockVarBase-split"></a><div class="section">
 <h3 id="normalblockvarbase-split-"><code>NormalBlockVarBase$split()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-split-"></a></h3>
 <p>Create a clone of the current [`NormalBlockVarBase`] object after splitting cluster `index`</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">split</span><span class="op">(</span><span class="va">index</span>, in_place <span class="op">=</span> <span class="cn">FALSE</span>, rule <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>index</code></dt>
 <dd><p>index (integer) of the cluster to split</p></dd>
 
@@ -214,7 +198,7 @@ them at the median of their noise variance. Default `NULL`, i.e.
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>A new [`NormalBlockVarBase`] object</p>
 </div>
 
@@ -223,10 +207,10 @@ them at the median of their noise variance. Default `NULL`, i.e.
 <p></p><hr><a id="method-NormalBlockVarBase-merge"></a><div class="section">
 <h3 id="normalblockvarbase-merge-"><code>NormalBlockVarBase$merge()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-merge-"></a></h3>
 <p>Create a clone of the current [`NormalBlockVarBase`] object after merging clusters `cl1` and `cl2`</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">merge</span><span class="op">(</span><span class="va">indices</span>, in_place <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>indices</code></dt>
 <dd><p>indices (couple of integer) of the clusters to merge</p></dd>
 
@@ -237,7 +221,7 @@ default FALSE (send a copy)</p></dd>
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>A new [`NormalBlockVarBase`] object</p>
 </div>
 
@@ -246,10 +230,10 @@ default FALSE (send a copy)</p></dd>
 <p></p><hr><a id="method-NormalBlockVarBase-clone"></a><div class="section">
 <h3 id="normalblockvarbase-clone-"><code>NormalBlockVarBase$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockvarbase-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockVarBase</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -275,7 +259,7 @@ default FALSE (send a copy)</p></dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

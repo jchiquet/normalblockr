@@ -9,7 +9,7 @@ mean-block ([NormalBlockMeanBase]) model families."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">normalblockr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +73,14 @@ mean-block ([NormalBlockMeanBase]) model families.</p>
 
     <dt><code>d</code></dt>
 <dd><p>number of variables (dimensions in X)</p></dd>
+
+
+    <dt><code>d0</code></dt>
+<dd><p>number of zero-inflation covariates (dimensions in X0)</p></dd>
+
+
+    <dt><code>who_am_I</code></dt>
+<dd><p>a description of the model</p></dd>
 
 
     <dt><code>q</code></dt>
@@ -153,11 +161,13 @@ for the mean-block family (network between variables).</p></dd>
 
 
     <dt><code>memberships</code></dt>
-<dd><p>cluster memberships</p></dd>
+<dd><p>the p x q matrix of cluster memberships: indicators
+for a known clustering, posterior probabilities (tau) otherwise</p></dd>
 
 
     <dt><code>clustering</code></dt>
-<dd><p>given as the list of elements contained in each cluster</p></dd>
+<dd><p>the cluster label of each variable (MAP for an
+unknown clustering), named after the columns of Y</p></dd>
 
 
     <dt><code>cluster_sizes</code></dt>
@@ -179,6 +189,7 @@ for the mean-block family (network between variables).</p></dd>
 <li><p><a href="#method-NormalBlockBase-update"><code>NormalBlockBase$update()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-optimize"><code>NormalBlockBase$optimize()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-best_of_inits"><code>NormalBlockBase$best_of_inits()</code></a></p></li>
+<li><p><a href="#method-NormalBlockBase-warm_start_from"><code>NormalBlockBase$warm_start_from()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-candidates_split"><code>NormalBlockBase$candidates_split()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-candidates_merge"><code>NormalBlockBase$candidates_merge()</code></a></p></li>
 <li><p><a href="#method-NormalBlockBase-heldout_loglik"><code>NormalBlockBase$heldout_loglik()</code></a></p></li>
@@ -235,13 +246,9 @@ is skipped entirely, since it would otherwise never be used downstream.</p></dd>
 <span>  Omega <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  gamma <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  mu <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  kappa <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  M <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  S <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  Psi <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  Phi <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  Lambda <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  ll_list <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  warm_started <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  clustering_init <span class="op">=</span> <span class="cn">NA</span></span>
@@ -267,9 +274,6 @@ models, variable-level for Normal Mean Block models) [all]</p></dd>
       <dt><code>mu</code></dt>
 <dd><p>mean for posterior distribution of W [NBVar - known]</p></dd>
 
-      <dt><code>kappa</code></dt>
-<dd><p>vector of zero-inflation probabilities [ZINBVar, ZINBMean]</p></dd>
-
       <dt><code>alpha</code></dt>
 <dd><p>vector of groups probabilities [NBVar]</p></dd>
 
@@ -278,15 +282,6 @@ models, variable-level for Normal Mean Block models) [all]</p></dd>
 
       <dt><code>S</code></dt>
 <dd><p>variational diagonal of variances for posterior distribution of W [NBVar - unknown]</p></dd>
-
-      <dt><code>Psi</code></dt>
-<dd><p>variational expectation of C'Omega C, intermediary term in calculations [NBMean - unknown]</p></dd>
-
-      <dt><code>Phi</code></dt>
-<dd><p>variational correction term used in the Psi/ELBO computations [NBMean - unknown]</p></dd>
-
-      <dt><code>Lambda</code></dt>
-<dd><p>variational correction term used in the Sigma-hat update [NBMean - unknown]</p></dd>
 
       <dt><code>ll_list</code></dt>
 <dd><p>list of log-lik (elbo) values</p></dd>
@@ -304,7 +299,7 @@ rather than recomputing a fresh heuristic initialization. Set by
 </dl><p></p></div>
 </div><p></p><div class="section">
 <h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
-<p>Update the current [`normal`] object</p>
+<p>Update the current object in place</p>
 </div>
 
 </div>
@@ -382,14 +377,36 @@ object; reassign the result (`model &lt;- model$best_of_inits()`).</p>
 
 </div>
 
+<p></p><hr><a id="method-NormalBlockBase-warm_start_from"></a><div class="section">
+<h3 id="normalblockbase-warm-start-from-"><code>NormalBlockBase$warm_start_from()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-warm-start-from-"></a></h3>
+<p>Seed this model's starting parameters from another,
+already-optimized model of the same family and q, instead of a fresh
+heuristic clustering. Used by the sparsity paths to warm-start each
+penalty from the previous one's solution.</p><div class="section">
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">warm_start_from</span><span class="op">(</span><span class="va">other</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>other</code></dt>
+<dd><p>a model of the same class, already optimized</p></dd>
+
+
+</dl><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<p>Update the current object in place with `other`'s parameters</p>
+</div>
+
+</div>
+
 <p></p><hr><a id="method-NormalBlockBase-candidates_split"></a><div class="section">
 <h3 id="normalblockbase-candidates-split-"><code>NormalBlockBase$candidates_split()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-candidates-split-"></a></h3>
 <p>generate and select a set of candidate models
 by splitting the clusters of the current model</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">candidates_split</span><span class="op">(</span>trial_niter <span class="op">=</span> <span class="fl">5</span>, split_rule <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
+<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>trial_niter</code></dt>
 <dd><p>number of (V)EM iterations used to cheaply score each
 candidate before the caller fully re-optimizes the best few – kept
@@ -409,10 +426,10 @@ short on purpose.</p></dd>
 <h3 id="normalblockbase-candidates-merge-"><code>NormalBlockBase$candidates_merge()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-candidates-merge-"></a></h3>
 <p>generate and select a set of candidate models
 by merging the clusters of the current model</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">candidates_merge</span><span class="op">(</span>max_candidates <span class="op">=</span> <span class="fl">30</span>, trial_niter <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
+<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>max_candidates</code></dt>
 <dd><p>merge candidates are, unlike split's, quadratic
 in q (`choose(q, q-2)` pairs): beyond `max_candidates` pairs, only
@@ -436,10 +453,10 @@ parameters and, for an unknown clustering, at the MAP partition (see
 [normal_block_cv()]). It is exact, computed for variance-block models
 with q x q matrices only (Woodbury identity), and given on Y's original
 scale.</p><div class="section">
-<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">heldout_loglik</span><span class="op">(</span><span class="va">newdata</span>, per_observation <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>newdata</code></dt>
 <dd><p>a [NormalBlockData] object with the same variables and
 covariates (and zero-inflation covariates) as the training data.</p></dd>
@@ -451,7 +468,7 @@ rather than their sum.</p></dd>
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p>the held-out log-likelihood, or a vector of `newdata$n` values</p>
 </div>
 
@@ -459,20 +476,22 @@ rather than their sum.</p></dd>
 
 <p></p><hr><a id="method-NormalBlockBase-predict"></a><div class="section">
 <h3 id="normalblockbase-predict-"><code>NormalBlockBase$predict()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-predict-"></a></h3>
-<p>Predicts observations Y for new covariates X, in Y's
-original units (like `$fitted`, so that predicting on the training X
-reproduces it).</p><div class="section">
-<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<p>Predicts the mean of Y for new covariates X, in Y's
+original units. For the variance-block family, `X B`: the latent block
+signals average out, so that on the training X it differs from
+`$fitted`, which adds their posterior mean. The mean-block family
+overrides it.</p><div class="section">
+<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">new_X</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
+<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>new_X</code></dt>
 <dd><p>new set of covariates.</p></dd>
 
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
+<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
 <p>A n*p prediction matrix for new observations</p>
 </div>
 
@@ -480,20 +499,24 @@ reproduces it).</p><div class="section">
 
 <p></p><hr><a id="method-NormalBlockBase-latent_network"></a><div class="section">
 <h3 id="normalblockbase-latent-network-"><code>NormalBlockBase$latent_network()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-latent-network-"></a></h3>
-<p>Extract interaction network in the latent space, as a
-matrix rather than a plot – see `$plot_network()` to plot it instead.</p><div class="section">
-<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
+<p>Extract the network encoded by Omega, as a matrix rather
+than a plot (see `$plot_network()`): between clusters for the
+variance-block family, between variables for the mean-block family.</p><div class="section">
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">latent_network</span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"partial_cor"</span>, <span class="st">"support"</span>, <span class="st">"precision"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
+<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>type</code></dt>
-<dd><p>edge value in the network. Can be "support" (binary edges), "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species)</p></dd>
+<dd><p>edge value in the network: "support" (binary edges),
+"precision" (entries of the precision matrix, on the scale of the fit)
+or "partial_cor" (partial correlations)</p></dd>
 
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
-<p>a square matrix of size `self$q`</p>
+<h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
+<p>a sparse square matrix, q x q (variance-block) or p x p
+(mean-block), with named rows and columns</p>
 </div>
 
 </div>
@@ -502,10 +525,10 @@ matrix rather than a plot – see `$plot_network()` to plot it instead.</p><div 
 <h3 id="normalblockbase-plot-loglik-"><code>NormalBlockBase$plot_loglik()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-plot-loglik-"></a></h3>
 <p>plots the evolution of the objective (log-likelihood or ELBO)
 across the (V)EM iterations of the last call to `optimize()`.</p><div class="section">
-<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">plot_loglik</span><span class="op">(</span>show_increment <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
+<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>show_increment</code></dt>
 <dd><p>whether to add a second panel with the (log10)
 absolute increment between iterations and the convergence `threshold`
@@ -514,7 +537,7 @@ absolute increment between iterations and the convergence `threshold`
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
+<h4 id="returns-8">Returns<a class="anchor" aria-label="anchor" href="#returns-8"></a></h4>
 <p>a [`ggplot2::ggplot`] graph</p>
 </div>
 
@@ -522,9 +545,9 @@ absolute increment between iterations and the convergence `threshold`
 
 <p></p><hr><a id="method-NormalBlockBase-plot_network"></a><div class="section">
 <h3 id="normalblockbase-plot-network-"><code>NormalBlockBase$plot_network()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-plot-network-"></a></h3>
-<p>plot the latent network. To extract the network as a
-matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
-<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
+<p>Plot the network encoded by Omega (see
+`$latent_network()` to extract it as a matrix).</p><div class="section">
+<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">plot_network</span><span class="op">(</span></span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"partial_cor"</span>, <span class="st">"support"</span><span class="op">)</span>,</span>
 <span>  output <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"igraph"</span>, <span class="st">"corrplot"</span><span class="op">)</span>,</span>
@@ -535,9 +558,10 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 <span>  plot <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
+<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>type</code></dt>
-<dd><p>edge value in the network. Either "precision" (coefficient of the precision matrix) or "partial_cor" (partial correlation between species).</p></dd>
+<dd><p>edge value in the network: "partial_cor" (partial
+correlations) or "support" (binary edges).</p></dd>
 
       <dt><code>output</code></dt>
 <dd><p>Output type. Either `igraph` (for the network) or `corrplot` (for the adjacency matrix)</p></dd>
@@ -549,7 +573,9 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 <dd><p>if `TRUE`, isolated node are remove before plotting. Only relevant for igraph output.</p></dd>
 
       <dt><code>node.labels</code></dt>
-<dd><p>vector of character. The labels of the nodes. The default will use the column names ot the response matrix.</p></dd>
+<dd><p>vector of character. The labels of the nodes. By
+default, the cluster names (variance-block) or the variable names
+(mean-block), as in `$latent_network()`.</p></dd>
 
       <dt><code>layout</code></dt>
 <dd><p>an igraph layout function, applied to the graph without its edge weights, or a matrix of node coordinates. Only relevant for igraph output.</p></dd>
@@ -567,7 +593,7 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 <h3 id="normalblockbase-plot-"><code>NormalBlockBase$plot()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-plot-"></a></h3>
 <p>plots the evolution of the objective during model optimization
 (see `plot_loglik()`)</p><div class="section">
-<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
+<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -576,10 +602,10 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 <p></p><hr><a id="method-NormalBlockBase-print"></a><div class="section">
 <h3 id="normalblockbase-print-"><code>NormalBlockBase$print()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-print-"></a></h3>
 <p>User friendly print method</p><div class="section">
-<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
+<h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span>model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"A "</span>, <span class="va">self</span><span class="op">$</span><span class="va">who_am_I</span>, <span class="st">".\n"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
+<h4 id="arguments-12">Arguments<a class="anchor" aria-label="anchor" href="#arguments-12"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>model</code></dt>
 <dd><p>First line of the print output</p></dd>
 
@@ -592,10 +618,10 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 <p></p><hr><a id="method-NormalBlockBase-clone"></a><div class="section">
 <h3 id="normalblockbase-clone-"><code>NormalBlockBase$clone()</code><a class="anchor" aria-label="anchor" href="#normalblockbase-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
+<h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">NormalBlockBase</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-12">Arguments<a class="anchor" aria-label="anchor" href="#arguments-12"></a></h4>
+<h4 id="arguments-13">Arguments<a class="anchor" aria-label="anchor" href="#arguments-13"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -619,7 +645,7 @@ matrix instead of plotting it, use `$latent_network()`.</p><div class="section">
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Jeanne Tous, Nestor Ngalala Manguitini, Julien Chiquet.</p>
+  <p>Developed by Jeanne Tous, Julien Chiquet, Nestor Ngalala Manguitini.</p>
 </div>
 
 <div class="pkgdown-footer-right">

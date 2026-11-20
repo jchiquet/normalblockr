@@ -37,8 +37,8 @@ summary(model)
 #> A diagonal normal-block-var model with 3 unknown blocks.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>        48 3       3        0 -667.394 1334.787 1520.732 1520.732 1527.323    10
+#>        48 3       3        0 -668.515 1337.029 1522.974 1522.974 1529.565    11
 #> ===========================================================================
-#> * Cluster sizes: 5, 10, 5
+#> * Cluster sizes: 5, 9, 6
 #> * Network: 3 edge(s), density = 1
 ```

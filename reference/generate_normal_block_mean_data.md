@@ -62,8 +62,9 @@ generate_normal_block_mean_data(
 
 - SNR:
 
-  Signal to noise ratio: magnitude of the regression parameters B will
-  be adjusted so that tr(var(XB)) and tr(Sigma) match the desired SNR.
+  signal-to-noise ratio: the residual covariance Sigma is rescaled so
+  that the squared norm of the signal X B C' is \`SNR\` times the
+  expected squared norm of the noise, n tr(Sigma).
 
 - alpha:
 

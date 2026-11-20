@@ -4,19 +4,10 @@ R6 class for a Normal-Block-Mean model with a known clustering.
 
 ## Super classes
 
-[`NormalBlockBase`](NormalBlockBase.md) -\>
-[`NormalBlockMeanBase`](NormalBlockMeanBase.md) -\>
-`NormalBlockMeanKnownClusters`
-
-## Active bindings
-
-- `fitted`:
-
-  Y values predicted by the model, in Y's original units
-
-- `who_am_I`:
-
-  a method to print what model is being fitted
+[`NormalBlockBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.md)
+-\>
+[`NormalBlockMeanBase`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md)
+-\> `NormalBlockMeanKnownClusters`
 
 ## Methods
 
@@ -28,21 +19,21 @@ R6 class for a Normal-Block-Mean model with a known clustering.
 
 Inherited methods
 
-- [`NormalBlockBase$best_of_inits()`](NormalBlockBase.html#method-best_of_inits)
-- [`NormalBlockBase$candidates_merge()`](NormalBlockBase.html#method-candidates_merge)
-- [`NormalBlockBase$candidates_split()`](NormalBlockBase.html#method-candidates_split)
-- [`NormalBlockBase$heldout_loglik()`](NormalBlockBase.html#method-heldout_loglik)
-- [`NormalBlockBase$latent_network()`](NormalBlockBase.html#method-latent_network)
-- [`NormalBlockBase$optimize()`](NormalBlockBase.html#method-optimize)
-- [`NormalBlockBase$plot()`](NormalBlockBase.html#method-plot)
-- [`NormalBlockBase$plot_loglik()`](NormalBlockBase.html#method-plot_loglik)
-- [`NormalBlockBase$plot_network()`](NormalBlockBase.html#method-plot_network)
-- [`NormalBlockBase$print()`](NormalBlockBase.html#method-print)
-- [`NormalBlockBase$update()`](NormalBlockBase.html#method-update)
-- [`NormalBlockMeanBase$merge()`](NormalBlockMeanBase.html#method-merge)
-- [`NormalBlockMeanBase$predict()`](NormalBlockMeanBase.html#method-predict)
-- [`NormalBlockMeanBase$split()`](NormalBlockMeanBase.html#method-split)
-- [`NormalBlockMeanBase$warm_start_from()`](NormalBlockMeanBase.html#method-warm_start_from)
+- [`NormalBlockBase$best_of_inits()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-best_of_inits)
+- [`NormalBlockBase$candidates_merge()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_merge)
+- [`NormalBlockBase$candidates_split()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-candidates_split)
+- [`NormalBlockBase$heldout_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-heldout_loglik)
+- [`NormalBlockBase$latent_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-latent_network)
+- [`NormalBlockBase$optimize()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-optimize)
+- [`NormalBlockBase$plot()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot)
+- [`NormalBlockBase$plot_loglik()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_loglik)
+- [`NormalBlockBase$plot_network()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-plot_network)
+- [`NormalBlockBase$print()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-print)
+- [`NormalBlockBase$update()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-update)
+- [`NormalBlockBase$warm_start_from()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.html#method-warm_start_from)
+- [`NormalBlockMeanBase$merge()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.html#method-merge)
+- [`NormalBlockMeanBase$predict()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.html#method-predict)
+- [`NormalBlockMeanBase$split()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.html#method-split)
 
 ------------------------------------------------------------------------
 
@@ -62,7 +53,7 @@ Create a new \[\`NormalBlockMeanKnownClusters\`\] object.
 
 - `C`:
 
-  clustering matrix C_jk = 1 if species j belongs to cluster k
+  p x q clustering matrix, C_jk = 1 if variable j belongs to cluster k
 
 - `sparsity`:
 
