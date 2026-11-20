@@ -258,6 +258,16 @@ NormalBlockVarBase <- R6::R6Class(
              "spherical" = rep(1 / mean(ddiag), self$p))
     },
 
+    ## Masked counterpart for zero-inflated models: the per-variable inverse
+    ## variances of the masked least-squares fit, pooled over the non-zero
+    ## cells when the noise is spherical
+    zi_dm1 = function() {
+      fit <- self$data$zi_ols_fit()
+      switch(private$res_covariance,
+             "diagonal"  = fit$dm1,
+             "spherical" = rep(zi_pooled_precision(fit$dm1, self$data$nY), self$p))
+    },
+
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     heuristic_optimize = function(control){

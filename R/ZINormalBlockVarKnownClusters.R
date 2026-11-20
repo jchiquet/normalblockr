@@ -44,7 +44,7 @@ ZINormalBlockVarKnownClusters <- R6::R6Class(
       zi_diag <- self$data$zi_ols_fit()
       Sigmaq  <- private$heuristic_Sigmaq_from_Sigma(cov(zi_diag$R))
       Omega  <- private$get_Omega(Sigmaq)
-      list(B = zi_diag$B, dm1 = zi_diag$dm1, Omega = Omega)
+      list(B = zi_diag$B, dm1 = private$zi_dm1(), Omega = Omega)
     },
 
     optim_initialize = function() {

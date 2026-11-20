@@ -112,6 +112,9 @@ Users of 0.3.0 will see different results on the same calls:
 * StARS subsamples keep an explicit `zeros` mask and the formula.
 * A collection over an unsorted range of q is ordered by q.
 * Known clusterings are checked to have one row per variable.
+* Zero-inflated models with a spherical noise start from the spherical
+  estimate of the noise variance, pooled over the non-zero cells (the
+  variance-block ones started from per-variable variances).
 
 ## Other changes
 

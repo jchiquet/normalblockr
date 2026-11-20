@@ -9,6 +9,47 @@ The design studies cited below live in the article repository
 (`normalblockr_jss`, `normalblockr-jss-article-quarto/experiments/design/`,
 subfolders `mean_block/` and `initialization/`), with their results.
 
+## Open issues, for a patch release (1.0.x)
+
+Found during the 1.0.0 review, deliberately left unchanged in 1.0.0 (they
+change numerical results, and the article's replication code had to stay
+stable).
+
+1. **Penalized variance-block objective not monotone.** With `sparsity > 0`
+   the (V)EM objective can decrease between iterations, by up to about 0.025
+   (spherical noise, known clusters, `sparsity = 0.05`, on the
+   `tests/testthat/testdata/testdata_normal.RDS` fixture), with or without
+   SQUAREM. Likely cause: the graphical-lasso M-step is an inexact,
+   warm-started iterative solve (`nb_omega::estimate()`), so the M-step is not
+   an exact argmax. Leads: compare the penalized objective before/after each
+   M-step and fall back to a cold or tighter solve when it decreases; check
+   that the objective traced is exactly the one the M-step maximizes
+   (penalty included, same threshold).
+2. **Small sparse variance-block paths converge slowly.** In the StARS test
+   (small n and p, a few penalties), some models hit the 500-iteration cap
+   with increments hovering around the 1e-4 threshold (the test now uses
+   `threshold = 1e-3`). Probably the same root cause as 1 (the objective
+   oscillates at the solver's precision). Leads: as in 1, and a stopping rule
+   on the relative change of the parameters rather than of the objective
+   when `sparsity > 0`.
+3. **`refine()` does not remove every deviance monotonicity violation.**
+   The models of a collection are nested, so the deviance should not
+   increase with q. After `refine()`, about 1.3-1.8 violations per
+   collection remain on simulated data (`var_init_study.R`), one on
+   `brca_rppa` for the mean-block family (20 before), and on `onema` the
+   `spectral` initialization goes from 1.7 to 2.6 violations (improving one
+   q can expose its neighbour). The documentation only claims that
+   `refine()` repairs poor local optima, not that it removes every
+   violation. Leads: iterate `refine()` until no model improves, or retry
+   the remaining violating q from both neighbours with more candidates.
+
+Minor, same family of issues: SQUAREM leaves a decrease of about 4e-6 on an
+unknown-cluster spherical variance-block fit (an accepted extrapolation
+slightly below the previous objective).
+
+(Fixed before the release: zero-inflated spherical models started from
+per-variable variances; they now start from the pooled masked estimate.)
+
 ## Model-selection criteria (1.0.0, #55, checked in #59)
 
 - **Per-group BIC penalties** `sum nu_g log N_g`, after Daudin, Picard &
