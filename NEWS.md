@@ -123,6 +123,10 @@ Users of 0.3.0 will see different results on the same calls:
 * `summary()` of a model and `print()` of a sequential fit wrap their long
   lines at the console width; the descriptions of the collections are the
   same for both families.
+* The progress line of a collection, rewritten in place, is only printed in
+  an interactive session (it made one long line in documents and logs).
+  `print()` of a collection no longer suggests `refine()` for a deviance
+  increase that `refine()` has already failed to repair.
 * Printed outputs speak of clusters of variables rather than blocks.
 * Vignettes and README build a known clustering with
   `model.matrix(~ 0 + factor(labels))`.
