@@ -7,12 +7,12 @@
 \method{print}{normal_block_cv}(x, ...)
 }
 \arguments{
-\item{x}{an object of class `normal_block_cv`, from [normal_block_cv()]}
+\item{x}{an object of class \code{normal_block_cv}, from \code{\link[=normal_block_cv]{normal_block_cv()}}}
 
 \item{...}{not used, only here for S3 compatibility}
 }
 \value{
-Invisibly returns `x`.
+Invisibly returns \code{x}.
 }
 \description{
 Print a Cross-Validated Log-Likelihood

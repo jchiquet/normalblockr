@@ -134,31 +134,12 @@ m_unknown <- normal_block(data, blocks = 2:20)
 ```
 
     Fitting a collection of diagonal normal-block-var models over q 
-         number of clusters = 2           
-         number of clusters = 3           
-         number of clusters = 4           
-         number of clusters = 5           
-         number of clusters = 6           
-         number of clusters = 7           
-         number of clusters = 8           
-         number of clusters = 9           
-         number of clusters = 10           
-         number of clusters = 11           
-         number of clusters = 12           
-         number of clusters = 13           
-         number of clusters = 14           
-         number of clusters = 15           
-         number of clusters = 16           
-         number of clusters = 17           
-         number of clusters = 18           
-         number of clusters = 19           
-         number of clusters = 20           
          refine(): improved 16 of 19 models
 
     DONE
 
 ``` r
-m_unknown$plot(c("deviance", "BIC", "ICL", "EBIC"))
+plot(m_unknown)
 ```
 
 ![](man/figures/README-unknown-1.png)
@@ -167,12 +148,12 @@ m_unknown$plot(c("deviance", "BIC", "ICL", "EBIC"))
 m_unknown$get_best_model("EBIC")
 ```
 
-    A diagonal normal-block-var model with 19 unknown clusters.
+    A diagonal normal-block-var model with 17 unknown clusters.
     ===========================================================================
      nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
-         1186 19     171        0 -66245.44 132490.9 139411.2 139411.2 140418.2
+         1147 17     136        0 -66611.15 133222.3 139916.1 139916.1 140686.8
      niter
-        11
+        47
     ===========================================================================
     * Useful fields
         $model_par, $posterior_par / $var_par, $clustering 
@@ -192,36 +173,7 @@ m_sparse <- normal_block(data, blocks = group, sparsity = TRUE)
 ```
 
     Fitting a collection of diagonal normal-block-var models over sparsity penalties, with fixed clusters 
-         penalty = 0.2565018           
-         penalty = 0.2188391           
-         penalty = 0.1867065           
-         penalty = 0.1592919           
-         penalty = 0.1359028           
-         penalty = 0.1159479           
-         penalty = 0.098923           
-         penalty = 0.08439792           
-         penalty = 0.07200559           
-         penalty = 0.06143286           
-         penalty = 0.05241254           
-         penalty = 0.04471669           
-         penalty = 0.03815085           
-         penalty = 0.03254907           
-         penalty = 0.02776982           
-         penalty = 0.02369232           
-         penalty = 0.02021353           
-         penalty = 0.01724553           
-         penalty = 0.01471333           
-         penalty = 0.01255294           
-         penalty = 0.01070977           
-         penalty = 0.009137229           
-         penalty = 0.00779559           
-         penalty = 0.006650947           
-         penalty = 0.005674374           
-         penalty = 0.004841193           
-         penalty = 0.004130351           
-         penalty = 0.003523882           
-         penalty = 0.003006463           
-         penalty = 0.002565018           
+
     DONE
 
 ``` r
@@ -248,13 +200,6 @@ m_zi    <- normal_block(data_zi, blocks = 2:8, zero_inflation = TRUE)
 ```
 
     Fitting a collection of zero-inflated diagonal normal-block-var models over q 
-         number of clusters = 2           
-         number of clusters = 3           
-         number of clusters = 4           
-         number of clusters = 5           
-         number of clusters = 6           
-         number of clusters = 7           
-         number of clusters = 8           
          refine(): improved 6 of 7 models
 
     DONE

@@ -12,16 +12,16 @@
 \item{...}{not used, only here for S3 compatibility}
 }
 \value{
-An object of class `"logLik"`. The numeric value is the
+An object of class \code{"logLik"}. The numeric value is the
 log-likelihood or its variational lower bound (ELBO), on the scale of the
-data the model was fitted on (rescaled or not, see [NormalBlockData]); use
-the `heldout_loglik()` method for a log-likelihood on Y's original scale.
-Attributes `df` and `nobs` hold the number of parameters and observations.
+data the model was fitted on (rescaled or not, see \link{NormalBlockData}); use
+the \code{heldout_loglik()} method for a log-likelihood on Y's original scale.
+Attributes \code{df} and \code{nobs} hold the number of parameters and observations.
 }
 \description{
 Returns the (variational) log-likelihood of a fitted
-normal-block model as a `"logLik"` object, compatible with [stats::AIC()]
-and [stats::BIC()].
+normal-block model as a \code{"logLik"} object, compatible with \code{\link[stats:AIC]{stats::AIC()}}
+and \code{\link[stats:BIC]{stats::BIC()}}.
 }
 \examples{
 ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)

@@ -44,26 +44,29 @@ NormalBlockCollectionClusters <- R6::R6Class(
       private$progress_label <- "number of clusters"
     },
 
-    #' @description returns the unknown-clusters model corresponding to given q
-    #' @param q number of blocks asked by user
-    #' @return A unknown-clusters object with given value q
+    #' @description The model of the collection with q clusters.
+    #' @param q a number of clusters among those of the collection (`$q_list`)
+    #' @return a fitted model, of the class of the collection's models
     get_model = function(q) {
       stopifnot("No such model in the collection. Acceptable values can be found via $q" = q %in% self$q_list)
       self$models[[which(self$q_list == q)]]
     },
 
-    #' @description Extract best model in the collection
-    #' @param crit a character for the criterion used to performed the selection.
-    #' Either "ICL" or "BIC". "ICL" is the default criterion
-    #' @return a [`unknown-clusters`] object
+    #' @description The best model of the collection for a criterion.
+    #' @param crit the criterion minimized: "ICL" (the default), "BIC",
+    #' "EBIC", or "deviance" (which always selects the largest q)
+    #' @return a copy of the selected fitted model
     get_best_model = function(crit = c("ICL", "BIC", "EBIC", "deviance")) {
       crit <- match.arg(crit)
       id <- private$best_id(crit)
       self$models[[id]]$clone()
     },
 
-    #' @description Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
-    #' @param criteria vector of characters. The criteria to plot in `c("deviance", "BIC", "ICL")`. Defaults to all of them.
+    #' @description Plot the criteria of the models of the collection
+    #' against q, with a dashed line at the q selected by each criterion (see
+    #' also [plot.NormalBlockCollection()]).
+    #' @param criteria the criteria to plot, among `"deviance"`, `"ICL"`,
+    #' `"BIC"` and `"EBIC"`; all of them by default.
     #' @return a [`ggplot2::ggplot`] graph
     plot = function(criteria = c("deviance", "ICL", "BIC", "EBIC")) {
       stopifnot(!anyNA(self$criteria[criteria]))
@@ -72,7 +75,7 @@ NormalBlockCollectionClusters <- R6::R6Class(
 
     #' @description optimizes every model in the collection, then -- if
     #' `control$refine` is `TRUE` (see [NB_control()], the default) --
-    #' calls [refine()] automatically, reporting in one line how many models
+    #' calls `$refine()` automatically, reporting in one line how many models
     #' it improved.
     #' @param control optimization parameters (niter, threshold, verbose)
     optimize = function(control = list(niter = 500, threshold = 1e-4, verbose = TRUE)) {

@@ -31,7 +31,7 @@
 #'
 #' The resulting `B`, `Omega` and clustering are properties of the data the
 #' model was fitted on; with rescaled data, use `$B_original`,
-#' `$dm1_original` and `$fitted` for quantities in Y's original units (a
+#' `$dm1_original` and [fitted()] for quantities in Y's original units (a
 #' shared block covariance has no unique original-scale counterpart, since
 #' the scaling factors differ within a block).
 #' @examples

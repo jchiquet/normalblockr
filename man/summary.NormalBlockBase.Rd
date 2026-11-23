@@ -12,9 +12,9 @@
 \item{...}{not used, only here for S3 compatibility}
 }
 \value{
-An object of class `summary.NormalBlockBase` (a list with the
-model's `who_am_I`, `criteria`, `cluster_sizes` and network `density`),
-printed with a dedicated [print.summary.NormalBlockBase()] method.
+An object of class \code{summary.NormalBlockBase} (a list with the
+model's \code{who_am_I}, \code{criteria}, \code{cluster_sizes} and network \code{density}),
+printed with a dedicated \code{\link[=print.summary.NormalBlockBase]{print.summary.NormalBlockBase()}} method.
 }
 \description{
 Summarizes a fitted normal-block model: model type,

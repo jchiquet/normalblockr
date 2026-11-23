@@ -7,12 +7,12 @@
 \method{print}{normal_block_sequential}(x, ...)
 }
 \arguments{
-\item{x}{an object of class `normal_block_sequential`}
+\item{x}{an object of class \code{normal_block_sequential}}
 
 \item{...}{not used, only here for S3 compatibility}
 }
 \value{
-Invisibly returns `x`.
+Invisibly returns \code{x}.
 }
 \description{
 Reports both stages and, when \pkg{aricode} is available, how

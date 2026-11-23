@@ -71,7 +71,7 @@ NormalBlockMeanBase <- R6::R6Class(
 
     #' @description Predicts the mean of Y for new covariates X, in Y's
     #' original units: mu_i = C B' X_i, with the posterior cluster
-    #' probabilities as C when the clustering is unknown (as in `$fitted`).
+    #' probabilities as C when the clustering is unknown (as in [fitted()]).
     #' @param new_X new set of covariates.
     #' @return A n*p prediction matrix for new observations
     predict = function(new_X) {

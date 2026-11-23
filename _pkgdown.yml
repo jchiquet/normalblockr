@@ -69,6 +69,7 @@ reference:
     - '`plot.NormalBlockBase`'
     - '`logLik.NormalBlockBase`'
     - '`BIC.NormalBlockBase`'
+    - '`plot.NormalBlockCollection`'
     - '`print.NormalBlockCollection`'
     - '`summary.NormalBlockCollection`'
     - '`print.summary.NormalBlockCollection`'

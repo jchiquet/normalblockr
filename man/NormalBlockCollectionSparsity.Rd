@@ -4,14 +4,14 @@
 \alias{NormalBlockCollectionSparsity}
 \title{Base Class for a Collection of Models over a Sparsity Path}
 \description{
-Shared scaffolding for [NormalBlockVarCollectionSparsity] and
-[NormalBlockMeanCollectionSparsity]: the penalty grid, the warm-started
+Shared scaffolding for \link{NormalBlockVarCollectionSparsity} and
+\link{NormalBlockMeanCollectionSparsity}: the penalty grid, the warm-started
 path traversal, the penalty lookup and the criteria plot. Model selection,
 StARS included (stability selection, Liu et al. 2010), is shared: a family
 only says on which covariance estimate the default penalty grid is read
-(`private$penalty_scale()`), how to refit its path on a subsample with the
-clustering held fixed (`private$subsample_path()`) and how to name the
-nodes of its network (`private$network_nodes()`).
+(\code{private$penalty_scale()}), how to refit its path on a subsample with the
+clustering held fixed (\code{private$subsample_path()}) and how to name the
+nodes of its network (\code{private$network_nodes()}).
 }
 \examples{
 # An internal abstract base class, never instantiated directly -- see
@@ -40,14 +40,14 @@ nodes of its network (`private$network_nodes()`).
     \item{\code{sparsity}}{list of sparsity penalties}
 
     \item{\code{criteria}}{a data frame with the criteria of every model of the
-path, plus its StARS stability once `stability_selection()` has run}
+path, plus its StARS stability once \code{stability_selection()} has run}
 
     \item{\code{stability_path}}{selection probability of every edge at every
-penalty (StARS), `NULL` until `stability_selection()` has run}
+penalty (StARS), \code{NULL} until \code{stability_selection()} has run}
 
     \item{\code{stability}}{mean edge stability along the penalty path,
-`1 - mean(4 p (1 - p))` over the edges; `NA` until
-`stability_selection()` has run}
+\verb{1 - mean(4 p (1 - p))} over the edges; \code{NA} until
+\code{stability_selection()} has run}
   }
   \if{html}{\out{</div>}}
 }
@@ -74,9 +74,9 @@ penalty (StARS), `NULL` until `stability_selection()` has run}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionSparsity-initialize}{}}}
 \subsection{\code{NormalBlockCollectionSparsity$new()}}{
   Create a collection over a path of sparsity penalties.
-By default, `control$n_sparsity_penalties` values on a log scale, from
+By default, \code{control$n_sparsity_penalties} values on a log scale, from
 the largest absolute (weighted) entry of a covariance estimate, which
-removes every edge, down to `control$min_ratio` times it.
+removes every edge, down to \code{control$min_ratio} times it.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionSparsity$new(
@@ -108,9 +108,9 @@ removes every edge, down to `control$min_ratio` times it.
 \subsection{\code{NormalBlockCollectionSparsity$optimize()}}{
   optimizes every model in the sparsity path, warm-starting
 each one (after the first) from the previous, adjacent penalty's
-converged parameters (see the family's base class's `warm_start_from()`)
+converged parameters (see the family's base class's \code{warm_start_from()})
 instead of re-deriving everything from the heuristic clustering, the
-way the generic [NormalBlockCollection] `optimize()` would. `blocks`
+way the generic \link{NormalBlockCollection} \code{optimize()} would. \code{blocks}
 (hence q) is fixed across the whole path, only the sparsity penalty
 changes, so the warm start is always between models of matching shape.
   \subsection{Usage}{
@@ -169,7 +169,7 @@ changes, so the warm start is always between models of matching shape.
     \describe{
       \item{\code{crit}}{a character for the criterion used to perform the
 selection: "BIC" (default), "EBIC", "ICL" or "StARS".}
-      \item{\code{stability}}{if `crit = "StARS"`, the level of stability required.}
+      \item{\code{stability}}{if \code{crit = "StARS"}, the level of stability required.}
     }
     \if{html}{\out{</div>}}
   }
@@ -197,7 +197,7 @@ recorded at every penalty.
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{subsamples}}{a list of vectors describing the subsamples. The number of vectors (or list length) determines the number of subsamples used in the stability selection. Automatically set to 10 subsamples with size `10*sqrt(n)` if `n >= 144` and `0.8*n` otherwise following Liu et al. (2010) recommendations.}
+      \item{\code{subsamples}}{a list of vectors describing the subsamples. The number of vectors (or list length) determines the number of subsamples used in the stability selection. Automatically set to 10 subsamples with size \code{10*sqrt(n)} if \code{n >= 144} and \code{0.8*n} otherwise following Liu et al. (2010) recommendations.}
       \item{\code{n_subsamples}}{number of subsamples to create if the subsamples are not given}
     }
     \if{html}{\out{</div>}}
@@ -208,7 +208,9 @@ recorded at every penalty.
 \if{html}{\out{<a id="method-NormalBlockCollectionSparsity-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionSparsity-plot}{}}}
 \subsection{\code{NormalBlockCollectionSparsity$plot()}}{
-  Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a collection)
+  Plot the criteria of the models of the path against the
+penalty, with a dashed line at the penalty selected by each criterion
+(see also \code{\link[=plot.NormalBlockCollection]{plot.NormalBlockCollection()}}).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionSparsity$plot(
@@ -220,13 +222,14 @@ recorded at every penalty.
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{criteria}}{vector of characters. The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults to all of them.}
-      \item{\code{log.x}}{logical: should the x-axis be represented in log-scale? Default is `TRUE`.}
+      \item{\code{criteria}}{the criteria to plot, among \code{"deviance"}, \code{"BIC"},
+\code{"EBIC"} and \code{"ICL"}; all of them by default.}
+      \item{\code{log.x}}{logical: should the x-axis be represented in log-scale? Default is \code{TRUE}.}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    a [`ggplot2::ggplot`] graph
+    a \code{\link[ggplot2:ggplot]{ggplot2::ggplot}} graph
   }
 }
 

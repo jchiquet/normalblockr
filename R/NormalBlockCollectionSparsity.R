@@ -164,8 +164,11 @@ NormalBlockCollectionSparsity <- R6::R6Class(
       invisible(subsamples)
     },
 
-    #' @description Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a collection)
-    #' @param criteria vector of characters. The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults to all of them.
+    #' @description Plot the criteria of the models of the path against the
+    #' penalty, with a dashed line at the penalty selected by each criterion
+    #' (see also [plot.NormalBlockCollection()]).
+    #' @param criteria the criteria to plot, among `"deviance"`, `"BIC"`,
+    #' `"EBIC"` and `"ICL"`; all of them by default.
     #' @param log.x logical: should the x-axis be represented in log-scale? Default is `TRUE`.
     #' @return a [`ggplot2::ggplot`] graph
     plot = function(criteria = c("deviance", "BIC", "EBIC", "ICL"), log.x = TRUE) {

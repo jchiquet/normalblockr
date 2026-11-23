@@ -12,10 +12,10 @@
 \item{...}{not used, only here for S3 compatibility}
 }
 \value{
-An object of class `summary.NormalBlockCollection` (a list
-with the collection's `who_am_I`, `criteria`, `q_range` and
-`sparsity_range`), printed with a dedicated
-[print.summary.NormalBlockCollection()] method.
+An object of class \code{summary.NormalBlockCollection} (a list
+with the collection's \code{who_am_I}, \code{criteria}, \code{q_range} and
+\code{sparsity_range}), printed with a dedicated
+\code{\link[=print.summary.NormalBlockCollection]{print.summary.NormalBlockCollection()}} method.
 }
 \description{
 Summarizes a collection of normal-block models: model type,

@@ -6,7 +6,7 @@
 \description{
 R6 class for a zero-inflated Normal-Block-Mean model with a known
 clustering. Sigma is diagonal or spherical here. See
-[NormalBlockMeanBase] for why a full one is out of reach under a mask.
+\link{NormalBlockMeanBase} for why a full one is out of reach under a mask.
 }
 \examples{
 ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
@@ -22,7 +22,7 @@ model$clustering
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{model_par}}{the parameters of [NormalBlockMeanBase] (B, Omega),
+    \item{\code{model_par}}{the parameters of \link{NormalBlockMeanBase} (B, Omega),
 plus B0 (zero-inflation coefficients) and kappa (zero-inflation
 probabilities)}
   }
@@ -58,7 +58,7 @@ probabilities)}
 \if{html}{\out{<a id="method-ZINormalBlockMeanKnownClusters-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-ZINormalBlockMeanKnownClusters-initialize}{}}}
 \subsection{\code{ZINormalBlockMeanKnownClusters$new()}}{
-  Create a new [`ZINormalBlockMeanKnownClusters`] object.
+  Create a new \code{\link{ZINormalBlockMeanKnownClusters}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{ZINormalBlockMeanKnownClusters$new(
@@ -80,7 +80,7 @@ probabilities)}
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`ZINormalBlockMeanKnownClusters`] object
+    A new \code{\link{ZINormalBlockMeanKnownClusters}} object
   }
 }
 

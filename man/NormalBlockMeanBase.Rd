@@ -20,10 +20,10 @@ structures the mean (mu_i = C B' X_i).
   \describe{
     \item{\code{model_par}}{a list with the model parameters: B (d x q, one
 profile per cluster) and Omega (p x p precision matrix of the
-residuals), on the scale of the fit (see [coef()] and [sigma()]).}
+residuals), on the scale of the fit (see \code{\link[=coef]{coef()}} and \code{\link[=sigma]{sigma()}}).}
 
     \item{\code{fitted}}{Y values predicted by the model, in Y's original units:
-`X B C'` (with the posterior cluster probabilities as C when the
+\verb{X B C'} (with the posterior cluster probabilities as C when the
 clustering is unknown), with the observed zeros of zero-inflated models
 set to 0}
 
@@ -61,7 +61,7 @@ set to 0}
 \if{html}{\out{<a id="method-NormalBlockMeanBase-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-initialize}{}}}
 \subsection{\code{NormalBlockMeanBase$new()}}{
-  Create a new [`NormalBlockMeanBase`] object.
+  Create a new \code{\link{NormalBlockMeanBase}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanBase$new(
@@ -86,7 +86,7 @@ set by the ZI subclasses themselves, not meant to be set by the end user.}
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockMeanBase`] object
+    A new \code{\link{NormalBlockMeanBase}} object
   }
 }
 
@@ -96,7 +96,7 @@ set by the ZI subclasses themselves, not meant to be set by the end user.}
 \subsection{\code{NormalBlockMeanBase$predict()}}{
   Predicts the mean of Y for new covariates X, in Y's
 original units: mu_i = C B' X_i, with the posterior cluster
-probabilities as C when the clustering is unknown (as in `$fitted`).
+probabilities as C when the clustering is unknown (as in \code{\link[=fitted]{fitted()}}).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanBase$predict(new_X)}
@@ -118,8 +118,8 @@ probabilities as C when the clustering is unknown (as in `$fitted`).
 \if{html}{\out{<a id="method-NormalBlockMeanBase-split"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-split}{}}}
 \subsection{\code{NormalBlockMeanBase$split()}}{
-  Create a clone of the current [`NormalBlockMeanBase`]
-object after splitting cluster `index`. Unlike the variance-block
+  Create a clone of the current \code{\link{NormalBlockMeanBase}}
+object after splitting cluster \code{index}. Unlike the variance-block
 family, Omega and the sparsity weights are p x p here and do not
 depend on q, so they carry over unchanged; only C (tau) and B (one
 column per cluster) are affected.
@@ -134,15 +134,15 @@ column per cluster) are affected.
       \item{\code{index}}{index (integer) of the cluster to split}
       \item{\code{in_place}}{should the split be applied to the object itself, or
 should a copy be sent? Default FALSE (send a copy)}
-      \item{\code{rule}}{how the members of the cluster are divided: `"kmeans"`
-runs a 2-means on their fitted mean trajectories `X B_ols`; `"noise"`
-cuts them at the median of their noise variance `1 / diag(Omega)`.
-Default `NULL`, i.e. `"noise"` for this family.}
+      \item{\code{rule}}{how the members of the cluster are divided: \code{"kmeans"}
+runs a 2-means on their fitted mean trajectories \verb{X B_ols}; \code{"noise"}
+cuts them at the median of their noise variance \code{1 / diag(Omega)}.
+Default \code{NULL}, i.e. \code{"noise"} for this family.}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockMeanBase`] object
+    A new \code{\link{NormalBlockMeanBase}} object
   }
 }
 
@@ -150,8 +150,8 @@ Default `NULL`, i.e. `"noise"` for this family.}
 \if{html}{\out{<a id="method-NormalBlockMeanBase-merge"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanBase-merge}{}}}
 \subsection{\code{NormalBlockMeanBase$merge()}}{
-  Create a clone of the current [`NormalBlockMeanBase`]
-object after merging clusters `indices`
+  Create a clone of the current \code{\link{NormalBlockMeanBase}}
+object after merging clusters \code{indices}
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanBase$merge(indices, in_place = FALSE)}
@@ -167,7 +167,7 @@ should a copy be sent? Default FALSE (send a copy)}
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockMeanBase`] object
+    A new \code{\link{NormalBlockMeanBase}} object
   }
 }
 

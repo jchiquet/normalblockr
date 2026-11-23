@@ -7,16 +7,16 @@
 \format{
 A list with 2 elements:
 \describe{
-  \item{biomass}{a 399 x 46 numeric matrix of total biomass (grams) per
-  species (3-letter species code, columns) and station (row names).}
-  \item{covariates}{a data frame with one row per station, in the same
-  order as the rows of `biomass`: `station` (matches `rownames(biomass)`)
-  and 14 environmental variables -- `slope`, `alt` (altitude), `d_source`
-  (distance to source), `strahler` (Strahler stream order),
-  `width_river_mean`/`width_river_cv`, `avg_depth_station_mean`/
-  `avg_depth_station_cv`, `DBO_med`/`DBO_cv` (biological oxygen demand),
-  `flow_med`/`flow_cv` and `temperature_med`/`temperature_cv` (`_med` =
-  median, `_cv` = coefficient of variation, over the monitoring period).}
+\item{biomass}{a 399 x 46 numeric matrix of total biomass (grams) per
+species (3-letter species code, columns) and station (row names).}
+\item{covariates}{a data frame with one row per station, in the same
+order as the rows of \code{biomass}: \code{station} (matches \code{rownames(biomass)})
+and 14 environmental variables -- \code{slope}, \code{alt} (altitude), \code{d_source}
+(distance to source), \code{strahler} (Strahler stream order),
+\code{width_river_mean}/\code{width_river_cv}, \code{avg_depth_station_mean}/
+\code{avg_depth_station_cv}, \code{DBO_med}/\code{DBO_cv} (biological oxygen demand),
+\code{flow_med}/\code{flow_cv} and \code{temperature_med}/\code{temperature_cv} (\verb{_med} =
+median, \verb{_cv} = coefficient of variation, over the monitoring period).}
 }
 }
 \source{
@@ -36,13 +36,13 @@ the French Office for Biodiversity (formerly ONEMA, "Office National de
 l'Eau et des Milieux Aquatiques"), using electrofishing.
 }
 \details{
-The source data is organized around fishing *operations* (`opcod`):
+The source data is organized around fishing \emph{operations} (\code{opcod}):
 several electrofishing operations can be carried out at the same
-*station* over time. `onema` aggregates this to one row per station:
-every operation is first mapped to its station (`fishing_protocol.csv`),
+\emph{station} over time. \code{onema} aggregates this to one row per station:
+every operation is first mapped to its station (\code{fishing_protocol.csv}),
 then biomass (in grams) is summed over every operation recorded at a
-given station, separately for each species (i.e. `biomass[s, ]` is the
-total biomass of each species ever caught at station `s`, not a single
+given station, separately for each species (i.e. \code{biomass[s, ]} is the
+total biomass of each species ever caught at station \code{s}, not a single
 operation's catch). Stations without environmental data are dropped.
 Species observed at fewer than 10 stations are also dropped: at that
 level of rarity, a zero-inflated fit's iterative initialization can fit a

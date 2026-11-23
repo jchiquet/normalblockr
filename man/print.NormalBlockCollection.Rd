@@ -12,12 +12,12 @@
 \item{...}{not used, only here for S3 compatibility}
 }
 \value{
-Invisibly returns `x`.
+Invisibly returns \code{x}.
 }
 \description{
 Print a short summary of a collection of normal-block
 models: model type and the range of q/sparsity explored. See
-[summary.NormalBlockCollection()] for the full criteria table.
+\code{\link[=summary.NormalBlockCollection]{summary.NormalBlockCollection()}} for the full criteria table.
 }
 \examples{
 ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)

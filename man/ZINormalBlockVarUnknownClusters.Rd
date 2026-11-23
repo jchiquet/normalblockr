@@ -22,7 +22,7 @@ model$clustering
   \describe{
     \item{\code{var_par}}{a list with variational parameters}
 
-    \item{\code{model_par}}{the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities) and alpha (cluster proportions)}
+    \item{\code{model_par}}{the parameters of \link{NormalBlockVarBase} (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities) and alpha (cluster proportions)}
   }
   \if{html}{\out{</div>}}
 }
@@ -57,7 +57,7 @@ model$clustering
 \if{html}{\out{<a id="method-ZINormalBlockVarUnknownClusters-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-ZINormalBlockVarUnknownClusters-initialize}{}}}
 \subsection{\code{ZINormalBlockVarUnknownClusters$new()}}{
-  Create a new [`ZINormalBlockVarUnknownClusters`] object.
+  Create a new \code{\link{ZINormalBlockVarUnknownClusters}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{ZINormalBlockVarUnknownClusters$new(
@@ -79,7 +79,7 @@ model$clustering
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`ZINormalBlockVarUnknownClusters`] object
+    A new \code{\link{ZINormalBlockVarUnknownClusters}} object
   }
 }
 

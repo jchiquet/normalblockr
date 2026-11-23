@@ -6,7 +6,7 @@
 \description{
 R6 class for a zero-inflated Normal-Block-Mean model with a fixed number of
 clusters (but unknown clustering), inferred by variational EM. Sigma is
-diagonal or spherical here. See [NormalBlockMeanBase] for why a full one
+diagonal or spherical here. See \link{NormalBlockMeanBase} for why a full one
 is out of reach under a mask.
 }
 \examples{
@@ -24,7 +24,7 @@ model$clustering
   \describe{
     \item{\code{var_par}}{a list with the variational parameter: tau (posterior group probabilities)}
 
-    \item{\code{model_par}}{the parameters of [NormalBlockMeanBase] (B, Omega),
+    \item{\code{model_par}}{the parameters of \link{NormalBlockMeanBase} (B, Omega),
 plus B0 (zero-inflation coefficients), kappa (zero-inflation
 probabilities) and alpha (cluster proportions)}
   }
@@ -60,7 +60,7 @@ probabilities) and alpha (cluster proportions)}
 \if{html}{\out{<a id="method-ZINormalBlockMeanUnknownClusters-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-ZINormalBlockMeanUnknownClusters-initialize}{}}}
 \subsection{\code{ZINormalBlockMeanUnknownClusters$new()}}{
-  Create a new [`ZINormalBlockMeanUnknownClusters`] object.
+  Create a new \code{\link{ZINormalBlockMeanUnknownClusters}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{ZINormalBlockMeanUnknownClusters$new(
@@ -82,7 +82,7 @@ probabilities) and alpha (cluster proportions)}
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`ZINormalBlockMeanUnknownClusters`] object
+    A new \code{\link{ZINormalBlockMeanUnknownClusters}} object
   }
 }
 

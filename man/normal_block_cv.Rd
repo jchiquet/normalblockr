@@ -15,38 +15,38 @@ normal_block_cv(
 )
 }
 \arguments{
-\item{data}{a [NormalBlockData] object}
+\item{data}{a \link{NormalBlockData} object}
 
-\item{blocks}{as in [normal_block()]: a range of numbers of clusters, a
+\item{blocks}{as in \code{\link[=normal_block]{normal_block()}}: a range of numbers of clusters, a
 single one, or a known clustering (p x q indicator matrix)}
 
-\item{model, zero_inflation, sparsity}{as in [normal_block()]. A sparsity
-path (`sparsity = TRUE`) is not supported: its penalty grid depends on
+\item{model, zero_inflation, sparsity}{as in \code{\link[=normal_block]{normal_block()}}. A sparsity
+path (\code{sparsity = TRUE}) is not supported: its penalty grid depends on
 the data, hence on the fold; pick the penalty with StARS instead (see
-[NormalBlockVarCollectionSparsity]).}
+\link{NormalBlockVarCollectionSparsity}).}
 
-\item{folds}{the number of folds, or a vector of `data$n` fold labels.
+\item{folds}{the number of folds, or a vector of \code{data$n} fold labels.
 With a number, the folds are drawn at random, stratified on the distinct
 rows of the design X when it is categorical (e.g. a factor coded by
-`model.matrix()`), so that every training set sees every category.}
+\code{model.matrix()}), so that every training set sees every category.}
 
-\item{control}{a list of controls, see [NB_control()]}
+\item{control}{a list of controls, see \code{\link[=NB_control]{NB_control()}}}
 }
 \value{
-an object of class `normal_block_cv`: a data frame with one row
-per model (`q`), the total held-out log-likelihood over the `n`
-observations (`loglik`, larger is better) and its standard error
-(`se`, from the spread of the per-observation values); the
-per-observation values are kept in the `per_observation` attribute
-(n x number of models) and the folds in `folds`. Its `best` attribute
+an object of class \code{normal_block_cv}: a data frame with one row
+per model (\code{q}), the total held-out log-likelihood over the \code{n}
+observations (\code{loglik}, larger is better) and its standard error
+(\code{se}, from the spread of the per-observation values); the
+per-observation values are kept in the \code{per_observation} attribute
+(n x number of models) and the folds in \code{folds}. Its \code{best} attribute
 is the q chosen by the one-standard-error rule, the smallest q within one
-standard error of the maximum; `best_max` is the maximum itself, which
+standard error of the maximum; \code{best_max} is the maximum itself, which
 tends to over-select.
 }
 \description{
-Splits the observations into folds, fits [normal_block()] on all but one
+Splits the observations into folds, fits \code{\link[=normal_block]{normal_block()}} on all but one
 fold and evaluates the held-out log-likelihood of the left-out fold (see
-`heldout_loglik()` in [NormalBlockBase]), for every model of the
+\code{heldout_loglik()} in \link{NormalBlockBase}), for every model of the
 collection. It selects the number of clusters without a penalty, and
 compares models of different families, shapes of Sigma or scalings.
 }

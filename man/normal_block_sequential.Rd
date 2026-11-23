@@ -15,13 +15,13 @@ normal_block_sequential(
 )
 }
 \arguments{
-\item{data}{a [NormalBlockData] object}
+\item{data}{a \link{NormalBlockData} object}
 
 \item{blocks_mean}{number of clusters for the mean-block stage: an integer,
 a vector of integers to explore, or a p x q indicator matrix. It can also be
-a mean-block model or collection already fitted on `data` (by
-`normal_block(data, ..., model = "mean")`), in which case the first stage
-is not refitted: a collection is reduced to its best model by `crit`.}
+a mean-block model or collection already fitted on \code{data} (by
+\code{normal_block(data, ..., model = "mean")}), in which case the first stage
+is not refitted: a collection is reduced to its best model by \code{crit}.}
 
 \item{blocks_var}{idem for the variance-block stage, run on the residuals}
 
@@ -32,19 +32,19 @@ is not refitted: a collection is reduced to its best model by `crit`.}
 then zero-inflated, sharing the same mask: the second one would otherwise
 re-derive it from residuals, which are never exactly zero.}
 
-\item{control_mean}{control list for the mean-block stage, see [NB_control()]}
+\item{control_mean}{control list for the mean-block stage, see \code{\link[=NB_control]{NB_control()}}}
 
 \item{control_var}{control list for the variance-block stage}
 }
 \value{
-an object of class `normal_block_sequential`, a list with the fitted
-`mean` and `var` models and the residual matrix `residuals` handed from one
+an object of class \code{normal_block_sequential}, a list with the fitted
+\code{mean} and \code{var} models and the residual matrix \code{residuals} handed from one
 stage to the other.
 }
 \description{
 Fits the two model families one after the other: a mean-block model
-([NormalBlockMeanBase]) groups the variables by how they respond to the
-covariates, then a variance-block model ([NormalBlockVarBase]) groups the
+(\link{NormalBlockMeanBase}) groups the variables by how they respond to the
+covariates, then a variance-block model (\link{NormalBlockVarBase}) groups the
 residuals of that fit by how they co-vary. The two answer different
 questions and generally return unrelated partitions, so running both is
 often more informative than choosing one.

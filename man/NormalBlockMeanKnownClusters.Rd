@@ -10,7 +10,7 @@ R6 class for a Normal-Block-Mean model with a known clustering.
 ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 model <- normal_block(data, blocks = ex$parameters$C, model = "mean")
-model$plot()
+plot(model)
 }
 \section{Super classes}{
 \code{\link[normalblockr:NormalBlockBase]{NormalBlockBase}} -> \code{\link[normalblockr:NormalBlockMeanBase]{NormalBlockMeanBase}} -> \code{NormalBlockMeanKnownClusters}
@@ -45,7 +45,7 @@ model$plot()
 \if{html}{\out{<a id="method-NormalBlockMeanKnownClusters-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanKnownClusters-initialize}{}}}
 \subsection{\code{NormalBlockMeanKnownClusters$new()}}{
-  Create a new [`NormalBlockMeanKnownClusters`] object.
+  Create a new \code{\link{NormalBlockMeanKnownClusters}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanKnownClusters$new(data, C, sparsity = 0, control = NB_control())}
@@ -62,7 +62,7 @@ model$plot()
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockMeanKnownClusters`] object
+    A new \code{\link{NormalBlockMeanKnownClusters}} object
   }
 }
 
