@@ -26,14 +26,6 @@ Main changes since 0.3.0 (see NEWS.md):
 
 0 errors | 0 warnings | 0 notes attributable to the package.
 
-The local `--as-cran` run reports notes that are artifacts of this machine
-rather than of the package: the non-portable `-mno-omit-leaf-frame-pointer`
-that Debian/Ubuntu's own `r-base` puts in `Makeconf` (the package's
-`src/Makevars` sets only `CXX_STD`, `-DARMA_WARN_LEVEL=1` and the BLAS/LAPACK
-libs), HTML Tidy not being installed here, and -- intermittently, when GitHub
-rate-limits us -- a 429 on the README's last-commit badge URL, which resolves
-normally otherwise.
-
 ## Previous submission
 
 The 0.3.0 ERROR on r-devel-linux-x86_64-fedora-gcc (`could not find function
