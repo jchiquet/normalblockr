@@ -4,13 +4,13 @@
 \alias{NormalBlockCollection}
 \title{Base Class for a Collection of Normal-Block Models}
 \description{
-Shared scaffolding for the collections explored by [get_model()]/
-[normal_block()]: a sweep over sparsity penalties ([`NormalBlockVarCollectionSparsity`]),
-over the number of clusters ([`NormalBlockVarCollectionClusters`]), or over both
-([`NormalBlockVarCollectionClustersSparsity`]). Concrete subclasses set
-`private$progress_field`/`private$progress_label` in their `initialize()`
-and provide their own `get_best_model()`, delegating the (row of
-`self$criteria` minimizing a criterion) lookup to `private$best_id()`.
+Shared scaffolding for the collections explored by \code{\link[=get_model]{get_model()}}/
+\code{\link[=normal_block]{normal_block()}}: a sweep over sparsity penalties (\code{\link{NormalBlockVarCollectionSparsity}}),
+over the number of clusters (\code{\link{NormalBlockVarCollectionClusters}}), or over both
+(\code{\link{NormalBlockVarCollectionClustersSparsity}}). Concrete subclasses set
+\code{private$progress_field}/\code{private$progress_label} in their \code{initialize()}
+and provide their own \code{get_best_model()}, delegating the (row of
+\code{self$criteria} minimizing a criterion) lookup to \code{private$best_id()}.
 }
 \examples{
 # An internal abstract base class, never instantiated directly -- see
@@ -36,7 +36,7 @@ holds and what varies across them}
 
     \item{\code{criteria}}{a data frame with the values of some criteria for the collection of models}
 
-    \item{\code{loglik}}{not defined for a collection: accessing it raises an informative error. Use `logLik()` for every model's log-likelihood, or `$get_best_model()$loglik` for a single one.}
+    \item{\code{loglik}}{not defined for a collection: accessing it raises an informative error. Use \code{logLik()} for every model's log-likelihood, or \verb{$get_best_model()$loglik} for a single one.}
   }
   \if{html}{\out{</div>}}
 }
@@ -65,8 +65,8 @@ holds and what varies across them}
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{control}}{optimization parameters (niter and threshold). When
-`control$clustering_init` is `"best_of_inits"`, each leaf model is fit
-via its own `best_of_inits()` instead of a plain `optimize()`.}
+\code{control$clustering_init} is \code{"best_of_inits"}, each leaf model is fit
+via its own \code{best_of_inits()} instead of a plain \code{optimize()}.}
     }
     \if{html}{\out{</div>}}
   }
@@ -77,7 +77,7 @@ via its own `best_of_inits()` instead of a plain `optimize()`.}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollection-print}{}}}
 \subsection{\code{NormalBlockCollection$print()}}{
   User-friendly print method: model type and the range of
-q/sparsity explored. See `summary()` for the full criteria table.
+q/sparsity explored. See \code{summary()} for the full criteria table.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollection$print()}
@@ -97,8 +97,8 @@ table, and the range of q/sparsity explored.
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    An object of class `summary.NormalBlockCollection`,
-printed with a dedicated [print.summary.NormalBlockCollection()]
+    An object of class \code{summary.NormalBlockCollection},
+printed with a dedicated \code{\link[=print.summary.NormalBlockCollection]{print.summary.NormalBlockCollection()}}
 method.
   }
 }

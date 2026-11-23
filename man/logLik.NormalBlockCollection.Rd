@@ -16,8 +16,8 @@ A numeric vector of log-likelihood values, one per model in the collection.
 }
 \description{
 Returns the log-likelihood of every model in a collection of
-normal-block models (see [NormalBlockVarCollectionClusters],
-[NormalBlockVarCollectionSparsity], [NormalBlockVarCollectionClustersSparsity]).
+normal-block models (see \link{NormalBlockVarCollectionClusters},
+\link{NormalBlockVarCollectionSparsity}, \link{NormalBlockVarCollectionClustersSparsity}).
 }
 \examples{
 ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)

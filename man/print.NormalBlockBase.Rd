@@ -12,7 +12,7 @@
 \item{...}{not used, only here for S3 compatibility}
 }
 \value{
-Invisibly returns `x`.
+Invisibly returns \code{x}.
 }
 \description{
 Print a short summary of a fitted normal-block model: model

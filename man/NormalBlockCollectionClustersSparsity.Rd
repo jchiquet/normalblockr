@@ -4,8 +4,8 @@
 \alias{NormalBlockCollectionClustersSparsity}
 \title{Base Class for a Collection over Cluster Counts and Sparsity Levels}
 \description{
-Shared scaffolding for [NormalBlockVarCollectionClustersSparsity] and
-[NormalBlockMeanCollectionClustersSparsity]: a collection of sparsity
+Shared scaffolding for \link{NormalBlockVarCollectionClustersSparsity} and
+\link{NormalBlockMeanCollectionClustersSparsity}: a collection of sparsity
 sub-collections, one per q in increasing order. Everything lives here
 (two-key model lookup, model selection over both axes, the criteria
 heatmap); subclasses only name the model family.
@@ -128,7 +128,8 @@ Either "BIC", "EBIC" or "ICL". "ICL" is the default criterion}
 \if{html}{\out{<a id="method-NormalBlockCollectionClustersSparsity-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClustersSparsity-plot}{}}}
 \subsection{\code{NormalBlockCollectionClustersSparsity$plot()}}{
-  Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits
+  Plot one criterion as a heatmap over q and the penalty
+(see also \code{\link[=plot.NormalBlockCollection]{plot.NormalBlockCollection()}}).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionClustersSparsity$plot(
@@ -140,13 +141,15 @@ Either "BIC", "EBIC" or "ICL". "ICL" is the default criterion}
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{criterion}}{The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults deviance.}
-      \item{\code{n_intervals}}{number of intervals into which the penalties range should be split}
+      \item{\code{criterion}}{the criterion to plot, among \code{"deviance"} (the
+default), \code{"ICL"}, \code{"BIC"} and \code{"EBIC"}.}
+      \item{\code{n_intervals}}{number of intervals into which the range of the
+penalties is split}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    a [`ggplot2::ggplot`] heatmap
+    a \code{\link[ggplot2:ggplot]{ggplot2::ggplot}} heatmap
   }
 }
 

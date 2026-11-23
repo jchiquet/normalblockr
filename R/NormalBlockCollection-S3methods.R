@@ -43,6 +43,37 @@ BIC.NormalBlockCollection <- function(object, ...) {
   object$criteria$BIC
 }
 
+#' @title Plot a Collection of Normal-Block Models
+#' @description Plots the model-selection criteria of a collection of
+#' normal-block models: against the number of clusters q for a collection
+#' over q ([NormalBlockVarCollectionClusters],
+#' [NormalBlockMeanCollectionClusters]), against the penalty for a sparsity
+#' path ([NormalBlockVarCollectionSparsity],
+#' [NormalBlockMeanCollectionSparsity]), with a dashed line at the model
+#' selected by each criterion; as a heatmap over q and the penalty for a
+#' collection over both ([NormalBlockVarCollectionClustersSparsity],
+#' [NormalBlockMeanCollectionClustersSparsity]).
+#' @param x An object inheriting from NormalBlockCollection.
+#' @param ... passed to the collection's `$plot()` method: `criteria` (the
+#' criteria to plot, among `"deviance"`, `"ICL"`, `"BIC"` and `"EBIC"`) for a
+#' collection over q or a sparsity path, plus `log.x` for the latter;
+#' `criterion` (a single one) and `n_intervals` for a collection over both.
+#' @return Invisibly returns the [ggplot2::ggplot] object; called for its
+#' side effect of plotting.
+#' @export
+#' @examples
+#' ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
+#' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
+#' models <- normal_block(data, blocks = 2:5, control = NB_control(verbose = FALSE))
+#' plot(models)
+#' plot(models, criteria = c("BIC", "ICL"))
+plot.NormalBlockCollection <- function(x, ...) {
+  stopifnot(isNBcollection(x))
+  p <- x$plot(...)
+  print(p)
+  invisible(p)
+}
+
 #' @title Print a Collection of Normal-Block Models
 #' @description Print a short summary of a collection of normal-block
 #' models: model type and the range of q/sparsity explored. See

@@ -21,7 +21,7 @@ model$clustering
   \describe{
     \item{\code{posterior_par}}{a list with the parameters of posterior distribution W | Y}
 
-    \item{\code{model_par}}{the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities)}
+    \item{\code{model_par}}{the parameters of \link{NormalBlockVarBase} (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities)}
   }
   \if{html}{\out{</div>}}
 }
@@ -56,7 +56,7 @@ model$clustering
 \if{html}{\out{<a id="method-ZINormalBlockVarKnownClusters-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-ZINormalBlockVarKnownClusters-initialize}{}}}
 \subsection{\code{ZINormalBlockVarKnownClusters$new()}}{
-  Create a new [`ZINormalBlockVarKnownClusters`] object.
+  Create a new \code{\link{ZINormalBlockVarKnownClusters}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{ZINormalBlockVarKnownClusters$new(
@@ -78,7 +78,7 @@ model$clustering
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`ZINormalBlockVarKnownClusters`] object
+    A new \code{\link{ZINormalBlockVarKnownClusters}} object
   }
 }
 

@@ -79,24 +79,25 @@ NormalBlockBase <- R6::R6Class(
     ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ## Setters    ------------------------
     #' @description
-    #' Update a [`NormalBlockBase`] object
-    #'
-    #' All possible parameters of the child classes
-    #' @param B regression matrix [all]
-    #' @param dm1 diagonal vector of inverse variance matrix (variables level) [NBVar]
-    #' @param C the matrix of groups memberships (posterior probabilities) [all]
-    #' @param Omega inverse variance matrix (cluster-level for Normal Block
-    #' models, variable-level for Normal Mean Block models) [all]
-    #' @param gamma  variance of posterior distribution of W [NBVar - known]
-    #' @param mu mean for posterior distribution of W [NBVar - known]
-    #' @param alpha vector of groups probabilities [NBVar]
-    #' @param M variational mean for posterior distribution of W [NBVar - unknown]
-    #' @param S variational diagonal of variances for posterior distribution of W [NBVar - unknown]
+    #' Update the parameters of a model in place. Each argument applies to
+    #' the families or variants named in parentheses; `NA` (the default)
+    #' leaves the parameter unchanged.
+    #' @param B regression coefficients (all models)
+    #' @param dm1 inverse noise variances of the variables (variance-block)
+    #' @param C cluster memberships: indicators, or posterior probabilities
+    #' (all models)
+    #' @param Omega precision matrix: between clusters (variance-block) or
+    #' between variables (mean-block)
+    #' @param gamma posterior variance of W (variance-block, known clusters)
+    #' @param mu posterior mean of W (variance-block, known clusters)
+    #' @param alpha cluster proportions (unknown clusters)
+    #' @param M variational means of W (variance-block, unknown clusters)
+    #' @param S variational variances of W (variance-block, unknown clusters)
     #' @param ll_list  list of log-lik (elbo) values
     #' @param warm_started whether `optim_initialize()` should treat the model as
     #' already initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand)
     #' rather than recomputing a fresh heuristic initialization. Set by
-    #' [warm_start_from()] and by [split()]/[merge()].
+    #' `$warm_start_from()` and by `$split()`/`$merge()`.
     #' @param clustering_init initial clustering
     #' @return Update the current object in place
     update = function(B = NA,
@@ -246,7 +247,7 @@ NormalBlockBase <- R6::R6Class(
     #' the most promising ones are actually built and trial-optimized, ranked
     #' by the family's own `private$merge_score()`. Set to `Inf` to always
     #' try every pair.
-    #' @param trial_niter see [candidates_split()]
+    #' @param trial_niter see `$candidates_split()`
     candidates_merge = function(max_candidates = 30, trial_niter = 2) {
       stopifnot("need at least two clusters to merge them" = self$q > 1)
       pairs <- combn(self$q, 2, simplify = FALSE)

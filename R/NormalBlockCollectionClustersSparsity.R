@@ -75,9 +75,12 @@ NormalBlockCollectionClustersSparsity <- R6::R6Class(
       self$get_model(best_q, best_pen)$clone()
     },
 
-    #' @description Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits 
-    #' @param criterion The criteria to plot in `c("deviance", BIC", "EBIC", "ICL")`. Defaults deviance.
-    #' @param n_intervals number of intervals into which the penalties range should be split
+    #' @description Plot one criterion as a heatmap over q and the penalty
+    #' (see also [plot.NormalBlockCollection()]).
+    #' @param criterion the criterion to plot, among `"deviance"` (the
+    #' default), `"ICL"`, `"BIC"` and `"EBIC"`.
+    #' @param n_intervals number of intervals into which the range of the
+    #' penalties is split
     #' @return a [`ggplot2::ggplot`] heatmap
     plot = function(criterion = c("deviance", "ICL", "BIC", "EBIC"),
                     n_intervals = NULL) {

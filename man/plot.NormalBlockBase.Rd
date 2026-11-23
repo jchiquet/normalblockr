@@ -12,13 +12,13 @@
 \item{...}{not used, only here for S3 compatibility}
 }
 \value{
-Invisibly returns the [ggplot2::ggplot] object; called for its
+Invisibly returns the \link[ggplot2:ggplot]{ggplot2::ggplot} object; called for its
 side effect of plotting.
 }
 \description{
 Plots the evolution of the objective (log-likelihood or
-ELBO) across the (V)EM iterations of the last call to `optimize()`, see
-`$plot_loglik()`.
+ELBO) across the (V)EM iterations of the last call to \code{optimize()}, see
+\verb{$plot_loglik()}.
 }
 \examples{
 ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)

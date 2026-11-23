@@ -4,10 +4,10 @@
 \alias{NormalBlockMeanCollectionSparsity}
 \title{Collection of Normal-Block-Mean Models over a Sparsity Path}
 \description{
-R6 class for a collection of mean-block models ([NormalBlockMeanBase]) with
+R6 class for a collection of mean-block models (\link{NormalBlockMeanBase}) with
 a fixed clustering (or a fixed number of blocks) and different sparsity
 levels applied to the p x p precision matrix of the variables. Mirrors
-[NormalBlockVarCollectionSparsity], StARS included; the default penalty
+\link{NormalBlockVarCollectionSparsity}, StARS included; the default penalty
 grid is read off the covariance of the least-squares residuals.
 }
 \examples{
@@ -42,7 +42,7 @@ models$plot(c("BIC", "EBIC"))
 \if{html}{\out{<a id="method-NormalBlockMeanCollectionSparsity-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanCollectionSparsity-initialize}{}}}
 \subsection{\code{NormalBlockMeanCollectionSparsity$new()}}{
-  Create a new [`NormalBlockMeanCollectionSparsity`] object.
+  Create a new \code{\link{NormalBlockMeanCollectionSparsity}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanCollectionSparsity$new(
@@ -58,14 +58,14 @@ models$plot(c("BIC", "EBIC"))
     \describe{
       \item{\code{mydata}}{object of NormalBlockData class, with responses and design matrix}
       \item{\code{blocks}}{either a clustering matrix (known, fixed clustering) or a single integer (number of blocks to infer)}
-      \item{\code{zero_inflation}}{must be `FALSE`: the path penalizes a full Sigma,
+      \item{\code{zero_inflation}}{must be \code{FALSE}: the path penalizes a full Sigma,
 which zero-inflated mean-block models do not carry}
       \item{\code{control}}{structured list of parameters to handle sparsity control}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockMeanCollectionSparsity`] object
+    A new \code{\link{NormalBlockMeanCollectionSparsity}} object
   }
 }
 

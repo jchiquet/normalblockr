@@ -21,26 +21,26 @@ structures the latent covariance.
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
     \item{\code{B_original}}{regression coefficients (d x p), converted back to
-Y's original units (undoing `NormalBlockData(scale = TRUE)`'s
-column-wise rescaling, if any). Use `model_par$B` instead for the
+Y's original units (undoing \code{NormalBlockData(scale = TRUE)}'s
+column-wise rescaling, if any). Use \code{model_par$B} instead for the
 coefficients on the internal fitting scale.}
 
     \item{\code{fitted}}{Y values predicted by the model, in Y's original units:
-`X B`, plus the posterior mean of the latent block signals for (V)EM
+\verb{X B}, plus the posterior mean of the latent block signals for (V)EM
 fits, with the observed zeros of zero-inflated models set to 0}
 
     \item{\code{model_par}}{a list with the model parameters: B (d x p regression
 coefficients), B0 (zero-inflation coefficients, if any), dm1 (inverse
 noise variances of the variables) and Omega (q x q precision matrix of
 the latent block signals), on the scale of the fit. Use
-`$B_original`/`$dm1_original` for B and dm1 on Y's original scale.}
+\verb{$B_original}/\verb{$dm1_original} for B and dm1 on Y's original scale.}
 
     \item{\code{sparsity_weights}}{(weights associated to each pair of groups)}
 
     \item{\code{dm1_original}}{inverse residual variance per variable
 (1 / Var(Y_j)), converted back to Y's original units. Use
-`model_par$dm1` instead for the internal fitting scale. With
-`noise_covariance = "spherical"`, `model_par$dm1` is a single value
+\code{model_par$dm1} instead for the internal fitting scale. With
+\code{noise_covariance = "spherical"}, \code{model_par$dm1} is a single value
 repeated p times; once
 converted back per-variable, the p values returned here generally
 differ from one another whenever Y's columns were rescaled by
@@ -79,7 +79,7 @@ different factors.}
 \if{html}{\out{<a id="method-NormalBlockVarBase-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-initialize}{}}}
 \subsection{\code{NormalBlockVarBase$new()}}{
-  Create a new [`NormalBlockVarBase`] object.
+  Create a new \code{\link{NormalBlockVarBase}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarBase$new(
@@ -100,13 +100,13 @@ different factors.}
       \item{\code{control}}{structured list of more specific parameters, to generate with NB_control}
       \item{\code{zero_inflation}}{whether the concrete subclass models zero-inflation;
 set by the ZI subclasses themselves, not meant to be set by the end user.
-When `FALSE`, the (costly) zero-inflation probability fit (`kappa`/`B0`)
+When \code{FALSE}, the (costly) zero-inflation probability fit (\code{kappa}/\code{B0})
 is skipped entirely, since it would otherwise never be used downstream.}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockVarBase`] object
+    A new \code{\link{NormalBlockVarBase}} object
   }
 }
 
@@ -117,17 +117,17 @@ is skipped entirely, since it would otherwise never be used downstream.}
   Checks that the blocks gather positively co-varying
 variables, as the model requires (two variables of a block have a
 positive correlation). Compares, for each block, the empirical
-correlations of the residuals `Y - XB` with those implied by the model.
+correlations of the residuals \code{Y - XB} with those implied by the model.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarBase$within_block_correlations()}
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    a data frame with one row per block: `block`, `size`, the mean
-and minimum of the empirical within-block correlations (`mean_cor`,
-`min_cor`), the proportion of negative ones (`prop_negative`), and the
-mean correlation implied by the model (`model_cor`). `NA` for blocks
+    a data frame with one row per block: \code{block}, \code{size}, the mean
+and minimum of the empirical within-block correlations (\code{mean_cor},
+\code{min_cor}), the proportion of negative ones (\code{prop_negative}), and the
+mean correlation implied by the model (\code{model_cor}). \code{NA} for blocks
 with fewer than two variables.
   }
 }
@@ -136,7 +136,7 @@ with fewer than two variables.
 \if{html}{\out{<a id="method-NormalBlockVarBase-split"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-split}{}}}
 \subsection{\code{NormalBlockVarBase$split()}}{
-  Create a clone of the current [`NormalBlockVarBase`] object after splitting cluster `index`
+  Create a clone of the current \code{\link{NormalBlockVarBase}} object after splitting cluster \code{index}
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarBase$split(index, in_place = FALSE, rule = NULL)}
@@ -148,15 +148,15 @@ with fewer than two variables.
       \item{\code{index}}{index (integer) of the cluster to split}
       \item{\code{in_place}}{should the split applied to the object itself, or should a copy be sent?
 default FALSE (send a copy)}
-      \item{\code{rule}}{how the members of the cluster are divided: `"kmeans"`
-runs a 2-means on their columns of residuals `Y - XB`; `"noise"` cuts
-them at the median of their noise variance. Default `NULL`, i.e.
-`"kmeans"` for this family.}
+      \item{\code{rule}}{how the members of the cluster are divided: \code{"kmeans"}
+runs a 2-means on their columns of residuals \code{Y - XB}; \code{"noise"} cuts
+them at the median of their noise variance. Default \code{NULL}, i.e.
+\code{"kmeans"} for this family.}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockVarBase`] object
+    A new \code{\link{NormalBlockVarBase}} object
   }
 }
 
@@ -164,7 +164,7 @@ them at the median of their noise variance. Default `NULL`, i.e.
 \if{html}{\out{<a id="method-NormalBlockVarBase-merge"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarBase-merge}{}}}
 \subsection{\code{NormalBlockVarBase$merge()}}{
-  Create a clone of the current [`NormalBlockVarBase`] object after merging clusters `cl1` and `cl2`
+  Create a clone of the current \code{\link{NormalBlockVarBase}} object after merging clusters \code{cl1} and \code{cl2}
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarBase$merge(indices, in_place = FALSE)}
@@ -180,7 +180,7 @@ default FALSE (send a copy)}
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockVarBase`] object
+    A new \code{\link{NormalBlockVarBase}} object
   }
 }
 

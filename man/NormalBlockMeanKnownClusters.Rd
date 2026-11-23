@@ -45,7 +45,7 @@ model$plot()
 \if{html}{\out{<a id="method-NormalBlockMeanKnownClusters-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockMeanKnownClusters-initialize}{}}}
 \subsection{\code{NormalBlockMeanKnownClusters$new()}}{
-  Create a new [`NormalBlockMeanKnownClusters`] object.
+  Create a new \code{\link{NormalBlockMeanKnownClusters}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanKnownClusters$new(data, C, sparsity = 0, control = NB_control())}
@@ -62,7 +62,7 @@ model$plot()
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockMeanKnownClusters`] object
+    A new \code{\link{NormalBlockMeanKnownClusters}} object
   }
 }
 

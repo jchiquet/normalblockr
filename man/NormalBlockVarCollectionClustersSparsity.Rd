@@ -6,7 +6,7 @@
 \description{
 R6 class for a collection of normal-block models with different number of
 clusters (q) and different sparsity levels, i.e. one
-[NormalBlockVarCollectionSparsity] per q.
+\link{NormalBlockVarCollectionSparsity} per q.
 }
 \examples{
 ex <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)

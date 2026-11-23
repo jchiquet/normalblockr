@@ -4,9 +4,9 @@
 \alias{NormalBlockMeanCollectionClusters}
 \title{Collection of Normal-Block-Mean Models over a Range of Cluster Counts}
 \description{
-R6 class for a collection of mean-block models ([NormalBlockMeanBase])
+R6 class for a collection of mean-block models (\link{NormalBlockMeanBase})
 with different numbers of clusters (q). As for
-[NormalBlockVarCollectionClusters], the q-independent part of the initial
+\link{NormalBlockVarCollectionClusters}, the q-independent part of the initial
 clustering heuristic is computed once for the whole collection.
 }
 \examples{

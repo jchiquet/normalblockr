@@ -34,7 +34,7 @@ generate_normal_block_var_data(
 \item{u_v}{two-size vector of positive numbers v and u controlling the generation of the precision matrix Omega: v scales the off-diagonal elements of the precision matrix (magnitude of partial correlations), and u is a positive number added to the diagonal elements to ensure positive-definiteness. The default value is c(0.3, 0.1).}
 
 \item{SNR}{signal-to-noise ratio: the regression coefficients B are
-rescaled so that the variance of the entries of X B is `SNR` times the
+rescaled so that the variance of the entries of X B is \code{SNR} times the
 variance of the entries of the latent block covariance Sigma.}
 
 \item{alpha}{the q-size vector of group proportion. Default to rep(1/q, q)}
@@ -45,15 +45,19 @@ variance of the entries of the latent block covariance Sigma.}
 }
 \value{
 A named list with the following element
-- Y a matrix of responses
-- X a regressor/design matrix
-- a list of model parameters, encompassing
-   - B: matrix of regression coefficients
-   - C: matrix of group membership
-   - D: diagonal matrix of variance of the variables
-   - Omega: precision matrix of the groups
-   - Sigma: covariance matrix of the groups
-   - kappa: vector of ZI inflation probabilities (one per variable)
+\itemize{
+\item Y a matrix of responses
+\item X a regressor/design matrix
+\item a list of model parameters, encompassing
+\itemize{
+\item B: matrix of regression coefficients
+\item C: matrix of group membership
+\item D: diagonal matrix of variance of the variables
+\item Omega: precision matrix of the groups
+\item Sigma: covariance matrix of the groups
+\item kappa: vector of ZI inflation probabilities (one per variable)
+}
+}
 }
 \description{
 A function to draw data from the normal block model (see details). The function returns both the generated data and the corresponding model parameters, in a list.

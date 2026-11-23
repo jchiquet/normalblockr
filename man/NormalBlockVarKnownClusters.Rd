@@ -53,7 +53,7 @@ model$clustering
 \if{html}{\out{<a id="method-NormalBlockVarKnownClusters-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarKnownClusters-initialize}{}}}
 \subsection{\code{NormalBlockVarKnownClusters$new()}}{
-  Create a new [`NormalBlockVarKnownClusters`] object.
+  Create a new \code{\link{NormalBlockVarKnownClusters}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarKnownClusters$new(data, C, sparsity = 0, control = NB_control())}
@@ -70,7 +70,7 @@ model$clustering
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockVarKnownClusters`] object
+    A new \code{\link{NormalBlockVarKnownClusters}} object
   }
 }
 

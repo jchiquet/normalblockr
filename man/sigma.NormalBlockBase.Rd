@@ -15,7 +15,7 @@
 The covariance matrix, of size q x q or p x p depending on the model.
 }
 \description{
-Extract the covariance matrix `Omega^-1`. For the
+Extract the covariance matrix \code{Omega^-1}. For the
 variance-block models, the q x q covariance of the latent block signals,
 on the scale of the fit (it has no original-scale counterpart when the
 variables of a block were rescaled by different factors). For the

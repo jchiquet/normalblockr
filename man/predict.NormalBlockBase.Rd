@@ -18,9 +18,9 @@ A n*p prediction matrix for new observations
 }
 \description{
 Predicts the mean of the observations Y for new covariates X,
-on the original scale of Y: `B' X` for the variance-block models (the
-latent block signals, centered, average out; unlike [fitted()], which adds
-their posterior mean for the training observations), `C B' X` for the
+on the original scale of Y: \verb{B' X} for the variance-block models (the
+latent block signals, centered, average out; unlike \code{\link[=fitted]{fitted()}}, which adds
+their posterior mean for the training observations), \verb{C B' X} for the
 mean-block models. For zero-inflated models, the mean of the Gaussian
 component.
 }

@@ -19,7 +19,7 @@ model$clustering
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
-    \item{\code{model_par}}{the parameters of [NormalBlockVarBase] (B, B0, dm1, Omega), plus alpha (cluster proportions)}
+    \item{\code{model_par}}{the parameters of \link{NormalBlockVarBase} (B, B0, dm1, Omega), plus alpha (cluster proportions)}
 
     \item{\code{var_par}}{a list with the matrices of the variational parameters: M (means), S (variances), tau (posterior group probabilities)}
   }
@@ -56,7 +56,7 @@ model$clustering
 \if{html}{\out{<a id="method-NormalBlockVarUnknownClusters-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockVarUnknownClusters-initialize}{}}}
 \subsection{\code{NormalBlockVarUnknownClusters$new()}}{
-  Create a new [`NormalBlockVarUnknownClusters`] object.
+  Create a new \code{\link{NormalBlockVarUnknownClusters}} object.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockVarUnknownClusters$new(
@@ -78,7 +78,7 @@ model$clustering
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A new [`NormalBlockVarUnknownClusters`] object
+    A new \code{\link{NormalBlockVarUnknownClusters}} object
   }
 }
 

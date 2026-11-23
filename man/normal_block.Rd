@@ -14,26 +14,26 @@ normal_block(
 )
 }
 \arguments{
-\item{data}{a [NormalBlockData] object, holding the responses (Y, n x p)
+\item{data}{a \link{NormalBlockData} object, holding the responses (Y, n x p)
 and the covariates (X, n x d).}
 
 \item{blocks}{the clustering of the variables: a p x q indicator matrix
-for a known clustering (e.g. `model.matrix(~ 0 + factor(labels))`), a
+for a known clustering (e.g. \code{model.matrix(~ 0 + factor(labels))}), a
 single integer q for an unknown clustering into q clusters, or a vector of
 distinct integers for a collection over these values of q.}
 
-\item{sparsity}{the graphical-lasso penalty on Omega: `0` (the default)
-for none, a positive number for a single penalty, or `TRUE` for a
-collection along a path of penalties (see [NB_control()]).}
+\item{sparsity}{the graphical-lasso penalty on Omega: \code{0} (the default)
+for none, a positive number for a single penalty, or \code{TRUE} for a
+collection along a path of penalties (see \code{\link[=NB_control]{NB_control()}}).}
 
 \item{zero_inflation}{whether to model an excess of exact zeros in Y.}
 
-\item{control}{a list of settings, built with [NB_control()].}
+\item{control}{a list of settings, built with \code{\link[=NB_control]{NB_control()}}.}
 
-\item{model}{the model family: `"var"` (the default) clusters the
+\item{model}{the model family: \code{"var"} (the default) clusters the
 variables by how they covary, and infers a network between clusters (see
-[NormalBlockVarBase]); `"mean"` clusters them by how they respond to the
-covariates, `mu_i = C B' X_i` (see [NormalBlockMeanBase]). Every
+\link{NormalBlockVarBase}); \code{"mean"} clusters them by how they respond to the
+covariates, \verb{mu_i = C B' X_i} (see \link{NormalBlockMeanBase}). Every
 combination of the other arguments is available for both families, except
 a penalty together with zero-inflation for the mean-block family, whose
 zero-inflated models have a diagonal or spherical Sigma.}
@@ -44,9 +44,9 @@ reference index), or a collection of fitted models.
 }
 \description{
 Fits a Normal-Block model, or a collection of them, by (variational) EM.
-The arguments select the model: the family (`model`), whether the
-clustering is known (`blocks`), whether the network is penalized
-(`sparsity`) and whether Y is zero-inflated (`zero_inflation`).
+The arguments select the model: the family (\code{model}), whether the
+clustering is known (\code{blocks}), whether the network is penalized
+(\code{sparsity}) and whether Y is zero-inflated (\code{zero_inflation}).
 }
 \examples{
 ## Variance-block models over a range of q

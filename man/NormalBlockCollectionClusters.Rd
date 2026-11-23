@@ -4,10 +4,10 @@
 \alias{NormalBlockCollectionClusters}
 \title{Base Class for a Collection of Models over a Range of Cluster Counts}
 \description{
-Shared scaffolding for [NormalBlockVarCollectionClusters] and
-[NormalBlockMeanCollectionClusters]: the models of the collection, one per
+Shared scaffolding for \link{NormalBlockVarCollectionClusters} and
+\link{NormalBlockMeanCollectionClusters}: the models of the collection, one per
 q in increasing order, model lookup and selection, the criteria plot and
-the split/merge `refine()` search. Concrete subclasses only name the model
+the split/merge \code{refine()} search. Concrete subclasses only name the model
 family.
 }
 \examples{
@@ -25,7 +25,7 @@ family.
 
     \item{\code{deviance_violations}}{the values of q whose deviance is higher
 than at the previous q of the collection. The models being nested, each
-one signals a poor local optimum, which `refine()` can repair.}
+one signals a poor local optimum, which \code{refine()} can repair.}
   }
   \if{html}{\out{</div>}}
 }
@@ -83,7 +83,7 @@ one signals a poor local optimum, which `refine()` can repair.}
 \if{html}{\out{<a id="method-NormalBlockCollectionClusters-get_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-get_model}{}}}
 \subsection{\code{NormalBlockCollectionClusters$get_model()}}{
-  returns the unknown-clusters model corresponding to given q
+  The model of the collection with q clusters.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionClusters$get_model(q)}
@@ -92,12 +92,12 @@ one signals a poor local optimum, which `refine()` can repair.}
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{q}}{number of blocks asked by user}
+      \item{\code{q}}{a number of clusters among those of the collection (\verb{$q_list})}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    A unknown-clusters object with given value q
+    a fitted model, of the class of the collection's models
   }
 }
 
@@ -105,7 +105,7 @@ one signals a poor local optimum, which `refine()` can repair.}
 \if{html}{\out{<a id="method-NormalBlockCollectionClusters-get_best_model"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-get_best_model}{}}}
 \subsection{\code{NormalBlockCollectionClusters$get_best_model()}}{
-  Extract best model in the collection
+  The best model of the collection for a criterion.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionClusters$get_best_model(
@@ -116,13 +116,13 @@ one signals a poor local optimum, which `refine()` can repair.}
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{crit}}{a character for the criterion used to performed the selection.
-Either "ICL" or "BIC". "ICL" is the default criterion}
+      \item{\code{crit}}{the criterion minimized: "ICL" (the default), "BIC",
+"EBIC", or "deviance" (which always selects the largest q)}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    a [`unknown-clusters`] object
+    a copy of the selected fitted model
   }
 }
 
@@ -130,7 +130,9 @@ Either "ICL" or "BIC". "ICL" is the default criterion}
 \if{html}{\out{<a id="method-NormalBlockCollectionClusters-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-plot}{}}}
 \subsection{\code{NormalBlockCollectionClusters$plot()}}{
-  Display various outputs (goodness-of-fit criteria, robustness, diagnostic) associated with a collection of network fits (a [`Networkfamily`])
+  Plot the criteria of the models of the collection
+against q, with a dashed line at the q selected by each criterion (see
+also \code{\link[=plot.NormalBlockCollection]{plot.NormalBlockCollection()}}).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionClusters$plot(
@@ -141,12 +143,13 @@ Either "ICL" or "BIC". "ICL" is the default criterion}
   \subsection{Arguments}{
     \if{html}{\out{<div class="arguments">}}
     \describe{
-      \item{\code{criteria}}{vector of characters. The criteria to plot in `c("deviance", "BIC", "ICL")`. Defaults to all of them.}
+      \item{\code{criteria}}{the criteria to plot, among \code{"deviance"}, \code{"ICL"},
+\code{"BIC"} and \code{"EBIC"}; all of them by default.}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    a [`ggplot2::ggplot`] graph
+    a \code{\link[ggplot2:ggplot]{ggplot2::ggplot}} graph
   }
 }
 
@@ -155,8 +158,8 @@ Either "ICL" or "BIC". "ICL" is the default criterion}
 \if{latex}{\out{\hypertarget{method-NormalBlockCollectionClusters-optimize}{}}}
 \subsection{\code{NormalBlockCollectionClusters$optimize()}}{
   optimizes every model in the collection, then -- if
-`control$refine` is `TRUE` (see [NB_control()], the default) --
-calls [refine()] automatically, reporting in one line how many models
+\code{control$refine} is \code{TRUE} (see \code{\link[=NB_control]{NB_control()}}, the default) --
+calls \verb{$refine()} automatically, reporting in one line how many models
 it improved.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
@@ -180,13 +183,13 @@ it improved.
 \subsection{\code{NormalBlockCollectionClusters$refine()}}{
   Tries to improve every model in the collection with a
 short split-and-reoptimize trial seeded from its smaller-q neighbor
-(`"split"`), a short merge-and-reoptimize trial seeded from its
-larger-q neighbor (`"merge"`), or both (the default); a candidate
+(\code{"split"}), a short merge-and-reoptimize trial seeded from its
+larger-q neighbor (\code{"merge"}), or both (the default); a candidate
 replaces the original only if it strictly lowers the deviance, so this
 can only improve (or leave unchanged) each model it touches. Only
-contiguous q pairs (`q` and `q -/+ 1`, both present in the collection)
+contiguous q pairs (\code{q} and \verb{q -/+ 1}, both present in the collection)
 are refined. Run by default after fitting a collection, see
-[NB_control()]'s `refine` for the rationale.
+\code{\link[=NB_control]{NB_control()}}'s \code{refine} for the rationale.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionClusters$refine(
@@ -202,28 +205,28 @@ are refined. Run by default after fitting a collection, see
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{trial_niter}}{number of EM iterations used for the cheap trial
-candidates (passed to `candidates_split()`/`candidates_merge()`)
+candidates (passed to \code{candidates_split()}/\code{candidates_merge()})
 before fully re-optimizing only the best one.}
-      \item{\code{max_candidates}}{passed to `candidates_merge()` (ignored for
-`"split"`, which is never combinatorial in q) -- see its
+      \item{\code{max_candidates}}{passed to \code{candidates_merge()} (ignored for
+\code{"split"}, which is never combinatorial in q) -- see its
 documentation.}
       \item{\code{directions}}{which neighbor(s) to seed refinement candidates
-from: `"split"` (smaller-q neighbor), `"merge"` (larger-q neighbor),
+from: \code{"split"} (smaller-q neighbor), \code{"merge"} (larger-q neighbor),
 or both (the default).}
       \item{\code{verbose}}{whether to print, for each q attempted, whether the
 candidate from that neighbor improved on it. Defaults to
-`control$verbose` (the value set at construction, see
-[NB_control()]).}
+\code{control$verbose} (the value set at construction, see
+\code{\link[=NB_control]{NB_control()}}).}
       \item{\code{split_rule}}{how a cluster is split to seed the q + 1 model, see
-the `rule` argument of the models' `split()`: `"kmeans"`, `"noise"`,
-or `NULL` (default) for the family's own default (`"kmeans"` for the
-variance-block family, `"noise"` for the mean-block one).}
+the \code{rule} argument of the models' \code{split()}: \code{"kmeans"}, \code{"noise"},
+or \code{NULL} (default) for the family's own default (\code{"kmeans"} for the
+variance-block family, \code{"noise"} for the mean-block one).}
     }
     \if{html}{\out{</div>}}
   }
   \subsection{Returns}{
-    invisibly returns `self`; improved models replace the
-originals in `$models` in place.
+    invisibly returns \code{self}; improved models replace the
+originals in \verb{$models} in place.
   }
 }
 
@@ -233,7 +236,7 @@ originals in `$models` in place.
 \subsection{\code{NormalBlockCollectionClusters$print()}}{
   User-friendly print method: as for any collection, plus a
 warning line when the deviance increases with q somewhere (see
-`deviance_violations`).
+\code{deviance_violations}).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockCollectionClusters$print()}

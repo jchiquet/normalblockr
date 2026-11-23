@@ -7,15 +7,15 @@
 \method{print}{summary.NormalBlockBase}(x, ...)
 }
 \arguments{
-\item{x}{An object of class `summary.NormalBlockBase`.}
+\item{x}{An object of class \code{summary.NormalBlockBase}.}
 
 \item{...}{not used, only here for S3 compatibility}
 }
 \value{
-Invisibly returns `x`.
+Invisibly returns \code{x}.
 }
 \description{
-Print method for objects returned by [summary.NormalBlockBase()].
+Print method for objects returned by \code{\link[=summary.NormalBlockBase]{summary.NormalBlockBase()}}.
 }
 \examples{
 ex_data <- generate_normal_block_var_data(n = 50, p = 20, d = 1, q = 3)
