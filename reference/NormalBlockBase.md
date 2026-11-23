@@ -1,7 +1,10 @@
 # Root Base Class for Normal-Block Models
 
-R6 abstract class shared by the variance-block (\[NormalBlockVarBase\])
-and mean-block (\[NormalBlockMeanBase\]) model families.
+R6 abstract class shared by the variance-block
+([NormalBlockVarBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.md))
+and mean-block
+([NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md))
+model families.
 
 ## Public fields
 
@@ -59,47 +62,47 @@ and mean-block (\[NormalBlockMeanBase\]) model families.
 - `entropy`:
 
   entropy of the (variational) posterior distribution of the clustering,
-  \`-sum(tau \* log(tau))\`: 0 when the clustering is known. Only the
+  `-sum(tau * log(tau))`: 0 when the clustering is known. Only the
   discrete partition is completed, as in the ICL of Biernacki, Celeux
   and Govaert (2000); the latent vectors W of the variance-block family
   are integrated out, not completed.
 
 - `penalty_terms`:
 
-  data frame with one row per group of parameters: its name (\`group\`),
-  its number of free parameters (\`nu\`) and the number of independent
-  observations informing it (\`N\`), so that the group costs \`nu \*
-  log(N)\` in the BIC. As in the ICL of Daudin, Picard and Robin (2008)
-  for SBMs and Keribin et al. (2015) for latent block models, the
-  cluster proportions are charged \`log(p)\` (the variables are the
-  units being clustered), parameters shared by every cell of a block
-  \`log(n \* p)\`, and the remaining ones \`log(n)\`.
+  data frame with one row per group of parameters: its name (`group`),
+  its number of free parameters (`nu`) and the number of independent
+  observations informing it (`N`), so that the group costs `nu * log(N)`
+  in the BIC. As in the ICL of Daudin, Picard and Robin (2008) for SBMs
+  and Keribin et al. (2015) for latent block models, the cluster
+  proportions are charged `log(p)` (the variables are the units being
+  clustered), parameters shared by every cell of a block `log(n * p)`,
+  and the remaining ones `log(n)`.
 
 - `nb_param`:
 
-  number of free parameters in the model, \`sum(penalty_terms\$nu)\`
+  number of free parameters in the model, `sum(penalty_terms$nu)`
 
 - `penalty`:
 
-  BIC penalty, \`sum(nu \* log(N))\` over \`penalty_terms\`
+  BIC penalty, `sum(nu * log(N))` over `penalty_terms`
 
 - `BIC`:
 
-  Bayesian information criterion, \`deviance + penalty\` (lower is
+  Bayesian information criterion, `deviance + penalty` (lower is
   better); built on the ELBO when the clustering is unknown and the
   likelihood is not available in closed form.
 
 - `ICL`:
 
-  integrated completed likelihood criterion, \`BIC + 2 \* entropy\`
-  (lower is better); equal to the BIC when the clustering is known.
+  integrated completed likelihood criterion, `BIC + 2 * entropy` (lower
+  is better); equal to the BIC when the clustering is known.
 
 - `EBIC`:
 
-  extended BIC of Foygel and Drton (2010) with gamma = 1/2, \`BIC + 2 \*
-  n_edges \* log(dim)\`, where \`dim\` is the dimension of the network:
-  q for the variance-block family (network between clusters), p for the
-  mean-block family (network between variables).
+  extended BIC of Foygel and Drton (2010) with gamma = 1/2,
+  `BIC + 2 * n_edges * log(dim)`, where `dim` is the dimension of the
+  network: q for the variance-block family (network between clusters), p
+  for the mean-block family (network between variables).
 
 - `criteria`:
 
@@ -169,7 +172,7 @@ and mean-block (\[NormalBlockMeanBase\]) model families.
 
 ### `NormalBlockBase$new()`
 
-Create a new \[\`NormalBlockBase\`\] object.
+Create a new `NormalBlockBase` object.
 
 #### Usage
 
@@ -198,21 +201,20 @@ Create a new \[\`NormalBlockBase\`\] object.
 
   whether the concrete subclass models zero-inflation; set by the ZI
   subclasses themselves, not meant to be set by the end user. When
-  \`FALSE\`, the (costly) zero-inflation probability fit
-  (\`kappa\`/\`B0\`) is skipped entirely, since it would otherwise never
-  be used downstream.
+  `FALSE`, the (costly) zero-inflation probability fit (`kappa`/`B0`) is
+  skipped entirely, since it would otherwise never be used downstream.
 
 #### Returns
 
-A new \[\`NormalBlockBase\`\] object
+A new `NormalBlockBase` object
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockBase$update()`
 
-Update a \[\`NormalBlockBase\`\] object
-
-All possible parameters of the child classes
+Update the parameters of a model in place. Each argument applies to the
+families or variants named in parentheses; `NA` (the default) leaves the
+parameter unchanged.
 
 #### Usage
 
@@ -235,41 +237,41 @@ All possible parameters of the child classes
 
 - `B`:
 
-  regression matrix \[all\]
+  regression coefficients (all models)
 
 - `dm1`:
 
-  diagonal vector of inverse variance matrix (variables level) \[NBVar\]
+  inverse noise variances of the variables (variance-block)
 
 - `C`:
 
-  the matrix of groups memberships (posterior probabilities) \[all\]
+  cluster memberships: indicators, or posterior probabilities (all
+  models)
 
 - `Omega`:
 
-  inverse variance matrix (cluster-level for Normal Block models,
-  variable-level for Normal Mean Block models) \[all\]
+  precision matrix: between clusters (variance-block) or between
+  variables (mean-block)
 
 - `gamma`:
 
-  variance of posterior distribution of W \[NBVar - known\]
+  posterior variance of W (variance-block, known clusters)
 
 - `mu`:
 
-  mean for posterior distribution of W \[NBVar - known\]
+  posterior mean of W (variance-block, known clusters)
 
 - `alpha`:
 
-  vector of groups probabilities \[NBVar\]
+  cluster proportions (unknown clusters)
 
 - `M`:
 
-  variational mean for posterior distribution of W \[NBVar - unknown\]
+  variational means of W (variance-block, unknown clusters)
 
 - `S`:
 
-  variational diagonal of variances for posterior distribution of W
-  \[NBVar - unknown\]
+  variational variances of W (variance-block, unknown clusters)
 
 - `ll_list`:
 
@@ -277,10 +279,10 @@ All possible parameters of the child classes
 
 - `warm_started`:
 
-  whether \`optim_initialize()\` should treat the model as already
+  whether `optim_initialize()` should treat the model as already
   initialized (reuse B/Omega/dm1/C/alpha/M/S as they stand) rather than
   recomputing a fresh heuristic initialization. Set by
-  \[warm_start_from()\] and by \[split()\]/\[merge()\].
+  `$warm_start_from()` and by `$split()`/`$merge()`.
 
 - `clustering_init`:
 
@@ -311,11 +313,12 @@ calls optimization (EM or heuristic) and updates relevant fields
 
 - `warn`:
 
-  whether to warn when the (V)EM stops at the \`niter\` cap without
-  reaching \`threshold\` (see \`private\$warn_if_not_converged()\`). Set
-  to \`FALSE\` for deliberately-truncated trial fits (cheap candidate
-  scoring in \`candidates_split()\`/\`candidates_merge()\`, the
-  sparsity-path warm-start probe in \[NormalBlockCollectionSparsity\])
+  whether to warn when the (V)EM stops at the `niter` cap without
+  reaching `threshold` (see `private$warn_if_not_converged()`). Set to
+  `FALSE` for deliberately-truncated trial fits (cheap candidate scoring
+  in `candidates_split()`/`candidates_merge()`, the sparsity-path
+  warm-start probe in
+  [NormalBlockCollectionSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollectionSparsity.md))
   where stopping at the cap is expected and not a sign of trouble.
 
 #### Returns
@@ -327,12 +330,13 @@ optimizes the model and updates its parameters
 ### `NormalBlockBase$best_of_inits()`
 
 Try several clustering-initialization heuristics and keep the best-ELBO
-converged fit (see \[NB_control()\]'s \`clustering_init\` for the
-heuristics and the rationale behind the default). Every candidate is
-first screened with a short \`trial_niter\` run (same idea as
-\`candidates_split()\`/\`candidates_merge()\`), and only the
-\`max_training\` best-screened ones are fully retrained with
-\`control\`.
+converged fit (see
+[`NB_control()`](https://jchiquet.github.io/normalblockr/reference/NB_control.md)'s
+`clustering_init` for the heuristics and the rationale behind the
+default). Every candidate is first screened with a short `trial_niter`
+run (same idea as `candidates_split()`/`candidates_merge()`), and only
+the `max_training` best-screened ones are fully retrained with
+`control`.
 
 #### Usage
 
@@ -348,27 +352,28 @@ first screened with a short \`trial_niter\` run (same idea as
 - `inits`:
 
   vector of clustering-heuristic names to try; defaults to the model
-  family's own preferred order (\`private\$default_inits\`)
+  family's own preferred order (`private$default_inits`)
 
 - `trial_niter`:
 
   number of (V)EM iterations used to cheaply screen every candidate in
-  \`inits\` before fully retraining the best few
+  `inits` before fully retraining the best few
 
 - `max_training`:
 
-  how many of the screened candidates (best \`loglik\` after
-  \`trial_niter\` iterations) get fully retrained with \`control\`
+  how many of the screened candidates (best `loglik` after `trial_niter`
+  iterations) get fully retrained with `control`
 
 - `control`:
 
-  \`optimize()\` control list (\`niter\`/\`threshold\`) used for the
-  final full retraining of the \`max_training\` best candidates
+  [`optimize()`](https://rdrr.io/r/stats/optimize.html) control list
+  (`niter`/`threshold`) used for the final full retraining of the
+  `max_training` best candidates
 
 #### Returns
 
 a new, already-optimized model. Does not mutate the current object;
-reassign the result (\`model \<- model\$best_of_inits()\`).
+reassign the result (`model <- model$best_of_inits()`).
 
 ------------------------------------------------------------------------
 
@@ -391,7 +396,7 @@ one's solution.
 
 #### Returns
 
-Update the current object in place with \`other\`'s parameters
+Update the current object in place with `other`'s parameters
 
 ------------------------------------------------------------------------
 
@@ -413,8 +418,8 @@ of the current model
 
 - `split_rule`:
 
-  passed to \`split()\` as its \`rule\`: \`"kmeans"\`, \`"noise"\`, or
-  \`NULL\` for the family's default
+  passed to [`split()`](https://rdrr.io/r/base/split.html) as its
+  `rule`: `"kmeans"`, `"noise"`, or `NULL` for the family's default
 
 ------------------------------------------------------------------------
 
@@ -431,23 +436,23 @@ the current model
 
 - `max_candidates`:
 
-  merge candidates are, unlike split's, quadratic in q (\`choose(q,
-  q-2)\` pairs): beyond \`max_candidates\` pairs, only the most
-  promising ones are actually built and trial-optimized, ranked by the
-  family's own \`private\$merge_score()\`. Set to \`Inf\` to always try
-  every pair.
+  merge candidates are, unlike split's, quadratic in q (`choose(q, q-2)`
+  pairs): beyond `max_candidates` pairs, only the most promising ones
+  are actually built and trial-optimized, ranked by the family's own
+  `private$merge_score()`. Set to `Inf` to always try every pair.
 
 - `trial_niter`:
 
-  see \[candidates_split()\]
+  see `$candidates_split()`
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockBase$heldout_loglik()`
 
 Log-likelihood of new observations at the fitted parameters and, for an
-unknown clustering, at the MAP partition (see \[normal_block_cv()\]). It
-is exact, computed for variance-block models with q x q matrices only
+unknown clustering, at the MAP partition (see
+[`normal_block_cv()`](https://jchiquet.github.io/normalblockr/reference/normal_block_cv.md)).
+It is exact, computed for variance-block models with q x q matrices only
 (Woodbury identity), and given on Y's original scale.
 
 #### Usage
@@ -458,8 +463,10 @@ is exact, computed for variance-block models with q x q matrices only
 
 - `newdata`:
 
-  a \[NormalBlockData\] object with the same variables and covariates
-  (and zero-inflation covariates) as the training data.
+  a
+  [NormalBlockData](https://jchiquet.github.io/normalblockr/reference/NormalBlockData.md)
+  object with the same variables and covariates (and zero-inflation
+  covariates) as the training data.
 
 - `per_observation`:
 
@@ -467,15 +474,16 @@ is exact, computed for variance-block models with q x q matrices only
 
 #### Returns
 
-the held-out log-likelihood, or a vector of \`newdata\$n\` values
+the held-out log-likelihood, or a vector of `newdata$n` values
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockBase$predict()`
 
 Predicts the mean of Y for new covariates X, in Y's original units. For
-the variance-block family, \`X B\`: the latent block signals average
-out, so that on the training X it differs from \`\$fitted\`, which adds
+the variance-block family, `X B`: the latent block signals average out,
+so that on the training X it differs from
+[`fitted()`](https://rdrr.io/r/stats/fitted.values.html), which adds
 their posterior mean. The mean-block family overrides it.
 
 #### Usage
@@ -497,8 +505,8 @@ A n\*p prediction matrix for new observations
 ### `NormalBlockBase$latent_network()`
 
 Extract the network encoded by Omega, as a matrix rather than a plot
-(see \`\$plot_network()\`): between clusters for the variance-block
-family, between variables for the mean-block family.
+(see `$plot_network()`): between clusters for the variance-block family,
+between variables for the mean-block family.
 
 #### Usage
 
@@ -522,7 +530,8 @@ with named rows and columns
 ### `NormalBlockBase$plot_loglik()`
 
 plots the evolution of the objective (log-likelihood or ELBO) across the
-(V)EM iterations of the last call to \`optimize()\`.
+(V)EM iterations of the last call to
+[`optimize()`](https://rdrr.io/r/stats/optimize.html).
 
 #### Usage
 
@@ -533,19 +542,21 @@ plots the evolution of the objective (log-likelihood or ELBO) across the
 - `show_increment`:
 
   whether to add a second panel with the (log10) absolute increment
-  between iterations and the convergence \`threshold\` (distinguishes
-  true convergence from a flat-looking objective trace).
+  between iterations and the convergence `threshold` (distinguishes true
+  convergence from a flat-looking objective trace).
 
 #### Returns
 
-a \[\`ggplot2::ggplot\`\] graph
+a
+[`ggplot2::ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)
+graph
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockBase$plot_network()`
 
-Plot the network encoded by Omega (see \`\$latent_network()\` to extract
-it as a matrix).
+Plot the network encoded by Omega (see `$latent_network()` to extract it
+as a matrix).
 
 #### Usage
 
@@ -568,24 +579,24 @@ it as a matrix).
 
 - `output`:
 
-  Output type. Either \`igraph\` (for the network) or \`corrplot\` (for
-  the adjacency matrix)
+  Output type. Either `igraph` (for the network) or `corrplot` (for the
+  adjacency matrix)
 
 - `edge.color`:
 
   Length 2 color vector. Color for positive/negative edges. Default is
-  \`c("#F8766D", "#00BFC4")\`. Only relevant for igraph output.
+  `c("#F8766D", "#00BFC4")`. Only relevant for igraph output.
 
 - `remove.isolated`:
 
-  if \`TRUE\`, isolated node are remove before plotting. Only relevant
-  for igraph output.
+  if `TRUE`, isolated node are remove before plotting. Only relevant for
+  igraph output.
 
 - `node.labels`:
 
   vector of character. The labels of the nodes. By default, the cluster
   names (variance-block) or the variable names (mean-block), as in
-  \`\$latent_network()\`.
+  `$latent_network()`.
 
 - `layout`:
 
@@ -596,14 +607,14 @@ it as a matrix).
 - `plot`:
 
   logical. Should the final network be displayed or only sent back to
-  the user. Default is \`TRUE\`.
+  the user. Default is `TRUE`.
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockBase$plot()`
 
 plots the evolution of the objective during model optimization (see
-\`plot_loglik()\`)
+`plot_loglik()`)
 
 #### Usage
 

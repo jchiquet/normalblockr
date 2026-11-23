@@ -24,49 +24,48 @@ A list with 3 elements:
 - covariates:
 
   a data frame with one row per sample, in the same order as the rows of
-  \`expr\`: \`sampleId\` (matches \`rownames(expr)\`) and 11 clinical
-  variables, factors unless noted otherwise – \`CN_CLUSTER\`
-  (copy-number cluster, 5 levels), \`CONVERTED_STAGE\` (tumor stage),
-  \`ER_STATUS\` (estrogen receptor status), \`FRACTION_GENOME_ALTERED\`
-  (numeric, in \\0, 1\\), \`HER2_STATUS\`, \`METASTASIS_CODED\`,
-  \`METHYLATION_CLUSTER\` (5 levels), \`MUTATION_COUNT\` (numeric),
-  \`PAM50_SUBTYPE\` (5 levels: Basal-like, HER2-enriched, Luminal A,
-  Luminal B, Normal-like), \`RPPA_CLUSTER\` (7 levels) and \`AGE\`
-  (numeric, in years). A few of these have missing values for a handful
-  of samples (\`FRACTION_GENOME_ALTERED\`, \`HER2_STATUS\`,
-  \`METASTASIS_CODED\`).
+  `expr`: `sampleId` (matches `rownames(expr)`) and 11 clinical
+  variables, factors unless noted otherwise – `CN_CLUSTER` (copy-number
+  cluster, 5 levels), `CONVERTED_STAGE` (tumor stage), `ER_STATUS`
+  (estrogen receptor status), `FRACTION_GENOME_ALTERED` (numeric, in
+  \[0, 1\]), `HER2_STATUS`, `METASTASIS_CODED`, `METHYLATION_CLUSTER` (5
+  levels), `MUTATION_COUNT` (numeric), `PAM50_SUBTYPE` (5 levels:
+  Basal-like, HER2-enriched, Luminal A, Luminal B, Normal-like),
+  `RPPA_CLUSTER` (7 levels) and `AGE` (numeric, in years). A few of
+  these have missing values for a handful of samples
+  (`FRACTION_GENOME_ALTERED`, `HER2_STATUS`, `METASTASIS_CODED`).
 
 - gene_annotation:
 
   a data frame with one row per protein, in the same order as the
-  columns of \`expr\`: \`protein\` (matches \`colnames(expr)\`),
-  \`entrezGeneId\`, \`hugoGeneSymbol\`, \`type\` (\`"protein-coding"\`
-  or \`"phosphoprotein"\`) and \`go_bp_term\` (a Gene Ontology
-  Biological Process classification, one term per protein, or
-  \`"unknown"\` if none could be found – see Details).
+  columns of `expr`: `protein` (matches `colnames(expr)`),
+  `entrezGeneId`, `hugoGeneSymbol`, `type` (`"protein-coding"` or
+  `"phosphoprotein"`) and `go_bp_term` (a Gene Ontology Biological
+  Process classification, one term per protein, or `"unknown"` if none
+  could be found – see Details).
 
 ## Source
 
 TCGA breast cancer cohort (Cancer Genome Atlas Network, 2012,
 [doi:10.1038/nature11412](https://doi.org/10.1038/nature11412) ),
-downloaded via cBioPortal (\`brca_tcga_pub\` study,
-<https://www.cbioportal.org>). \`go_bp_term\` (see Details) was added
-afterwards from \`org.Hs.eg.db\`.
+downloaded via cBioPortal (`brca_tcga_pub` study,
+<https://www.cbioportal.org>). `go_bp_term` (see Details) was added
+afterwards from `org.Hs.eg.db`.
 
 ## Details
 
-\`go_bp_term\` is derived from \`org.Hs.eg.db\`, queried by
-\`entrezGeneId\` for \`"protein-coding"\` rows. Phospho-site antibodies
-(\`type == "phosphoprotein"\`, e.g. \`"EGFR_PY1068"\`) carry a
-placeholder, negative \`entrezGeneId\` (there is no separate gene for a
-specific phosphorylation site, only the underlying gene) and are instead
-queried by gene symbol (the part of \`protein\` before the first
-\`"\_"\`). Each protein typically has dozens of GO Biological Process
-terms; \`go_bp_term\` keeps, for each protein, the one term shared by
-the most \*other\* proteins in this dataset – giving a handful of
-non-trivial groups rather than one near-singleton group per protein,
-more useful for comparing against an inferred clustering. See
-\`data-raw/brca_rppa_go_annotation.R\` for the full extraction code.
+`go_bp_term` is derived from `org.Hs.eg.db`, queried by `entrezGeneId`
+for `"protein-coding"` rows. Phospho-site antibodies
+(`type == "phosphoprotein"`, e.g. `"EGFR_PY1068"`) carry a placeholder,
+negative `entrezGeneId` (there is no separate gene for a specific
+phosphorylation site, only the underlying gene) and are instead queried
+by gene symbol (the part of `protein` before the first `"_"`). Each
+protein typically has dozens of GO Biological Process terms;
+`go_bp_term` keeps, for each protein, the one term shared by the most
+*other* proteins in this dataset – giving a handful of non-trivial
+groups rather than one near-singleton group per protein, more useful for
+comparing against an inferred clustering. See
+`data-raw/brca_rppa_go_annotation.R` for the full extraction code.
 
 ## Examples
 

@@ -197,7 +197,7 @@ out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE,
 
 ``` r
 
-out$plot(criteria = c("BIC", "EBIC", "deviance"))
+plot(out, criteria = c("BIC", "EBIC", "deviance"))
 ```
 
 ![](zero-inflated-normal-block_files/figure-html/plot-zi-1.png)
@@ -231,7 +231,7 @@ out$refine()
 #>   refine: q = 4 -- deviance 27034 -> 27034 (improved via merge )
 #>   refine: q = 3 -- deviance 27194.75 -> 27096.46 (improved via merge )
 #>   refine: q = 2 -- deviance 27370.52 -> 27261.14 (improved via merge )
-out$plot(criteria = c("BIC", "EBIC", "deviance"))
+plot(out, criteria = c("BIC", "EBIC", "deviance"))
 ```
 
 ![](zero-inflated-normal-block_files/figure-html/refine-zi-1.png)
@@ -320,7 +320,7 @@ $`\ell_1`$ penalties on the network:
 C_selected <- model.matrix(~ 0 + factor(myModel$clustering))
 out_sp <- normal_block(data, blocks = C_selected, sparsity = TRUE, zero_inflation = TRUE,
                        control = NB_control(verbose = FALSE))
-out_sp$plot(c("BIC", "EBIC", "deviance"))
+plot(out_sp, criteria = c("BIC", "EBIC", "deviance"))
 ```
 
 ![](zero-inflated-normal-block_files/figure-html/sparsify-zi-1.png)

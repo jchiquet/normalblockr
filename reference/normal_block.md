@@ -1,9 +1,9 @@
 # Fit Normal-Block Models
 
 Fits a Normal-Block model, or a collection of them, by (variational) EM.
-The arguments select the model: the family (\`model\`), whether the
-clustering is known (\`blocks\`), whether the network is penalized
-(\`sparsity\`) and whether Y is zero-inflated (\`zero_inflation\`).
+The arguments select the model: the family (`model`), whether the
+clustering is known (`blocks`), whether the network is penalized
+(`sparsity`) and whether Y is zero-inflated (`zero_inflation`).
 
 ## Usage
 
@@ -22,21 +22,24 @@ normal_block(
 
 - data:
 
-  a \[NormalBlockData\] object, holding the responses (Y, n x p) and the
-  covariates (X, n x d).
+  a
+  [NormalBlockData](https://jchiquet.github.io/normalblockr/reference/NormalBlockData.md)
+  object, holding the responses (Y, n x p) and the covariates (X, n x
+  d).
 
 - blocks:
 
   the clustering of the variables: a p x q indicator matrix for a known
-  clustering (e.g. \`model.matrix(~ 0 + factor(labels))\`), a single
+  clustering (e.g. `model.matrix(~ 0 + factor(labels))`), a single
   integer q for an unknown clustering into q clusters, or a vector of
   distinct integers for a collection over these values of q.
 
 - sparsity:
 
-  the graphical-lasso penalty on Omega: \`0\` (the default) for none, a
-  positive number for a single penalty, or \`TRUE\` for a collection
-  along a path of penalties (see \[NB_control()\]).
+  the graphical-lasso penalty on Omega: `0` (the default) for none, a
+  positive number for a single penalty, or `TRUE` for a collection along
+  a path of penalties (see
+  [`NB_control()`](https://jchiquet.github.io/normalblockr/reference/NB_control.md)).
 
 - zero_inflation:
 
@@ -44,14 +47,17 @@ normal_block(
 
 - control:
 
-  a list of settings, built with \[NB_control()\].
+  a list of settings, built with
+  [`NB_control()`](https://jchiquet.github.io/normalblockr/reference/NB_control.md).
 
 - model:
 
-  the model family: \`"var"\` (the default) clusters the variables by
-  how they covary, and infers a network between clusters (see
-  \[NormalBlockVarBase\]); \`"mean"\` clusters them by how they respond
-  to the covariates, \`mu_i = C B' X_i\` (see \[NormalBlockMeanBase\]).
+  the model family: `"var"` (the default) clusters the variables by how
+  they covary, and infers a network between clusters (see
+  [NormalBlockVarBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.md));
+  `"mean"` clusters them by how they respond to the covariates,
+  `mu_i = C B' X_i` (see
+  [NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md)).
   Every combination of the other arguments is available for both
   families, except a penalty together with zero-inflation for the
   mean-block family, whose zero-inflated models have a diagonal or
@@ -73,7 +79,7 @@ my_normal_block <- normal_block(data, blocks = 1:5)
 #>   refine(): improved 1 of 5 models
 #> 
 #> DONE
-my_normal_block$plot(c("deviance", "BIC", "ICL"))
+plot(my_normal_block)
 
 best <- my_normal_block$get_best_model("ICL")
 plot(ex_data$Y, fitted(best)); abline(0, 1)

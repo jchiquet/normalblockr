@@ -14,7 +14,7 @@ print(x, ...)
 
 - x:
 
-  an object of class \`normal_block_sequential\`
+  an object of class `normal_block_sequential`
 
 - ...:
 
@@ -22,7 +22,7 @@ print(x, ...)
 
 ## Value
 
-Invisibly returns \`x\`.
+Invisibly returns `x`.
 
 ## Examples
 
@@ -37,7 +37,7 @@ print(fit)
 #>                         unknown clusters
 #>   variance-block stage: 2 clusters -- diagonal normal-block-var model with 2
 #>                         unknown clusters
-#>   ARI between the two partitions: -0.015 
+#>   ARI between the two partitions: -0.024 
 #>   (near 0 means the two structures are unrelated, as is usual)
 #> ===========================================================================
 #> * Useful fields

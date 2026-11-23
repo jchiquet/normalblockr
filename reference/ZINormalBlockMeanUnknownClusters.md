@@ -2,8 +2,9 @@
 
 R6 class for a zero-inflated Normal-Block-Mean model with a fixed number
 of clusters (but unknown clustering), inferred by variational EM. Sigma
-is diagonal or spherical here. See \[NormalBlockMeanBase\] for why a
-full one is out of reach under a mask.
+is diagonal or spherical here. See
+[NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md)
+for why a full one is out of reach under a mask.
 
 ## Super classes
 
@@ -21,9 +22,10 @@ full one is out of reach under a mask.
 
 - `model_par`:
 
-  the parameters of \[NormalBlockMeanBase\] (B, Omega), plus B0
-  (zero-inflation coefficients), kappa (zero-inflation probabilities)
-  and alpha (cluster proportions)
+  the parameters of
+  [NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md)
+  (B, Omega), plus B0 (zero-inflation coefficients), kappa
+  (zero-inflation probabilities) and alpha (cluster proportions)
 
 ## Methods
 
@@ -55,7 +57,7 @@ Inherited methods
 
 ### `ZINormalBlockMeanUnknownClusters$new()`
 
-Create a new \[\`ZINormalBlockMeanUnknownClusters\`\] object.
+Create a new `ZINormalBlockMeanUnknownClusters` object.
 
 #### Usage
 
@@ -87,7 +89,7 @@ Create a new \[\`ZINormalBlockMeanUnknownClusters\`\] object.
 
 #### Returns
 
-A new \[\`ZINormalBlockMeanUnknownClusters\`\] object
+A new `ZINormalBlockMeanUnknownClusters` object
 
 ------------------------------------------------------------------------
 

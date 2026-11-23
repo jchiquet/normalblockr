@@ -182,7 +182,7 @@ NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30, control = NB_contro
 
 ``` r
 
-NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
+plot(NB_prot_subtype, criteria = c("deviance", "BIC", "ICL"))
 ```
 
 ![](breast-cancer-proteomics_files/figure-html/plotting-criteria-1.png)
@@ -275,7 +275,7 @@ NB_prot_subtype$refine()
 
 ``` r
 
-NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
+plot(NB_prot_subtype, criteria = c("deviance", "BIC", "ICL"))
 ```
 
 ![](breast-cancer-proteomics_files/figure-html/plotting-criteria-refined-1.png)

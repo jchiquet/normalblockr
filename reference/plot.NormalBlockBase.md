@@ -1,8 +1,9 @@
 # Plot a Normal-Block Model
 
 Plots the evolution of the objective (log-likelihood or ELBO) across the
-(V)EM iterations of the last call to \`optimize()\`, see
-\`\$plot_loglik()\`.
+(V)EM iterations of the last call to
+[`optimize()`](https://rdrr.io/r/stats/optimize.html), see
+`$plot_loglik()`.
 
 ## Usage
 
@@ -23,8 +24,9 @@ plot(x, ...)
 
 ## Value
 
-Invisibly returns the \[ggplot2::ggplot\] object; called for its side
-effect of plotting.
+Invisibly returns the
+[ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)
+object; called for its side effect of plotting.
 
 ## Examples
 

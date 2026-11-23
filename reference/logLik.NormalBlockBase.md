@@ -1,8 +1,9 @@
 # Extract Log-Likelihood of a Normal-Block Model
 
 Returns the (variational) log-likelihood of a fitted normal-block model
-as a \`"logLik"\` object, compatible with \[stats::AIC()\] and
-\[stats::BIC()\].
+as a `"logLik"` object, compatible with
+[`stats::AIC()`](https://rdrr.io/r/stats/AIC.html) and
+[`stats::BIC()`](https://rdrr.io/r/stats/AIC.html).
 
 ## Usage
 
@@ -23,11 +24,12 @@ logLik(object, ...)
 
 ## Value
 
-An object of class \`"logLik"\`. The numeric value is the log-likelihood
+An object of class `"logLik"`. The numeric value is the log-likelihood
 or its variational lower bound (ELBO), on the scale of the data the
-model was fitted on (rescaled or not, see \[NormalBlockData\]); use the
-\`heldout_loglik()\` method for a log-likelihood on Y's original scale.
-Attributes \`df\` and \`nobs\` hold the number of parameters and
+model was fitted on (rescaled or not, see
+[NormalBlockData](https://jchiquet.github.io/normalblockr/reference/NormalBlockData.md));
+use the `heldout_loglik()` method for a log-likelihood on Y's original
+scale. Attributes `df` and `nobs` hold the number of parameters and
 observations.
 
 ## Examples

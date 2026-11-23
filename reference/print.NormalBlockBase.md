@@ -23,7 +23,7 @@ print(x, ...)
 
 ## Value
 
-Invisibly returns \`x\`.
+Invisibly returns `x`.
 
 ## Examples
 
@@ -34,8 +34,8 @@ model <- normal_block(data, blocks = 3, control = NB_control(verbose = FALSE))
 print(model)
 #> A diagonal normal-block-var model with 3 unknown clusters.
 #> ===========================================================================
-#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>        48 3       3        0 -572.736 1145.473 1331.417 1331.417 1338.009    13
+#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL    EBIC niter
+#>        48 3       3        0 -616.642 1233.284 1419.228 1419.228 1425.82    10
 #> ===========================================================================
 #> * Useful fields
 #>     $model_par, $posterior_par / $var_par, $clustering 

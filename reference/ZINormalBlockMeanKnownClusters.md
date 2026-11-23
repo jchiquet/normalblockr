@@ -2,7 +2,8 @@
 
 R6 class for a zero-inflated Normal-Block-Mean model with a known
 clustering. Sigma is diagonal or spherical here. See
-\[NormalBlockMeanBase\] for why a full one is out of reach under a mask.
+[NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md)
+for why a full one is out of reach under a mask.
 
 ## Super classes
 
@@ -15,8 +16,10 @@ clustering. Sigma is diagonal or spherical here. See
 
 - `model_par`:
 
-  the parameters of \[NormalBlockMeanBase\] (B, Omega), plus B0
-  (zero-inflation coefficients) and kappa (zero-inflation probabilities)
+  the parameters of
+  [NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md)
+  (B, Omega), plus B0 (zero-inflation coefficients) and kappa
+  (zero-inflation probabilities)
 
 ## Methods
 
@@ -48,7 +51,7 @@ Inherited methods
 
 ### `ZINormalBlockMeanKnownClusters$new()`
 
-Create a new \[\`ZINormalBlockMeanKnownClusters\`\] object.
+Create a new `ZINormalBlockMeanKnownClusters` object.
 
 #### Usage
 
@@ -80,7 +83,7 @@ Create a new \[\`ZINormalBlockMeanKnownClusters\`\] object.
 
 #### Returns
 
-A new \[\`ZINormalBlockMeanKnownClusters\`\] object
+A new `ZINormalBlockMeanKnownClusters` object
 
 ------------------------------------------------------------------------
 

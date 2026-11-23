@@ -14,8 +14,9 @@ R6 class for a Normal-Block-Mean model with a fixed number of clusters
 
 - `model_par`:
 
-  the parameters of \[NormalBlockMeanBase\] (B, Omega), plus alpha
-  (cluster proportions)
+  the parameters of
+  [NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md)
+  (B, Omega), plus alpha (cluster proportions)
 
 - `var_par`:
 
@@ -52,7 +53,7 @@ Inherited methods
 
 ### `NormalBlockMeanUnknownClusters$new()`
 
-Create a new \[\`NormalBlockMeanUnknownClusters\`\] object.
+Create a new `NormalBlockMeanUnknownClusters` object.
 
 #### Usage
 
@@ -84,7 +85,7 @@ Create a new \[\`NormalBlockMeanUnknownClusters\`\] object.
 
 #### Returns
 
-A new \[\`NormalBlockMeanUnknownClusters\`\] object
+A new `NormalBlockMeanUnknownClusters` object
 
 ------------------------------------------------------------------------
 

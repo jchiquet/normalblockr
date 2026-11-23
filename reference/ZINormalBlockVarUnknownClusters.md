@@ -18,8 +18,10 @@ clusters (but unknown clustering).
 
 - `model_par`:
 
-  the parameters of \[NormalBlockVarBase\] (B, B0, dm1, Omega), plus
-  kappa (zero-inflation probabilities) and alpha (cluster proportions)
+  the parameters of
+  [NormalBlockVarBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.md)
+  (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities) and
+  alpha (cluster proportions)
 
 ## Methods
 
@@ -52,7 +54,7 @@ Inherited methods
 
 ### `ZINormalBlockVarUnknownClusters$new()`
 
-Create a new \[\`ZINormalBlockVarUnknownClusters\`\] object.
+Create a new `ZINormalBlockVarUnknownClusters` object.
 
 #### Usage
 
@@ -83,7 +85,7 @@ Create a new \[\`ZINormalBlockVarUnknownClusters\`\] object.
 
 #### Returns
 
-A new \[\`ZINormalBlockVarUnknownClusters\`\] object
+A new `ZINormalBlockVarUnknownClusters` object
 
 ------------------------------------------------------------------------
 

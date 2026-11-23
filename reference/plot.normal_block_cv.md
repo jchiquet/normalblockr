@@ -14,7 +14,8 @@ plot(x, ...)
 
 - x:
 
-  an object of class \`normal_block_cv\`, from \[normal_block_cv()\]
+  an object of class `normal_block_cv`, from
+  [`normal_block_cv()`](https://jchiquet.github.io/normalblockr/reference/normal_block_cv.md)
 
 - ...:
 
@@ -22,7 +23,9 @@ plot(x, ...)
 
 ## Value
 
-a \[\`ggplot2::ggplot\`\] graph
+a
+[`ggplot2::ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)
+graph
 
 ## Examples
 

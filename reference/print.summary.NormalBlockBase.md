@@ -1,6 +1,7 @@
 # Print a Normal-Block Model Summary
 
-Print method for objects returned by \[summary.NormalBlockBase()\].
+Print method for objects returned by
+[`summary.NormalBlockBase()`](https://jchiquet.github.io/normalblockr/reference/summary.NormalBlockBase.md).
 
 ## Usage
 
@@ -13,7 +14,7 @@ print(x, ...)
 
 - x:
 
-  An object of class \`summary.NormalBlockBase\`.
+  An object of class `summary.NormalBlockBase`.
 
 - ...:
 
@@ -21,7 +22,7 @@ print(x, ...)
 
 ## Value
 
-Invisibly returns \`x\`.
+Invisibly returns `x`.
 
 ## Examples
 
@@ -33,8 +34,8 @@ print(summary(model))
 #> A diagonal normal-block-var model with 3 unknown clusters.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>        48 3       3        0 -670.207 1340.413 1526.358 1526.358 1532.949    11
+#>        48 3       3        0 -415.005   830.01 1015.954 1015.954 1022.546    10
 #> ===========================================================================
-#> * Cluster sizes: 10, 4, 6
+#> * Cluster sizes: 4, 8, 8
 #> * Network: 3 edge(s), density = 1
 ```

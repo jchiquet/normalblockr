@@ -1,11 +1,13 @@
 # Collection of Normal-Block-Mean Models over a Sparsity Path
 
-R6 class for a collection of mean-block models (\[NormalBlockMeanBase\])
+R6 class for a collection of mean-block models
+([NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md))
 with a fixed clustering (or a fixed number of blocks) and different
 sparsity levels applied to the p x p precision matrix of the variables.
-Mirrors \[NormalBlockVarCollectionSparsity\], StARS included; the
-default penalty grid is read off the covariance of the least-squares
-residuals.
+Mirrors
+[NormalBlockVarCollectionSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionSparsity.md),
+StARS included; the default penalty grid is read off the covariance of
+the least-squares residuals.
 
 ## Super classes
 
@@ -36,7 +38,7 @@ Inherited methods
 
 ### `NormalBlockMeanCollectionSparsity$new()`
 
-Create a new \[\`NormalBlockMeanCollectionSparsity\`\] object.
+Create a new `NormalBlockMeanCollectionSparsity` object.
 
 #### Usage
 
@@ -60,8 +62,8 @@ Create a new \[\`NormalBlockMeanCollectionSparsity\`\] object.
 
 - `zero_inflation`:
 
-  must be \`FALSE\`: the path penalizes a full Sigma, which
-  zero-inflated mean-block models do not carry
+  must be `FALSE`: the path penalizes a full Sigma, which zero-inflated
+  mean-block models do not carry
 
 - `control`:
 
@@ -69,7 +71,7 @@ Create a new \[\`NormalBlockMeanCollectionSparsity\`\] object.
 
 #### Returns
 
-A new \[\`NormalBlockMeanCollectionSparsity\`\] object
+A new `NormalBlockMeanCollectionSparsity` object
 
 ------------------------------------------------------------------------
 
@@ -97,5 +99,5 @@ models <- normal_block(data, blocks = 3, sparsity = TRUE, model = "mean",
 #> Fitting a collection of full normal-block-mean models over sparsity penalties, with fixed q 
 #> 
 #> DONE
-models$plot(c("BIC", "EBIC"))
+plot(models, criteria = c("BIC", "EBIC"))
 ```

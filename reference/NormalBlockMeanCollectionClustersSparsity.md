@@ -1,9 +1,11 @@
 # Collection of Normal-Block-Mean Models over Cluster Counts and Sparsity Levels
 
-R6 class for a collection of mean-block models (\[NormalBlockMeanBase\])
+R6 class for a collection of mean-block models
+([NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md))
 over both a range of cluster counts (q) and a sparsity path, i.e. one
-\[NormalBlockMeanCollectionSparsity\] per q. Mirrors
-\[NormalBlockVarCollectionClustersSparsity\].
+[NormalBlockMeanCollectionSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanCollectionSparsity.md)
+per q. Mirrors
+[NormalBlockVarCollectionClustersSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionClustersSparsity.md).
 
 ## Super classes
 
@@ -54,7 +56,7 @@ models <- normal_block(data, blocks = 2:4, sparsity = TRUE, model = "mean",
 #> Fitting a collection of full normal-block-mean models over q and sparsity penalties 
 #> 
 #> DONE
-models$plot("BIC")
+plot(models, criterion = "BIC")
 
 models$get_best_model("BIC")
 #> A full normal-block-mean model with 3 unknown clusters.

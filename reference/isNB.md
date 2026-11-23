@@ -1,7 +1,8 @@
 # Check if an Object is a Normal-Block Model
 
-Checks if a model is of class \[NormalBlockBase()\], i.e. any
-normal-block model (variance-block or mean-block family).
+Checks if a model is of class
+[`NormalBlockBase()`](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.md),
+i.e. any normal-block model (variance-block or mean-block family).
 
 ## Usage
 

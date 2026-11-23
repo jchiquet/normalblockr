@@ -63,8 +63,8 @@ generate_normal_block_mean_data(
 - SNR:
 
   signal-to-noise ratio: the residual covariance Sigma is rescaled so
-  that the squared norm of the signal X B C' is \`SNR\` times the
-  expected squared norm of the noise, n tr(Sigma).
+  that the squared norm of the signal X B C' is `SNR` times the expected
+  squared norm of the noise, n tr(Sigma).
 
 - alpha:
 
@@ -77,12 +77,23 @@ generate_normal_block_mean_data(
 
 ## Value
 
-A named list with the following element - Y a matrix of responses - X a
-regressor/design matrix - a list of model parameters, encompassing - B:
-matrix of regression coefficients - C: matrix of group membership -
-Omega: precision matrix of the variables - Sigma: covariance matrix of
-the variables - kappa: vector of ZI inflation probabilities (one per
-variable)
+A named list with the following element
+
+- Y a matrix of responses
+
+- X a regressor/design matrix
+
+- a list of model parameters, encompassing
+
+  - B: matrix of regression coefficients
+
+  - C: matrix of group membership
+
+  - Omega: precision matrix of the variables
+
+  - Sigma: covariance matrix of the variables
+
+  - kappa: vector of ZI inflation probabilities (one per variable)
 
 ## Examples
 

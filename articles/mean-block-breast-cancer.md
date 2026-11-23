@@ -152,7 +152,7 @@ boundary would mean nothing.
 
 ``` r
 
-NB_means$plot(c("deviance", "ICL"))
+plot(NB_means, criteria = c("deviance", "ICL"))
 ```
 
 ![](mean-block-breast-cancer_files/figure-html/collection-criteria-1.png)

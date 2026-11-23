@@ -39,7 +39,7 @@ Inherited methods
 
 ### `NormalBlockMeanKnownClusters$new()`
 
-Create a new \[\`NormalBlockMeanKnownClusters\`\] object.
+Create a new `NormalBlockMeanKnownClusters` object.
 
 #### Usage
 
@@ -66,7 +66,7 @@ Create a new \[\`NormalBlockMeanKnownClusters\`\] object.
 
 #### Returns
 
-A new \[\`NormalBlockMeanKnownClusters\`\] object
+A new `NormalBlockMeanKnownClusters` object
 
 ------------------------------------------------------------------------
 
@@ -93,5 +93,5 @@ model <- normal_block(data, blocks = ex$parameters$C, model = "mean")
 #> Fitting a diagonal normal-block-mean model with fixed clusters 
 #> 
 #> DONE
-model$plot()
+plot(model)
 ```

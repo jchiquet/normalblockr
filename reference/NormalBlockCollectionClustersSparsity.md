@@ -1,10 +1,12 @@
 # Base Class for a Collection over Cluster Counts and Sparsity Levels
 
-Shared scaffolding for \[NormalBlockVarCollectionClustersSparsity\] and
-\[NormalBlockMeanCollectionClustersSparsity\]: a collection of sparsity
-sub-collections, one per q in increasing order. Everything lives here
-(two-key model lookup, model selection over both axes, the criteria
-heatmap); subclasses only name the model family.
+Shared scaffolding for
+[NormalBlockVarCollectionClustersSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionClustersSparsity.md)
+and
+[NormalBlockMeanCollectionClustersSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanCollectionClustersSparsity.md):
+a collection of sparsity sub-collections, one per q in increasing order.
+Everything lives here (two-key model lookup, model selection over both
+axes, the criteria heatmap); subclasses only name the model family.
 
 ## Super class
 
@@ -131,8 +133,8 @@ a single fitted model object
 
 ### `NormalBlockCollectionClustersSparsity$plot()`
 
-Display various outputs (goodness-of-fit criteria, robustness,
-diagnostic) associated with a collection of network fits
+Plot one criterion as a heatmap over q and the penalty (see also
+[`plot.NormalBlockCollection()`](https://jchiquet.github.io/normalblockr/reference/plot.NormalBlockCollection.md)).
 
 #### Usage
 
@@ -145,16 +147,18 @@ diagnostic) associated with a collection of network fits
 
 - `criterion`:
 
-  The criteria to plot in \`c("deviance", BIC", "EBIC", "ICL")\`.
-  Defaults deviance.
+  the criterion to plot, among `"deviance"` (the default), `"ICL"`,
+  `"BIC"` and `"EBIC"`.
 
 - `n_intervals`:
 
-  number of intervals into which the penalties range should be split
+  number of intervals into which the range of the penalties is split
 
 #### Returns
 
-a \[\`ggplot2::ggplot\`\] heatmap
+a
+[`ggplot2::ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)
+heatmap
 
 ------------------------------------------------------------------------
 

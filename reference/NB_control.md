@@ -32,8 +32,8 @@ NB_control(
 - threshold:
 
   the (V)EM stops when the objective (log-likelihood or ELBO) increases
-  by less than this. A negative value runs exactly \`niter\` iterations,
-  without the warning issued when \`niter\` is reached.
+  by less than this. A negative value runs exactly `niter` iterations,
+  without the warning issued when `niter` is reached.
 
 - fixed_point_niter:
 
@@ -49,9 +49,9 @@ NB_control(
 
 - sparsity_penalties:
 
-  the penalties of a sparsity path (\`sparsity = TRUE\`). By default,
-  \`n_sparsity_penalties\` values from the smallest penalty that removes
-  every edge down to \`min_ratio\` times it, on a log scale.
+  the penalties of a sparsity path (`sparsity = TRUE`). By default,
+  `n_sparsity_penalties` values from the smallest penalty that removes
+  every edge down to `min_ratio` times it, on a log scale.
 
 - n_sparsity_penalties:
 
@@ -65,7 +65,7 @@ NB_control(
 - fixed_tau:
 
   whether the posterior cluster probabilities stay at their initial
-  value (\`clustering_init\`) during the optimization; used to refit a
+  value (`clustering_init`) during the optimization; used to refit a
   sparsity path with its clustering held fixed (stability selection).
 
 - clustering_init:
@@ -75,9 +75,10 @@ NB_control(
   clustering (a vector of labels or a p x q indicator matrix, or a list
   of either per q for a collection), or "best_of_inits" to try several
   heuristics per model and keep the best-ELBO fit (see
-  \[NormalBlockBase\]'s \`best_of_inits()\`; not supported with
-  \`sparsity = TRUE\`). Default \`NULL\`, i.e. "kmeans" for both model
-  families; "ward2" can work better on zero-inflated abundance data.
+  [NormalBlockBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.md)'s
+  `best_of_inits()`; not supported with `sparsity = TRUE`). Default
+  `NULL`, i.e. "kmeans" for both model families; "ward2" can work better
+  on zero-inflated abundance data.
 
 - verbose:
 
@@ -87,43 +88,44 @@ NB_control(
 
   whether to use the heuristic approach (moment-based, no (V)EM
   recursion) instead of the full (V)EM. Default is FALSE. In heuristic
-  mode, no likelihood/ELBO is computed, so \`entropy\`, \`loglik\`,
-  \`BIC\`, \`ICL\` and \`EBIC\` are all \`NA\` on the resulting model.
+  mode, no likelihood/ELBO is computed, so `entropy`, `loglik`, `BIC`,
+  `ICL` and `EBIC` are all `NA` on the resulting model.
 
 - noise_covariance:
 
   shape of the residual covariance. Variance-block models accept
   "diagonal" (variable-specific) or "spherical" (common); mean-block
   models, whose Sigma is the full p x p residual covariance, also accept
-  "full". Default \`NULL\`, resolved per model family at fit time to
-  "diagonal" – except for a mean-block model with \`sparsity \> 0\`,
-  which implies "full" since a penalty on a diagonal precision matrix
-  would have nothing to act on (explicitly asking for both is an error).
-  A full Sigma has many parameters and needs n \> p; use it when the
+  "full". Default `NULL`, resolved per model family at fit time to
+  "diagonal" – except for a mean-block model with `sparsity > 0`, which
+  implies "full" since a penalty on a diagonal precision matrix would
+  have nothing to act on (explicitly asking for both is an error). A
+  full Sigma has many parameters and needs n \> p; use it when the
   residual associations between variables are of interest.
 
 - refine:
 
   for collections over a range of cluster counts (both families):
-  whether \`optimize()\` automatically calls \`refine()\` afterwards.
-  Default \`TRUE\`: the split and merge search repairs the poor local
-  optima that independent fits can leave, at a few times the cost of the
-  collection. With \`FALSE\`, \`collection\$refine()\` can be called
-  later.
+  whether [`optimize()`](https://rdrr.io/r/stats/optimize.html)
+  automatically calls `refine()` afterwards. Default `TRUE`: the split
+  and merge search repairs the poor local optima that independent fits
+  can leave, at a few times the cost of the collection. With `FALSE`,
+  `collection$refine()` can be called later.
 
 - acceleration:
 
   whether the (V)EM is accelerated by SQUAREM (Varadhan & Roland, 2008),
   an extrapolation built on two successive (V)EM steps and accepted only
-  if it does not lower the objective. Default \`NULL\`: on, except for
+  if it does not lower the objective. Default `NULL`: on, except for
   mean-block models with a diagonal or spherical Sigma, whose EM is
-  exact and fast. \`TRUE\` or \`FALSE\` forces it. Never used when
-  \`sparsity \> 0\`.
+  exact and fast. `TRUE` or `FALSE` forces it. Never used when
+  `sparsity > 0`.
 
 ## Value
 
-A named list of parameters to pass to \[normal_block()\]'s \`control\`
-argument.
+A named list of parameters to pass to
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md)'s
+`control` argument.
 
 ## Examples
 
@@ -133,13 +135,13 @@ data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 ## silent fits, without the split and merge search
 ctrl <- NB_control(verbose = FALSE, refine = FALSE)
 collection <- normal_block(data, blocks = 2:4, control = ctrl)
-collection$criteria
-#>   nb_param q n_edges sparsity    loglik  deviance      BIC      ICL     EBIC
-#> 1       44 2       1        0 -562.3405 1124.6810 1295.894 1295.894 1297.280
-#> 2       48 3       3        0 -467.6143  935.2286 1121.173 1121.173 1127.765
-#> 3       53 4       6        0 -467.6177  935.2355 1139.824 1139.824 1156.459
-#>   niter
-#> 1    11
-#> 2     7
-#> 3    34
+summary(collection)
+#> A collection of diagonal normal-block-var models over q 
+#> ===========================================================================
+#>     q ranging from 2 to 4 
+#> ===========================================================================
+#>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
+#>        44 2       1        0 -562.340 1124.681 1295.894 1295.894 1297.280    11
+#>        48 3       3        0 -467.614  935.229 1121.173 1121.173 1127.765     7
+#>        53 4       6        0 -467.618  935.235 1139.824 1139.824 1156.459    34
 ```

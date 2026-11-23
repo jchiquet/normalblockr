@@ -22,10 +22,11 @@ summary(object, ...)
 
 ## Value
 
-An object of class \`summary.NormalBlockCollection\` (a list with the
-collection's \`who_am_I\`, \`criteria\`, \`q_range\` and
-\`sparsity_range\`), printed with a dedicated
-\[print.summary.NormalBlockCollection()\] method.
+An object of class `summary.NormalBlockCollection` (a list with the
+collection's `who_am_I`, `criteria`, `q_range` and `sparsity_range`),
+printed with a dedicated
+[`print.summary.NormalBlockCollection()`](https://jchiquet.github.io/normalblockr/reference/print.summary.NormalBlockCollection.md)
+method.
 
 ## Examples
 
@@ -39,8 +40,8 @@ summary(models)
 #>     q ranging from 2 to 5 
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>        44 2       1        0 -733.207 1466.415 1637.627 1637.627 1639.014    10
-#>        48 3       3        0 -628.158 1256.317 1442.261 1442.261 1448.853     7
-#>        53 4       6        0 -596.138 1192.277 1396.865 1396.865 1413.501     6
-#>        59 5      10        0 -596.241 1192.481 1419.626 1419.626 1451.814    10
+#>        44 2       1        0 -591.923 1183.847 1355.060 1355.511 1356.446     8
+#>        48 3       3        0 -469.088  938.176 1124.121 1124.121 1130.713    11
+#>        53 4       6        0 -445.445  890.890 1095.479 1095.515 1112.114    14
+#>        59 5      10        0 -445.448  890.896 1118.040 1118.076 1150.229    28
 ```

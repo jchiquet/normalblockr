@@ -23,9 +23,11 @@ summary(object, ...)
 
 ## Value
 
-An object of class \`summary.NormalBlockBase\` (a list with the model's
-\`who_am_I\`, \`criteria\`, \`cluster_sizes\` and network \`density\`),
-printed with a dedicated \[print.summary.NormalBlockBase()\] method.
+An object of class `summary.NormalBlockBase` (a list with the model's
+`who_am_I`, `criteria`, `cluster_sizes` and network `density`), printed
+with a dedicated
+[`print.summary.NormalBlockBase()`](https://jchiquet.github.io/normalblockr/reference/print.summary.NormalBlockBase.md)
+method.
 
 ## Examples
 
@@ -37,8 +39,8 @@ summary(model)
 #> A diagonal normal-block-var model with 3 unknown clusters.
 #> ===========================================================================
 #>  nb_param q n_edges sparsity   loglik deviance      BIC      ICL     EBIC niter
-#>        48 3       3        0 -668.515 1337.029 1522.974 1522.974 1529.565    11
+#>        48 3       3        0 -667.394 1334.787 1520.732 1520.732 1527.323    10
 #> ===========================================================================
-#> * Cluster sizes: 5, 9, 6
+#> * Cluster sizes: 5, 10, 5
 #> * Network: 3 edge(s), density = 1
 ```

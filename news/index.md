@@ -91,6 +91,12 @@ Users of 0.3.0 will see different results on the same calls:
   Variance-block merge candidates are ranked by the signed correlation
   between the latent block signals, since a block can only gather
   positively co-varying variables.
+- [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method for
+  collections of models: the criteria against q or the penalty, or a
+  heatmap over both (it wraps the collections’ `$plot()`). The model
+  selected by each criterion is marked on its curve and labelled with
+  the criterion and the selected q or penalty, so that it is clear which
+  dashed line belongs to which criterion.
 - New fields `penalty_terms` and `penalty` (the BIC penalty, group by
   group), `NormalBlockData$for_family()` (the data a family is fitted
   on), `NormalBlockData$subset()` and `$Y_original`, and
@@ -146,6 +152,10 @@ Users of 0.3.0 will see different results on the same calls:
 
 ### Other changes
 
+- The help pages render their links, code and emphasis (roxygen markdown
+  was not enabled: links to other pages showed as plain text in
+  brackets); the links of the online reference to inherited R6 methods
+  reach the method.
 - Every help page has a running example; help titles follow the two
   families of the article (Normal-Block-Var, Normal-Block-Mean).
 - [`summary()`](https://rdrr.io/r/base/summary.html) of a model and

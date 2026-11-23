@@ -13,13 +13,13 @@ clustering structures the latent covariance.
 - `B_original`:
 
   regression coefficients (d x p), converted back to Y's original units
-  (undoing \`NormalBlockData(scale = TRUE)\`'s column-wise rescaling, if
-  any). Use \`model_par\$B\` instead for the coefficients on the
-  internal fitting scale.
+  (undoing `NormalBlockData(scale = TRUE)`'s column-wise rescaling, if
+  any). Use `model_par$B` instead for the coefficients on the internal
+  fitting scale.
 
 - `fitted`:
 
-  Y values predicted by the model, in Y's original units: \`X B\`, plus
+  Y values predicted by the model, in Y's original units: `X B`, plus
   the posterior mean of the latent block signals for (V)EM fits, with
   the observed zeros of zero-inflated models set to 0
 
@@ -29,8 +29,7 @@ clustering structures the latent covariance.
   B0 (zero-inflation coefficients, if any), dm1 (inverse noise variances
   of the variables) and Omega (q x q precision matrix of the latent
   block signals), on the scale of the fit. Use
-  \`\$B_original\`/\`\$dm1_original\` for B and dm1 on Y's original
-  scale.
+  `$B_original`/`$dm1_original` for B and dm1 on Y's original scale.
 
 - `sparsity_weights`:
 
@@ -39,11 +38,11 @@ clustering structures the latent covariance.
 - `dm1_original`:
 
   inverse residual variance per variable (1 / Var(Y_j)), converted back
-  to Y's original units. Use \`model_par\$dm1\` instead for the internal
-  fitting scale. With \`noise_covariance = "spherical"\`,
-  \`model_par\$dm1\` is a single value repeated p times; once converted
-  back per-variable, the p values returned here generally differ from
-  one another whenever Y's columns were rescaled by different factors.
+  to Y's original units. Use `model_par$dm1` instead for the internal
+  fitting scale. With `noise_covariance = "spherical"`, `model_par$dm1`
+  is a single value repeated p times; once converted back per-variable,
+  the p values returned here generally differ from one another whenever
+  Y's columns were rescaled by different factors.
 
 ## Methods
 
@@ -79,7 +78,7 @@ Inherited methods
 
 ### `NormalBlockVarBase$new()`
 
-Create a new \[\`NormalBlockVarBase\`\] object.
+Create a new `NormalBlockVarBase` object.
 
 #### Usage
 
@@ -114,13 +113,12 @@ Create a new \[\`NormalBlockVarBase\`\] object.
 
   whether the concrete subclass models zero-inflation; set by the ZI
   subclasses themselves, not meant to be set by the end user. When
-  \`FALSE\`, the (costly) zero-inflation probability fit
-  (\`kappa\`/\`B0\`) is skipped entirely, since it would otherwise never
-  be used downstream.
+  `FALSE`, the (costly) zero-inflation probability fit (`kappa`/`B0`) is
+  skipped entirely, since it would otherwise never be used downstream.
 
 #### Returns
 
-A new \[\`NormalBlockVarBase\`\] object
+A new `NormalBlockVarBase` object
 
 ------------------------------------------------------------------------
 
@@ -129,7 +127,7 @@ A new \[\`NormalBlockVarBase\`\] object
 Checks that the blocks gather positively co-varying variables, as the
 model requires (two variables of a block have a positive correlation).
 Compares, for each block, the empirical correlations of the residuals
-\`Y - XB\` with those implied by the model.
+`Y - XB` with those implied by the model.
 
 #### Usage
 
@@ -137,18 +135,18 @@ Compares, for each block, the empirical correlations of the residuals
 
 #### Returns
 
-a data frame with one row per block: \`block\`, \`size\`, the mean and
-minimum of the empirical within-block correlations (\`mean_cor\`,
-\`min_cor\`), the proportion of negative ones (\`prop_negative\`), and
-the mean correlation implied by the model (\`model_cor\`). \`NA\` for
-blocks with fewer than two variables.
+a data frame with one row per block: `block`, `size`, the mean and
+minimum of the empirical within-block correlations (`mean_cor`,
+`min_cor`), the proportion of negative ones (`prop_negative`), and the
+mean correlation implied by the model (`model_cor`). `NA` for blocks
+with fewer than two variables.
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockVarBase$split()`
 
-Create a clone of the current \[\`NormalBlockVarBase\`\] object after
-splitting cluster \`index\`
+Create a clone of the current `NormalBlockVarBase` object after
+splitting cluster `index`
 
 #### Usage
 
@@ -167,21 +165,21 @@ splitting cluster \`index\`
 
 - `rule`:
 
-  how the members of the cluster are divided: \`"kmeans"\` runs a
-  2-means on their columns of residuals \`Y - XB\`; \`"noise"\` cuts
-  them at the median of their noise variance. Default \`NULL\`, i.e.
-  \`"kmeans"\` for this family.
+  how the members of the cluster are divided: `"kmeans"` runs a 2-means
+  on their columns of residuals `Y - XB`; `"noise"` cuts them at the
+  median of their noise variance. Default `NULL`, i.e. `"kmeans"` for
+  this family.
 
 #### Returns
 
-A new \[\`NormalBlockVarBase\`\] object
+A new `NormalBlockVarBase` object
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockVarBase$merge()`
 
-Create a clone of the current \[\`NormalBlockVarBase\`\] object after
-merging clusters \`cl1\` and \`cl2\`
+Create a clone of the current `NormalBlockVarBase` object after merging
+clusters `cl1` and `cl2`
 
 #### Usage
 
@@ -200,7 +198,7 @@ merging clusters \`cl1\` and \`cl2\`
 
 #### Returns
 
-A new \[\`NormalBlockVarBase\`\] object
+A new `NormalBlockVarBase` object
 
 ------------------------------------------------------------------------
 

@@ -46,7 +46,7 @@ Inherited methods
 
 ### `NormalBlockVarKnownClusters$new()`
 
-Create a new \[\`NormalBlockVarKnownClusters\`\] object.
+Create a new `NormalBlockVarKnownClusters` object.
 
 #### Usage
 
@@ -73,7 +73,7 @@ Create a new \[\`NormalBlockVarKnownClusters\`\] object.
 
 #### Returns
 
-A new \[\`NormalBlockVarKnownClusters\`\] object
+A new `NormalBlockVarKnownClusters` object
 
 ------------------------------------------------------------------------
 

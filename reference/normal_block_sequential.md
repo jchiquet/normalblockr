@@ -1,8 +1,10 @@
 # Cluster Variables in the Mean, then in the Residual Covariance
 
 Fits the two model families one after the other: a mean-block model
-(\[NormalBlockMeanBase\]) groups the variables by how they respond to
-the covariates, then a variance-block model (\[NormalBlockVarBase\])
+([NormalBlockMeanBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanBase.md))
+groups the variables by how they respond to the covariates, then a
+variance-block model
+([NormalBlockVarBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.md))
 groups the residuals of that fit by how they co-vary. The two answer
 different questions and generally return unrelated partitions, so
 running both is often more informative than choosing one.
@@ -25,16 +27,18 @@ normal_block_sequential(
 
 - data:
 
-  a \[NormalBlockData\] object
+  a
+  [NormalBlockData](https://jchiquet.github.io/normalblockr/reference/NormalBlockData.md)
+  object
 
 - blocks_mean:
 
   number of clusters for the mean-block stage: an integer, a vector of
   integers to explore, or a p x q indicator matrix. It can also be a
-  mean-block model or collection already fitted on \`data\` (by
-  \`normal_block(data, ..., model = "mean")\`), in which case the first
+  mean-block model or collection already fitted on `data` (by
+  `normal_block(data, ..., model = "mean")`), in which case the first
   stage is not refitted: a collection is reduced to its best model by
-  \`crit\`.
+  `crit`.
 
 - blocks_var:
 
@@ -53,7 +57,8 @@ normal_block_sequential(
 
 - control_mean:
 
-  control list for the mean-block stage, see \[NB_control()\]
+  control list for the mean-block stage, see
+  [`NB_control()`](https://jchiquet.github.io/normalblockr/reference/NB_control.md)
 
 - control_var:
 
@@ -61,9 +66,9 @@ normal_block_sequential(
 
 ## Value
 
-an object of class \`normal_block_sequential\`, a list with the fitted
-\`mean\` and \`var\` models and the residual matrix \`residuals\` handed
-from one stage to the other.
+an object of class `normal_block_sequential`, a list with the fitted
+`mean` and `var` models and the residual matrix `residuals` handed from
+one stage to the other.
 
 ## Details
 

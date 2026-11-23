@@ -17,8 +17,9 @@ R6 class for a zero-inflated normal-block model with a known clustering.
 
 - `model_par`:
 
-  the parameters of \[NormalBlockVarBase\] (B, B0, dm1, Omega), plus
-  kappa (zero-inflation probabilities)
+  the parameters of
+  [NormalBlockVarBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.md)
+  (B, B0, dm1, Omega), plus kappa (zero-inflation probabilities)
 
 ## Methods
 
@@ -51,7 +52,7 @@ Inherited methods
 
 ### `ZINormalBlockVarKnownClusters$new()`
 
-Create a new \[\`ZINormalBlockVarKnownClusters\`\] object.
+Create a new `ZINormalBlockVarKnownClusters` object.
 
 #### Usage
 
@@ -83,7 +84,7 @@ Create a new \[\`ZINormalBlockVarKnownClusters\`\] object.
 
 #### Returns
 
-A new \[\`ZINormalBlockVarKnownClusters\`\] object
+A new `ZINormalBlockVarKnownClusters` object
 
 ------------------------------------------------------------------------
 

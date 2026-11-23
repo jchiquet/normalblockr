@@ -14,8 +14,9 @@ unknown clustering).
 
 - `model_par`:
 
-  the parameters of \[NormalBlockVarBase\] (B, B0, dm1, Omega), plus
-  alpha (cluster proportions)
+  the parameters of
+  [NormalBlockVarBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarBase.md)
+  (B, B0, dm1, Omega), plus alpha (cluster proportions)
 
 - `var_par`:
 
@@ -53,7 +54,7 @@ Inherited methods
 
 ### `NormalBlockVarUnknownClusters$new()`
 
-Create a new \[\`NormalBlockVarUnknownClusters\`\] object.
+Create a new `NormalBlockVarUnknownClusters` object.
 
 #### Usage
 
@@ -84,7 +85,7 @@ Create a new \[\`NormalBlockVarUnknownClusters\`\] object.
 
 #### Returns
 
-A new \[\`NormalBlockVarUnknownClusters\`\] object
+A new `NormalBlockVarUnknownClusters` object
 
 ------------------------------------------------------------------------
 

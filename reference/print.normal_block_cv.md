@@ -13,7 +13,8 @@ print(x, ...)
 
 - x:
 
-  an object of class \`normal_block_cv\`, from \[normal_block_cv()\]
+  an object of class `normal_block_cv`, from
+  [`normal_block_cv()`](https://jchiquet.github.io/normalblockr/reference/normal_block_cv.md)
 
 - ...:
 
@@ -21,7 +22,7 @@ print(x, ...)
 
 ## Value
 
-Invisibly returns \`x\`.
+Invisibly returns `x`.
 
 ## Examples
 
@@ -33,8 +34,8 @@ cv <- normal_block_cv(data, blocks = 2:4, folds = 3)
 print(cv)
 #> Cross-validated log-likelihood, 3 folds (larger is better)
 #>  q    loglik       se
-#>  2 -1682.441 27.55630
-#>  3 -1614.087 24.04311
-#>  4 -1588.535 23.02608
+#>  2 -1715.748 33.05504
+#>  3 -1620.557 26.49306
+#>  4 -1565.828 22.31855
 #> Best: q = 4 (one-standard-error rule; maximum at q = 4)
 ```

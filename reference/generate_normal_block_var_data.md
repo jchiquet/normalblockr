@@ -64,8 +64,8 @@ generate_normal_block_var_data(
 - SNR:
 
   signal-to-noise ratio: the regression coefficients B are rescaled so
-  that the variance of the entries of X B is \`SNR\` times the variance
-  of the entries of the latent block covariance Sigma.
+  that the variance of the entries of X B is `SNR` times the variance of
+  the entries of the latent block covariance Sigma.
 
 - alpha:
 
@@ -84,12 +84,25 @@ generate_normal_block_var_data(
 
 ## Value
 
-A named list with the following element - Y a matrix of responses - X a
-regressor/design matrix - a list of model parameters, encompassing - B:
-matrix of regression coefficients - C: matrix of group membership - D:
-diagonal matrix of variance of the variables - Omega: precision matrix
-of the groups - Sigma: covariance matrix of the groups - kappa: vector
-of ZI inflation probabilities (one per variable)
+A named list with the following element
+
+- Y a matrix of responses
+
+- X a regressor/design matrix
+
+- a list of model parameters, encompassing
+
+  - B: matrix of regression coefficients
+
+  - C: matrix of group membership
+
+  - D: diagonal matrix of variance of the variables
+
+  - Omega: precision matrix of the groups
+
+  - Sigma: covariance matrix of the groups
+
+  - kappa: vector of ZI inflation probabilities (one per variable)
 
 ## Examples
 

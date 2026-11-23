@@ -3,14 +3,14 @@
 R6 class holding the responses and design matrix used to fit a
 normal-block model.
 
-## Rescaling Y (\`scale\`)
+## Rescaling Y (`scale`)
 
 Each column of Y can be divided by its own standard deviation before
-fitting. \`scale = NULL\` (the default) leaves the choice to the model
+fitting. `scale = NULL` (the default) leaves the choice to the model
 family, resolved when a model is fitted: rescaled for variance-block
-models, raw for mean-block ones; \`TRUE\` or \`FALSE\` forces it for
-both. Columns are never centered: the model's own intercept already
-absorbs each variable's mean.
+models, raw for mean-block ones; `TRUE` or `FALSE` forces it for both.
+Columns are never centered: the model's own intercept already absorbs
+each variable's mean.
 
 The two families need opposite defaults. A variance-block model loads
 every variable of a block on the same latent signal with the same
@@ -19,17 +19,19 @@ signal with different amplitudes; rescaling evens them out. A mean-block
 model shares a mean profile within a block, which a division by
 variable-specific standard deviations would break.
 
-The resulting \`B\`, \`Omega\` and clustering are properties of the data
-the model was fitted on; with rescaled data, use \`\$B_original\`,
-\`\$dm1_original\` and \`\$fitted\` for quantities in Y's original units
-(a shared block covariance has no unique original-scale counterpart,
-since the scaling factors differ within a block).
+The resulting `B`, `Omega` and clustering are properties of the data the
+model was fitted on; with rescaled data, use `$B_original`,
+`$dm1_original` and
+[`fitted()`](https://rdrr.io/r/stats/fitted.values.html) for quantities
+in Y's original units (a shared block covariance has no unique
+original-scale counterpart, since the scaling factors differ within a
+block).
 
 ## Public fields
 
 - `Y`:
 
-  the matrix of responses (rescaled column-wise if \`scale = TRUE\`)
+  the matrix of responses (rescaled column-wise if `scale = TRUE`)
 
 - `Y_scale`:
 
@@ -38,8 +40,8 @@ since the scaling factors differ within a block).
 
 - `scale`:
 
-  the \`scale\` argument as given: \`TRUE\`, \`FALSE\`, or \`NULL\` for
-  the family default (see \`for_family()\`)
+  the `scale` argument as given: `TRUE`, `FALSE`, or `NULL` for the
+  family default (see `for_family()`)
 
 - `X`:
 
@@ -128,7 +130,7 @@ since the scaling factors differ within a block).
 
 ### `NormalBlockData$new()`
 
-Create a new \[\`NormalBlockData\`\] object.
+Create a new `NormalBlockData` object.
 
 #### Usage
 
@@ -164,26 +166,26 @@ Create a new \[\`NormalBlockData\`\] object.
 - `scale`:
 
   whether to rescale each column of Y by its own standard deviation (no
-  centering): \`NULL\` (default) for the model family's default, see the
-  section "Rescaling Y" below and \`for_family()\`.
+  centering): `NULL` (default) for the model family's default, see the
+  section "Rescaling Y" below and `for_family()`.
 
 - `zeros`:
 
-  an optional 0/1 matrix of structural zeros, overriding the default \`Y
-  == 0\`.
+  an optional 0/1 matrix of structural zeros, overriding the default
+  `Y == 0`.
 
 - `check_constant`:
 
   whether to refuse constant columns of Y, which carry no information to
-  cluster on. \`FALSE\` for data only used to evaluate a fitted model
-  (see \`heldout_loglik()\`).
+  cluster on. `FALSE` for data only used to evaluate a fitted model (see
+  `heldout_loglik()`).
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockData$for_family()`
 
-The data a model of the given family is fitted on. When \`scale\` was
-given explicitly, the object itself. Otherwise (\`scale = NULL\`) the
+The data a model of the given family is fitted on. When `scale` was
+given explicitly, the object itself. Otherwise (`scale = NULL`) the
 family decides: the object itself, unscaled, for the mean-block family;
 a rescaled copy for the variance-block family, built once and shared by
 every model fitted on it.
@@ -196,11 +198,11 @@ every model fitted on it.
 
 - `model`:
 
-  the model family, \`"var"\` or \`"mean"\`
+  the model family, `"var"` or `"mean"`
 
 #### Returns
 
-a \[\`NormalBlockData\`\] object
+a `NormalBlockData` object
 
 ------------------------------------------------------------------------
 
@@ -222,11 +224,11 @@ these rows).
 
 - `check_constant`:
 
-  as in \`new()\`
+  as in `new()`
 
 #### Returns
 
-a \[\`NormalBlockData\`\] object
+a `NormalBlockData` object
 
 ------------------------------------------------------------------------
 
@@ -241,17 +243,17 @@ covariance. Computed once and memoized.
 
 #### Returns
 
-a list with \`B\` (d x p), \`R\` (n x p residuals) and \`Sigma\` (p x p
+a list with `B` (d x p), `R` (n x p residuals) and `Sigma` (p x p
 residual covariance)
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockData$zi_ols_fit()`
 
-Masked counterpart of \`ols_fit()\`: a per-variable weighted
-least-squares fit of B under the zero-inflation mask, with its inverse
-residual variances and residuals (see \`zi_weighted_fit()\`). Computed
-once and memoized.
+Masked counterpart of `ols_fit()`: a per-variable weighted least-squares
+fit of B under the zero-inflation mask, with its inverse residual
+variances and residuals (see `zi_weighted_fit()`). Computed once and
+memoized.
 
 #### Usage
 
@@ -259,16 +261,15 @@ once and memoized.
 
 #### Returns
 
-a list with \`B\` (d x p), \`dm1\` (p) and \`R\` (n x p masked
-residuals)
+a list with `B` (d x p), `dm1` (p) and `R` (n x p masked residuals)
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockData$zi_fit()`
 
-Zero-inflation component: \`p\` independent logistic regressions of each
-variable's zero pattern on \`X0\`, and the fixed contribution they make
-to the log-likelihood. The (V)EM never revisits these, so they are a
+Zero-inflation component: `p` independent logistic regressions of each
+variable's zero pattern on `X0`, and the fixed contribution they make to
+the log-likelihood. The (V)EM never revisits these, so they are a
 property of the data rather than of a model.
 
 #### Usage
@@ -277,8 +278,8 @@ property of the data rather than of a model.
 
 #### Returns
 
-a list with \`B0\` (d0 x p), \`kappa\` (n x p zero-inflation
-probabilities) and \`ZI_cond_mean\` (a scalar)
+a list with `B0` (d0 x p), `kappa` (n x p zero-inflation probabilities)
+and `ZI_cond_mean` (a scalar)
 
 ------------------------------------------------------------------------
 

@@ -25,14 +25,13 @@ A list with 2 elements:
 - covariates:
 
   a data frame with one row per station, in the same order as the rows
-  of \`biomass\`: \`station\` (matches \`rownames(biomass)\`) and 14
-  environmental variables – \`slope\`, \`alt\` (altitude), \`d_source\`
-  (distance to source), \`strahler\` (Strahler stream order),
-  \`width_river_mean\`/\`width_river_cv\`, \`avg_depth_station_mean\`/
-  \`avg_depth_station_cv\`, \`DBO_med\`/\`DBO_cv\` (biological oxygen
-  demand), \`flow_med\`/\`flow_cv\` and
-  \`temperature_med\`/\`temperature_cv\` (\`\_med\` = median, \`\_cv\` =
-  coefficient of variation, over the monitoring period).
+  of `biomass`: `station` (matches `rownames(biomass)`) and 14
+  environmental variables – `slope`, `alt` (altitude), `d_source`
+  (distance to source), `strahler` (Strahler stream order),
+  `width_river_mean`/`width_river_cv`, `avg_depth_station_mean`/
+  `avg_depth_station_cv`, `DBO_med`/`DBO_cv` (biological oxygen demand),
+  `flow_med`/`flow_cv` and `temperature_med`/`temperature_cv` (`_med` =
+  median, `_cv` = coefficient of variation, over the monitoring period).
 
 ## Source
 
@@ -43,20 +42,19 @@ and its temporal stability in fish communities", data set, Zenodo,
 
 ## Details
 
-The source data is organized around fishing \*operations\* (\`opcod\`):
+The source data is organized around fishing *operations* (`opcod`):
 several electrofishing operations can be carried out at the same
-\*station\* over time. \`onema\` aggregates this to one row per station:
-every operation is first mapped to its station
-(\`fishing_protocol.csv\`), then biomass (in grams) is summed over every
-operation recorded at a given station, separately for each species (i.e.
-\`biomass\[s, \]\` is the total biomass of each species ever caught at
-station \`s\`, not a single operation's catch). Stations without
-environmental data are dropped. Species observed at fewer than 10
-stations are also dropped: at that level of rarity, a zero-inflated
-fit's iterative initialization can fit a species' handful of non-zero
-observations exactly, driving its estimated noise precision to infinity
-(these species also carry essentially no information for clustering
-anyway).
+*station* over time. `onema` aggregates this to one row per station:
+every operation is first mapped to its station (`fishing_protocol.csv`),
+then biomass (in grams) is summed over every operation recorded at a
+given station, separately for each species (i.e. `biomass[s, ]` is the
+total biomass of each species ever caught at station `s`, not a single
+operation's catch). Stations without environmental data are dropped.
+Species observed at fewer than 10 stations are also dropped: at that
+level of rarity, a zero-inflated fit's iterative initialization can fit
+a species' handful of non-zero observations exactly, driving its
+estimated noise precision to infinity (these species also carry
+essentially no information for clustering anyway).
 
 ## Examples
 

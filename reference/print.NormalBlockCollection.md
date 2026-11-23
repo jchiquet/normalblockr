@@ -2,7 +2,8 @@
 
 Print a short summary of a collection of normal-block models: model type
 and the range of q/sparsity explored. See
-\[summary.NormalBlockCollection()\] for the full criteria table.
+[`summary.NormalBlockCollection()`](https://jchiquet.github.io/normalblockr/reference/summary.NormalBlockCollection.md)
+for the full criteria table.
 
 ## Usage
 
@@ -23,7 +24,7 @@ print(x, ...)
 
 ## Value
 
-Invisibly returns \`x\`.
+Invisibly returns `x`.
 
 ## Examples
 

@@ -2,7 +2,8 @@
 
 R6 class for a collection of normal-block models with different number
 of clusters (q) and different sparsity levels, i.e. one
-\[NormalBlockVarCollectionSparsity\] per q.
+[NormalBlockVarCollectionSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionSparsity.md)
+per q.
 
 ## Super classes
 

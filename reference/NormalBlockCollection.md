@@ -1,14 +1,19 @@
 # Base Class for a Collection of Normal-Block Models
 
-Shared scaffolding for the collections explored by \[get_model()\]/
-\[normal_block()\]: a sweep over sparsity penalties
-(\[\`NormalBlockVarCollectionSparsity\`\]), over the number of clusters
-(\[\`NormalBlockVarCollectionClusters\`\]), or over both
-(\[\`NormalBlockVarCollectionClustersSparsity\`\]). Concrete subclasses
-set \`private\$progress_field\`/\`private\$progress_label\` in their
-\`initialize()\` and provide their own \`get_best_model()\`, delegating
-the (row of \`self\$criteria\` minimizing a criterion) lookup to
-\`private\$best_id()\`.
+Shared scaffolding for the collections explored by
+[`get_model()`](https://jchiquet.github.io/normalblockr/reference/get_model.md)/
+[`normal_block()`](https://jchiquet.github.io/normalblockr/reference/normal_block.md):
+a sweep over sparsity penalties
+([`NormalBlockVarCollectionSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionSparsity.md)),
+over the number of clusters
+([`NormalBlockVarCollectionClusters`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionClusters.md)),
+or over both
+([`NormalBlockVarCollectionClustersSparsity`](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionClustersSparsity.md)).
+Concrete subclasses set
+`private$progress_field`/`private$progress_label` in their
+`initialize()` and provide their own `get_best_model()`, delegating the
+(row of `self$criteria` minimizing a criterion) lookup to
+`private$best_id()`.
 
 ## Public fields
 
@@ -36,8 +41,9 @@ the (row of \`self\$criteria\` minimizing a criterion) lookup to
 - `loglik`:
 
   not defined for a collection: accessing it raises an informative
-  error. Use \`logLik()\` for every model's log-likelihood, or
-  \`\$get_best_model()\$loglik\` for a single one.
+  error. Use [`logLik()`](https://rdrr.io/r/stats/logLik.html) for every
+  model's log-likelihood, or `$get_best_model()$loglik` for a single
+  one.
 
 ## Methods
 
@@ -68,16 +74,17 @@ optimizes every model (or sub-collection) in the collection
 - `control`:
 
   optimization parameters (niter and threshold). When
-  \`control\$clustering_init\` is \`"best_of_inits"\`, each leaf model
-  is fit via its own \`best_of_inits()\` instead of a plain
-  \`optimize()\`.
+  `control$clustering_init` is `"best_of_inits"`, each leaf model is fit
+  via its own `best_of_inits()` instead of a plain
+  [`optimize()`](https://rdrr.io/r/stats/optimize.html).
 
 ------------------------------------------------------------------------
 
 ### `NormalBlockCollection$print()`
 
 User-friendly print method: model type and the range of q/sparsity
-explored. See \`summary()\` for the full criteria table.
+explored. See [`summary()`](https://rdrr.io/r/base/summary.html) for the
+full criteria table.
 
 #### Usage
 
@@ -96,8 +103,10 @@ of q/sparsity explored.
 
 #### Returns
 
-An object of class \`summary.NormalBlockCollection\`, printed with a
-dedicated \[print.summary.NormalBlockCollection()\] method.
+An object of class `summary.NormalBlockCollection`, printed with a
+dedicated
+[`print.summary.NormalBlockCollection()`](https://jchiquet.github.io/normalblockr/reference/print.summary.NormalBlockCollection.md)
+method.
 
 ------------------------------------------------------------------------
 

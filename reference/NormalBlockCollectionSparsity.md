@@ -1,14 +1,16 @@
 # Base Class for a Collection of Models over a Sparsity Path
 
-Shared scaffolding for \[NormalBlockVarCollectionSparsity\] and
-\[NormalBlockMeanCollectionSparsity\]: the penalty grid, the
-warm-started path traversal, the penalty lookup and the criteria plot.
-Model selection, StARS included (stability selection, Liu et al. 2010),
-is shared: a family only says on which covariance estimate the default
-penalty grid is read (\`private\$penalty_scale()\`), how to refit its
-path on a subsample with the clustering held fixed
-(\`private\$subsample_path()\`) and how to name the nodes of its network
-(\`private\$network_nodes()\`).
+Shared scaffolding for
+[NormalBlockVarCollectionSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionSparsity.md)
+and
+[NormalBlockMeanCollectionSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockMeanCollectionSparsity.md):
+the penalty grid, the warm-started path traversal, the penalty lookup
+and the criteria plot. Model selection, StARS included (stability
+selection, Liu et al. 2010), is shared: a family only says on which
+covariance estimate the default penalty grid is read
+(`private$penalty_scale()`), how to refit its path on a subsample with
+the clustering held fixed (`private$subsample_path()`) and how to name
+the nodes of its network (`private$network_nodes()`).
 
 ## Super class
 
@@ -42,17 +44,17 @@ path on a subsample with the clustering held fixed
 - `criteria`:
 
   a data frame with the criteria of every model of the path, plus its
-  StARS stability once \`stability_selection()\` has run
+  StARS stability once `stability_selection()` has run
 
 - `stability_path`:
 
-  selection probability of every edge at every penalty (StARS), \`NULL\`
-  until \`stability_selection()\` has run
+  selection probability of every edge at every penalty (StARS), `NULL`
+  until `stability_selection()` has run
 
 - `stability`:
 
-  mean edge stability along the penalty path, \`1 - mean(4 p (1 - p))\`
-  over the edges; \`NA\` until \`stability_selection()\` has run
+  mean edge stability along the penalty path, `1 - mean(4 p (1 - p))`
+  over the edges; `NA` until `stability_selection()` has run
 
 ## Methods
 
@@ -82,9 +84,9 @@ Inherited methods
 ### `NormalBlockCollectionSparsity$new()`
 
 Create a collection over a path of sparsity penalties. By default,
-\`control\$n_sparsity_penalties\` values on a log scale, from the
-largest absolute (weighted) entry of a covariance estimate, which
-removes every edge, down to \`control\$min_ratio\` times it.
+`control$n_sparsity_penalties` values on a log scale, from the largest
+absolute (weighted) entry of a covariance estimate, which removes every
+edge, down to `control$min_ratio` times it.
 
 #### Usage
 
@@ -124,9 +126,11 @@ A new collection object
 
 optimizes every model in the sparsity path, warm-starting each one
 (after the first) from the previous, adjacent penalty's converged
-parameters (see the family's base class's \`warm_start_from()\`) instead
+parameters (see the family's base class's `warm_start_from()`) instead
 of re-deriving everything from the heuristic clustering, the way the
-generic \[NormalBlockCollection\] \`optimize()\` would. \`blocks\`
+generic
+[NormalBlockCollection](https://jchiquet.github.io/normalblockr/reference/NormalBlockCollection.md)
+[`optimize()`](https://rdrr.io/r/stats/optimize.html) would. `blocks`
 (hence q) is fixed across the whole path, only the sparsity penalty
 changes, so the warm start is always between models of matching shape.
 
@@ -185,7 +189,7 @@ Extract best model in the collection
 
 - `stability`:
 
-  if \`crit = "StARS"\`, the level of stability required.
+  if `crit = "StARS"`, the level of stability required.
 
 #### Returns
 
@@ -213,9 +217,9 @@ penalty.
 
   a list of vectors describing the subsamples. The number of vectors (or
   list length) determines the number of subsamples used in the stability
-  selection. Automatically set to 10 subsamples with size
-  \`10\*sqrt(n)\` if \`n \>= 144\` and \`0.8\*n\` otherwise following
-  Liu et al. (2010) recommendations.
+  selection. Automatically set to 10 subsamples with size `10*sqrt(n)`
+  if `n >= 144` and `0.8*n` otherwise following Liu et al. (2010)
+  recommendations.
 
 - `n_subsamples`:
 
@@ -225,8 +229,9 @@ penalty.
 
 ### `NormalBlockCollectionSparsity$plot()`
 
-Display various outputs (goodness-of-fit criteria, robustness,
-diagnostic) associated with a collection of network fits (a collection)
+Plot the criteria of the models of the path against the penalty, with a
+dashed line at the penalty selected by each criterion (see also
+[`plot.NormalBlockCollection()`](https://jchiquet.github.io/normalblockr/reference/plot.NormalBlockCollection.md)).
 
 #### Usage
 
@@ -239,17 +244,19 @@ diagnostic) associated with a collection of network fits (a collection)
 
 - `criteria`:
 
-  vector of characters. The criteria to plot in \`c("deviance", BIC",
-  "EBIC", "ICL")\`. Defaults to all of them.
+  the criteria to plot, among `"deviance"`, `"BIC"`, `"EBIC"` and
+  `"ICL"`; all of them by default.
 
 - `log.x`:
 
   logical: should the x-axis be represented in log-scale? Default is
-  \`TRUE\`.
+  `TRUE`.
 
 #### Returns
 
-a \[\`ggplot2::ggplot\`\] graph
+a
+[`ggplot2::ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)
+graph
 
 ------------------------------------------------------------------------
 

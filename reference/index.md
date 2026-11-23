@@ -95,6 +95,8 @@ subclass)
   : Extract Log-Likelihood of a Normal-Block Model
 - [`BIC(`*`<NormalBlockBase>`*`)`](https://jchiquet.github.io/normalblockr/reference/BIC.NormalBlockBase.md)
   : Bayesian Information Criterion for a Normal-Block Model
+- [`plot(`*`<NormalBlockCollection>`*`)`](https://jchiquet.github.io/normalblockr/reference/plot.NormalBlockCollection.md)
+  : Plot a Collection of Normal-Block Models
 - [`print(`*`<NormalBlockCollection>`*`)`](https://jchiquet.github.io/normalblockr/reference/print.NormalBlockCollection.md)
   : Print a Collection of Normal-Block Models
 - [`summary(`*`<NormalBlockCollection>`*`)`](https://jchiquet.github.io/normalblockr/reference/summary.NormalBlockCollection.md)

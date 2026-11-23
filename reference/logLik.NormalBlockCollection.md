@@ -1,9 +1,10 @@
 # Extract Log-Likelihood of a Collection of Normal-Block Models
 
 Returns the log-likelihood of every model in a collection of
-normal-block models (see \[NormalBlockVarCollectionClusters\],
-\[NormalBlockVarCollectionSparsity\],
-\[NormalBlockVarCollectionClustersSparsity\]).
+normal-block models (see
+[NormalBlockVarCollectionClusters](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionClusters.md),
+[NormalBlockVarCollectionSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionSparsity.md),
+[NormalBlockVarCollectionClustersSparsity](https://jchiquet.github.io/normalblockr/reference/NormalBlockVarCollectionClustersSparsity.md)).
 
 ## Usage
 

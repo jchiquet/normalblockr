@@ -1,17 +1,24 @@
 # normalblockr: Gaussian Models with Latent Clustering of Variables
 
-Implements the Normal-Block model, a Gaussian graphical model with a
-latent clustering structure for the multivariate analysis of continuous
-data. The model clusters variables and, building on the graphical lasso,
-infers a network of statistical dependencies between clusters rather
-than between individual variables, for known or unknown clusterings,
-with an optional zero-inflation extension for data with an excess of
-exact zeros. A complementary family clusters variables by their
-regression response to covariates rather than by their covariance,
-sharing one profile per cluster. See Tous & Chiquet (2026)
+Implements two families of Gaussian models with a latent clustering of
+the variables, for multivariate data whose variables co-vary, or respond
+to covariates, in groups. In the Normal-Block-Var model, the clusters
+structure the covariance through latent variables, and a network is
+inferred between the clusters rather than between the variables, which
+reduces its dimension and eases its interpretation (Tous and Chiquet
+(2026)
 [doi:10.1016/j.csda.2026.108347](https://doi.org/10.1016/j.csda.2026.108347)
-for the model itself and its variational expectation-maximization
-estimation procedure.
+). In the Normal-Block-Mean model, the variables of a cluster share the
+same regression profile, and a network between the variables can be
+inferred from their residual covariance. In both families, the
+clustering is either known or inferred, the network can be sparse
+(graphical lasso), and zero-inflated variants handle data with an excess
+of zeros. The parameters are estimated by expectation-maximization or
+variational expectation-maximization algorithms, accelerated by squared
+extrapolation, and a split and merge procedure improves the fits of a
+collection of models. The number of clusters, the sparsity of the
+network and the shape of the covariance are chosen with penalized
+criteria, cross-validation or stability selection.
 
 ## See also
 

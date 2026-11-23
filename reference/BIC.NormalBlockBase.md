@@ -1,11 +1,13 @@
 # Bayesian Information Criterion for a Normal-Block Model
 
 Extracts the (variational) BIC of a fitted normal-block model, computed
-as \`deviance + penalty\` (lower is better). The penalty charges each
+as `deviance + penalty` (lower is better). The penalty charges each
 group of parameters the log of the number of observations informing it
-(see the \`penalty_terms\` field of \[NormalBlockBase\]), so it differs
-from \`stats::BIC()\`'s default \`log(nobs) \* df\` computed from
-\[logLik()\].
+(see the `penalty_terms` field of
+[NormalBlockBase](https://jchiquet.github.io/normalblockr/reference/NormalBlockBase.md)),
+so it differs from [`stats::BIC()`](https://rdrr.io/r/stats/AIC.html)'s
+default `log(nobs) * df` computed from
+[`logLik()`](https://rdrr.io/r/stats/logLik.html).
 
 ## Usage
 
