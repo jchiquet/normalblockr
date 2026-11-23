@@ -25,7 +25,7 @@ deviations would break.
 
 The resulting \code{B}, \code{Omega} and clustering are properties of the data the
 model was fitted on; with rescaled data, use \verb{$B_original},
-\verb{$dm1_original} and \verb{$fitted} for quantities in Y's original units (a
+\verb{$dm1_original} and \code{\link[=fitted]{fitted()}} for quantities in Y's original units (a
 shared block covariance has no unique original-scale counterpart, since
 the scaling factors differ within a block).
 }

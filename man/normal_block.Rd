@@ -53,7 +53,7 @@ clustering is known (\code{blocks}), whether the network is penalized
 ex_data <- generate_normal_block_var_data(n = 100, p = 30, d = 1, q = 3)
 data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 my_normal_block <- normal_block(data, blocks = 1:5)
-my_normal_block$plot(c("deviance", "BIC", "ICL"))
+plot(my_normal_block)
 best <- my_normal_block$get_best_model("ICL")
 plot(ex_data$Y, fitted(best)); abline(0, 1)
 ## the same with zero-inflation

@@ -14,7 +14,7 @@ ex <- generate_normal_block_mean_data(n = 60, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 2:4, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 4))
-models$plot("BIC")
+plot(models, criterion = "BIC")
 models$get_best_model("BIC")
 }
 \section{Super classes}{

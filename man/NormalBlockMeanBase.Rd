@@ -96,7 +96,7 @@ set by the ZI subclasses themselves, not meant to be set by the end user.}
 \subsection{\code{NormalBlockMeanBase$predict()}}{
   Predicts the mean of Y for new covariates X, in Y's
 original units: mu_i = C B' X_i, with the posterior cluster
-probabilities as C when the clustering is unknown (as in \verb{$fitted}).
+probabilities as C when the clustering is unknown (as in \code{\link[=fitted]{fitted()}}).
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{NormalBlockMeanBase$predict(new_X)}

@@ -15,7 +15,7 @@ ex <- generate_normal_block_mean_data(n = 60, p = 20, d = 1, q = 3)
 data <- NormalBlockData$new(ex$Y, ex$X)
 models <- normal_block(data, blocks = 3, sparsity = TRUE, model = "mean",
                        control = NB_control(n_sparsity_penalties = 5))
-models$plot(c("BIC", "EBIC"))
+plot(models, criteria = c("BIC", "EBIC"))
 }
 \section{Super classes}{
 \code{\link[normalblockr:NormalBlockCollection]{NormalBlockCollection}} -> \code{\link[normalblockr:NormalBlockCollectionSparsity]{NormalBlockCollectionSparsity}} -> \code{NormalBlockMeanCollectionSparsity}

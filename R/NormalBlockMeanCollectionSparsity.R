@@ -14,7 +14,7 @@
 #' data <- NormalBlockData$new(ex$Y, ex$X)
 #' models <- normal_block(data, blocks = 3, sparsity = TRUE, model = "mean",
 #'                        control = NB_control(n_sparsity_penalties = 5))
-#' models$plot(c("BIC", "EBIC"))
+#' plot(models, criteria = c("BIC", "EBIC"))
 #' @export
 NormalBlockMeanCollectionSparsity <- R6::R6Class(
   classname = "NormalBlockMeanCollectionSparsity",

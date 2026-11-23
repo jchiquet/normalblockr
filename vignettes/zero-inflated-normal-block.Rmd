@@ -120,7 +120,7 @@ out <- normal_block(data, blocks = 2:8, zero_inflation = TRUE,
 ```
 
 ```{r, plot-zi}
-out$plot(criteria = c("BIC", "EBIC", "deviance"))
+plot(out, criteria = c("BIC", "EBIC", "deviance"))
 ```
 
 ## Refining the collection
@@ -129,7 +129,7 @@ Each model in the collection above is initialized independently (a heuristic clu
 
 ```{r, refine-zi}
 out$refine()
-out$plot(criteria = c("BIC", "EBIC", "deviance"))
+plot(out, criteria = c("BIC", "EBIC", "deviance"))
 ```
 
 ## Selecting a model and inspecting the clustering
@@ -177,7 +177,7 @@ Once a model is chosen, its network between clusters can be sparsified as in the
 C_selected <- model.matrix(~ 0 + factor(myModel$clustering))
 out_sp <- normal_block(data, blocks = C_selected, sparsity = TRUE, zero_inflation = TRUE,
                        control = NB_control(verbose = FALSE))
-out_sp$plot(c("BIC", "EBIC", "deviance"))
+plot(out_sp, criteria = c("BIC", "EBIC", "deviance"))
 ```
 
 With only `r choose(myModel$q, 2)` possible edges, each edge costs little in BIC and EBIC, which pick one of the weakest penalties, at the end of the path. Stability selection (StARS) is more informative here: it refits the path on subsamples of the stations, the clustering being held fixed, and keeps the smallest penalty whose network is stable enough.

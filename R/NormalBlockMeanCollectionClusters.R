@@ -12,7 +12,7 @@
 #' ex <- generate_normal_block_mean_data(n = 50, p = 20, d = 1, q = 3)
 #' data <- NormalBlockData$new(ex$Y, ex$X)
 #' models <- normal_block(data, blocks = 2:5, model = "mean")
-#' models$plot(c("BIC", "ICL"))
+#' plot(models, criteria = c("BIC", "ICL"))
 #' models$get_best_model()
 #' @export
 NormalBlockMeanCollectionClusters <- R6::R6Class(

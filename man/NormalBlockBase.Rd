@@ -376,7 +376,7 @@ rather than their sum.}
   Predicts the mean of Y for new covariates X, in Y's
 original units. For the variance-block family, \verb{X B}: the latent block
 signals average out, so that on the training X it differs from
-\verb{$fitted}, which adds their posterior mean. The mean-block family
+\code{\link[=fitted]{fitted()}}, which adds their posterior mean. The mean-block family
 overrides it.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}

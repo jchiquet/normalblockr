@@ -100,7 +100,7 @@ NB_prot_subtype <- normal_block(data_subtype, blocks = 1:30, control = NB_contro
 ## Model selection: criteria to fix the number of clusters
 
 ```{r, plotting-criteria, fig.width=7, fig.height=5}
-NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
+plot(NB_prot_subtype, criteria = c("deviance", "BIC", "ICL"))
 ```
 
 ```{r, model-selection}
@@ -117,7 +117,7 @@ NB_prot_subtype$refine()
 ```
 
 ```{r, plotting-criteria-refined, fig.width=7, fig.height=5}
-NB_prot_subtype$plot(c("deviance", "BIC", "ICL"))
+plot(NB_prot_subtype, criteria = c("deviance", "BIC", "ICL"))
 ```
 
 ```{r, model-selection-refined}

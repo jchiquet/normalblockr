@@ -295,7 +295,7 @@ NormalBlockBase <- R6::R6Class(
     #' @description Predicts the mean of Y for new covariates X, in Y's
     #' original units. For the variance-block family, `X B`: the latent block
     #' signals average out, so that on the training X it differs from
-    #' `$fitted`, which adds their posterior mean. The mean-block family
+    #' [fitted()], which adds their posterior mean. The mean-block family
     #' overrides it.
     #' @param new_X new set of covariates.
     #' @return A n*p prediction matrix for new observations

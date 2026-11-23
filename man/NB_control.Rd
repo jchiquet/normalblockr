@@ -101,5 +101,5 @@ data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 ## silent fits, without the split and merge search
 ctrl <- NB_control(verbose = FALSE, refine = FALSE)
 collection <- normal_block(data, blocks = 2:4, control = ctrl)
-collection$criteria
+summary(collection)
 }

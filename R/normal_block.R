@@ -29,7 +29,7 @@
 #' ex_data <- generate_normal_block_var_data(n = 100, p = 30, d = 1, q = 3)
 #' data <- NormalBlockData$new(ex_data$Y, ex_data$X)
 #' my_normal_block <- normal_block(data, blocks = 1:5)
-#' my_normal_block$plot(c("deviance", "BIC", "ICL"))
+#' plot(my_normal_block)
 #' best <- my_normal_block$get_best_model("ICL")
 #' plot(ex_data$Y, fitted(best)); abline(0, 1)
 #' ## the same with zero-inflation
@@ -149,7 +149,7 @@ normal_block <- function(data,
 #' ## silent fits, without the split and merge search
 #' ctrl <- NB_control(verbose = FALSE, refine = FALSE)
 #' collection <- normal_block(data, blocks = 2:4, control = ctrl)
-#' collection$criteria
+#' summary(collection)
 #' @export
 NB_control <- function(
     niter                = 500,
