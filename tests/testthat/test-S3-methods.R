@@ -99,3 +99,15 @@ test_that("print(), summary() and plot() work on a mean-block model, its network
   expect_output(print(s), "density")
   expect_s3_class(plot(m), "ggplot")
 })
+
+test_that("plot() of a collection names the model selected by each criterion", {
+  set.seed(3)
+  ex <- generate_normal_block_var_data(n = 60, p = 15, d = 1, q = 3)
+  coll <- normal_block(NormalBlockData$new(ex$Y, ex$X), blocks = 2:4,
+                       control = NB_control(verbose = FALSE, refine = FALSE))
+  pdf(NULL); on.exit(dev.off())
+  p <- plot(coll, criteria = c("deviance", "BIC", "ICL"))
+  labels <- unlist(lapply(p$layers, function(l) l$data$label))
+  expect_setequal(labels, paste0(c("BIC", "ICL"), ": q = ",
+                                 c(coll$get_best_model("BIC")$q, coll$get_best_model("ICL")$q)))
+})

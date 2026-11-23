@@ -72,7 +72,10 @@ Users of 0.3.0 will see different results on the same calls:
   candidates are ranked by the signed correlation between the latent block
   signals, since a block can only gather positively co-varying variables.
 * `plot()` method for collections of models: the criteria against q or the
-  penalty, or a heatmap over both (it wraps the collections' `$plot()`).
+  penalty, or a heatmap over both (it wraps the collections' `$plot()`). The
+  model selected by each criterion is marked on its curve and labelled with
+  the criterion and the selected q or penalty, so that it is clear which
+  dashed line belongs to which criterion.
 * New fields `penalty_terms` and `penalty` (the BIC penalty, group by
   group), `NormalBlockData$for_family()` (the data a family is fitted on),
   `NormalBlockData$subset()` and `$Y_original`, and `sparsity_details` on

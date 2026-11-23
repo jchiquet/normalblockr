@@ -125,12 +125,34 @@ NormalBlockCollection <- R6::R6Class(
         ggplot2::labs(x = x_var) +
         ggplot2::theme_bw()
       if (length(vline_crit) > 0) {
-        dvlines <- data.frame(
+        ## the model selected by each criterion: a dashed line, a large point
+        ## on the criterion's own curve, and a label naming the criterion and
+        ## the selected value, stacked from the top so that criteria
+        ## selecting the same model stay readable
+        best <- vapply(vline_crit, function(crit) private$best_id(crit, crit_df = crit_df), integer(1))
+        xs   <- crit_df[[x_var]][best]
+        what <- if (x_var == "q") paste("q =", xs) else paste("penalty =", signif(xs, 2))
+        rng  <- range(dplot$value, na.rm = TRUE)
+        ## labels on the side of the line with more room
+        pos  <- (match(xs, sort(unique(crit_df[[x_var]]))) - 1) / max(1, length(unique(crit_df[[x_var]])) - 1)
+        dbest <- data.frame(
           criterion = vline_crit,
-          x         = sapply(vline_crit, function(crit) crit_df[[x_var]][[private$best_id(crit, crit_df = crit_df)]])
+          x         = xs,
+          value     = mapply(function(crit, i) crit_df[[crit]][[i]], vline_crit, best),
+          label     = paste0(vline_crit, ": ", what),
+          y_label   = rng[2] - (seq_along(vline_crit) - 1) * 0.08 * diff(rng),
+          hjust     = ifelse(pos > 0.5, 1, 0)
         )
-        p <- p + ggplot2::geom_vline(data = dvlines, ggplot2::aes(xintercept = .data$x, colour = .data$criterion),
-                                      linetype = "dashed", alpha = 0.6, show.legend = FALSE)
+        p <- p +
+          ggplot2::geom_vline(data = dbest, ggplot2::aes(xintercept = .data$x, colour = .data$criterion),
+                              linetype = "dashed", alpha = 0.6, show.legend = FALSE) +
+          ggplot2::geom_point(data = dbest, ggplot2::aes(x = .data$x, y = .data$value, colour = .data$criterion),
+                              size = 3.5, shape = 21, fill = "white", stroke = 1.2, inherit.aes = FALSE,
+                              show.legend = FALSE) +
+          ggplot2::geom_label(data = dbest, ggplot2::aes(x = .data$x, y = .data$y_label, label = .data$label,
+                                                         colour = .data$criterion, hjust = .data$hjust),
+                              size = 3, fontface = "bold", inherit.aes = FALSE, show.legend = FALSE) +
+          ggplot2::labs(caption = "Dashed lines and circled points: model selected by each criterion")
       }
       p
     }
