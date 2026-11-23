@@ -148,10 +148,12 @@ plot(m_unknown)
 m_unknown$get_best_model("EBIC")
 ```
 
-    A diagonal normal-block-var model with 19 unknown clusters.
+    A diagonal normal-block-var model with 17 unknown clusters.
     ===========================================================================
-     nb_param  q n_edges sparsity    loglik deviance      BIC      ICL   EBIC niter
-         1186 19     171        0 -66334.86 132669.7 139590.1 139590.1 140597    18
+     nb_param  q n_edges sparsity    loglik deviance      BIC      ICL     EBIC
+         1147 17     136        0 -66611.15 133222.3 139916.1 139916.1 140686.8
+     niter
+        47
     ===========================================================================
     * Useful fields
         $model_par, $posterior_par / $var_par, $clustering 
