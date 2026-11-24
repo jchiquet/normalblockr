@@ -2,6 +2,8 @@
 
 ## normalblockr 1.0.0
 
+CRAN release: 2026-11-23
+
 ### Changes of default behavior since 0.3.0
 
 Users of 0.3.0 will see different results on the same calls:
